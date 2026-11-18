@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.gwsheridan.worldarchitect.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": ["WorldCreationUiStateMixin", "ModpackWorldTabMixin", "ModpackCreateWorldMixin", "ModpackWorldTypeMixin", "ProtectedWorldOpenMixin"],
+  "injectors": {"defaultRequire": 1}
+}

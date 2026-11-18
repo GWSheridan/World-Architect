@@ -1,0 +1,128 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+group = 'com.gwsheridan.worldarchitect'
+version = mod_version
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+neoForge {
+    version = neo_version
+    addModdingDependenciesTo sourceSets.test
+    runs {
+        client { client() }
+        server {
+            server()
+            programArgument '--nogui'
+            if (providers.gradleProperty('testWorldDirectory').present) {
+                gameDirectory = file(providers.gradleProperty('testWorldDirectory').get())
+            }
+        }
+    }
+    mods {
+        worldarchitect { sourceSet sourceSets.main }
+    }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test', Test).configure {
+    useJUnitPlatform()
+    workingDir = temporaryDir
+}
+
+tasks.named('runServer', JavaExec).configure {
+    standardInput = System.in
+}
+
+tasks.register('auditTerrainWorld', JavaExec) {
+    group = 'verification'
+    description = 'Check every block in selected Single Block or Layered chunks from a stopped test server.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.worldgen.TerrainWorldAudit'
+    workingDir = temporaryDir
+    def worldDirectory = layout.projectDirectory
+    argumentProviders.add({
+        [worldDirectory.dir(providers.gradleProperty('terrainWorld').get()).asFile.absolutePath, providers.gradleProperty('terrainChunks').get(),
+         providers.gradleProperty('terrainPreset').orElse('single_block').get(),
+         providers.gradleProperty('terrainBase').orElse('').get(),
+         providers.gradleProperty('terrainDimension').orElse('minecraft:overworld').get()]
+    } as CommandLineArgumentProvider)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.register('auditFeatureWorld', JavaExec) {
+    group = 'verification'
+    description = 'Audit the per-dimension feature example from a stopped dedicated server.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.worldgen.FeatureWorldAudit'
+    workingDir = temporaryDir
+    def root = layout.projectDirectory
+    argumentProviders.add({
+        [root.dir(providers.gradleProperty('terrainWorld').get()).asFile.absolutePath,
+         providers.gradleProperty('featureChunkOrigin').orElse('0').get(),
+         providers.gradleProperty('featureFiltersExpected').orElse('false').get()]
+    } as CommandLineArgumentProvider)
+}
+
+tasks.register('auditVoidWorld', JavaExec) {
+    group = 'verification'
+    description = 'Check saved Void or Skyblock chunks against the pinned island template and air.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.worldgen.VoidWorldAudit'
+    workingDir = temporaryDir
+    def root = layout.projectDirectory
+    argumentProviders.add({
+        [root.dir(providers.gradleProperty('terrainWorld').get()).asFile.absolutePath,
+         providers.gradleProperty('terrainDimension').orElse('minecraft:overworld').get(),
+         providers.gradleProperty('terrainChunks').get(),
+         providers.gradleProperty('islandAllocations').orElse('').get(),
+         providers.gradleProperty('islandAssignments').orElse('').get()]
+    } as CommandLineArgumentProvider)
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    inputs.property 'mod_version', mod_version
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand mod_version: mod_version
+    }
+}
+
+def releaseDirectory = layout.buildDirectory.dir('release')
+def releaseSources = tasks.register('releaseSources', Zip) {
+    group = 'distribution'
+    description = 'Package the complete buildable source tree.'
+    archiveClassifier = 'source'
+    destinationDirectory = releaseDirectory
+    from(layout.projectDirectory) {
+        include 'src/**', 'gradle/**', 'docs/**', 'examples/**', '.gitignore',
+                'gradlew', 'gradlew.bat', 'build.gradle', 'settings.gradle', 'gradle.properties', 'README.md', 'CHANGELOG.md'
+    }
+}
+
+tasks.register('packageRelease', Zip) {
+    group = 'distribution'
+    description = 'Package the mod, buildable sources, documentation, and example presets.'
+    dependsOn tasks.named('check')
+    archiveClassifier = 'release'
+    destinationDirectory = releaseDirectory
+    from(tasks.named('jar')) { into 'mods' }
+    from(releaseSources) { into 'source' }
+    from('README.md', 'CHANGELOG.md')
+    from('docs') { into 'docs' }
+    from('examples') { into 'examples' }
+    def lockedBundle = providers.gradleProperty('releaseLockedBundle')
+    if (lockedBundle.isPresent()) {
+        from(file(lockedBundle.get())) { into 'examples/bundles' }
+    }
+}

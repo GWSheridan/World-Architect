@@ -1,0 +1,29 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "worldarchitect"
+version = "${mod_version}"
+displayName = "World Architect"
+authors = "GWSHERIDAN"
+credits = "Original Creator and Developer: GWSHERIDAN"
+description = "Design custom Minecraft worlds before creating them."
+
+[[mixins]]
+config = "worldarchitect.mixins.json"
+
+[[mixins]]
+config = "worldarchitect.client.mixins.json"
+
+[[dependencies.worldarchitect]]
+modId = "neoforge"
+type = "required"
+versionRange = "[26.3.0.103,)"
+side = "BOTH"
+
+[[dependencies.worldarchitect]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.3]"
+side = "BOTH"

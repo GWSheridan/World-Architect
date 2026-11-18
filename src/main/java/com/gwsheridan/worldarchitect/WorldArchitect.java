@@ -1,0 +1,72 @@
+package com.gwsheridan.worldarchitect;
+
+import com.gwsheridan.worldarchitect.api.DimensionAdapterRegistry;
+import com.gwsheridan.worldarchitect.compatibility.SaveProtection;
+import com.gwsheridan.worldarchitect.modpack.ModpackRuntime;
+import com.gwsheridan.worldarchitect.modpack.ModpackCommands;
+import com.gwsheridan.worldarchitect.skyblock.IslandSpawns;
+import com.gwsheridan.worldarchitect.structure.StructureCommands;
+import com.gwsheridan.worldarchitect.worldgen.LayeredGenerator;
+import com.gwsheridan.worldarchitect.worldgen.RegionBiomeSource;
+import com.gwsheridan.worldarchitect.worldgen.SingleBlockGenerator;
+import com.gwsheridan.worldarchitect.worldgen.SolidColumnGenerator;
+import com.gwsheridan.worldarchitect.worldgen.VoidGenerator;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.presets.WorldPreset;
+import net.minecraft.world.level.storage.LevelData;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+@Mod(WorldArchitect.ID)
+public final class WorldArchitect {
+    public static final String ID = "worldarchitect";
+    public static final Identifier GENERATOR_ID = Identifier.fromNamespaceAndPath(ID, "single_block");
+    public static final ResourceKey<WorldPreset> PRESET = ResourceKey.create(Registries.WORLD_PRESET, GENERATOR_ID);
+    public static final ResourceKey<WorldPreset> LAYERED_PRESET = ResourceKey.create(Registries.WORLD_PRESET, Identifier.fromNamespaceAndPath(ID, "layered"));
+    public static final ResourceKey<WorldPreset> DIMENSIONS_PRESET = ResourceKey.create(Registries.WORLD_PRESET, Identifier.fromNamespaceAndPath(ID, "dimensions"));
+
+    public WorldArchitect(IEventBus modBus) {
+        modBus.addListener(DimensionAdapterRegistry::registerRegistry);
+        modBus.addListener(ModpackRuntime::addPack);
+        DeferredRegister<MapCodec<? extends ChunkGenerator>> generators = DeferredRegister.create(Registries.CHUNK_GENERATOR, ID);
+        generators.register(GENERATOR_ID.getPath(), () -> SingleBlockGenerator.CODEC);
+        generators.register(LAYERED_PRESET.identifier().getPath(), () -> LayeredGenerator.CODEC);
+        generators.register("void", () -> VoidGenerator.CODEC);
+        generators.register(modBus);
+        DeferredRegister<MapCodec<? extends BiomeSource>> biomeSources = DeferredRegister.create(Registries.BIOME_SOURCE, ID);
+        biomeSources.register("regions", () -> RegionBiomeSource.CODEC);
+        biomeSources.register(modBus);
+        NeoForge.EVENT_BUS.addListener(WorldArchitect::createSpawn);
+        NeoForge.EVENT_BUS.addListener(SaveProtection::recordNewWorld);
+        NeoForge.EVENT_BUS.addListener(IslandSpawns::respawn);
+        NeoForge.EVENT_BUS.addListener(StructureCommands::register);
+        NeoForge.EVENT_BUS.addListener(ModpackCommands::register);
+        NeoForge.EVENT_BUS.addListener(StructureCommands::onLogout);
+    }
+
+    private static void createSpawn(LevelEvent.CreateSpawnPosition event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
+        if (level.getChunkSource().getGenerator() instanceof SolidColumnGenerator generator) {
+            int height = generator.getBaseHeight(8, 8, Heightmap.Types.WORLD_SURFACE, level, level.getChunkSource().randomState());
+            event.getSettings().setSpawn(LevelData.RespawnData.of(level.dimension(), new BlockPos(8, height, 8), 0.0F, 0.0F));
+            event.setCanceled(true);
+        } else if (level.getChunkSource().getGenerator() instanceof VoidGenerator generator) {
+            BlockPos spawn = generator.island().map(island -> island.spawn(0)).orElseGet(() -> new BlockPos(8, level.getMinY() + 4, 8));
+            event.getSettings().setSpawn(LevelData.RespawnData.of(level.dimension(), spawn, 0.0F, 0.0F));
+            event.setCanceled(true);
+        }
+    }
+}

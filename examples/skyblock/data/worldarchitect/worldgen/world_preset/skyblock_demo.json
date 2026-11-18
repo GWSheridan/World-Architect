@@ -1,0 +1,66 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "worldarchitect:void",
+        "biome": "minecraft:plains",
+        "dimension": {"min_y": -64, "height": 384},
+        "island": {
+          "origin_y": 81,
+          "spacing": 96,
+          "personal_slots": 2,
+          "template": {
+            "size": [18, 4, 4],
+            "spawn": [16, 1, 1],
+            "blocks": [
+              {"pos": [14, 0, 0], "state": "minecraft:moss_block"},
+              {"pos": [15, 0, 0], "state": "minecraft:oak_log[axis=x]"},
+              {"pos": [16, 0, 0], "state": "minecraft:oak_log[axis=x]"},
+              {"pos": [17, 0, 0], "state": "minecraft:moss_block"},
+              {"pos": [14, 0, 1], "state": "minecraft:moss_block"},
+              {"pos": [15, 0, 1], "state": "minecraft:oak_planks"},
+              {"pos": [16, 0, 1], "state": "minecraft:oak_planks"},
+              {"pos": [17, 0, 1], "state": "minecraft:moss_block"},
+              {"pos": [14, 0, 2], "state": "minecraft:moss_block"},
+              {"pos": [15, 0, 2], "state": "minecraft:stone"},
+              {"pos": [16, 0, 2], "state": "minecraft:stone"},
+              {"pos": [17, 0, 2], "state": "minecraft:moss_block"},
+              {"pos": [14, 1, 2], "state": "minecraft:crafting_table"},
+              {"pos": [17, 1, 2], "state": "minecraft:stone_slab[type=bottom,waterlogged=false]"}
+            ]
+          }
+        }
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "worldarchitect:void",
+        "biome": "minecraft:nether_wastes",
+        "dimension": {"min_y": 0, "height": 256},
+        "island": {
+          "origin_y": 66,
+          "template": {
+            "size": [2, 3, 2],
+            "spawn": [0, 1, 0],
+            "blocks": [
+              {"pos": [0, 0, 0], "state": "minecraft:polished_blackstone"},
+              {"pos": [0, 0, 1], "state": "minecraft:polished_blackstone"},
+              {"pos": [1, 0, 0], "state": "minecraft:polished_blackstone"},
+              {"pos": [1, 0, 1], "state": "minecraft:polished_blackstone"}
+            ]
+          }
+        }
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "worldarchitect:void",
+        "biome": "minecraft:the_end",
+        "dimension": {"min_y": 0, "height": 256}
+      }
+    }
+  }
+}

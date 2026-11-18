@@ -1,0 +1,6 @@
+{
+  "minecraft:overworld": {
+    "structure": "wa_example:starter",
+    "spawn": [16, 1, 1]
+  }
+}

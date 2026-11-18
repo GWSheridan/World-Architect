@@ -1,0 +1,12 @@
+{
+  "format": 1,
+  "preset": "wa_example:locked_skyblock",
+  "title": "Locked Skyblock",
+  "description": "A custom starter island with two personal slots, a layered-bed Nether and an empty End.",
+  "author": "GWSheridan",
+  "release": "1.0.0",
+  "lock": "full",
+  "options": {"seed": 24071609, "generate_structures": false, "bonus_chest": false},
+  "required_mods": ["worldarchitect"],
+  "allow_structure_library": false
+}
