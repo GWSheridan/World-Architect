@@ -266,3 +266,13 @@ tasks.register('prepareAssemblyExample', JavaExec) {
         file(providers.gradleProperty('assemblyExport').get()).absolutePath,
         project.version.toString()] } as CommandLineArgumentProvider)
 }
+
+tasks.register('auditSavedChunkPair', JavaExec) {
+    group = 'verification'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.worldgen.SavedChunkPairAudit'
+    argumentProviders.add({ [file(providers.gradleProperty('baselineWorld').get()).absolutePath,
+        file(providers.gradleProperty('candidateWorld').get()).absolutePath,
+        providers.gradleProperty('terrainDimension').get(), providers.gradleProperty('terrainChunks').get()] } as CommandLineArgumentProvider)
+}

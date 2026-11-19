@@ -40,7 +40,7 @@ public final class BenchmarkWorldAudit {
         }
         System.out.println(profile + ": " + (strict ? "PASS, 72 identical managed chunks" : "native diagnostic, changed heightmap chunks=" + heightmaps + ", structures=" + structures + ", changed blocks=" + differences.values().stream().mapToLong(Integer::longValue).sum() + ", transition types=" + differences.size()));
     }
-    private static void palette(CompoundTag left, CompoundTag right, int size, int minimumBits, String kind, boolean strict, Map<String, Integer> differences, String context) {
+    static void palette(CompoundTag left, CompoundTag right, int size, int minimumBits, String kind, boolean strict, Map<String, Integer> differences, String context) {
         if (left.equals(right)) return;
         var a = left.getListOrEmpty("palette"); var b = right.getListOrEmpty("palette");
         int aBits = Math.max(minimumBits, 32 - Integer.numberOfLeadingZeros(a.size() - 1));

@@ -14,6 +14,10 @@ The map samples a fixed 48 × 48 grid. Choose a rule, pan or zoom, and use **Coo
 
 Green means the displayed condition passes; red means it fails. Cyan marks the native End arena, where custom generation actions are excluded. Separate-filter views intentionally omit the other conditions. Biomes are sampled at the inspected Y.
 
+![Rule Inspector showing a completed biome-condition map](images/rule-inspector.png)
+
+This example has no biome restriction, so its biome filter passes across the sampled area.
+
 Choose **Explain** for the centre coordinate. The report lists every rule in evaluation order, its phase and priority, and the pass/fail result for each condition and dependency. An eligible rule can still fail its action's target, support, collision, spacing, marker or other placement checks. Coverage does not promise that a structure, ore or decoration will appear.
 
 **Order & warnings** shows the material, feature, template and spawn phases. Higher priorities run first; ties retain editor order. Dependencies must refer to earlier rules and require their conditions to match at the same candidate. The report includes the existing per-chunk limits: 32,768 feature steps and eight template candidates.

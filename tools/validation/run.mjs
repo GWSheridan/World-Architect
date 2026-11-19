@@ -7,9 +7,11 @@ import { createHash } from 'node:crypto';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const options = Object.fromEntries(Array.from({length: (process.argv.length - 2) / 2}, (_, i) => process.argv.slice(2 + i * 2, 4 + i * 2)));
-for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset'].includes(key)) throw new Error(`Unknown option ${key}`);
+for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset','--check-end'].includes(key)) throw new Error(`Unknown option ${key}`);
 if (!['online','offline'].includes(options['--network'] || 'offline')) throw new Error('Network must be online or offline');
 if (!options['--jar'] || !options['--fixture'] || !options['--output']) throw new Error('Use --jar JAR --fixture VALIDATION_JAR --output NEW_DIRECTORY [--world COPIED_SAVE] [--profile single-block] [--port 25945]');
+if(options['--dimension']&&!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--dimension']))throw Error('Invalid dimension ID');
+if(options['--check-end']&&!['true','false'].includes(options['--check-end']))throw Error('Invalid End check flag');
 const output = resolve(root, options['--output']);
 if (!relative(root, output).startsWith('build' + (process.platform === 'win32' ? '\\' : '/'))) throw new Error('Output must be under build/');
 await fs.mkdir(output, {recursive:false});
@@ -94,7 +96,7 @@ function launch(stage) {
             await new Promise(done=>setTimeout(done,200));
         }
     }
-    return {child,exit,send,wait};
+    return {child,exit,send,wait,output:()=>text};
 }
 let running;
 let pinned;
@@ -123,13 +125,22 @@ try {
             running.send(`wa_validate assembly_generation ${options['--assembly']} ${options['--dimension']} ${stage==='fresh'?64:65}`);await running.wait('WA_ASSEMBLY_GENERATION_PASS');
         } else {
             const base = stage === 'fresh' ? 16000 : 32000, end = base + 48;
-            running.send(`forceload add ${base} ${base} ${end} ${end}`);
+            const dimension=options['--dimension']||'minecraft:overworld';
+            running.send(`execute in ${dimension} run forceload add ${base} ${base} ${end} ${end}`);
             const marker = `WA_COMPATIBILITY_${stage.toUpperCase()}_PASS`;
             for (let poll=0; poll<150; poll++) {
-                running.send(`execute if loaded ${base} 100 ${base} if loaded ${end} 100 ${end} run say ${marker}`);
+                const points=[];if(options['--check-end']==='true'){for(let x=base;x<=end;x+=16)for(let z=base;z<=end;z+=16)points.push(`if loaded ${x} 100 ${z}`);}else points.push(`if loaded ${base} 100 ${base}`,`if loaded ${end} 100 ${end}`);
+                running.send(`execute in ${dimension} ${points.join(' ')} run say ${marker}`);
                 try { await running.wait(marker,1); break; } catch(error) { if(poll===149)throw error; }
             }
-            running.send('forceload remove all');
+            running.send(`execute in ${dimension} run forceload remove all`);
+        }
+        if(options['--check-end']==='true'){
+            running.send('dragon_test audit');await running.wait('DRAGON_ARENA_AUDIT_PASS');
+            running.send('dragon_test state');await running.wait('DRAGON_STATE');
+            const state=[...running.output().matchAll(/DRAGON_STATE (\{.*\}) ENTITIES (\d+)/g)].at(-1);if(!state)throw Error('Missing saved dragon state');
+            const data=JSON.parse(state[1]),persistent={};for(const key of ['dragon_killed','previously_killed','exit_portal_location','gateways','dragon_uuid','respawn_stage','respawn_time'])if(key in data)persistent[key]=data[key];
+            results.end_progression??=[];if(results.end_progression.length&&JSON.stringify(results.end_progression[0].state)!==JSON.stringify(persistent))throw Error('Saved dragon progression changed across the idle restart');results.end_progression.push({stage,state:persistent,arena_audit:'passed'});
         }
         running.send('save-all flush'); await running.wait('Saved the game');
         running.send('stop');

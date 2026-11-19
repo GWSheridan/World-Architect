@@ -27,4 +27,4 @@ Existing worlds retain their saved algorithms, templates, archived presets and E
 
 Place the JAR in `mods/`. Keep preset bundles zipped in `config/worldarchitect/bundles/` and select the required bundle in `developer.json`. Test fixtures and third-party compatibility mods are excluded from the gameplay distribution.
 
-See [Assembly Studio](wiki/Assembly-Studio.md), [Rule Inspector](wiki/Rule-Inspector.md), [Administration Panel](wiki/Administration-Panel.md) and [Backups and Upgrades](wiki/Backups-and-Upgrades.md).
+See [Assembly Studio](https://github.com/GWSheridan/World-Architect/blob/v1.2.0/docs/wiki/Assembly-Studio.md), [Rule Inspector](https://github.com/GWSheridan/World-Architect/blob/v1.2.0/docs/wiki/Rule-Inspector.md), [Administration Panel](https://github.com/GWSheridan/World-Architect/blob/v1.2.0/docs/wiki/Administration-Panel.md) and [Backups and Upgrades](https://github.com/GWSheridan/World-Architect/blob/v1.2.0/docs/wiki/Backups-and-Upgrades.md).
