@@ -19,3 +19,5 @@ Read each example before installing it. Use a new test world with matching depen
 See the [wiki example guide](../docs/wiki/Example-Presets.md) and [modpack quick start](../docs/wiki/Modpack-Quick-Start.md).
 
 The [1.1 creator starters](creator-starters/README.md) provide unlocked Single Block, Layered, Skyblock and native-End starting points.
+
+The [Assembly Studio example](assembly-studio/) demonstrates two modules, individual transforms, empty chests and safe markers. Its versioned bundle comes from the verified in-game export.

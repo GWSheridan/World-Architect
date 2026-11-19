@@ -23,9 +23,9 @@ The supported native structure IDs are `minecraft:desert_pyramid`, `minecraft:ju
 
 To generate a desert pyramid in the End, choose a flat sandstone Single Block profile for the End. In **Features & Structures → Biomes**, enter `minecraft:desert`. Under **Structures**, add `minecraft:desert_pyramid` and choose its spacing and separation. Enable **Dragon fight** to keep a native central arena; see [End progression](End-Progression.md).
 
-The [dedicated-server demo](https://github.com/GWSheridan/World-Architect/tree/v1.1.0/examples/features-and-structures) includes a desert pyramid in the End, a Nether lava sea, and an Overworld with gold in forests, amethyst decorations at Y 57 in plains, and dry caves.
+The [dedicated-server demo](https://github.com/GWSheridan/World-Architect/tree/v1.2.0/examples/features-and-structures) includes a desert pyramid in the End, a Nether lava sea, and an Overworld with gold in forests, amethyst decorations at Y 57 in plains, and dry caves.
 
-For an End City in the Overworld, choose solid terrain with its surface at least Y 60 and enable `minecraft:end_highlands` or `minecraft:end_midlands`. Add `minecraft:end_city` under **Structures**. The [cross-dimension example](https://github.com/GWSheridan/World-Architect/tree/v1.1.0/examples/cross-dimension-structures) includes an Overworld End City and modular templates in two custom dimensions.
+For an End City in the Overworld, choose solid terrain with its surface at least Y 60 and enable `minecraft:end_highlands` or `minecraft:end_midlands`. Add `minecraft:end_city` under **Structures**. The [cross-dimension example](https://github.com/GWSheridan/World-Architect/tree/v1.2.0/examples/cross-dimension-structures) includes an Overworld End City and modular templates in two custom dimensions.
 
 ## Modular template generation
 

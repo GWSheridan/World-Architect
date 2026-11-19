@@ -7,7 +7,7 @@ import { createHash } from 'node:crypto';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const options = Object.fromEntries(Array.from({length: (process.argv.length - 2) / 2}, (_, i) => process.argv.slice(2 + i * 2, 4 + i * 2)));
-for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension'].includes(key)) throw new Error(`Unknown option ${key}`);
+for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset'].includes(key)) throw new Error(`Unknown option ${key}`);
 if (!['online','offline'].includes(options['--network'] || 'offline')) throw new Error('Network must be online or offline');
 if (!options['--jar'] || !options['--fixture'] || !options['--output']) throw new Error('Use --jar JAR --fixture VALIDATION_JAR --output NEW_DIRECTORY [--world COPIED_SAVE] [--profile single-block] [--port 25945]');
 const output = resolve(root, options['--output']);
@@ -55,6 +55,7 @@ if (options['--mods']) {
 }
 let properties = await fs.readFile(join(root,'examples/performance/profiles',profile,'server.properties'),'utf8');
 properties = properties.split(/\r?\n/).filter(line => !/^(server-port|management-server|rcon\.|resource-pack|text-filter|log-ips|motd)=/.test(line)).join('\n');
+if(options['--preset']){if(options['--bundle']||!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--preset']))throw Error('Choose one valid preset ID or a bundle');properties=properties.replace(/^level-type=.*$/m,'level-type='+options['--preset']);}
 if (options['--bundle']) {
     if (options['--world']) throw new Error('Use a pack-specific upgrade fixture for an existing bundled world');
     const config=join(server,'config/worldarchitect');await fs.mkdir(join(config,'bundles'),{recursive:true});

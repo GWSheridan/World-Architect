@@ -73,3 +73,5 @@ Placed blocks and supported metadata save as ordinary chunk data, independent of
 ```
 
 A marker stores the player’s feet position and facing relative to the template. Place it inside the selection with two air cells over a safe full block. Use the same origin, rotation, and mirror for both `place` and `spawn`. The server transforms the location and facing together and checks the live blocks before teleporting the player. Use `marker remove <id> <name>` to remove a marker.
+
+Combine saved templates in [Assembly Studio](Assembly-Studio.md). Modules retain captured states, rules and markers, independently of later library changes.

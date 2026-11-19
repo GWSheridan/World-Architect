@@ -40,14 +40,14 @@ public final class ReleaseExamples {
         }
         System.out.println("Prepared six immutable versioned example bundles and their source resources.");
     }
-    private static SortedMap<String,byte[]> read(Path path)throws IOException {
+    static SortedMap<String,byte[]> read(Path path)throws IOException {
         var files=new TreeMap<String,byte[]>();
         try(var zip=new ZipInputStream(Files.newInputStream(path))){ZipEntry entry;while((entry=zip.getNextEntry())!=null){if(entry.isDirectory())continue;
             String name=entry.getName();if(name.startsWith("/")||name.contains("..")||name.contains("\\"))throw new IOException("Unsafe example entry");
             byte[] bytes=zip.readNBytes(8*1024*1024+1);if(bytes.length>8*1024*1024||files.putIfAbsent(name,bytes)!=null)throw new IOException("Invalid example entry");
         }}return files;
     }
-    private static void save(SortedMap<String,byte[]> files,Path archive,Path source)throws IOException {
+    static void save(SortedMap<String,byte[]> files,Path archive,Path source)throws IOException {
         var buffer=new ByteArrayOutputStream();
         try(var zip=new ZipOutputStream(buffer)){for(var file:files.entrySet()){var entry=new ZipEntry(file.getKey());entry.setTimeLocal(LocalDateTime.of(1980,1,1,0,0));zip.putNextEntry(entry);zip.write(file.getValue());zip.closeEntry();}}
         immutable(archive,buffer.toByteArray());for(var file:files.entrySet())immutable(source.resolve(file.getKey()),file.getValue());
@@ -56,6 +56,6 @@ public final class ReleaseExamples {
         if(Files.exists(path)){if(!Arrays.equals(bytes,Files.readAllBytes(path)))throw new IOException("Example release already exists with different bytes: "+path.getFileName());return;}
         Files.createDirectories(path.getParent());Files.write(path,bytes,StandardOpenOption.CREATE_NEW);
     }
-    private static JsonObject json(byte[] bytes){return JsonParser.parseString(new String(bytes,StandardCharsets.UTF_8)).getAsJsonObject();}
-    private static byte[] bytes(JsonObject json){return (GSON.toJson(json)+"\n").getBytes(StandardCharsets.UTF_8);}
+    static JsonObject json(byte[] bytes){return JsonParser.parseString(new String(bytes,StandardCharsets.UTF_8)).getAsJsonObject();}
+    static byte[] bytes(JsonObject json){return (GSON.toJson(json)+"\n").getBytes(StandardCharsets.UTF_8);}
 }

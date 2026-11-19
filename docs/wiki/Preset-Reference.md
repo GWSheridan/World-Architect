@@ -12,7 +12,7 @@ Solid profiles include `generator_version`, `elevation` and `relief`. Single Blo
 
 A dimension profile contains `min_y`, `height`, optional `adapter`, `content`, `rule_engine` and `end_progression`. Its range must match the dimension type and use 16-block alignment. Adapter bindings specify the exact dimension ID and version.
 
-`content` supports `biomes`, `biome_scale` (16–1024, default 128), `biome_seed` (default 0), `ores`, `decorations`, `caves`, `sea`, `structures` and `native_features`. Lists default to empty. Height ranges must fit the dimension, and feature biomes must be enabled. Read [Biomes and Features](Biomes-and-Features.md) for behaviour and the [content codecs](https://github.com/GWSheridan/World-Architect/blob/v1.1.0/src/main/java/com/gwsheridan/worldarchitect/config/ContentProfile.java) for field-level bounds/defaults.
+`content` supports `biomes`, `biome_scale` (16–1024, default 128), `biome_seed` (default 0), `ores`, `decorations`, `caves`, `sea`, `structures` and `native_features`. Lists default to empty. Height ranges must fit the dimension, and feature biomes must be enabled. Read [Biomes and Features](Biomes-and-Features.md) for behaviour and the [content codecs](https://github.com/GWSheridan/World-Architect/blob/v1.2.0/src/main/java/com/gwsheridan/worldarchitect/config/ContentProfile.java) for field-level bounds/defaults.
 
 An island specifies `template`, `origin_y`, `spacing` (64–4096, multiple of 16, default 128) and `personal_slots` (0–4095, default 0). Personal allocations require Overworld Skyblock. An empty Overworld requires a safe island or explicit unsafe spawning. See [Void and Skyblock](Void-and-Skyblock.md).
 

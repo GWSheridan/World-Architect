@@ -11,9 +11,11 @@ Assembly Studio combines saved structure templates into a modular structure. Ope
 5. Use **Settings** for the assembly height offset, maximum supported slope and random rotation of the whole structure. Each module also retains its own placement rules.
 6. Choose **Save draft**. Reopen the saved document to continue later.
 
-Limits are 16 modules, 96 blocks per axis and 65,536 occupied cells. Each source template is limited to 32 blocks per axis. Offsets are 0–95; a template extending past 96 makes the assembly invalid. Modules cannot share occupied cells or obstruct a marker's two air cells. An unfinished draft can be saved while its geometry is invalid, but it cannot be exported.
+Limits are 16 modules, 96 blocks per axis and 65,536 occupied cells. Each source template is limited to 32 blocks per axis. Saved draft JSON is limited to 8 MiB; complex states or metadata may reach that limit before the cell limit. Offsets are 0–95; a template extending past 96 makes the assembly invalid. Modules cannot share occupied cells or obstruct a marker's two air cells. An unfinished draft can be saved while its geometry is invalid, but it cannot be exported.
 
 Modules contain captured templates, block states, permitted decorative metadata and markers. Changing or deleting a library source later does not change an assembly. To take a newer source revision, remove that module and add it again. Rotation and mirroring transform states and marker directions together. Preview colours identify block types; the preview does not display block textures or container contents.
+
+![Two transformed modules and their safe markers](images/assembly-studio.png)
 
 ## Export for new worlds
 

@@ -59,3 +59,5 @@ Administration settings live in `data/worldarchitect-administration-v1.dat`. Inc
 
 
 Keep the same authentication mode throughout a world's life so player UUIDs remain consistent. The fully locked Studio example has two personal slots; a third unassigned player receives a capacity message. Choose a larger capacity before creating a world when your pack needs more players.
+
+Use [Administration Panel](Administration-Panel.md) for the permissioned GUI over these commands. Changes require confirmation and are refused when the reviewed server state is stale.

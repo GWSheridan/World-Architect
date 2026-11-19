@@ -1,6 +1,6 @@
-# Creator tools in 1.1
+# Creator tools
 
-These controls are included in World Architect 1.1.0. Use matching 1.1 versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
+These controls are included in World Architect 1.2.0. Use matching 1.2 versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
 
 ## Start a world
 
@@ -60,3 +60,5 @@ History retains at most ten operations per author with a shared 32 MiB accountin
 ## Local diagnostics
 
 Level 3 administrators can run `/wa_diagnose report`. It writes a local JSON file under `config/worldarchitect/diagnostics/`. Reports contain platform/mod versions, dimension and adapter capabilities, live dependency matches and SHA-256 hashes of generation files. Player identities, addresses, credentials, absolute paths and raw seeds are excluded. No report is uploaded automatically. A world that fails protection during loading must be diagnosed from its startup error before this command becomes available.
+
+Use [Assembly Studio](Assembly-Studio.md) to combine templates into complete modular structures, [Rule Inspector](Rule-Inspector.md) for condition maps and explanations, and [Administration Panel](Administration-Panel.md) for confirmed server changes.

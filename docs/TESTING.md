@@ -55,3 +55,9 @@ Run three alternating fresh-world performance pairs after stopping other game/bu
 All five 1.1 profiles stayed within the performance thresholds. Across the three pairs, 864 managed chunk comparisons matched exactly; 216 native comparisons remained diagnostic. Raw measurements, input hashes and host settings are retained with the verification report.
 
 The [1.1 verification report](maintainers/verification/release-1.1/) distinguishes the frozen integration binary from the final client refinements and records the exact release-JAR checks. API 1 and saved generation formats remain compatible; placement networking requires matching 1.1 clients and servers.
+
+## World Architect 1.2
+
+Milestones 27–31 use the published 1.1.0 JAR as the stabilization and performance baseline. The release candidate adds real-client Assembly Studio and administration workflows, condition/evaluator comparisons, bounded no-chunk preview checks, exported generation in vanilla and API dimensions, the combined pinned public-mod pack and seven clean example installations. The four-real-client acceptance workload runs for one hour before a final restart. Reuse a new output directory for every run; all upgrade fixtures copy their source worlds before loading.
+
+Use the portable commands in [validation runners](../tools/validation/README.md). Keep the gameplay JAR hash fixed across the dedicated, multiplayer, upgrade, compatibility and performance suites. Build from the final extracted source archive and compare its JAR hash before preparing the release. API 1 remains stable; authoring and placement networking requires matching 1.2 clients and servers.

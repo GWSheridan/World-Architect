@@ -5,6 +5,8 @@ Commands are checked by the server. Preset locks can restrict operations that an
 | Command | Purpose | Access |
 | --- | --- | --- |
 | `/wa_diagnose report` | Local versions, adapter capabilities and snapshot hashes | Permission level 3 |
+| `/wa_admin` or `/wa_island panel` | Personal island view; confirmed administration controls | Self view; changes require permission level 3 |
+| `/wa_assembly` | Visual assembly drafts and datapack exports | Permission level 2 and library access; preset export also needs level 3 and developer mode |
 | `/wa_structure` | Library, capture, import, placement and markers | Permission level 2; bundle must allow the library |
 | `/wa_island` | Personal assignment; admin subcommands for reassignment, teams and protection | Self inspection; administration needs permission level 3 |
 | `/wa_spawn` | Spawn policies | Permission level 3 |
@@ -19,3 +21,5 @@ See [Multiplayer and Islands](Multiplayer-and-Islands.md) for island and spawn a
 Generation settings remain fixed for an existing save. Starting-preset edits are applied when creating a new world.
 
 In 1.1, `/wa_structure stage`, `view3d`, `confirm` and `undo` share the library permission and bundle policy. See [Creator Tools](Creator-Tools.md) for guarded undo and preview lifetime.
+
+Assembly edits use a server session token and serial. Administration changes require a current view token and one-use confirmation. Direct command requests receive the same permission and lock checks as the GUI. See [Assembly Studio](Assembly-Studio.md) and [Administration Panel](Administration-Panel.md).

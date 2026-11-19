@@ -65,7 +65,7 @@ Put `rule_engine` inside the managed generator's `dimension_profile`. Bind its `
 }
 ```
 
-The [floating Sky City example](https://github.com/GWSheridan/World-Architect/tree/v1.1.0/examples/worldgen-rules) includes every action type, competing templates, rejected filters and generated-marker join/respawn policies.
+The [floating Sky City example](https://github.com/GWSheridan/World-Architect/tree/v1.2.0/examples/worldgen-rules) includes every action type, competing templates, rejected filters and generated-marker join/respawn policies.
 
 ## Inspection and protection
 
@@ -74,3 +74,5 @@ The [floating Sky City example](https://github.com/GWSheridan/World-Architect/tr
 Rules, engine version, template definitions and declared mod dependencies are covered by immutable generation snapshots. Changing an installed world preset does not change an existing world's inline rules or unexplored chunks. A changed declared mod presence/version stops startup. Keep required datapacks installed; changes to registered templates used by a protected save are rejected.
 
 Profiles without `rule_engine` keep the original generation path and serialize without an added engine field, preserving older snapshots. Back up the complete world, including generation files, template archives, administration settings and island ledger, before upgrading.
+
+The [Rule Inspector](Rule-Inspector.md) visualizes condition coverage, explains coordinates and reports order and conservative conflicts without creating chunks.

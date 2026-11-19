@@ -217,7 +217,7 @@ tasks.register('releaseChecksums', JavaExec) {
         releaseSources.get().archiveFile.get().asFile.absolutePath,
         tasks.named('packageRelease').get().archiveFile.get().asFile.absolutePath,
         file('examples/preset-studio/bundles').absolutePath, project.version.toString(),
-        file('examples/creator-starters/bundles').absolutePath] } as CommandLineArgumentProvider)
+        file('examples/creator-starters/bundles').absolutePath, file('examples/assembly-studio/bundles').absolutePath] } as CommandLineArgumentProvider)
 }
 
 tasks.register('assembleRelease') {
@@ -254,4 +254,15 @@ tasks.register('acceptanceJar', Jar) {
 tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
+}
+
+tasks.register('prepareAssemblyExample', JavaExec) {
+    group = 'distribution'
+    description = 'Prepare a versioned example from the verified in-game assembly export.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseAssemblyExample'
+    argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
+        file(providers.gradleProperty('assemblyExport').get()).absolutePath,
+        project.version.toString()] } as CommandLineArgumentProvider)
 }

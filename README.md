@@ -5,11 +5,11 @@ Design each Minecraft dimension before creating a world. Choose terrain and laye
 **Minecraft Java 26.3 · NeoForge 26.3.0.103 · Java 25**
 Created and maintained by **GWSHERIDAN**.
 
-See the [1.1 milestones](docs/ROADMAP-1.1.md) and [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
+See the [1.2 milestones](docs/ROADMAP-1.2.md) and [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
 ## Get started
 
-Install `worldarchitect-1.1.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
+Install `worldarchitect-1.2.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
 
 In **Create New World → World**, choose **World Architect · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
 
@@ -17,8 +17,10 @@ In **Create New World → World**, choose **World Architect · Dimensions** and 
 - **Features and structures:** biomes, ores, decoration, caves, fluids, native structures and modular assemblies.
 - **Void and Skyblock:** empty terrain or template islands with persistent multiplayer assignments.
 - **End progression:** a native central arena and dragon fight surrounded by custom terrain.
+- **Assembly Studio:** visual modules, transformed markers, saved drafts and datapack or preset exports.
+- **Rule Inspector:** condition maps, coordinate explanations and rule order without generating chunks.
 - **Preset Studio:** versioned presets, embedded templates, validation and server-enforced locks.
-- **Server administration:** safe spawns, island access, time, weather and supported visual settings.
+- **Server administration:** confirmed island, team, spawn and protection changes, plus environment settings.
 
 The [full wiki](https://github.com/GWSheridan/World-Architect/wiki) has guides for players, server owners and modpack developers. An [offline Markdown copy](docs/wiki/Home.md) is included in the source and complete release ZIP.
 

@@ -16,3 +16,7 @@ See the [Studio guide](../../docs/PRESET_STUDIO.md) and [verification procedure]
 ## 1.1.0 bundles
 
 `bundles/studio-partial-1.1.0.zip` and `bundles/studio-skyblock-1.1.0.zip` retain the same generation and lock policies under new release identities. Their expanded resources are in `partial-1.1.0-source/` and `skyblock-1.1.0-source/`. Earlier ZIPs remain unchanged for existing saves.
+
+## 1.2.0 bundles
+
+`bundles/studio-partial-1.2.0.zip` and `bundles/studio-skyblock-1.2.0.zip` preserve the generation and lock policies with new release identities. Expanded sources are in `partial-1.2.0-source/` and `skyblock-1.2.0-source/`. Earlier bundles remain unchanged.
