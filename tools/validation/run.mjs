@@ -7,7 +7,8 @@ import { createHash } from 'node:crypto';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const options = Object.fromEntries(Array.from({length: (process.argv.length - 2) / 2}, (_, i) => process.argv.slice(2 + i * 2, 4 + i * 2)));
-for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle'].includes(key)) throw new Error(`Unknown option ${key}`);
+for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network'].includes(key)) throw new Error(`Unknown option ${key}`);
+if (!['online','offline'].includes(options['--network'] || 'offline')) throw new Error('Network must be online or offline');
 if (!options['--jar'] || !options['--fixture'] || !options['--output']) throw new Error('Use --jar JAR --fixture VALIDATION_JAR --output NEW_DIRECTORY [--world COPIED_SAVE] [--profile single-block] [--port 25945]');
 const output = resolve(root, options['--output']);
 if (!relative(root, output).startsWith('build' + (process.platform === 'win32' ? '\\' : '/'))) throw new Error('Output must be under build/');
@@ -67,7 +68,8 @@ try { await fs.cp(join(root,'examples/performance/profiles',profile,'datapacks')
 catch (error) { if (error.code !== 'ENOENT') throw error; }
 
 function launch(stage) {
-    const args = ['-I','tools/validation/server.init.gradle','runServer','--offline','--console=plain',`-PtestWorldDirectory=${server}`];
+    const args = ['-I','tools/validation/server.init.gradle','runServer','--console=plain',`-PtestWorldDirectory=${server}`];
+    if (options['--network'] !== 'online') args.push('--offline');
     if (process.env.JAVA21_HOME) args.push(`-Porg.gradle.java.installations.paths=${process.env.JAVA21_HOME}`);
     let child;
     if (process.platform === 'win32') {

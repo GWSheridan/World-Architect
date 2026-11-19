@@ -60,7 +60,7 @@ public final class CreatorAcceptance {
             press("Browse saved presets");bounds();
             var search=mc.gui.screen().children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast).findFirst().orElseThrow();search.setValue(name);
             var list=mc.gui.screen().children().stream().filter(ObjectSelectionList.class::isInstance).map(ObjectSelectionList.class::cast).findFirst().orElseThrow();
-            mc.gui.screen().setFocused(list);list.keyPressed(new KeyEvent(264,0,0));press("Load selected");press("Continue");
+            mc.gui.screen().setFocused(list);mc.gui.screen().keyPressed(new KeyEvent(264,0,0));press("Load selected");press("Continue");
         });
         STEPS.add(()->{press("Apply to world");press("Done");
             var gen=parent.getUiState().getSettings().selectedDimensions().get(starter.equals("Custom End")?LevelStem.END:LevelStem.OVERWORLD).orElseThrow().generator();

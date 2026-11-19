@@ -17,6 +17,7 @@
   "worldarchitect.blocks.no_properties": "No block-state properties",
   "worldarchitect.blocks.no_matches": "No matching blocks",
   "worldarchitect.blocks.apply": "Use block",
+  "worldarchitect.preview.rotate": "Rotate the 3D view",
   "worldarchitect.preview.open": "Preview terrain",
   "worldarchitect.preview.unavailable": "This generator has no World Architect preview.",
   "worldarchitect.preview.view": "Map view",

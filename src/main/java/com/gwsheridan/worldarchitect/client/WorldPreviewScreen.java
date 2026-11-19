@@ -67,8 +67,8 @@ final class WorldPreviewScreen extends Screen {
             zoom = preview.islands().isPresent() ? 3 : 2;
             resample();
         });
-        control("↶", "rotate", left + 114, 28, () -> rotate(-1));
-        control("↷", "rotate", left + 142, 28, () -> rotate(1));
+        control("<", "rotate", left + 114, 28, () -> rotate(-1));
+        control(">", "rotate", left + 142, 28, () -> rotate(1));
         addRenderableWidget(Button.builder(Component.literal("Go to"), b -> minecraft.gui.setScreen(new StudioFormScreen(this,
                 "Preview coordinates", "Coordinates sample base terrain using the current draft seed.", java.util.List.of(
                 new StudioFormScreen.Field("X", Integer.toString(centerX)), new StudioFormScreen.Field("Z", Integer.toString(centerZ))), values -> {
@@ -194,11 +194,17 @@ final class WorldPreviewScreen extends Screen {
     }
 
     private Component cursor(int mouseX, int mouseY) {
-        if (mouseX < mapLeft || mouseX >= mapLeft + mapSide || mouseY < MAP_TOP || mouseY >= MAP_TOP + mapSide) {
+        if (view == View.TERRAIN || mouseX < mapLeft || mouseX >= mapLeft + mapSide || mouseY < MAP_TOP || mouseY >= MAP_TOP + mapSide) {
             return Component.translatable("worldarchitect.preview.center", centerX, centerZ, STEPS[zoom], seed);
         }
         int column = ((mouseX - mapLeft + 1) * GRID - 1) / mapSide;
         int row = ((mouseY - MAP_TOP + 1) * GRID - 1) / mapSide;
+        if (view == View.SECTION) {
+            if (section[column] == null) return Component.literal("Sampling cross-section…");
+            int y = preview.maxY() - (mouseY - MAP_TOP) * (preview.maxY() - preview.minY() + 1) / mapSide;
+            return Component.literal((start(centerX) + column * STEPS[zoom]) + ", " + y + ", " + centerZ + " · "
+                    + net.minecraft.commands.arguments.blocks.BlockStateParser.serialize(section[column].getBlock(y)));
+        }
         var sample = samples[row * GRID + column];
         if (sample == null) return Component.literal("Sampling base terrain…");
         return Component.translatable("worldarchitect.preview.point", start(centerX) + column * STEPS[zoom],
@@ -251,10 +257,10 @@ final class WorldPreviewScreen extends Screen {
     }
 
     private void renderSection(GuiGraphicsExtractor g) {
-        int rows = Math.min(160, preview.maxY() - preview.minY());
+        int rows = Math.min(160, preview.maxY() - preview.minY() + 1);
         for (int x = 0; x < GRID; x++) for (int row = 0; row < rows; row++) {
             var column = section[x]; if (column == null) continue;
-            int y = preview.maxY() - 1 - row * (preview.maxY() - preview.minY()) / rows;
+            int y = preview.maxY() - row * (preview.maxY() - preview.minY() + 1) / rows;
             var block = column.getBlock(y);
             int color = block.isAir() ? 0xFF141E2B : !block.getFluidState().isEmpty() ? 0xFF397CC4
                     : 0xFF000000 | Color.HSBtoRGB(Math.floorMod(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block.getBlock()).hashCode(), 360) / 360f, .3f, .75f);

@@ -6,6 +6,7 @@
 - Added rotatable base-terrain previews, vertical cross-sections and coordinate navigation.
 - Added a 3D template viewer, staged structure placement, temporary world ghosts and guarded session undo.
 - Added administrator-only local diagnostics and portable dedicated-server validation fixtures.
+- Fixed Unix wrapper line endings so clean source checkouts run on Linux.
 - Retained API 1, preset and template formats, saved generation settings and native End policies.
 
 The release remains in development while integration and platform checks are completed.
