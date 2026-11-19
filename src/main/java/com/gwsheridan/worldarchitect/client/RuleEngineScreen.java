@@ -62,11 +62,12 @@ final class RuleEngineScreen extends Screen {
         boolean compact = height < 260;
         navigation = compact ? 22 : 38; addY = compact ? 40 : 62; summaryY = compact ? 60 : 90; formY = compact ? 74 : 110; buttonHeight = compact ? 16 : 20;
         int part = (span - 24) / 5;
+        int navigationWidth = (span - 84) / 3;
         control("←", left, navigation, 32, () -> select(index - 1)).active = index > 0;
         control("→", left + 36, navigation, 32, () -> select(index + 1)).active = index + 1 < drafts.size();
-        control("Move up", left + 76, navigation, part + 20, () -> move(-1)).active = index > 0;
-        control("Move down", left + 102 + part, navigation, part + 20, () -> move(1)).active = index + 1 < drafts.size();
-        control("Remove", left + span - 68, navigation, 68, () -> { drafts.remove(index); select(Math.max(0, Math.min(index, drafts.size() - 1))); }).active = !drafts.isEmpty();
+        control("Move up", left + 76, navigation, navigationWidth, () -> move(-1)).active = index > 0;
+        control("Move down", left + 80 + navigationWidth, navigation, navigationWidth, () -> move(1)).active = index + 1 < drafts.size();
+        control("Remove", left + 84 + navigationWidth * 2, navigation, navigationWidth, () -> { drafts.remove(index); select(Math.max(0, Math.min(index, drafts.size() - 1))); }).active = !drafts.isEmpty();
         RuleSet.Kind[] kinds = RuleSet.Kind.values();
         String[] labels = {"Material", "Ore", "Decoration", "Template", "Spawn"};
         for (int i = 0; i < kinds.length; i++) {
@@ -79,7 +80,8 @@ final class RuleEngineScreen extends Screen {
             control("Dimension, biome, height", left + half + 8, formY, half, this::world);
             control("Region and distance", left, formY + buttonHeight + 4, half, this::region);
             control("Seed and dependencies", left + half + 8, formY + buttonHeight + 4, half, this::dependencies);
-            control("Edit action", left, formY + 2 * (buttonHeight + 4), span, this::action);
+            control("Edit action", left, formY + 2 * (buttonHeight + 4), half, this::action);
+            control("Inspect rules", left + half + 8, formY + 2 * (buttonHeight + 4), half, this::inspect);
         }
         done = addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> { var parsed = parse(); if (parsed != null) { save.accept(profile.withRules(parsed)); onClose(); } }).bounds(left, height - 24, half, 20).build());
         addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, b -> onClose()).bounds(left + half + 8, height - 24, half, 20).build());
@@ -130,6 +132,15 @@ final class RuleEngineScreen extends Screen {
             }
         }
         rule.add("action", action); drafts.add(rule); select(drafts.size() - 1);
+    }
+    private void inspect() {
+        try {
+            var parsed = new RuleSet(dimension, drafts.stream().map(json -> RuleSet.Rule.CODEC.parse(ops, json).getOrThrow(IllegalArgumentException::new)).toList());
+            var key = ResourceKey.create(Registries.LEVEL_STEM, dimension);
+            var stem = new LevelStem(dimensions.get(key).type(), copy(profile.withRules(parsed)));
+            var preview = com.gwsheridan.worldarchitect.worldgen.GenerationPreview.forStem(stem, seed).orElseThrow();
+            minecraft.gui.setScreen(new RuleInspectorScreen(this, dimension, seed, parsed, preview));
+        } catch (RuntimeException e) { status = e.getMessage() == null ? "Fix invalid rule fields before inspecting." : e.getMessage(); }
     }
     private boolean contains(String id) { return drafts.stream().anyMatch(rule -> rule.get("id").getAsString().equals(id)); }
     private RuleFormScreen.Field field(String path, String label, RuleFormScreen.Kind kind, boolean optional) { return new RuleFormScreen.Field(path, label, kind, optional); }

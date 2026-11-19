@@ -21,6 +21,7 @@ final class WorldPreviewScreen extends Screen {
     private final Identifier dimension;
     private final long seed;
     private final GenerationPreview preview;
+    private com.gwsheridan.worldarchitect.rules.RuleSet rules = com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY;
     private final GenerationPreview.Sample[] samples = new GenerationPreview.Sample[GRID * GRID];
     private final int[] colors = new int[GRID * GRID];
     private final BitSet markers = new BitSet(GRID * GRID);
@@ -46,6 +47,10 @@ final class WorldPreviewScreen extends Screen {
         this.preview = preview;
         zoom = preview.islands().isPresent() ? 3 : 2;
         resample();
+    }
+
+    WorldPreviewScreen(Screen parent, Identifier dimension, long seed, GenerationPreview preview, com.gwsheridan.worldarchitect.rules.RuleSet rules) {
+        this(parent, dimension, seed, preview); this.rules = rules;
     }
 
     @Override
@@ -76,6 +81,8 @@ final class WorldPreviewScreen extends Screen {
                     return "";
                 }, values -> { centerX = Integer.parseInt(values.get(0)); centerZ = Integer.parseInt(values.get(1)); resample(); })))
                 .bounds(left + 114, height - 26, 62, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Rules"), b -> minecraft.gui.setScreen(new RuleInspectorScreen(this, dimension, seed, rules, preview)))
+                .bounds(left + 182, height - 26, Math.max(36, span - 260), 20).build()).active = !rules.isEmpty();
         int controls = height - 26;
         control("←", "west", left, controls, () -> move(-1, 0));
         control("↑", "north", left + 28, controls, () -> move(0, -1));

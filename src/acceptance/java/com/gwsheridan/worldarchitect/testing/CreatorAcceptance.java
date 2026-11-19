@@ -53,7 +53,11 @@ public final class CreatorAcceptance {
             STEPS.add(()->{var cycle=mc.gui.screen().children().stream().filter(CycleButton.class::isInstance).map(CycleButton.class::cast).findFirst().orElseThrow();cycle.onPress(ENTER);});
             STEPS.add(()->Screenshot.grab(mc,false));
         }
-        STEPS.add(()->{press("Back");press("Preset Studio");bounds();press("Metadata");bounds();});
+        STEPS.add(()->{press("Back");pressEither("World Generation Rules","Generation Rules");press("Spawn");bounds();press("Inspect rules");bounds();});
+        for(int overlay=0;overlay<5;overlay++) {
+            STEPS.add(()->{bounds();Screenshot.grab(mc,false);var cycle=mc.gui.screen().children().stream().filter(CycleButton.class::isInstance).map(CycleButton.class::cast).findFirst().orElseThrow();cycle.onPress(ENTER);});
+        }
+        STEPS.add(()->{press("Coordinates");bounds();press("Apply");press("Explain");bounds();press("Back");press("Order & warnings");bounds();press("Back");press("Back");press("Cancel");press("Preset Studio");bounds();press("Metadata");bounds();});
         STEPS.add(()->{
             var fields=mc.gui.screen().children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast).toList();
             String name=starter.toLowerCase(Locale.ROOT).replace(' ','-')+"-"+scale;
@@ -70,6 +74,7 @@ public final class CreatorAcceptance {
             require(parent.getUiState().getSettings().selectedDimensions().get(starter.equals("Custom End")?LevelStem.END:LevelStem.OVERWORLD).orElseThrow().generator()==gen,"Cancelled draft reached world settings");
         });
     }
+    private static void pressEither(String a,String b){var screen=Minecraft.getInstance().gui.screen();press(screen.children().stream().filter(Button.class::isInstance).map(Button.class::cast).anyMatch(w->w.getMessage().getString().equals(a))?a:b);}
     private static void press(String label) {
         var screen=Minecraft.getInstance().gui.screen();
         var button=screen.children().stream().filter(Button.class::isInstance).map(Button.class::cast).filter(b->b.getMessage().getString().equals(label)).findFirst().orElseThrow(()->new AssertionError("Missing "+label+" in "+screen.getTitle().getString()));
@@ -88,7 +93,7 @@ public final class CreatorAcceptance {
     private static void validateBounds(Screen screen) {
         var widgets=screen.children().stream().filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).filter(w->w.visible).toList();
         for(var a:widgets) {require(a.getX()>=0&&a.getY()>=0&&a.getRight()<=screen.width&&a.getBottom()<=screen.height,"Off-screen control in "+screen.getTitle().getString());
-            for(var b:widgets)if(a!=b)require(a.getRight()<=b.getX()||a.getX()>=b.getRight()||a.getBottom()<=b.getY()||a.getY()>=b.getBottom(),"Overlapping controls in "+screen.getTitle().getString());}
+            for(var b:widgets)if(a!=b)require(a.getRight()<=b.getX()||a.getX()>=b.getRight()||a.getBottom()<=b.getY()||a.getY()>=b.getBottom(),"Overlapping controls in "+screen.getTitle().getString()+": "+a.getMessage().getString()+" / "+b.getMessage().getString());}
     }
     private static void require(boolean test,String message){if(!test)throw new AssertionError(message);}
 }

@@ -1,0 +1,19 @@
+gradle.beforeProject { project ->
+    project.pluginManager.withPlugin('net.neoforged.moddev') {
+        def root = project.file(project.providers.gradleProperty('studioRoot').get())
+        def stage = project.providers.gradleProperty('studioStage').get()
+        project.neoForge.runs.create('studioServer') {
+            server(); loadedMods = []; gameDirectory = new File(root, 'server'); programArgument '--nogui'
+            jvmArgument '-Xmx1400m'; jvmArgument '-XX:ActiveProcessorCount=4'
+        }
+        ['Alice', 'Bob'].each { player ->
+            project.neoForge.runs.create('studio' + player) {
+                client(); loadedMods = []; gameDirectory = new File(root, 'client-' + player.toLowerCase())
+                programArguments.addAll('--username', 'WA12' + player, '--quickPlayMultiplayer', '127.0.0.1:25963', '--width', '1000', '--height', '760')
+                jvmArgument '-Xmx1100m'; jvmArgument '-XX:ActiveProcessorCount=3'
+                jvmArgument '-Dwa.validation.probe=' + new File(root, 'evidence/' + stage + '/' + player).absolutePath
+            }
+        }
+        project.tasks.withType(JavaExec).configureEach { if (name == 'runStudioServer') standardInput = System.in }
+    }
+}

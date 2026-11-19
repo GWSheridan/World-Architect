@@ -42,6 +42,7 @@ final class LibraryDialog {
         int current = Math.clamp(page, 1, pages);
         var actions = new ArrayList<ActionButton>();
         actions.add(button("Capture selection", "/wa_structure builder"));
+        actions.add(button("Assembly Studio", "/wa_assembly"));
         actions.add(button("Import template", "/wa_structure builder import"));
         int first = (current - 1) * PAGE_SIZE;
         for (Identifier id : ids.subList(first, Math.min(ids.size(), first + PAGE_SIZE))) {

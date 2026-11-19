@@ -7,7 +7,7 @@ import { createHash } from 'node:crypto';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const options = Object.fromEntries(Array.from({length: (process.argv.length - 2) / 2}, (_, i) => process.argv.slice(2 + i * 2, 4 + i * 2)));
-for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network'].includes(key)) throw new Error(`Unknown option ${key}`);
+for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension'].includes(key)) throw new Error(`Unknown option ${key}`);
 if (!['online','offline'].includes(options['--network'] || 'offline')) throw new Error('Network must be online or offline');
 if (!options['--jar'] || !options['--fixture'] || !options['--output']) throw new Error('Use --jar JAR --fixture VALIDATION_JAR --output NEW_DIRECTORY [--world COPIED_SAVE] [--profile single-block] [--port 25945]');
 const output = resolve(root, options['--output']);
@@ -62,6 +62,11 @@ if (options['--bundle']) {
     await fs.writeFile(join(config,'developer.json'),JSON.stringify({format:1,bundle:'preset.zip'}));
     properties=properties.split(/\r?\n/).filter(line=>!/^(level-type|level-seed|generator-settings|generate-structures|initial-enabled-packs)=/.test(line)).join('\n');
 }
+if(suite === 'authoring') {
+    const config=join(server,'config/worldarchitect');await fs.mkdir(config,{recursive:true});
+    const file=join(config,'developer.json');let developer={format:1};try{developer=JSON.parse(await fs.readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+    developer.developer_mode=true;await fs.writeFile(file,JSON.stringify(developer));
+}
 await fs.writeFile(join(server,'server.properties'),properties + `\nserver-port=${port}\nmanagement-server-enabled=false\nlog-ips=false\nmotd=World Architect validation\n`);
 await fs.writeFile(join(server,'eula.txt'),'eula=true\n');
 try { await fs.cp(join(root,'examples/performance/profiles',profile,'datapacks'),join(server,'world/datapacks'),{recursive:true}); }
@@ -106,10 +111,15 @@ async function generationPins() {
 try {
     for (const stage of ['fresh','restart']) {
         running = launch(stage); await running.wait('Done (');
+        let beforeAuthoring;
+        if(stage==='fresh'&&suite==='authoring'){running.send('save-all flush');await running.wait('Saved the game');beforeAuthoring=await generationPins();}
         if (suite === 'authoring') {
             running.send(stage === 'fresh' ? 'wa_validate structures' : 'wa_validate restart');
             await running.wait(stage === 'fresh' ? 'WA_VALIDATION_STRUCTURES_PASS' : 'WA_VALIDATION_RESTART_PASS');
             running.send('wa_diagnose report'); await running.wait('Saved local diagnostics');
+        } else if(options['--assembly']) {
+            if(!options['--dimension'])throw Error('Assembly validation requires a dimension');
+            running.send(`wa_validate assembly_generation ${options['--assembly']} ${options['--dimension']} ${stage==='fresh'?64:65}`);await running.wait('WA_ASSEMBLY_GENERATION_PASS');
         } else {
             const base = stage === 'fresh' ? 16000 : 32000, end = base + 48;
             running.send(`forceload add ${base} ${base} ${end} ${end}`);
@@ -125,6 +135,7 @@ try {
         const code = await Promise.race([running.exit,new Promise((_,fail)=>setTimeout(()=>fail(new Error('Shutdown timed out')),40000).unref())]);
         if (code !== 0) throw new Error('Server exited with an error');
         const current=await generationPins();
+        if(beforeAuthoring&&JSON.stringify(current)!==JSON.stringify(beforeAuthoring))throw new Error('Authoring changed pinned generation files');
         if(pinned&&JSON.stringify(current)!==JSON.stringify(pinned))throw new Error('Pinned generation files changed after restart');
         pinned=current;results.generation_sha256=current;
         results.tests.push({case:stage,status:'passed'}); running = undefined;

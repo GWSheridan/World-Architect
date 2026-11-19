@@ -1,0 +1,107 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "biome": "minecraft:plains",
+        "profile": {
+          "material": "minecraft:stone",
+          "generator_version": 1,
+          "elevation": 96,
+          "relief": 0
+        },
+        "dimension_profile": {
+          "min_y": -64,
+          "height": 384,
+          "rule_engine": {
+            "version": 1,
+            "dimension": "minecraft:overworld",
+            "rules": [
+              {
+                "id": "city",
+                "when": {
+                  "min_y": 97,
+                  "max_y": 110,
+                  "region": {
+                    "min_x": 0,
+                    "max_x": 31,
+                    "min_z": 0,
+                    "max_z": 31
+                  }
+                },
+                "action": {
+                  "template": {
+                    "structure": "wa_studio:mini",
+                    "spacing": 4,
+                    "separation": 3
+                  },
+                  "type": "template"
+                }
+              },
+              {
+                "id": "join",
+                "action": {
+                  "spawn": {
+                    "kind": "generated",
+                    "dimension": "minecraft:overworld",
+                    "position": [
+                      1,
+                      98,
+                      1
+                    ],
+                    "template": "wa_studio:mini",
+                    "module": "main",
+                    "marker": "entry"
+                  },
+                  "type": "spawn"
+                }
+              },
+              {
+                "id": "respawn",
+                "action": {
+                  "spawn": {
+                    "kind": "generated",
+                    "dimension": "minecraft:overworld",
+                    "position": [
+                      1,
+                      98,
+                      1
+                    ],
+                    "template": "wa_studio:mini",
+                    "module": "main",
+                    "marker": "entry"
+                  },
+                  "event": "respawn",
+                  "type": "spawn"
+                }
+              }
+            ]
+          }
+        },
+        "type": "worldarchitect:single_block"
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "biome": "minecraft:nether_wastes",
+        "dimension": {
+          "min_y": 0,
+          "height": 256
+        },
+        "type": "worldarchitect:void"
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "biome": "minecraft:the_end",
+        "dimension": {
+          "min_y": 0,
+          "height": 256
+        },
+        "type": "worldarchitect:void"
+      }
+    }
+  }
+}

@@ -224,8 +224,9 @@ final class DimensionManagerScreen extends Screen {
         ResourceKey<LevelStem> key = selected;
         if (key != null) {
             long seed = draftOptions.seed();
-            var preview = GenerationPreview.forStem(effective(key), seed);
-            if (preview.isPresent()) minecraft.gui.setScreen(new WorldPreviewScreen(this, key.identifier(), seed, preview.orElseThrow()));
+            var stem = effective(key);
+            var preview = GenerationPreview.forStem(stem, seed);
+            if (preview.isPresent()) minecraft.gui.setScreen(new WorldPreviewScreen(this, key.identifier(), seed, preview.orElseThrow(), stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.ManagedGenerator managed ? managed.dimensionProfile().map(DimensionProfile::rules).orElse(com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY) : com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY));
             else minecraft.gui.setScreen(new StudioReportScreen(this, "Preview unavailable", List.of(
                     "This original or modded generator does not expose a base-terrain sampler.",
                     "World Architect does not create chunks to simulate unsupported generators.")));

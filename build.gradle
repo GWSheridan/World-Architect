@@ -234,7 +234,7 @@ tasks.register('prepareExampleReleases', JavaExec) {
     mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseExamples'
     argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
         file(providers.gradleProperty('creatorExports').get()).absolutePath,
-        providers.gradleProperty('exampleVersion').orElse('1.1.0').get()] } as CommandLineArgumentProvider)
+        providers.gradleProperty('exampleVersion').orElse('1.2.0').get()] } as CommandLineArgumentProvider)
 }
 
 sourceSets {

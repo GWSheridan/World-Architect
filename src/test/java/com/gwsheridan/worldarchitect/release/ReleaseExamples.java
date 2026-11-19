@@ -36,7 +36,7 @@ public final class ReleaseExamples {
             manifest.addProperty("author","GWSHERIDAN");manifest.addProperty("release",version);manifest.getAsJsonObject("options").addProperty("seed",18);
             files.put(MANIFEST,bytes(manifest));
             var pack=json(files.get("pack.mcmeta"));pack.getAsJsonObject("pack").addProperty("description",titles.get(kind)+" starter for World Architect "+version);files.put("pack.mcmeta",bytes(pack));
-            Path directory=root.resolve("examples/creator-starters");save(files,directory.resolve("bundles/"+kind+"-"+version+".zip"),directory.resolve(kind+"-source"));
+            Path directory=root.resolve("examples/creator-starters");save(files,directory.resolve("bundles/"+kind+"-"+version+".zip"),directory.resolve(kind+"-"+version+"-source"));
         }
         System.out.println("Prepared six immutable versioned example bundles and their source resources.");
     }

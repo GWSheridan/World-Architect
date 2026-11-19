@@ -62,6 +62,7 @@ public final class WorldArchitect {
         modBus.addListener(ModpackRuntime::addPack);
         modBus.addListener(EnvironmentPayload::register);
         modBus.addListener(com.gwsheridan.worldarchitect.structure.PlacementPreviewPayload::register);
+        modBus.addListener(com.gwsheridan.worldarchitect.studio.StudioViewPayload::register);
         DeferredRegister<MapCodec<? extends ChunkGenerator>> generators = DeferredRegister.create(Registries.CHUNK_GENERATOR, ID);
         generators.register(GENERATOR_ID.getPath(), () -> SingleBlockGenerator.CODEC);
         generators.register(LAYERED_PRESET.identifier().getPath(), () -> LayeredGenerator.CODEC);
@@ -86,6 +87,7 @@ public final class WorldArchitect {
         NeoForge.EVENT_BUS.addListener(WorldEnvironment::respawned);
         NeoForge.EVENT_BUS.addListener(SpawnPolicies::respawn);
         NeoForge.EVENT_BUS.addListener(IslandAdministration::register);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.skyblock.AdministrationPanel::register);
         NeoForge.EVENT_BUS.addListener(IslandProtection::breaking);
         NeoForge.EVENT_BUS.addListener(IslandProtection::placing);
         NeoForge.EVENT_BUS.addListener(IslandProtection::interacting);
@@ -93,6 +95,7 @@ public final class WorldArchitect {
         NeoForge.EVENT_BUS.addListener(IslandProtection::closed);
         NeoForge.EVENT_BUS.addListener(IslandProtection::logout);
         NeoForge.EVENT_BUS.addListener(StructureCommands::register);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.structure.AssemblyStudio::register);
         NeoForge.EVENT_BUS.addListener(ModpackCommands::register);
         NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.modpack.PresetStudioCommands::register);
         NeoForge.EVENT_BUS.addListener(StructureCommands::onLogout);

@@ -104,6 +104,8 @@ public final class StructureCommands {
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             PlacementStudio.logout(player);
+            AssemblyStudio.logout(player);
+            com.gwsheridan.worldarchitect.skyblock.AdministrationPanel.logout(player);
             var selections = SELECTIONS.get(player.level().getServer());
             if (selections != null) {
                 selections.remove(player.getStringUUID());

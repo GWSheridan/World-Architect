@@ -22,14 +22,16 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 /** Dedicated-server assertions in a separate mod, never in the gameplay JAR. */
 @Mod("wa_validation")
 public final class PlacementAcceptance {
-    public PlacementAcceptance() { NeoForge.EVENT_BUS.addListener(PlacementAcceptance::register); }
+    public PlacementAcceptance() { NeoForge.EVENT_BUS.addListener(PlacementAcceptance::register); NeoForge.EVENT_BUS.addListener(ProgressionAcceptance::register); }
     private static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("wa_validate").requires(Commands.hasPermission(Commands.LEVEL_OWNERS))
                 .then(Commands.literal("structures").executes(c -> {
-                    try { PreviewAcceptance.check(c.getSource().getServer()); structures(c.getSource().getServer().overworld()); c.getSource().sendSuccess(() -> Component.literal("WA_VALIDATION_STRUCTURES_PASS"), false); return 1; }
+                    try { PreviewAcceptance.check(c.getSource().getServer()); RuleInspectionAcceptance.check(c.getSource().getServer()); AssemblyAcceptance.fresh(c.getSource().getServer()); structures(c.getSource().getServer().overworld()); c.getSource().sendSuccess(() -> Component.literal("WA_VALIDATION_STRUCTURES_PASS"), false); return 1; }
                     catch (Throwable e) { e.printStackTrace(); throw new IllegalStateException("WA_VALIDATION_STRUCTURES_FAILED", e); }
                 }))
+                .then(Commands.literal("assembly_generation").then(Commands.argument("structure",net.minecraft.commands.arguments.IdentifierArgument.id()).then(Commands.argument("dimension",net.minecraft.commands.arguments.IdentifierArgument.id()).then(Commands.argument("region",com.mojang.brigadier.arguments.IntegerArgumentType.integer(1,10000)).executes(c->{try{AssemblyAcceptance.generated(c.getSource().getServer(),net.minecraft.commands.arguments.IdentifierArgument.getId(c,"structure"),net.minecraft.commands.arguments.IdentifierArgument.getId(c,"dimension"),com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c,"region"));return 1;}catch(Exception e){throw new IllegalStateException("WA_ASSEMBLY_GENERATION_FAILED",e);}})))))
                 .then(Commands.literal("restart").executes(c -> {
+                    try { AssemblyAcceptance.restart(c.getSource().getServer()); } catch (Exception e) { throw new IllegalStateException(e); }
                     var player = player(c.getSource().getServer().overworld());
                     denied(() -> callStatic("PlacementHistory", "undo", player));
                     c.getSource().sendSuccess(() -> Component.literal("WA_VALIDATION_RESTART_PASS"), false); return 1;

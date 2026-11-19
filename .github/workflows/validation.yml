@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -42,6 +42,12 @@ jobs:
           $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
           node tools/validation/run.mjs --jar "build/libs/worldarchitect-$version.jar" --fixture "build/validation-tools/worldarchitect-$version-validation.jar" --output build/ci-validation --network online
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Exported assembly generation and restart
+        shell: pwsh
+        run: |
+          $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
+          node tools/validation/assemblies.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Pinned public compatibility matrix
         shell: pwsh
         run: |
@@ -59,11 +65,14 @@ jobs:
         with:
           name: validation-${{ matrix.os }}
           path: |
+            build/ci-assemblies/results.json
+            build/ci-assemblies/*/results.json
+            build/ci-assemblies/*/*.log
             build/ci-validation/results.json
             build/ci-validation/*.log
             build/ci-compatibility/matrix.json
-            build/ci-compat-*/results.json
-            build/ci-compat-*/*.log
+            build/ci-compatibility/cases/*/results.json
+            build/ci-compatibility/cases/*/*.log
             build/ci-bundles.json
             build/ci-bundle-*/results.json
             build/ci-bundle-*/*.log

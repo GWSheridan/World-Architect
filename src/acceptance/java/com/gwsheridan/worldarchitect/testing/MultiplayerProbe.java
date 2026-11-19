@@ -5,6 +5,9 @@ import com.gwsheridan.worldarchitect.environment.WorldEnvironment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -27,6 +30,7 @@ public final class MultiplayerProbe {
         if(FOLDER==null)return;
         var root=Path.of(FOLDER);var mc=Minecraft.getInstance();
         if(Files.exists(root.resolve("stop"))){mc.stop();return;}
+        if(mc.gui.screen()!=null && mc.gui.screen().getClass().getSimpleName().equals("WinScreen"))mc.gui.screen().onClose();
         if(mc.player==null||mc.level==null)return;
         ticks++;
         if(mc.player.isDeadOrDying()){mc.player.respawn();return;}
@@ -47,7 +51,13 @@ public final class MultiplayerProbe {
             else if(line.equals("SHOT"))Screenshot.grab(mc,false);
             else if(line.equals("CLOSE"))mc.gui.setScreen(null);
             else if(line.startsWith("EDIT ")){String[] parts=line.split(" ",3);widgets(mc.gui.screen()).filter(EditBox.class::isInstance).map(EditBox.class::cast).toList().get(Integer.parseInt(parts[1])).setValue(parts[2]);}
-            else if(line.startsWith("PRESS "))widgets(mc.gui.screen()).filter(Button.class::isInstance).map(Button.class::cast).filter(b->b.getMessage().getString().equals(line.substring(6))).findFirst().orElseThrow().onPress(ENTER);
+            else if(line.startsWith("PRESS ")){var button=widgets(mc.gui.screen()).filter(AbstractButton.class::isInstance).map(AbstractButton.class::cast).filter(b->b.getMessage().getString().equals(line.substring(6))).findFirst().orElseThrow();if(!button.active)throw new AssertionError("Disabled "+line);button.onPress(ENTER);}
+            else if(line.startsWith("ROW "))select(mc.gui.screen(),Integer.parseInt(line.substring(4)));
+            else if(line.startsWith("SCALE ")){mc.options.guiScale().set(Integer.parseInt(line.substring(6)));mc.resizeGui();}
+            else if(line.equals("BOUNDS")){var screen=mc.gui.screen();int w=screen.width,h=screen.height;bounds(screen);screen.resize(320,240);bounds(screen);screen.resize(w,h);record("BOUNDS_PASS "+screen.getTitle().getString());}
+            else if(line.equals("VIEW")){var screen=mc.gui.screen();record("WIDGETS "+widgets(screen).filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).map(w->w.getMessage().getString()+"="+w.active).toList());try{var field=screen.getClass().getDeclaredField("data");field.setAccessible(true);record("VIEW "+field.get(screen));}catch(NoSuchFieldException ignored){}}
+            else if(line.startsWith("USE ")){var p=line.substring(4).split(" ");var pos=new net.minecraft.core.BlockPos(Integer.parseInt(p[0]),Integer.parseInt(p[1]),Integer.parseInt(p[2]));mc.gameMode.useItemOn(mc.player,net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos),net.minecraft.core.Direction.UP,pos,false));}
+            else if(line.equals("MENU"))record("MENU "+mc.player.containerMenu.getClass().getSimpleName()+" SCREEN "+(mc.gui.screen()==null?"none":mc.gui.screen().getTitle().getString()));
             else if(line.equals("RESET_OBSERVATION"))previous="";
             else if(line.startsWith("BLOCK ")){var parts=line.split(" ");var pos=new net.minecraft.core.BlockPos(Integer.parseInt(parts[1]),Integer.parseInt(parts[2]),Integer.parseInt(parts[3]));record("BLOCK "+pos.toShortString()+" "+net.minecraft.commands.arguments.blocks.BlockStateParser.serialize(mc.level.getBlockState(pos)));}
             else throw new AssertionError(line);
@@ -55,6 +65,8 @@ public final class MultiplayerProbe {
         action++;finish=ticks+12;
     }
     private static Stream<GuiEventListener> widgets(GuiEventListener listener){return listener instanceof ContainerEventHandler container?Stream.concat(Stream.of(listener),container.children().stream().flatMap(MultiplayerProbe::widgets)):Stream.of(listener);}
+    @SuppressWarnings({"rawtypes","unchecked"}) private static void select(net.minecraft.client.gui.screens.Screen screen,int index)throws Exception{var rows=widgets(screen).filter(AbstractSelectionList.class::isInstance).map(AbstractSelectionList.class::cast).findFirst().orElseThrow();var entry=rows.children().get(index);var method=java.util.Arrays.stream(rows.getClass().getMethods()).filter(m->m.getName().equals("setSelected")&&!m.isBridge()&&m.getParameterCount()==1&&m.getParameterTypes()[0].isInstance(entry)).findFirst().orElseThrow();method.setAccessible(true);method.invoke(rows,entry);}
+    private static void bounds(net.minecraft.client.gui.screens.Screen screen){var controls=screen.children().stream().filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).filter(w->w.visible).toList();for(var a:controls){if(a.getX()<0||a.getY()<0||a.getRight()>screen.width||a.getBottom()>screen.height)throw new AssertionError("Offscreen "+a.getMessage());for(var b:controls)if(a!=b&&a.getRight()>b.getX()&&a.getX()<b.getRight()&&a.getBottom()>b.getY()&&a.getY()<b.getBottom())throw new AssertionError("Overlapping "+a.getMessage()+" / "+b.getMessage());}}
     private static int rgb(Vector3fc v){return Math.round(v.x()*255)<<16|Math.round(v.y()*255)<<8|Math.round(v.z()*255);}
     @SubscribeEvent public static void chat(ClientChatReceivedEvent.System event)throws Exception{if(FOLDER!=null)record("SERVER "+event.getMessage().getString().replace('\n',' '));}
     private static void record(String s)throws Exception{Files.writeString(Path.of(FOLDER,"observed.log"),s+System.lineSeparator(),StandardOpenOption.CREATE,StandardOpenOption.APPEND);}

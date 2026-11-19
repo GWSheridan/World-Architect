@@ -52,6 +52,7 @@ public final class IslandAdministration {
 
     public static void register(RegisterCommandsEvent event) {
         var root = literal("wa_island").executes(run(IslandAdministration::self))
+                .then(literal("panel").executes(run(c -> AdministrationPanel.open(c.getSource().getPlayerOrException(), 0))))
                 .then(literal("home").executes(run(c -> home(c.getSource().getPlayerOrException()))))
                 .then(literal("list").requires(Commands.hasPermission(Commands.LEVEL_ADMINS)).executes(run(IslandAdministration::list)))
                 .then(literal("inspect").requires(Commands.hasPermission(Commands.LEVEL_ADMINS))

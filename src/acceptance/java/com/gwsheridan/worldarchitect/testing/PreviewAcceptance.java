@@ -11,6 +11,7 @@ import net.minecraft.world.level.dimension.LevelStem;
 final class PreviewAcceptance {
     private PreviewAcceptance() {}
     static void check(MinecraftServer server) {
+        int loaded=server.overworld().getChunkSource().getLoadedChunksCount();
         var stems=server.registryAccess().lookupOrThrow(Registries.LEVEL_STEM);
         var base=stems.getOrThrow(LevelStem.OVERWORLD).value();
         var biome=server.registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(net.minecraft.world.level.biome.Biomes.PLAINS);
@@ -39,12 +40,14 @@ final class PreviewAcceptance {
                 var expected=stem.generator() instanceof SolidColumnGenerator solid?solid.baseColumn(x,z,height,seed):((VoidGenerator)stem.generator()).baseColumn(x,z,height,seed);
                 int top=height.getMinY()-1;
                 for(int y=height.getMinY();y<=height.getMaxY();y++) {
+                    require(preview.biomeAt(x,y,z).isPresent(),"Missing sampled biome registry ID");
                     require(column.getBlock(y)==expected.getBlock(y),"Cross-section differs from generator column");
                     if(!column.getBlock(y).isAir())top=y;blocks++;
                 }
                 require(sample.surfaceY()==top&&sample.occupied()==(top>=height.getMinY()),"Height preview differs from column");columns++;
             }
         }
+        require(loaded==server.overworld().getChunkSource().getLoadedChunksCount(),"Preview sampling loaded chunks");
         System.out.println("WA_PREVIEW_BASE_COLUMNS_PASS cases="+cases.size()+" columns="+columns+" blocks="+blocks);
     }
     private static void require(boolean test,String message){if(!test)throw new AssertionError(message);}

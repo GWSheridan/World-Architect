@@ -11,14 +11,17 @@
 - [Biomes and Features](Biomes-and-Features.md)
 - [Structures](Structures.md)
 - [Structure Library](Structure-Library.md)
+- [Assembly Studio](Assembly-Studio.md)
 - [Void and Skyblock](Void-and-Skyblock.md)
 - [End Progression](End-Progression.md)
 - [Environment Controls](Environment-Controls.md)
 - [World Generation Rules](World-Generation-Rules.md)
+- [Rule Inspector](Rule-Inspector.md)
 
 **Servers**
 
 - [Server Setup](Server-Setup.md)
+- [Administration Panel](Administration-Panel.md)
 - [Multiplayer and Islands](Multiplayer-and-Islands.md)
 - [Commands and Permissions](Commands-and-Permissions.md)
 - [Backups and Upgrades](Backups-and-Upgrades.md)

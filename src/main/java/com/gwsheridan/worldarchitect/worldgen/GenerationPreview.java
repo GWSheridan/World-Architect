@@ -70,6 +70,11 @@ public final class GenerationPreview {
 
     public boolean endArena() { return endArena; }
 
+    /** Registered biome at the requested height, without loading a chunk. */
+    public Optional<Identifier> biomeAt(int x, int y, int z) {
+        return biomes.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)).unwrapKey().map(key -> key.identifier());
+    }
+
     /** Base terrain only; this never runs decoration or loads a chunk. */
     public net.minecraft.world.level.NoiseColumn column(int x, int z) { return columns.at(x, z); }
 
