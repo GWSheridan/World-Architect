@@ -21,7 +21,9 @@ final class LockedPresetScreen extends Screen {
     @Override
     protected void init() {
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> onClose())
-                .bounds(width / 2 - 90, height - 32, 180, 20).build());
+                .bounds(width / 2 - 184, height - 32, 180, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Preset help"), button -> minecraft.gui.setScreen(new StudioReportScreen(this, "Preset Studio help", StudioReportScreen.help())))
+                .bounds(width / 2 + 4, height - 32, 180, 20).build());
     }
 
     @Override

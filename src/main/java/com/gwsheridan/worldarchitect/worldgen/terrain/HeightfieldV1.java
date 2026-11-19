@@ -12,7 +12,7 @@ public final class HeightfieldV1 {
         return elevation + (int) Math.round(relief * (0.65 * broad + 0.25 * hills + 0.10 * detail + 0.55 * ridge * ridge * ridge));
     }
 
-    private static double noise(long seed, int x, int z, int scale) {
+    static double noise(long seed, int x, int z, int scale) {
         int left = Math.floorDiv(x, scale);
         int near = Math.floorDiv(z, scale);
         double tx = smooth((double) Math.floorMod(x, scale) / scale);
@@ -30,7 +30,7 @@ public final class HeightfieldV1 {
         return a + (b - a) * t;
     }
 
-    private static double sample(long seed, int x, int z) {
+    static double sample(long seed, int x, int z) {
         long bits = seed ^ (0x9E3779B97F4A7C15L * x) ^ (0xD1B54A32D192ED03L * z);
         bits = (bits ^ (bits >>> 30)) * 0xBF58476D1CE4E5B9L;
         bits = (bits ^ (bits >>> 27)) * 0x94D049BB133111EBL;

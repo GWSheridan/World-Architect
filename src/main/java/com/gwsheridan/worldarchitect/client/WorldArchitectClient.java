@@ -13,6 +13,8 @@ import net.neoforged.neoforge.client.event.RegisterPresetEditorsEvent;
 public final class WorldArchitectClient {
     public WorldArchitectClient(IEventBus modBus) {
         modBus.addListener(WorldArchitectClient::registerEditors);
+        modBus.addListener(ClientEnvironment::register);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(ClientEnvironment::logout);
     }
 
     private static void registerEditors(RegisterPresetEditorsEvent event) {

@@ -3,6 +3,30 @@
   "minVersion": "0.8",
   "package": "com.gwsheridan.worldarchitect.compatibility.mixin",
   "compatibilityLevel": "JAVA_25",
-  "mixins": ["LevelStorageSourceMixin", "LevelStorageAccessMixin", "WorldLoaderMixin", "FileFixerUpperMixin", "ServerPacksSourceMixin", "WorldDimensionsMixin", "ServerLevelMixin", "PrepareSpawnTaskMixin", "ServerConfigurationPacketListenerMixin", "VoidPortalMixin", "DedicatedServerPropertiesMixin", "DedicatedWorldCreationMixin", "ModpackServerMixin"],
-  "injectors": {"defaultRequire": 1}
+  "mixins": [
+    "LevelStorageSourceMixin",
+    "LevelStorageAccessMixin",
+    "WorldLoaderMixin",
+    "FileFixerUpperMixin",
+    "ServerPacksSourceMixin",
+    "WorldDimensionsMixin",
+    "ServerLevelMixin",
+    "PrepareSpawnTaskMixin",
+    "ServerConfigurationPacketListenerMixin",
+    "VoidPortalMixin",
+    "DedicatedServerPropertiesMixin",
+    "DedicatedWorldCreationMixin",
+    "ModpackServerMixin",
+    "ProtectedContainerMixin",
+    "EnvironmentAttributesMixin",
+    "EnvironmentClockMixin",
+    "EnvironmentWeatherMixin",
+    "EndArenaRegionMixin",
+    "EndArenaStructuresMixin",
+    "EndGatewaySafetyMixin",
+    "EndGatewayMessageMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

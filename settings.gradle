@@ -8,4 +8,8 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
+// Keep checkout settings in the buildable source distribution.
+org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.gitignore')
+org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.gitattributes')
+
 rootProject.name = 'worldarchitect'

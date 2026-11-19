@@ -1,0 +1,74 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "worldarchitect:single_block",
+        "biome": "minecraft:plains",
+        "dimension_profile": {
+          "min_y": -64,
+          "height": 384
+        },
+        "profile": {
+          "generator_version": 1,
+          "material": "minecraft:sand",
+          "elevation": 68,
+          "relief": 44
+        }
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "worldarchitect:layered",
+        "biome": "minecraft:nether_wastes",
+        "dimension_profile": {
+          "min_y": 0,
+          "height": 256
+        },
+        "profile": {
+          "generator_version": 1,
+          "base_material": "minecraft:netherrack",
+          "layers": [
+            {
+              "material": "minecraft:smooth_basalt",
+              "depth": 5
+            }
+          ],
+          "elevation": 46,
+          "relief": 19
+        }
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "worldarchitect:single_block",
+        "biome": "minecraft:end_highlands",
+        "profile": {
+          "generator_version": 1,
+          "material": "minecraft:purpur_block",
+          "elevation": 80,
+          "relief": 0
+        },
+        "dimension_profile": {
+          "min_y": 0,
+          "height": 256,
+          "end_progression": {
+            "version": 1,
+            "mode": "vanilla_arena"
+          },
+          "content": {
+            "structures": [
+              {
+                "structure": "minecraft:end_city",
+                "spacing": 8,
+                "separation": 4
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

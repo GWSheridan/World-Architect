@@ -1,6 +1,8 @@
 package com.gwsheridan.worldarchitect.modpack;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.JsonObject;
@@ -9,6 +11,7 @@ import com.gwsheridan.worldarchitect.modpack.BundleManifest.Feature;
 import com.gwsheridan.worldarchitect.modpack.BundleManifest.Option;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import org.junit.jupiter.api.Test;
 
 final class BundleManifestTest {
@@ -65,6 +68,39 @@ final class BundleManifestTest {
 
     private static BundleManifest decode(JsonObject json) {
         return BundleManifest.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+    }
+
+    @Test
+    void structureOptionPermissionAllowsOnlyStructureChanges() {
+        var json = manifest("partial");
+        json.add("editable_options", JsonParser.parseString("[\"generate_structures\"]"));
+        var policy = decode(json);
+        var baseline = policy.options();
+        assertDoesNotThrow(() -> ModpackRuntime.compareOptions(policy,
+                new WorldOptions(baseline.seed(), !baseline.generateStructures(), baseline.generateBonusChest())));
+        assertThrows(IllegalStateException.class, () -> ModpackRuntime.compareOptions(policy,
+                new WorldOptions(baseline.seed() + 1, baseline.generateStructures(), baseline.generateBonusChest())));
+        assertThrows(IllegalStateException.class, () -> ModpackRuntime.compareOptions(policy,
+                new WorldOptions(baseline.seed(), baseline.generateStructures(), !baseline.generateBonusChest())));
+    }
+
+    @Test
+    void fullLockRejectsStructureOptionChanges() {
+        var policy = decode(manifest("full"));
+        var baseline = policy.options();
+        assertThrows(IllegalStateException.class, () -> ModpackRuntime.compareOptions(policy,
+                new WorldOptions(baseline.seed(), !baseline.generateStructures(), baseline.generateBonusChest())));
+    }
+
+    @Test
+    void allFeatureEditorsCanBeUnlockedWithoutUnlockingTheDimension() {
+        var json = manifest("partial");
+        json.add("editable_features", JsonParser.parseString("""
+                {"minecraft:the_end":["biomes","ores","decorations","caves","fluids","structures","native_features"]}
+                """));
+        var policy = decode(json);
+        for (Feature feature : Feature.values()) assertTrue(policy.canEditFeature(END, feature));
+        assertFalse(policy.canEditDimension(END));
     }
 
     private static JsonObject manifest(String mode) {

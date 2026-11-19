@@ -1,0 +1,15 @@
+wa_environment minecraft:overworld set time fixed 6000
+wa_environment minecraft:overworld set weather clear
+wa_environment minecraft:overworld set fog_color 223344
+wa_environment minecraft:overworld set fog 4 96
+wa_environment minecraft:overworld set sky_color 33aaff
+wa_environment minecraft:overworld set clouds hidden
+wa_environment wa_example:workshop set time fixed 18000
+wa_environment wa_example:workshop set weather thunder
+wa_environment wa_example:workshop set fog_color 881122
+wa_environment wa_example:workshop set sky_color dd6600
+wa_environment wa_example:workshop set clouds shown
+wa_environment wa_example:workshop set cloud_color 00ff00
+wa_environment wa_example:workshop set cloud_height 110
+wa_environment minecraft:overworld set mobs monsters false
+wa_environment minecraft:the_nether set portal players

@@ -50,7 +50,11 @@ public final class RegionBiomeSource extends BiomeSource {
 
     @Override
     public BiomeResolver createResolver(Climate.Sampler sampler) {
-        return (quartX, quartY, quartZ) -> resolve(quartX * 4, quartZ * 4);
+        return this::getNoiseBiome;
+    }
+
+    Holder<Biome> getNoiseBiome(int quartX, int quartY, int quartZ) {
+        return resolve(quartX * 4, quartZ * 4);
     }
 
     private Holder<Biome> resolve(int x, int z) {

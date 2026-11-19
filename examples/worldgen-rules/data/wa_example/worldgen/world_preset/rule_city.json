@@ -1,0 +1,434 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "worldarchitect:single_block",
+        "biome": "minecraft:plains",
+        "profile": {
+          "generator_version": 2,
+          "material": "minecraft:stone",
+          "elevation": 96,
+          "relief": 0,
+          "terrain": {
+            "landform": "floating_islands",
+            "scale": 256
+          }
+        },
+        "dimension_profile": {
+          "min_y": -64,
+          "height": 384,
+          "rule_engine": {
+            "version": 1,
+            "dimension": "minecraft:overworld",
+            "rules": [
+              {
+                "id": "gold",
+                "priority": 100,
+                "action": {
+                  "type": "material",
+                  "material": "minecraft:gold_block"
+                },
+                "when": {
+                  "dimensions": [
+                    "minecraft:overworld"
+                  ],
+                  "biomes": [
+                    "minecraft:plains"
+                  ],
+                  "seed": 18,
+                  "mods": [
+                    "minecraft"
+                  ],
+                  "min_y": 92,
+                  "max_y": 96,
+                  "region": {
+                    "min_x": -64,
+                    "max_x": -1,
+                    "min_z": -32,
+                    "max_z": 64
+                  },
+                  "distance": {
+                    "center_x": 0,
+                    "center_z": 0,
+                    "min": 0,
+                    "max": 100
+                  }
+                }
+              },
+              {
+                "id": "blue",
+                "priority": 10,
+                "action": {
+                  "type": "material",
+                  "material": "minecraft:lapis_block"
+                },
+                "when": {
+                  "dimensions": [
+                    "minecraft:overworld"
+                  ],
+                  "biomes": [
+                    "minecraft:plains"
+                  ],
+                  "seed": 18,
+                  "mods": [
+                    "minecraft"
+                  ],
+                  "min_y": 92,
+                  "max_y": 96,
+                  "region": {
+                    "min_x": -64,
+                    "max_x": 64,
+                    "min_z": -32,
+                    "max_z": 64
+                  }
+                }
+              },
+              {
+                "id": "ore",
+                "priority": 10,
+                "action": {
+                  "type": "ore",
+                  "ore": {
+                    "material": "minecraft:redstone_block",
+                    "target": "minecraft:lapis_block",
+                    "attempts": 16,
+                    "size": 6,
+                    "min_y": 94,
+                    "max_y": 95
+                  }
+                },
+                "when": {
+                  "dimensions": [
+                    "minecraft:overworld"
+                  ],
+                  "biomes": [
+                    "minecraft:plains"
+                  ],
+                  "seed": 18,
+                  "mods": [
+                    "minecraft"
+                  ],
+                  "region": {
+                    "min_x": 0,
+                    "max_x": 63,
+                    "min_z": 0,
+                    "max_z": 31
+                  },
+                  "min_y": 94,
+                  "max_y": 95
+                },
+                "requires": [
+                  "blue"
+                ]
+              },
+              {
+                "id": "crystals",
+                "priority": 0,
+                "action": {
+                  "type": "decoration",
+                  "decoration": {
+                    "material": "minecraft:amethyst_block",
+                    "attempts": 16,
+                    "chance": 100
+                  }
+                },
+                "when": {
+                  "dimensions": [
+                    "minecraft:overworld"
+                  ],
+                  "biomes": [
+                    "minecraft:plains"
+                  ],
+                  "seed": 18,
+                  "mods": [
+                    "minecraft"
+                  ],
+                  "region": {
+                    "min_x": 48,
+                    "max_x": 63,
+                    "min_z": 0,
+                    "max_z": 31
+                  },
+                  "min_y": 97,
+                  "max_y": 97,
+                  "distance": {
+                    "center_x": 56,
+                    "center_z": 16,
+                    "max": 12
+                  },
+                  "seed_modulus": 4,
+                  "seed_remainder": 0,
+                  "seed_salt": 7
+                }
+              },
+              {
+                "id": "missing_mod",
+                "priority": 100,
+                "action": {
+                  "type": "decoration",
+                  "decoration": {
+                    "material": "minecraft:emerald_block",
+                    "attempts": 16,
+                    "chance": 100
+                  }
+                },
+                "when": {
+                  "mods": [
+                    "wa_missing_dependency"
+                  ]
+                }
+              },
+              {
+                "id": "wrong_dimension",
+                "priority": 100,
+                "action": {
+                  "type": "decoration",
+                  "decoration": {
+                    "material": "minecraft:netherite_block",
+                    "attempts": 16,
+                    "chance": 100
+                  }
+                },
+                "when": {
+                  "dimensions": [
+                    "minecraft:the_nether"
+                  ]
+                }
+              },
+              {
+                "id": "wrong_biome",
+                "priority": 100,
+                "action": {
+                  "type": "ore",
+                  "ore": {
+                    "material": "minecraft:emerald_ore",
+                    "attempts": 16,
+                    "size": 4,
+                    "min_y": 92,
+                    "max_y": 95
+                  }
+                },
+                "when": {
+                  "biomes": [
+                    "minecraft:forest"
+                  ]
+                }
+              },
+              {
+                "id": "wrong_height",
+                "priority": 100,
+                "action": {
+                  "type": "decoration",
+                  "decoration": {
+                    "material": "minecraft:diamond_block",
+                    "attempts": 16,
+                    "chance": 100
+                  }
+                },
+                "when": {
+                  "min_y": 150,
+                  "max_y": 151
+                }
+              },
+              {
+                "id": "wrong_seed",
+                "priority": 100,
+                "action": {
+                  "type": "decoration",
+                  "decoration": {
+                    "material": "minecraft:redstone_lamp",
+                    "attempts": 16,
+                    "chance": 100
+                  }
+                },
+                "when": {
+                  "seed": 19
+                }
+              },
+              {
+                "id": "city",
+                "priority": 0,
+                "action": {
+                  "type": "template",
+                  "template": {
+                    "structure": "wa_example:rule_city",
+                    "spacing": 4,
+                    "separation": 3
+                  }
+                },
+                "when": {
+                  "dimensions": [
+                    "minecraft:overworld"
+                  ],
+                  "biomes": [
+                    "minecraft:plains"
+                  ],
+                  "seed": 18,
+                  "mods": [
+                    "minecraft"
+                  ],
+                  "region": {
+                    "min_x": 0,
+                    "max_x": 47,
+                    "min_z": 0,
+                    "max_z": 47
+                  },
+                  "min_y": 97,
+                  "max_y": 115,
+                  "distance": {
+                    "max": 68
+                  }
+                }
+              },
+              {
+                "id": "lower_city",
+                "priority": -10,
+                "action": {
+                  "type": "template",
+                  "template": {
+                    "structure": "wa_example:lower_city",
+                    "spacing": 4,
+                    "separation": 3
+                  }
+                },
+                "when": {
+                  "dimensions": [
+                    "minecraft:overworld"
+                  ],
+                  "biomes": [
+                    "minecraft:plains"
+                  ],
+                  "seed": 18,
+                  "mods": [
+                    "minecraft"
+                  ],
+                  "region": {
+                    "min_x": 0,
+                    "max_x": 47,
+                    "min_z": 0,
+                    "max_z": 47
+                  },
+                  "min_y": 97,
+                  "max_y": 115,
+                  "distance": {
+                    "max": 68
+                  }
+                }
+              },
+              {
+                "id": "city_join",
+                "priority": 0,
+                "action": {
+                  "type": "spawn",
+                  "event": "initial",
+                  "spawn": {
+                    "kind": "generated",
+                    "dimension": "minecraft:overworld",
+                    "template": "wa_example:rule_city",
+                    "position": [
+                      1,
+                      98,
+                      1
+                    ],
+                    "module": "main",
+                    "marker": "entry"
+                  }
+                },
+                "when": {
+                  "dimensions": [
+                    "minecraft:overworld"
+                  ],
+                  "biomes": [
+                    "minecraft:plains"
+                  ],
+                  "seed": 18,
+                  "mods": [
+                    "minecraft"
+                  ]
+                },
+                "requires": [
+                  "city"
+                ]
+              },
+              {
+                "id": "city_respawn",
+                "priority": 0,
+                "action": {
+                  "type": "spawn",
+                  "event": "respawn",
+                  "spawn": {
+                    "kind": "generated",
+                    "dimension": "minecraft:overworld",
+                    "template": "wa_example:rule_city",
+                    "position": [
+                      1,
+                      98,
+                      1
+                    ],
+                    "module": "main",
+                    "marker": "entry"
+                  }
+                },
+                "when": {
+                  "dimensions": [
+                    "minecraft:overworld"
+                  ],
+                  "biomes": [
+                    "minecraft:plains"
+                  ],
+                  "seed": 18,
+                  "mods": [
+                    "minecraft"
+                  ]
+                },
+                "requires": [
+                  "city"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "worldarchitect:void",
+        "biome": "minecraft:nether_wastes",
+        "dimension": {
+          "min_y": 0,
+          "height": 256
+        }
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "worldarchitect:void",
+        "biome": "minecraft:the_end",
+        "dimension": {
+          "min_y": 0,
+          "height": 256
+        }
+      }
+    },
+    "wa_example:annex": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "worldarchitect:single_block",
+        "biome": "minecraft:plains",
+        "profile": {
+          "generator_version": 1,
+          "material": "minecraft:stone",
+          "elevation": 80,
+          "relief": 0
+        },
+        "dimension_profile": {
+          "min_y": -64,
+          "height": 384
+        }
+      }
+    }
+  }
+}

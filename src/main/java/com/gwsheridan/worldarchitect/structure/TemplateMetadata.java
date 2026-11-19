@@ -1,12 +1,15 @@
 package com.gwsheridan.worldarchitect.structure;
 
 import java.io.IOException;
+import java.util.Set;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
@@ -25,6 +28,31 @@ final class TemplateMetadata {
                 || state.is(Blocks.REPEATING_COMMAND_BLOCK) || state.is(Blocks.STRUCTURE_BLOCK) || state.is(Blocks.JIGSAW)
                 || state.is(Blocks.SPAWNER) || state.is(Blocks.TRIAL_SPAWNER) || state.is(Blocks.VAULT)
                 || state.is(Blocks.END_GATEWAY) || state.is(Blocks.MOVING_PISTON);
+    }
+
+    static void validateSchematic(BlockState state, CompoundTag raw, BlockPos pos) throws IOException {
+        Identifier id = Identifier.tryParse(raw.getStringOr("id", ""));
+        var type = id == null ? null : BuiltInRegistries.BLOCK_ENTITY_TYPE.getValue(id);
+        if (type == null || !type.isValid(state)) {
+            throw new IOException("Schematic block entity " + id + " does not match " + state + " at " + pos.toShortString());
+        }
+        Set<String> allowed;
+        if (type == BlockEntityTypes.SIGN || type == BlockEntityTypes.HANGING_SIGN) {
+            allowed = Set.of("front_text", "back_text", "is_waxed");
+        } else if (type == BlockEntityTypes.BANNER) {
+            allowed = Set.of("patterns", "CustomName");
+        } else if (type == BlockEntityTypes.CHEST || type == BlockEntityTypes.TRAPPED_CHEST) {
+            allowed = Set.of("CustomName");
+        } else {
+            throw new IOException("Unsupported schematic block entity " + id + " at " + pos.toShortString() + ". Remove its data and re-export.");
+        }
+        for (String field : raw.keySet()) {
+            if (allowed.contains(field) || field.equals("id") || field.equals("x") || field.equals("y") || field.equals("z")
+                    || field.equals("Items") && raw.getList("Items").filter(list -> list.isEmpty()).isPresent()) {
+                continue;
+            }
+            throw new IOException("Unsupported schematic block-entity field " + field + " at " + pos.toShortString() + ". Clear it and re-export.");
+        }
     }
 
     static @Nullable CompoundTag sanitize(BlockState state, @Nullable CompoundTag raw, HolderLookup.Provider registries) throws IOException {

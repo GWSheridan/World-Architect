@@ -29,6 +29,7 @@ import java.util.WeakHashMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -60,17 +61,36 @@ public final class StructureCommands {
                 .then(corner("pos1", true))
                 .then(corner("pos2", false))
                 .then(literal("outline").executes(run(StructureCommands::outline)))
+                .then(builder())
+                .then(literal("editor").then(saved().executes(run(c -> editor(c, "main")))
+                        .then(literal("palette").executes(run(c -> editor(c, "palette"))))
+                        .then(literal("transform").executes(run(c -> editor(c, "transform"))))
+                        .then(literal("markers").executes(run(c -> editor(c, "markers"))))
+                        .then(literal("placement").executes(run(c -> editor(c, "placement"))))))
                 .then(literal("capture").then(idArgument("name").executes(run(c -> capture(c, selected(c))))
                         .then(posArgument("from").then(posArgument("to").executes(run(c -> capture(c,
                                 new Selection(c.getSource().getLevel().dimension(), getBlockPos(c, "from"), getBlockPos(c, "to")))))))))
                 .then(literal("import").then(idArgument("source").then(idArgument("name").executes(run(StructureCommands::importNative)))))
+                .then(literal("import_schem").then(idArgument("source").then(idArgument("name").executes(run(StructureCommands::importSchematic)))))
                 .then(literal("export").then(saved().then(idArgument("target").executes(run(StructureCommands::export)))))
+                .then(literal("export_generation").then(saved().then(idArgument("target").then(idArgument("biome")
+                        .executes(run(StructureCommands::exportGeneration))))))
+                .then(literal("append_generation").then(saved().then(idArgument("target").then(arg("module", word())
+                        .then(posArgument("offset").executes(run(StructureCommands::appendGeneration)))))))
+                .then(literal("generated_markers").then(idArgument("structure").then(posArgument("position")
+                        .executes(run(StructureCommands::generatedMarkers)))))
+                .then(literal("generated_spawn").then(idArgument("structure").then(posArgument("position")
+                        .then(arg("module", word()).then(arg("marker", word()).executes(run(StructureCommands::generatedSpawn)))))))
                 .then(literal("duplicate").then(saved().then(idArgument("target").executes(run(StructureCommands::duplicate)))))
                 .then(literal("rename").then(saved().then(idArgument("target").executes(run(StructureCommands::rename)))))
                 .then(literal("describe").then(saved().then(arg("category", string()).then(arg("title", string()).executes(run(StructureCommands::describe))))))
                 .then(literal("preview").then(saved().executes(run(c -> preview(c, -1)))
                         .then(integerArgument("layer", 0, NativeTemplate.MAX_SIDE - 1).executes(run(c -> preview(c, getInteger(c, "layer")))))))
                 .then(literal("place").then(saved().then(destination(false))))
+                .then(literal("transform").then(saved().then(rotationArgument().then(mirrorArgument().executes(run(c -> saveChange(c,
+                        entry(c).transformed(new TemplatePlacement(BlockPos.ZERO, rotation(c), mirror(c))))))))))
+                .then(literal("replace").then(saved().then(arg("original", BlockStateArgument.block(event.getBuildContext()))
+                        .then(arg("replacement", BlockStateArgument.block(event.getBuildContext())).executes(run(StructureCommands::replaceState))))))
                 .then(literal("spawn").then(saved().then(arg("marker", word()).then(destination(true)))))
                 .then(markers())
                 .then(rules());
@@ -91,12 +111,53 @@ public final class StructureCommands {
                 .then(posArgument("position").executes(run(c -> select(c, first, getBlockPos(c, "position")))));
     }
 
+    private static LiteralArgumentBuilder<CommandSourceStack> builder() {
+        return literal("builder")
+                .executes(run(StructureCommands::showBuilder))
+                .then(literal("pos1").executes(run(c -> setBuilderCorner(c, true))))
+                .then(literal("pos2").executes(run(c -> setBuilderCorner(c, false))))
+                .then(literal("import").executes(run(c -> {
+                    LibraryDialog.importer(c.getSource().getPlayerOrException());
+                    return 1;
+                })));
+    }
+
+    private static int setBuilderCorner(CommandContext<CommandSourceStack> context, boolean first) throws IOException, CommandSyntaxException {
+        context.getSource().getPlayerOrException();
+        select(context, first, BlockPos.containing(context.getSource().getPosition()));
+        return showBuilder(context);
+    }
+
+    private static int showBuilder(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        var player = context.getSource().getPlayerOrException();
+        var selection = SELECTIONS.getOrDefault(server(context), Map.of()).get(selectionKey(context));
+        if (selection == null || !selection.dimension.equals(player.level().dimension())) {
+            LibraryDialog.builder(player, null, null);
+        } else {
+            LibraryDialog.builder(player, selection.first, selection.second);
+        }
+        return 1;
+    }
+
+    private static int editor(CommandContext<CommandSourceStack> context, String section) throws IOException, CommandSyntaxException {
+        LibraryDialog.editor(context.getSource().getPlayerOrException(), getId(context, "template"), entry(context), section);
+        return 1;
+    }
+
     private static ArgumentBuilder<CommandSourceStack, ?> destination(boolean spawn) {
         return posArgument("origin").executes(run(c -> useDestination(c, spawn, Rotation.NONE, Mirror.NONE)))
-                .then(choices("rotation", "none", "cw90", "cw180", "ccw90")
+                .then(rotationArgument()
                         .executes(run(c -> useDestination(c, spawn, rotation(c), Mirror.NONE)))
-                        .then(choices("mirror", "none", "left_right", "front_back")
+                        .then(mirrorArgument()
                                 .executes(run(c -> useDestination(c, spawn, rotation(c), mirror(c))))));
+    }
+
+    private static RequiredArgumentBuilder<CommandSourceStack, String> rotationArgument() {
+        return choices("rotation", "none", "cw90", "cw180", "ccw90");
+    }
+
+    private static RequiredArgumentBuilder<CommandSourceStack, String> mirrorArgument() {
+        return choices("mirror", "none", "left_right", "front_back");
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> markers() {
@@ -211,10 +272,69 @@ public final class StructureCommands {
         return 1;
     }
 
+    private static int importSchematic(CommandContext<CommandSourceStack> context) throws IOException {
+        Identifier id = getId(context, "name");
+        var result = StructureLibrary.importSchematic(server(context), getId(context, "source"), id, context.getSource().getTextName());
+        StructureLibrary.saveNew(server(context), id, result);
+        success(context, "Imported Sponge schematic " + id + " with " + result.template().blocks().size() + " blocks.");
+        return 1;
+    }
+
     private static int export(CommandContext<CommandSourceStack> context) throws IOException {
         Identifier target = getId(context, "target");
         StructureLibrary.export(server(context), target, entry(context));
         success(context, "Exported native structure " + target + ".");
+        return 1;
+    }
+
+    private static int exportGeneration(CommandContext<CommandSourceStack> context) throws IOException {
+        GenerationExport.create(server(context), getId(context, "target"), getId(context, "biome"), entry(context));
+        success(context, "Exported generation datapack structure " + getId(context, "target") + ". Enable file/worldarchitect-generated in a new world.");
+        return 1;
+    }
+
+    private static int appendGeneration(CommandContext<CommandSourceStack> context) throws IOException {
+        GenerationExport.append(server(context), getId(context, "target"), getString(context, "module"),
+                getBlockPos(context, "offset"), entry(context));
+        success(context, "Added module " + getString(context, "module") + " to " + getId(context, "target") + ".");
+        return 1;
+    }
+
+    private static List<ModularPiece> generatedPieces(CommandContext<CommandSourceStack> context) throws IOException {
+        var level = context.getSource().getLevel();
+        BlockPos pos = getBlockPos(context, "position");
+        if (!level.hasChunkAt(pos)) {
+            throw new IOException("Load the generated structure's location first.");
+        }
+        var structure = server(context).registryAccess().lookupOrThrow(Registries.STRUCTURE).getValue(getId(context, "structure"));
+        if (!(structure instanceof ModularStructure)) {
+            throw new IOException("Choose a registered World Architect modular structure.");
+        }
+        var start = level.structureManager().getStructureAt(pos, structure);
+        if (!start.isValid()) {
+            throw new IOException("No matching generated structure contains that location.");
+        }
+        return start.getPieces().stream().filter(ModularPiece.class::isInstance).map(ModularPiece.class::cast).toList();
+    }
+
+    private static int generatedMarkers(CommandContext<CommandSourceStack> context) throws IOException {
+        int count = 0;
+        for (var piece : generatedPieces(context)) {
+            for (var marker : new java.util.TreeMap<>(piece.entry().markers()).entrySet()) {
+                success(context, piece.name() + "/" + marker.getKey() + " · " + piece.origin().offset(marker.getValue().pos()).toShortString()
+                        + " · " + marker.getValue().facing().getSerializedName());
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static int generatedSpawn(CommandContext<CommandSourceStack> context) throws IOException, CommandSyntaxException {
+        var player = context.getSource().getPlayerOrException();
+        var piece = generatedPieces(context).stream().filter(module -> module.name().equals(getString(context, "module"))).findFirst()
+                .orElseThrow(() -> new IOException("Unknown module " + getString(context, "module")));
+        new TemplatePlacement(piece.origin(), Rotation.NONE, Mirror.NONE)
+                .spawn(context.getSource().getLevel(), player, piece.entry(), getString(context, "marker"));
         return 1;
     }
 
@@ -234,6 +354,12 @@ public final class StructureCommands {
 
     private static int describe(CommandContext<CommandSourceStack> context) throws IOException {
         return saveChange(context, entry(context).withDetails(getString(context, "title"), getString(context, "category")));
+    }
+
+    private static int replaceState(CommandContext<CommandSourceStack> context) throws IOException {
+        var old = BlockStateArgument.getBlock(context, "original");
+        var replacement = BlockStateArgument.getBlock(context, "replacement");
+        return saveChange(context, entry(context).replaceState(old.getState(), replacement.getState()));
     }
 
     private static int preview(CommandContext<CommandSourceStack> context, int layer) throws IOException {

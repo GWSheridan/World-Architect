@@ -4,6 +4,7 @@ import com.gwsheridan.worldarchitect.config.DimensionProfile;
 import com.gwsheridan.worldarchitect.config.SingleBlockProfile;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
@@ -19,7 +20,7 @@ public final class SingleBlockGenerator extends SolidColumnGenerator {
     private final SingleBlockProfile profile;
 
     public SingleBlockGenerator(Holder<Biome> biome, SingleBlockProfile profile, Optional<DimensionProfile> dimensionProfile) {
-        super(biome, profile.elevation(), profile.relief(), dimensionProfile);
+        super(biome, profile.shape(), List.of(), dimensionProfile);
         this.profile = profile;
     }
 

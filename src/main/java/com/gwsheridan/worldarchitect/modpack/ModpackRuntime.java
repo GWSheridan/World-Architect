@@ -130,7 +130,7 @@ public final class ModpackRuntime {
         }
         selected.filter(bundle -> bundle.manifest().locked()).ifPresent(bundle -> {
             var manifest = bundle.manifest();
-            compareOptions(bundle, options);
+            compareOptions(manifest, options);
             var expected = bundle.expectedPreset(registries).createWorldDimensions();
             validateManifestDimensions(manifest, expected);
             compareDimensions(manifest, expected, actual, registries);
@@ -150,8 +150,7 @@ public final class ModpackRuntime {
         });
     }
 
-    private static void compareOptions(PresetBundle bundle, WorldOptions actual) {
-        var manifest = bundle.manifest();
+    static void compareOptions(BundleManifest manifest, WorldOptions actual) {
         var expected = WorldOptions.CODEC.codec().encodeStart(JsonOps.INSTANCE, manifest.options()).getOrThrow().getAsJsonObject();
         var chosen = WorldOptions.CODEC.codec().encodeStart(JsonOps.INSTANCE, actual).getOrThrow().getAsJsonObject();
         for (Option option : manifest.editableOptions()) {
@@ -242,7 +241,7 @@ public final class ModpackRuntime {
         }
 
         private static PresetBundle readBundle(String filename) {
-            if (!filename.endsWith(".zip") || !BundleFiles.filename(filename.substring(0, filename.length() - 4))) {
+            if (!BundleFiles.archiveFilename(filename)) {
                 throw problem("Choose a local ZIP filename in developer.json");
             }
             try {

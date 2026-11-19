@@ -21,7 +21,7 @@ public final class LayeredGenerator extends SolidColumnGenerator {
     private final BlockState[] layers;
 
     public LayeredGenerator(Holder<Biome> biome, LayeredProfile profile, Optional<DimensionProfile> dimensionProfile) {
-        super(biome, profile.elevation(), profile.relief(), dimensionProfile);
+        super(biome, profile.shape(), profile.strata(), dimensionProfile);
         this.profile = profile;
         this.layers = new BlockState[profile.layers().stream().mapToInt(LayeredProfile.Layer::depth).sum()];
         int start = 0;

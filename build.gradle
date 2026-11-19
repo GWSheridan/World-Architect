@@ -35,6 +35,17 @@ tasks.named('test', Test).configure {
     workingDir = temporaryDir
 }
 
+tasks.register('checkDocumentation', JavaExec) {
+    group = 'verification'
+    description = 'Check local and versioned-source links in the shipped Markdown guides.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.DocumentationAudit'
+    args layout.projectDirectory.asFile.absolutePath
+}
+
+tasks.named('check').configure { dependsOn tasks.named('checkDocumentation') }
+
 tasks.named('runServer', JavaExec).configure {
     standardInput = System.in
 }
@@ -74,6 +85,35 @@ tasks.register('auditFeatureWorld', JavaExec) {
     } as CommandLineArgumentProvider)
 }
 
+tasks.register('auditAdvancedTerrainWorld', JavaExec) {
+    group = 'verification'
+    description = 'Audit version 2 terrain, strata, and floating islands from the advanced terrain example.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.worldgen.AdvancedTerrainWorldAudit'
+    workingDir = temporaryDir
+    def root = layout.projectDirectory
+    argumentProviders.add({
+        [root.dir(providers.gradleProperty('terrainWorld').get()).asFile.absolutePath,
+         providers.gradleProperty('advancedTerrainChunkOrigin').orElse('0').get()]
+    } as CommandLineArgumentProvider)
+}
+
+tasks.register('auditCrossDimensionWorld', JavaExec) {
+    group = 'verification'
+    description = 'Audit the dedicated cross-dimension End City and modular structure fixtures.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.worldgen.CrossDimensionWorldAudit'
+    workingDir = temporaryDir
+    def root = layout.projectDirectory
+    argumentProviders.add({
+        [root.dir(providers.gradleProperty('terrainWorld').get()).asFile.absolutePath,
+         providers.gradleProperty('structureChunkOrigin').orElse('0').get(),
+         providers.gradleProperty('structureRuleFixtures').orElse('false').get()]
+    } as CommandLineArgumentProvider)
+}
+
 tasks.register('auditVoidWorld', JavaExec) {
     group = 'verification'
     description = 'Check saved Void or Skyblock chunks against the pinned island template and air.'
@@ -99,15 +139,53 @@ tasks.named('processResources', ProcessResources).configure {
 }
 
 def releaseDirectory = layout.buildDirectory.dir('release')
+tasks.register('auditExtensionWorld', JavaExec) {
+    group = 'verification'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.worldgen.ExtensionWorldAudit'
+    argumentProviders.add({ [file(providers.gradleProperty('terrainWorld').get()).absolutePath, providers.gradleProperty('extensionChunkOrigin').orElse('32').get()] } as CommandLineArgumentProvider)
+}
+tasks.register('auditBenchmarkWorlds', JavaExec) {
+    group = 'verification'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.worldgen.BenchmarkWorldAudit'
+    argumentProviders.add({ [file(providers.gradleProperty('benchmarkBaseline').get()).absolutePath, file(providers.gradleProperty('benchmarkCandidate').get()).absolutePath, providers.gradleProperty('benchmarkNativeControl').map { file(it).absolutePath }.orElse('').get()] } as CommandLineArgumentProvider)
+}
+tasks.register('auditStudioWorld', JavaExec) {
+    group = 'verification'
+    description = 'Audit the clean partial Preset Studio bundle and its allowed ore edits.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.worldgen.StudioWorldAudit'
+    workingDir = temporaryDir
+    def root = layout.projectDirectory
+    argumentProviders.add({ [root.dir(providers.gradleProperty('terrainWorld').get()).asFile.absolutePath] } as CommandLineArgumentProvider)
+}
+tasks.register('auditRuleWorld', JavaExec) {
+    group = 'verification'
+    description = 'Audit the floating city rule preset from a stopped dedicated server.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.worldgen.RuleWorldAudit'
+    workingDir = temporaryDir
+    def root = layout.projectDirectory
+    argumentProviders.add({ [root.dir(providers.gradleProperty('terrainWorld').get()).asFile.absolutePath,
+                            providers.gradleProperty('ruleCityExpected').orElse('true').get(),
+                            providers.gradleProperty('ruleExtraChunks').orElse('').get()] } as CommandLineArgumentProvider)
+}
 def releaseSources = tasks.register('releaseSources', Zip) {
     group = 'distribution'
     description = 'Package the complete buildable source tree.'
     archiveClassifier = 'source'
     destinationDirectory = releaseDirectory
     from(layout.projectDirectory) {
-        include 'src/**', 'gradle/**', 'docs/**', 'examples/**', '.gitignore',
+        exclude '**/build/**', '**/.gradle/**', '**/.gradle-local/**', '**/run/**'
+        include 'src/**', 'gradle/**', 'docs/**', 'examples/**',
                 'gradlew', 'gradlew.bat', 'build.gradle', 'settings.gradle', 'gradle.properties', 'README.md', 'CHANGELOG.md'
     }
+    from('.gitignore', '.gitattributes')
 }
 
 tasks.register('packageRelease', Zip) {
@@ -120,9 +198,29 @@ tasks.register('packageRelease', Zip) {
     from(releaseSources) { into 'source' }
     from('README.md', 'CHANGELOG.md')
     from('docs') { into 'docs' }
-    from('examples') { into 'examples' }
+    from('examples') { into 'examples'; exclude '**/build/**', '**/.gradle/**', '**/.gradle-local/**', '**/run/**' }
     def lockedBundle = providers.gradleProperty('releaseLockedBundle')
     if (lockedBundle.isPresent()) {
         from(file(lockedBundle.get())) { into 'examples/bundles' }
     }
+}
+
+tasks.register('releaseChecksums', JavaExec) {
+    group = 'distribution'
+    description = 'Build and stage the release assets with SHA-256 checksums.'
+    dependsOn tasks.named('packageRelease')
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseChecksums'
+    argumentProviders.add({ [releaseDirectory.get().asFile.absolutePath,
+        tasks.named('jar').get().archiveFile.get().asFile.absolutePath,
+        releaseSources.get().archiveFile.get().asFile.absolutePath,
+        tasks.named('packageRelease').get().archiveFile.get().asFile.absolutePath,
+        file('examples/preset-studio/bundles').absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
+}
+
+tasks.register('assembleRelease') {
+    group = 'distribution'
+    description = 'Build the JAR, source, full distribution, examples and checksums.'
+    dependsOn tasks.named('releaseChecksums')
 }

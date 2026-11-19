@@ -22,7 +22,7 @@ public record BundleManifest(Identifier preset, String title, String description
             StringRepresentable.fromEnum(Lock::values).fieldOf("lock").forGetter(BundleManifest::lock),
             WorldOptions.CODEC.codec().fieldOf("options").forGetter(BundleManifest::options),
             Identifier.CODEC.listOf(0, 128).optionalFieldOf("editable_dimensions", List.of()).forGetter(BundleManifest::editableDimensions),
-            Codec.unboundedMap(Identifier.CODEC, StringRepresentable.fromEnum(Feature::values).listOf(1, 6))
+            Codec.unboundedMap(Identifier.CODEC, StringRepresentable.fromEnum(Feature::values).listOf(1, Feature.values().length))
                     .optionalFieldOf("editable_features", Map.of()).forGetter(BundleManifest::editableFeatures),
             StringRepresentable.fromEnum(Option::values).listOf(0, 3).optionalFieldOf("editable_options", List.of()).forGetter(BundleManifest::editableOptions),
             Codec.STRING.listOf(0, 256).optionalFieldOf("required_mods", List.of()).forGetter(BundleManifest::requiredMods),
@@ -33,7 +33,7 @@ public record BundleManifest(Identifier preset, String title, String description
 
     public BundleManifest {
         editableDimensions = List.copyOf(editableDimensions);
-        editableFeatures = Map.copyOf(editableFeatures);
+        editableFeatures = editableFeatures.entrySet().stream().collect(java.util.stream.Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> List.copyOf(entry.getValue())));
         editableOptions = List.copyOf(editableOptions);
         requiredMods = List.copyOf(requiredMods);
     }
@@ -97,7 +97,7 @@ public record BundleManifest(Identifier preset, String title, String description
     public enum Feature implements StringRepresentable {
         BIOMES("biomes", "biomes", "biome_scale", "biome_seed"), ORES("ores", "ores"),
         DECORATIONS("decorations", "decorations"), CAVES("caves", "caves"), FLUIDS("fluids", "sea"),
-        STRUCTURES("structures", "structures");
+        STRUCTURES("structures", "structures"), NATIVE_FEATURES("native_features", "native_features");
 
         private final String name;
         private final List<String> fields;

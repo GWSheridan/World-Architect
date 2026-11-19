@@ -1,0 +1,102 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "worldarchitect:single_block",
+        "biome": "minecraft:plains",
+        "profile": {
+          "generator_version": 1,
+          "material": "minecraft:stone",
+          "elevation": 40,
+          "relief": 0
+        },
+        "dimension_profile": {
+          "min_y": -64,
+          "height": 384
+        }
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "worldarchitect:void",
+        "biome": "minecraft:nether_wastes",
+        "dimension": {
+          "min_y": 0,
+          "height": 256
+        }
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "worldarchitect:void",
+        "biome": "minecraft:the_end",
+        "dimension": {
+          "min_y": 0,
+          "height": 256
+        }
+      }
+    },
+    "wa_api_fixture:lab": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "worldarchitect:single_block",
+        "biome": "minecraft:plains",
+        "profile": {
+          "generator_version": 1,
+          "material": "wa_api_fixture:slate",
+          "elevation": 40,
+          "relief": 0
+        },
+        "dimension_profile": {
+          "min_y": -64,
+          "height": 384,
+          "content": {
+            "structures": [
+              {
+                "structure": "wa_api_fixture:pyramid",
+                "spacing": 4,
+                "separation": 3
+              }
+            ],
+            "native_features": [
+              {
+                "feature": "wa_api_fixture:markers",
+                "attempts": 4,
+                "min_y": 45,
+                "max_y": 45,
+                "biomes": [
+                  "minecraft:plains"
+                ]
+              }
+            ]
+          },
+          "adapter": {
+            "id": "wa_api_fixture:lab",
+            "version": 1
+          }
+        }
+      }
+    },
+    "wa_api_fixture:untouched": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "minecraft:flat",
+        "settings": {
+          "biome": "minecraft:plains",
+          "layers": [
+            {
+              "height": 1,
+              "block": "minecraft:bedrock"
+            }
+          ],
+          "lakes": false,
+          "features": false,
+          "structure_overrides": []
+        }
+      }
+    }
+  }
+}

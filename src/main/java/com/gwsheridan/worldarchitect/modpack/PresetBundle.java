@@ -57,13 +57,19 @@ public final class PresetBundle {
                 if (!entries.add(name) || entry.isDirectory()) {
                     throw new IOException("Duplicate or unexpected archive entry " + name);
                 }
-                if (BundleFiles.templatePath(name)) {
+                if (BundleFiles.templatePath(name) || BundleFiles.modularPath(name)) {
                     if (++templates > BundleFiles.MAX_TEMPLATES || entry.getSize() < 0 || entry.getSize() > BundleFiles.MAX_TEMPLATE_BYTES
                             || (templateBytes += entry.getSize()) > BundleFiles.MAX_ARCHIVE_BYTES) {
                         throw new IOException("The archive exceeds its bundled structure limits.");
                     }
                 } else if (!name.equals("pack.mcmeta") && !name.equals(BundleFiles.MANIFEST) && !name.equals(presetPath)) {
                     throw new IOException("Unsupported preset archive entry " + name);
+                }
+                if (BundleFiles.modularPath(name)) {
+                    var definition = readJson(zip, name);
+                    if (!definition.has("type") || !definition.get("type").getAsString().equals("worldarchitect:modular")) {
+                        throw new IOException("Only World Architect modular definitions can be embedded: " + name);
+                    }
                 }
             }
             readJson(zip, "pack.mcmeta");
@@ -83,6 +89,32 @@ public final class PresetBundle {
 
     public BundleManifest manifest() {
         return manifest;
+    }
+
+    /** Library labels need metadata only; a missing mod must not hide unrelated saved revisions. */
+    static BundleManifest summary(Path archive) throws IOException {
+        if (java.nio.file.Files.size(archive) > BundleFiles.MAX_ARCHIVE_BYTES) throw new IOException("Preset archive exceeds 32 MiB: " + archive.getFileName());
+        try (var zip = new ZipFile(archive.toFile())) {
+            if (zip.size() < 3 || zip.size() > BundleFiles.MAX_TEMPLATES + 3) throw new IOException("Unexpected number of archive entries: " + archive.getFileName());
+            return BundleManifest.CODEC.parse(JsonOps.INSTANCE, readJson(zip, BundleFiles.MANIFEST)).getOrThrow(IOException::new);
+        }
+    }
+
+    JsonObject presetJson() { return preset.deepCopy(); }
+
+    java.util.SortedMap<String, byte[]> templates() throws IOException {
+        verifyArchive();
+        var result = new java.util.TreeMap<String, byte[]>();
+        try (var zip = new ZipFile(archive.toFile())) {
+            for (var entry : zip.stream().toList()) {
+                if (BundleFiles.templatePath(entry.getName()) || BundleFiles.modularPath(entry.getName())) {
+                    try (var input = zip.getInputStream(entry)) {
+                        result.put(entry.getName(), BundleFiles.readBytes(input, BundleFiles.MAX_TEMPLATE_BYTES, entry.getName()));
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     Path archive() {

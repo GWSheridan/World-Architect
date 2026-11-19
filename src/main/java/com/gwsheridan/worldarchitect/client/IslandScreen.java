@@ -158,7 +158,10 @@ final class IslandScreen extends Screen {
     }
 
     private void apply(Optional<IslandProfile> island, boolean allowUnsafeSpawn) {
-        save.accept(new VoidGenerator(support.biome().orElseThrow(), profile, island, allowUnsafeSpawn));
+        var generator = new VoidGenerator(support.biome().orElseThrow(), profile, island, allowUnsafeSpawn);
+        var ruleProblem = generator.profileProblem();
+        if (ruleProblem.isPresent()) { problem = Component.literal(ruleProblem.orElseThrow()); return; }
+        save.accept(generator);
         onClose();
     }
 

@@ -1,6 +1,7 @@
 package com.gwsheridan.worldarchitect.worldgen;
 
 import com.gwsheridan.worldarchitect.config.ContentProfile.StructureRule;
+import com.gwsheridan.worldarchitect.structure.ModularStructure;
 import java.util.Comparator;
 import java.util.stream.Stream;
 import net.minecraft.core.Holder;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
 import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadType;
 import net.minecraft.world.level.levelgen.structure.structures.DesertPyramidStructure;
+import net.minecraft.world.level.levelgen.structure.structures.EndCityStructure;
 import net.minecraft.world.level.levelgen.structure.structures.JungleTempleStructure;
 import net.minecraft.world.level.levelgen.structure.structures.SwampHutStructure;
 
@@ -24,7 +26,10 @@ public final class NativeStructures {
 
     public static boolean supported(Structure structure) {
         Class<?> type = structure.getClass();
-        return type == DesertPyramidStructure.class || type == JungleTempleStructure.class || type == SwampHutStructure.class;
+        return type == DesertPyramidStructure.class || type == JungleTempleStructure.class || type == SwampHutStructure.class
+                || type == EndCityStructure.class || type == ModularStructure.class
+                || com.gwsheridan.worldarchitect.api.StructureAdapters.get(structure)
+                        .filter(adapter -> adapter.version() > 0 && adapter.supports(structure)).isPresent();
     }
 
     static Stream<Holder<StructureSet>> placements(Stream<StructureRule> rules) {
