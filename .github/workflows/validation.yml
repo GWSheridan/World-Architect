@@ -32,8 +32,8 @@ jobs:
         shell: pwsh
         run: |
           $toolchain = "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64"
-          if ($IsWindows) { & ./gradlew.bat build acceptanceJar --console=plain $toolchain }
-          else { & sh ./gradlew build acceptanceJar --console=plain $toolchain }
+          if ($IsWindows) { & ./gradlew.bat build acceptanceJar prepareServerRun --console=plain $toolchain }
+          else { & sh ./gradlew build acceptanceJar prepareServerRun --console=plain $toolchain }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Dedicated server and restart
         shell: pwsh
@@ -48,6 +48,7 @@ jobs:
           name: validation-${{ matrix.os }}
           path: |
             build/ci-validation/results.json
+            build/ci-validation/*.log
             build/ci-validation/server/config/worldarchitect/diagnostics/*.json
             build/test-results/test/*.xml
           if-no-files-found: error

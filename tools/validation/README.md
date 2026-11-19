@@ -1,6 +1,6 @@
 # Validation runners
 
-Use Node 22 or newer and Java 25. The asset tools also require Java 21. Set `JAVA21_HOME` if Gradle cannot discover it. Build with `gradlew.bat build acceptanceJar` on Windows or `sh ./gradlew build acceptanceJar` on Linux. Add `-Porg.gradle.java.installations.paths=<Java 21 directory>` when needed.
+Use Node 22 or newer and Java 25. The asset tools also require Java 21. Set `JAVA21_HOME` if Gradle cannot discover it. Build with `gradlew.bat build acceptanceJar prepareServerRun` on Windows or `sh ./gradlew build acceptanceJar prepareServerRun` on Linux. Add `-Porg.gradle.java.installations.paths=<Java 21 directory>` when needed. Preparing the server run online populates runtime and asset dependencies before the runner uses offline Gradle.
 
 The `validation` JAR is a separate test mod. It is excluded from the gameplay JAR. The portable runner installs the packaged gameplay JAR and fixture into a new disposable directory under `build/`, starts a loopback dedicated server, runs assertions and restarts it. It writes results and local logs to that directory. It refuses to reuse an output directory.
 
