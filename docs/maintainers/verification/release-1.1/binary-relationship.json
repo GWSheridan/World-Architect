@@ -1,0 +1,13 @@
+{
+  "integration_jar_sha256": "53641bd74dba319893e145b1445eacee80029d6cdaae9c078fa9af1ee41acaf7",
+  "changed_client_classes": [
+    "com/gwsheridan/worldarchitect/client/ClientStructurePreview.class",
+    "com/gwsheridan/worldarchitect/client/StudioFormScreen.class",
+    "com/gwsheridan/worldarchitect/client/StudioReportScreen.class",
+    "com/gwsheridan/worldarchitect/client/WorldPreviewScreen.class",
+    "com/gwsheridan/worldarchitect/client/WorldPreviewScreen$View.class"
+  ],
+  "class_count": 242,
+  "candidate_jar_sha256": "d74e4ae729cd9d5e0c32d87ac9ac1109836c873316df32d46a00adf7d5a1ca38",
+  "server_and_generation_classes_identical": true
+}

@@ -12,3 +12,7 @@ Install one ZIP in `config/worldarchitect/bundles` and create `config/worldarchi
 For authoring, enable developer mode, put a bundle in `config/worldarchitect/imports`, then use **Import ZIP** in Studio. Choose a new release or **Duplicate** before saving changed versions. The source directories beside the bundles contain their manifest, preset and embedded template resources for inspection.
 
 See the [Studio guide](../../docs/PRESET_STUDIO.md) and [verification procedure](../../docs/TESTING.md).
+
+## 1.1.0 bundles
+
+`bundles/studio-partial-1.1.0.zip` and `bundles/studio-skyblock-1.1.0.zip` retain the same generation and lock policies under new release identities. Their expanded resources are in `partial-1.1.0-source/` and `skyblock-1.1.0-source/`. Earlier ZIPs remain unchanged for existing saves.

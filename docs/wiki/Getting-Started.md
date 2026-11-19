@@ -5,7 +5,7 @@
 3. Choose **Original Generation**, **Single Block**, **Layered**, or **Void / Skyblock**.
 4. For solid terrain, choose blocks and terrain shape. **Browse blocks** searches vanilla and modded states. Layered terrain adds surface layers and optional strata.
 5. Open **Features** for biomes, ores, decoration, caves, fluids and structures. **World Generation Rules** adds ordered actions with conditions.
-6. Check **Preview map**. Pan and zoom to inspect height and biomes for the current seed. Skyblock previews show reserved markers.
+6. Check **Preview terrain**. Pan and zoom to inspect height and biomes for the current seed. Skyblock previews show reserved markers.
 7. For a new custom solid End, review **Dragon fight: On**. It reserves a native arena; turn it off for a fully custom, fight-free End.
 8. Choose **Done** in the dimension manager, then create the world. **Cancel** discards the manager's unsaved changes.
 

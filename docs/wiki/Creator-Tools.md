@@ -1,6 +1,6 @@
 # Creator tools in 1.1
 
-These controls are included in the 1.1 development series. Use matching 1.1 versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
+These controls are included in World Architect 1.1.0. Use matching 1.1 versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
 
 ## Start a world
 

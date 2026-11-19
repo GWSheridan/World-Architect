@@ -21,7 +21,8 @@ final class ClientStructurePreview {
         var mc = Minecraft.getInstance();
         if (mc.player != null) mc.player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                 "Ghost lasts 10 seconds. Reopen with /wa_structure stage " + data.getStringOr("id", "") + " "
-                        + java.util.Arrays.stream(data.getIntArray("origin").orElse(new int[3])).mapToObj(Integer::toString).collect(java.util.stream.Collectors.joining(" "))));
+                        + java.util.Arrays.stream(data.getIntArray("origin").orElse(new int[3])).mapToObj(Integer::toString).collect(java.util.stream.Collectors.joining(" "))
+                        + " " + data.getStringOr("rotation", "none") + " " + data.getStringOr("mirror", "none")));
     }
     static void clear() { ghost = null; remaining = 0; }
     static void tick(ClientTickEvent.Post event) {

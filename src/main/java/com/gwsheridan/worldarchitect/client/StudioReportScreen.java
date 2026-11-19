@@ -17,7 +17,7 @@ final class StudioReportScreen extends Screen {
         "Enable authoring: set {\"format\":1,\"developer_mode\":true} in config/worldarchitect/developer.json, then restart.",
         "Metadata sets the preset ID, title, author, release and required mod IDs. World defaults sets seed, structures and bonus chest. Locks chooses the permitted edits.",
         "Save version writes an immutable local archive under config/worldarchitect/studio/<name>/<release>.zip. To change a saved release, choose a new release or Duplicate. Cancel does not delete versions you explicitly saved.",
-        "Load version restores a library revision into the Studio draft. Duplicate assigns a new ID and release. Apply to world changes the new-world draft; confirm Done in Dimension Manager afterward.",
+        "Browse saved presets searches the local library by name, title, version, author and lock. Load selected restores a revision; a changed draft prompts before replacement. Duplicate assigns a new ID and release. Apply to world changes the dimension-manager draft; confirm Done afterward.",
         "Export ZIP copies a saved version into config/worldarchitect/exports. Put an incoming ZIP into config/worldarchitect/imports, then Import ZIP. Imports validate before entering the draft; use Save version to retain them.",
         "Native starting-island templates and selected modular structure definitions travel with the preset. New registered templates need the exported bundle installed and a restart before Apply to world is available.",
         "Partial locks permit whole dimensions, selected feature groups, and/or world options. Full locks permit no generation edits. World name, difficulty, game mode and gameplay rules remain available.",

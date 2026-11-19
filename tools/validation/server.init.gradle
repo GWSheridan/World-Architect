@@ -1,5 +1,16 @@
 gradle.beforeProject { project ->
     project.pluginManager.withPlugin('net.neoforged.moddev') {
+        project.neoForge.runs.create('validationServer') {
+            server()
+            loadedMods = []
+            gameDirectory = project.file(project.providers.gradleProperty('testWorldDirectory').orElse('build/validation-server').get())
+            programArgument '--nogui'
+            jvmArgument '-Xmx1400m'
+            jvmArgument '-XX:ActiveProcessorCount=4'
+        }
+        project.tasks.withType(JavaExec).configureEach {
+            if (name == 'runValidationServer') standardInput = System.in
+        }
         project.neoForge.runs.configureEach {
             if (name == 'server') {
                 loadedMods = []

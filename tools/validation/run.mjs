@@ -68,7 +68,7 @@ try { await fs.cp(join(root,'examples/performance/profiles',profile,'datapacks')
 catch (error) { if (error.code !== 'ENOENT') throw error; }
 
 function launch(stage) {
-    const args = ['-I','tools/validation/server.init.gradle','runServer','--console=plain',`-PtestWorldDirectory=${server}`];
+    const args = ['-I','tools/validation/server.init.gradle','runValidationServer','--console=plain',`-PtestWorldDirectory=${server}`];
     if (options['--network'] !== 'online') args.push('--offline');
     if (process.env.JAVA21_HOME) args.push(`-Porg.gradle.java.installations.paths=${process.env.JAVA21_HOME}`);
     let child;
@@ -91,6 +91,18 @@ function launch(stage) {
     return {child,exit,send,wait};
 }
 let running;
+let pinned;
+async function generationPins() {
+    const data=join(server,'world/data'),pins={};
+    for(const file of ['worldarchitect-generation-v1.dat','minecraft/world_gen_settings.dat']) {
+        try{pins[file]=sha(await fs.readFile(join(data,file)));}catch(error){if(error.code!=='ENOENT')throw error;}
+    }
+    try {
+        for(const file of (await fs.readdir(join(data,'worldarchitect/generation'))).filter(name=>name.endsWith('.zip')).sort())
+            pins['worldarchitect/generation/'+file]=sha(await fs.readFile(join(data,'worldarchitect/generation',file)));
+    } catch(error){if(error.code!=='ENOENT')throw error;}
+    return pins;
+}
 try {
     for (const stage of ['fresh','restart']) {
         running = launch(stage); await running.wait('Done (');
@@ -112,8 +124,12 @@ try {
         running.send('stop');
         const code = await Promise.race([running.exit,new Promise((_,fail)=>setTimeout(()=>fail(new Error('Shutdown timed out')),40000).unref())]);
         if (code !== 0) throw new Error('Server exited with an error');
+        const current=await generationPins();
+        if(pinned&&JSON.stringify(current)!==JSON.stringify(pinned))throw new Error('Pinned generation files changed after restart');
+        pinned=current;results.generation_sha256=current;
         results.tests.push({case:stage,status:'passed'}); running = undefined;
     }
+    results.tests.push({case:'generation-pins-intact',status:'passed',files:Object.keys(pinned).length});
     if (original) {
         const after = await hashes(resolve(root,options['--world']));
         if (JSON.stringify(original) !== JSON.stringify(after)) throw new Error('Original save changed');

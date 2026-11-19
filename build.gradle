@@ -216,13 +216,25 @@ tasks.register('releaseChecksums', JavaExec) {
         tasks.named('jar').get().archiveFile.get().asFile.absolutePath,
         releaseSources.get().archiveFile.get().asFile.absolutePath,
         tasks.named('packageRelease').get().archiveFile.get().asFile.absolutePath,
-        file('examples/preset-studio/bundles').absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
+        file('examples/preset-studio/bundles').absolutePath, project.version.toString(),
+        file('examples/creator-starters/bundles').absolutePath] } as CommandLineArgumentProvider)
 }
 
 tasks.register('assembleRelease') {
     group = 'distribution'
     description = 'Build the JAR, source, full distribution, examples and checksums.'
     dependsOn tasks.named('releaseChecksums')
+}
+
+tasks.register('prepareExampleReleases', JavaExec) {
+    group = 'distribution'
+    description = 'Prepare new versioned examples from validated Studio exports, preserving earlier bundles.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseExamples'
+    argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
+        file(providers.gradleProperty('creatorExports').get()).absolutePath,
+        providers.gradleProperty('exampleVersion').orElse('1.1.0').get()] } as CommandLineArgumentProvider)
 }
 
 sourceSets {

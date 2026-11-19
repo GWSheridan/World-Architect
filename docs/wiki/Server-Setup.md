@@ -1,6 +1,6 @@
 # Dedicated server setup
 
-Install the matching NeoForge server and put `worldarchitect-1.0.0.jar` and required provider mods in `mods/`. Use Java 25 and matching versions on clients. Keep the server's usual authentication and access settings for public play.
+Install the matching NeoForge server and put `worldarchitect-1.1.0.jar` and required provider mods in `mods/`. Use Java 25 and matching versions on clients. Keep the server's usual authentication and access settings for public play.
 
 For a new built-in world, set these before first launch:
 

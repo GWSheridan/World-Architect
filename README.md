@@ -5,11 +5,11 @@ Design each Minecraft dimension before creating a world. Choose terrain and laye
 **Minecraft Java 26.3 · NeoForge 26.3.0.103 · Java 25**
 Created and maintained by **GWSHERIDAN**.
 
-The stable release is 1.0.0. The working tree is preparing 1.1; see the [milestones](docs/ROADMAP-1.1.md) and [creator tools guide](docs/wiki/Creator-Tools.md).
+See the [1.1 milestones](docs/ROADMAP-1.1.md) and [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
 ## Get started
 
-Install `worldarchitect-1.0.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
+Install `worldarchitect-1.1.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
 
 In **Create New World → World**, choose **World Architect · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
 

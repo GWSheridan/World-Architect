@@ -4,6 +4,7 @@ Commands are checked by the server. Preset locks can restrict operations that an
 
 | Command | Purpose | Access |
 | --- | --- | --- |
+| `/wa_diagnose report` | Local versions, adapter capabilities and snapshot hashes | Permission level 3 |
 | `/wa_structure` | Library, capture, import, placement and markers | Permission level 2; bundle must allow the library |
 | `/wa_island` | Personal assignment; admin subcommands for reassignment, teams and protection | Self inspection; administration needs permission level 3 |
 | `/wa_spawn` | Spawn policies | Permission level 3 |
@@ -16,3 +17,5 @@ Commands are checked by the server. Preset locks can restrict operations that an
 See [Multiplayer and Islands](Multiplayer-and-Islands.md) for island and spawn administration, [Structure Library](Structure-Library.md) for capture and import, [Environment Controls](Environment-Controls.md) for live settings, and [World Generation Rules](World-Generation-Rules.md) for inspection commands.
 
 Generation settings remain fixed for an existing save. Starting-preset edits are applied when creating a new world.
+
+In 1.1, `/wa_structure stage`, `view3d`, `confirm` and `undo` share the library permission and bundle policy. See [Creator Tools](Creator-Tools.md) for guarded undo and preview lifetime.

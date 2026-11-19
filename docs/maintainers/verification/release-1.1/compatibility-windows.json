@@ -1,0 +1,127 @@
+{
+  "format": 1,
+  "platform": "win32",
+  "candidate": "1.1.0-dev",
+  "baseline": "1.0.0",
+  "cases": [
+    {
+      "pack": "terralith",
+      "profile": "normal",
+      "status": "passed",
+      "inputs": [
+        {
+          "filename": "Terralith_v2.6.5+26.3-neoforge.jar",
+          "version": "2.6.5+26.3",
+          "sha256": "306461c39a5d45373ea6ff74e3f7ca453b49f8bb48fc2c531c84e6aa8d96d780"
+        },
+        {
+          "filename": "lithostitched-2.0.6-neoforge-26.3.jar",
+          "version": "2.0.6-neoforge-26.3",
+          "sha256": "88241e12586f8a04271b68c02300e1b02ec2c0098e3a0add879398a14c6e271d"
+        }
+      ],
+      "baseline": {
+        "status": "passed",
+        "jar_sha256": "14fe208d2fed07e8dec98e33b1f06c519cb35a81a95412e60b1c808d94b332cd",
+        "failure": null
+      },
+      "candidate": {
+        "status": "passed",
+        "jar_sha256": "43ef37a97b72b7b5da20e313479e621db17f5f59fdb52d19a1698c92043b3065",
+        "failure": null
+      }
+    },
+    {
+      "pack": "terralith",
+      "profile": "single-block",
+      "status": "passed",
+      "inputs": [
+        {
+          "filename": "Terralith_v2.6.5+26.3-neoforge.jar",
+          "version": "2.6.5+26.3",
+          "sha256": "306461c39a5d45373ea6ff74e3f7ca453b49f8bb48fc2c531c84e6aa8d96d780"
+        },
+        {
+          "filename": "lithostitched-2.0.6-neoforge-26.3.jar",
+          "version": "2.0.6-neoforge-26.3",
+          "sha256": "88241e12586f8a04271b68c02300e1b02ec2c0098e3a0add879398a14c6e271d"
+        }
+      ],
+      "baseline": {
+        "status": "passed",
+        "jar_sha256": "14fe208d2fed07e8dec98e33b1f06c519cb35a81a95412e60b1c808d94b332cd",
+        "failure": null
+      },
+      "candidate": {
+        "status": "passed",
+        "jar_sha256": "43ef37a97b72b7b5da20e313479e621db17f5f59fdb52d19a1698c92043b3065",
+        "failure": null
+      }
+    },
+    {
+      "pack": "biomesoplenty",
+      "profile": "normal",
+      "status": "passed",
+      "inputs": [
+        {
+          "filename": "BiomesOPlenty-neoforge-26.3-26.3.0.0.16.jar",
+          "version": "26.3.0.0.16",
+          "sha256": "b4d22fddccca00211504114928a1e2f35d479a974fd77565132cc8e3271b8f7a"
+        },
+        {
+          "filename": "GlitchCore-neoforge-26.3-26.3.0.0.5.jar",
+          "version": "26.3.0.0.5",
+          "sha256": "a0459020efb2df6da15a6c86a8dd6b9a5e0f86ca7abd29f2b69bad07a14e09b5"
+        },
+        {
+          "filename": "TerraBlender-neoforge-26.3-26.3.0.0.9.jar",
+          "version": "26.3.0.0.9",
+          "sha256": "c6ad9bcc08fa40c1097d026d25e5f851bbb70d9d87ab201f7426514c741e0190"
+        }
+      ],
+      "baseline": {
+        "status": "passed",
+        "jar_sha256": "14fe208d2fed07e8dec98e33b1f06c519cb35a81a95412e60b1c808d94b332cd",
+        "failure": null
+      },
+      "candidate": {
+        "status": "passed",
+        "jar_sha256": "43ef37a97b72b7b5da20e313479e621db17f5f59fdb52d19a1698c92043b3065",
+        "failure": null
+      }
+    },
+    {
+      "pack": "biomesoplenty",
+      "profile": "single-block",
+      "status": "passed",
+      "inputs": [
+        {
+          "filename": "BiomesOPlenty-neoforge-26.3-26.3.0.0.16.jar",
+          "version": "26.3.0.0.16",
+          "sha256": "b4d22fddccca00211504114928a1e2f35d479a974fd77565132cc8e3271b8f7a"
+        },
+        {
+          "filename": "GlitchCore-neoforge-26.3-26.3.0.0.5.jar",
+          "version": "26.3.0.0.5",
+          "sha256": "a0459020efb2df6da15a6c86a8dd6b9a5e0f86ca7abd29f2b69bad07a14e09b5"
+        },
+        {
+          "filename": "TerraBlender-neoforge-26.3-26.3.0.0.9.jar",
+          "version": "26.3.0.0.9",
+          "sha256": "c6ad9bcc08fa40c1097d026d25e5f851bbb70d9d87ab201f7426514c741e0190"
+        }
+      ],
+      "baseline": {
+        "status": "passed",
+        "jar_sha256": "14fe208d2fed07e8dec98e33b1f06c519cb35a81a95412e60b1c808d94b332cd",
+        "failure": null
+      },
+      "candidate": {
+        "status": "passed",
+        "jar_sha256": "43ef37a97b72b7b5da20e313479e621db17f5f59fdb52d19a1698c92043b3065",
+        "failure": null
+      }
+    }
+  ],
+  "status": "passed"
+}

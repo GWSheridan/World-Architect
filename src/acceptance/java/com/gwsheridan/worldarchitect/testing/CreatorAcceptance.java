@@ -17,7 +17,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 @EventBusSubscriber(modid="wa_validation", value=Dist.CLIENT)
 public final class CreatorAcceptance {
     private static final Deque<Runnable> STEPS = new ArrayDeque<>();
-    private static final KeyEvent ENTER = new KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_RETURN,0,0);
+    private static final KeyEvent ENTER = new KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_RETURN,'\r',0);
     private static boolean started;
     private static int ticks;
     private static CreateWorldScreen parent;
@@ -53,7 +53,7 @@ public final class CreatorAcceptance {
             STEPS.add(()->{var cycle=mc.gui.screen().children().stream().filter(CycleButton.class::isInstance).map(CycleButton.class::cast).findFirst().orElseThrow();cycle.onPress(ENTER);});
             STEPS.add(()->Screenshot.grab(mc,false));
         }
-        STEPS.add(()->{press("Back");press("Preset Studio");bounds();press("Metadata");});
+        STEPS.add(()->{press("Back");press("Preset Studio");bounds();press("Metadata");bounds();});
         STEPS.add(()->{
             var fields=mc.gui.screen().children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast).toList();
             String name=starter.toLowerCase(Locale.ROOT).replace(' ','-')+"-"+scale;
@@ -61,7 +61,7 @@ public final class CreatorAcceptance {
             press("Apply");press("Validate draft");press("Save version");press("Export ZIP");Screenshot.grab(mc,false);
             press("Browse saved presets");bounds();
             var search=mc.gui.screen().children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast).findFirst().orElseThrow();search.setValue(name);
-            mc.gui.screen().keyPressed(new KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_TAB,0,0));press("Load selected");press("Continue");
+            mc.gui.screen().keyPressed(new KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_TAB,'\t',0));press("Load selected");press("Continue");
         });
         STEPS.add(()->{press("Apply to world");press("Done");
             var gen=parent.getUiState().getSettings().selectedDimensions().get(starter.equals("Custom End")?LevelStem.END:LevelStem.OVERWORLD).orElseThrow().generator();
@@ -81,6 +81,11 @@ public final class CreatorAcceptance {
     }
     private static void bounds() {
         var screen=Minecraft.getInstance().gui.screen();
+        validateBounds(screen);
+        int width=screen.width,height=screen.height;
+        screen.resize(320,240);validateBounds(screen);screen.resize(width,height);validateBounds(screen);
+    }
+    private static void validateBounds(Screen screen) {
         var widgets=screen.children().stream().filter(AbstractWidget.class::isInstance).map(AbstractWidget.class::cast).filter(w->w.visible).toList();
         for(var a:widgets) {require(a.getX()>=0&&a.getY()>=0&&a.getRight()<=screen.width&&a.getBottom()<=screen.height,"Off-screen control in "+screen.getTitle().getString());
             for(var b:widgets)if(a!=b)require(a.getRight()<=b.getX()||a.getX()>=b.getRight()||a.getBottom()<=b.getY()||a.getY()>=b.getBottom(),"Overlapping controls in "+screen.getTitle().getString());}

@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "platform": "linux",
+  "profile": "single-block",
+  "jar_sha256": "43ef37a97b72b7b5da20e313479e621db17f5f59fdb52d19a1698c92043b3065",
+  "tests": [
+    {
+      "case": "fresh",
+      "status": "passed"
+    },
+    {
+      "case": "restart",
+      "status": "passed"
+    }
+  ],
+  "status": "passed",
+  "suite": "authoring"
+}

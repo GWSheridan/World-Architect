@@ -4,6 +4,8 @@ Open the world’s library with `/wa_structure`. Select a template to see its ti
 
 Library commands require the same permission as Minecraft’s `/place` command. On a dedicated server, the console can run capture, import, export, editing, and placement commands. An in-game player can open the preview and travel to a marker.
 
+In 1.1, **3D viewer** opens an orbitable template view and **Stage here** opens guarded placement. See [Creator Tools](Creator-Tools.md) for previews, server revalidation and `/wa_structure undo`.
+
 ## Use the in-game editor
 
 Open **Capture selection**, stand at one corner, and choose **Set corner 1 here**. Close the dialog, move to the other corner, and reopen it to set corner 2. Use **Outline selection** to check the bounds, then enter a template ID and capture.

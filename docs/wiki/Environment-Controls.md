@@ -16,7 +16,7 @@ Use `/wa_environment <dimension>` to inspect settings, current time and weather,
 /wa_environment wa_example:workshop set weather vanilla
 ```
 
-The workshop example dimension is supplied by the [cross-dimension structures datapack](https://github.com/GWSheridan/World-Architect/tree/v1.0.0/examples/cross-dimension-structures). Replace its ID with an installed compatible dimension.
+The workshop example dimension is supplied by the [cross-dimension structures datapack](https://github.com/GWSheridan/World-Architect/tree/v1.1.0/examples/cross-dimension-structures). Replace its ID with an installed compatible dimension.
 
 Fixed time holds the dimension's default clock at the selected tick. Offset time adds 0–23999 ticks to the underlying clock and follows its normal rate and pause state. These are read-only views: shared clocks, game time, scheduled ticks and saved generation data remain untouched. Native timeline attributes use the same clock view, including sun position and skylight. Normal `/time` commands still change Minecraft's underlying clocks.
 

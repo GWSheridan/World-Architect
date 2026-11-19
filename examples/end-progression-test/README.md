@@ -8,7 +8,7 @@ Build World Architect first, then run this from the repository root with Java 25
 .\gradlew.bat -p examples/end-progression-test build
 ```
 
-Put the resulting test JAR and `worldarchitect-1.0.0.jar` in a fresh server's `mods/` folder. Install the [End progression example](../end-progression) before creating its world. Use ordinary clients with the production mod and an operator console for commands:
+Put the resulting test JAR and `worldarchitect-1.1.0.jar` in a fresh server's `mods/` folder. Install the [End progression example](../end-progression) before creating its world. Use ordinary clients with the production mod and an operator console for commands:
 
 | Command | Check |
 | --- | --- |

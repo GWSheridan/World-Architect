@@ -26,7 +26,7 @@ final class StudioFormScreen extends Screen {
         values=new ArrayList<>(fields.stream().map(Field::value).toList());
     }
     @Override protected void init() {
-        int span=Math.min(420,width-24),left=(width-span)/2,half=(span-8)/2,first=height<260?48:68,row=height<260?26:34;
+        int span=Math.min(420,width-24),left=(width-span)/2,half=(span-8)/2,first=height<260?58:68,row=height<260?26:34;
         apply=addRenderableWidget(Button.builder(Component.literal("Apply"),b->{save.accept(List.copyOf(values));onClose();}).bounds(left,height-26,half,20).build());
         addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL,b->onClose()).bounds(left+half+8,height-26,half,20).build());
         for(int i=0;i<fields.size();i++){
@@ -38,7 +38,7 @@ final class StudioFormScreen extends Screen {
     private void refresh(){try{error=validate.apply(List.copyOf(values));}catch(RuntimeException e){error=e.getMessage()==null?"Check the entered values.":e.getMessage();}apply.active=error.isEmpty();}
     @Override public void onClose(){minecraft.gui.setScreen(parent);}
     @Override public void extractRenderState(GuiGraphicsExtractor graphics,int mouseX,int mouseY,float tick){
-        super.extractRenderState(graphics,mouseX,mouseY,tick);int span=Math.min(420,width-24),left=(width-span)/2,half=(span-8)/2,first=height<260?48:68,row=height<260?26:34;
+        super.extractRenderState(graphics,mouseX,mouseY,tick);int span=Math.min(420,width-24),left=(width-span)/2,half=(span-8)/2,first=height<260?58:68,row=height<260?26:34;
         graphics.centeredText(font,title,width/2,8,0xFFF1E7CE);var lines=font.split(Component.literal(help),span);
         for(int i=0;i<Math.min(2,lines.size());i++)graphics.text(font,lines.get(i),left,24+i*9,0xFFCCCCCC);
         for(int i=0;i<fields.size();i++)graphics.text(font,font.plainSubstrByWidth(fields.get(i).label(),half),left+i%2*(half+8),first+i/2*row-10,0xFFEAEAEA);

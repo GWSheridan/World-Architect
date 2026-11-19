@@ -65,7 +65,7 @@ Put `rule_engine` inside the managed generator's `dimension_profile`. Bind its `
 }
 ```
 
-The [floating Sky City example](https://github.com/GWSheridan/World-Architect/tree/v1.0.0/examples/worldgen-rules) includes every action type, competing templates, rejected filters and generated-marker join/respawn policies.
+The [floating Sky City example](https://github.com/GWSheridan/World-Architect/tree/v1.1.0/examples/worldgen-rules) includes every action type, competing templates, rejected filters and generated-marker join/respawn policies.
 
 ## Inspection and protection
 

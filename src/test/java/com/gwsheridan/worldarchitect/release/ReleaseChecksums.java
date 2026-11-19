@@ -17,8 +17,10 @@ public final class ReleaseChecksums {
         Files.createDirectories(directory);
         var assets = new ArrayList<Path>();
         for (int i = 1; i <= 3; i++) assets.add(stage(Path.of(args[i]), directory));
-        try (var bundles = Files.list(Path.of(args[4]))) {
-            for (Path bundle : bundles.filter(path -> path.getFileName().toString().endsWith(".zip")).sorted().toList()) assets.add(stage(bundle, directory));
+        var bundleDirectories=new ArrayList<Path>();bundleDirectories.add(Path.of(args[4]));
+        for(int index=6;index<args.length;index++)bundleDirectories.add(Path.of(args[index]));
+        for(Path bundleDirectory:bundleDirectories)try (var bundles = Files.list(bundleDirectory)) {
+            for (Path bundle : bundles.filter(path -> path.getFileName().toString().endsWith("-"+version+".zip")).sorted().toList()) assets.add(stage(bundle, directory));
         }
         assets.sort(Comparator.comparing(path -> path.getFileName().toString()));
         var rows = new ArrayList<String>();

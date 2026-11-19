@@ -9,5 +9,5 @@ neoForge {
     mods { wa_dragon_probe { sourceSet sourceSets.main } }
 }
 dependencies {
-    implementation files(providers.gradleProperty('worldarchitectJar').orElse('../../build/libs/worldarchitect-1.0.0.jar').get())
+    implementation files(providers.gradleProperty('worldarchitectJar').orElse('../../build/libs/worldarchitect-1.1.0.jar').get())
 }

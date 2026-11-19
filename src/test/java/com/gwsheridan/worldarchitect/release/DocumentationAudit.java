@@ -36,10 +36,9 @@ public final class DocumentationAudit {
             if (target.isEmpty() || target.startsWith("mailto:")) continue;
             String repository = "https://github.com/GWSheridan/World-Architect/";
             Path resolved;
-            if (target.startsWith(repository + "blob/v1.0.0/")) {
-                resolved = root.resolve(target.substring((repository + "blob/v1.0.0/").length()));
-            } else if (target.startsWith(repository + "tree/v1.0.0/")) {
-                resolved = root.resolve(target.substring((repository + "tree/v1.0.0/").length()));
+            var versioned=Pattern.compile(Pattern.quote(repository)+"(?:blob|tree)/v[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][^/]+)?/(.+)").matcher(target);
+            if (versioned.matches()) {
+                resolved = root.resolve(versioned.group(1));
             } else if (target.matches("^[a-zA-Z]+:.*")) {
                 continue;
             } else {

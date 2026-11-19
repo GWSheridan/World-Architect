@@ -1,6 +1,6 @@
 # World Architect 1.1
 
-This cycle targets Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Development builds use `1.1.0-dev` until the release checks pass. Existing 0.9.0 and 1.0.0 releases remain available.
+This cycle targets Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. The release candidate is packaged as `1.1.0`; publication waits for the release checks. Existing 0.9.0 and 1.0.0 releases remain available.
 
 | Milestone | Scope | Release checks |
 | --- | --- | --- |
