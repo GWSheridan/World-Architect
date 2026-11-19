@@ -17,7 +17,7 @@ public final class DocumentationAudit {
         for (String directory : new String[] {"docs", "examples"}) {
             try (var files = Files.walk(root.resolve(directory))) {
                 for (Path path : files.filter(p -> p.toString().endsWith(".md"))
-                        .filter(p -> !p.toString().replace('\\', '/').matches(".*/(?:build|\\.gradle|\\.gradle-local|run)/.*")).toList()) {
+                        .filter(p -> !root.relativize(p).toString().replace('\\', '/').matches("(?:.*/)?(?:build|\\.gradle|\\.gradle-local|run)/.*")).toList()) {
                     inspect(root, path, failures);
                     count++;
                 }
