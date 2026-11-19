@@ -1,7 +1,7 @@
 {
   "format": 1,
   "platform": "linux",
-  "candidate": "1.1.0-dev",
+  "candidate": "1.1.0",
   "baseline": "1.0.0",
   "cases": [
     {
@@ -27,7 +27,7 @@
       },
       "candidate": {
         "status": "passed",
-        "jar_sha256": "43ef37a97b72b7b5da20e313479e621db17f5f59fdb52d19a1698c92043b3065",
+        "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
         "failure": null
       }
     },
@@ -54,7 +54,7 @@
       },
       "candidate": {
         "status": "passed",
-        "jar_sha256": "43ef37a97b72b7b5da20e313479e621db17f5f59fdb52d19a1698c92043b3065",
+        "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
         "failure": null
       }
     },
@@ -86,7 +86,7 @@
       },
       "candidate": {
         "status": "passed",
-        "jar_sha256": "43ef37a97b72b7b5da20e313479e621db17f5f59fdb52d19a1698c92043b3065",
+        "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
         "failure": null
       }
     },
@@ -118,7 +118,7 @@
       },
       "candidate": {
         "status": "passed",
-        "jar_sha256": "43ef37a97b72b7b5da20e313479e621db17f5f59fdb52d19a1698c92043b3065",
+        "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
         "failure": null
       }
     }

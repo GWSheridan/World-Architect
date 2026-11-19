@@ -6,6 +6,7 @@
 
 **World design**
 
+- [Creator Tools](Creator-Tools.md)
 - [Terrain and Dimensions](Terrain-and-Dimensions.md)
 - [Biomes and Features](Biomes-and-Features.md)
 - [Structures](Structures.md)
@@ -33,5 +34,3 @@
 - [Example Presets](Example-Presets.md)
 - [Public API](Public-API.md)
 - [Compatibility and Performance](Compatibility-and-Performance.md)
-
-[Creator tools in 1.1](Creator-Tools.md)

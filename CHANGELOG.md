@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.0 · in development
+## 1.1.0
 
 - Added starter recipes and a searchable preset library, with explicit draft-discard prompts.
 - Added rotatable base-terrain previews, vertical cross-sections and coordinate navigation.
@@ -9,7 +9,7 @@
 - Fixed Unix wrapper line endings so clean source checkouts run on Linux.
 - Retained API 1, preset and template formats, saved generation settings and native End policies.
 
-The release remains in development while integration and platform checks are completed.
+Release checks cover Windows/Linux dedicated servers, two-client placement, a thirty-minute multiplayer soak, native End progression, older-save protection, six clean example installations and three same-host performance pairs. Existing 0.9.0 and 1.0.0 releases remain unchanged.
 
 ## 1.0.0
 

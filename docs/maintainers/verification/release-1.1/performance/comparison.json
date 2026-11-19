@@ -1,0 +1,87 @@
+{
+  "format": 1,
+  "pairs": 3,
+  "profiles": [
+    {
+      "profile": "normal",
+      "baseline": {
+        "median_pair_seconds": 6.99,
+        "median_peak_resident_mib": 877.5,
+        "measured_chunks": 216
+      },
+      "candidate": {
+        "median_pair_seconds": 7.609999999999999,
+        "median_peak_resident_mib": 906,
+        "measured_chunks": 216
+      },
+      "generation_change_percent": 8.87,
+      "memory_change_percent": 3.25,
+      "status": "passed"
+    },
+    {
+      "profile": "void",
+      "baseline": {
+        "median_pair_seconds": 3.06,
+        "median_peak_resident_mib": 756,
+        "measured_chunks": 216
+      },
+      "candidate": {
+        "median_pair_seconds": 2.19,
+        "median_peak_resident_mib": 728,
+        "measured_chunks": 216
+      },
+      "generation_change_percent": -28.43,
+      "memory_change_percent": -3.7,
+      "status": "passed"
+    },
+    {
+      "profile": "single-block",
+      "baseline": {
+        "median_pair_seconds": 3.71,
+        "median_peak_resident_mib": 751,
+        "measured_chunks": 216
+      },
+      "candidate": {
+        "median_pair_seconds": 2.41,
+        "median_peak_resident_mib": 695.5,
+        "measured_chunks": 216
+      },
+      "generation_change_percent": -35.04,
+      "memory_change_percent": -7.39,
+      "status": "passed"
+    },
+    {
+      "profile": "layered",
+      "baseline": {
+        "median_pair_seconds": 3.29,
+        "median_peak_resident_mib": 747.5,
+        "measured_chunks": 216
+      },
+      "candidate": {
+        "median_pair_seconds": 3.5200000000000005,
+        "median_peak_resident_mib": 778,
+        "measured_chunks": 216
+      },
+      "generation_change_percent": 6.99,
+      "memory_change_percent": 4.08,
+      "status": "passed"
+    },
+    {
+      "profile": "structure-heavy",
+      "baseline": {
+        "median_pair_seconds": 3.2800000000000002,
+        "median_peak_resident_mib": 710,
+        "measured_chunks": 216
+      },
+      "candidate": {
+        "median_pair_seconds": 2.64,
+        "median_peak_resident_mib": 795.5,
+        "measured_chunks": 216
+      },
+      "generation_change_percent": -19.51,
+      "memory_change_percent": 12.04,
+      "status": "passed"
+    }
+  ],
+  "status": "passed"
+}

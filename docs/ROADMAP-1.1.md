@@ -2,6 +2,8 @@
 
 This cycle targets Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. The release candidate is packaged as `1.1.0`; publication waits for the release checks. Existing 0.9.0 and 1.0.0 releases remain available.
 
+Milestones 22–26 are implemented. Dedicated, client, multiplayer, save-protection and performance checks passed; [supporting results](maintainers/verification/release-1.1/) record their scope. The release assets and wiki are prepared for publication. The GitHub release remains a draft until it is published.
+
 | Milestone | Scope | Release checks |
 | --- | --- | --- |
 | 22 · Creator workflow | Starter gallery, searchable preset library, draft cancellation and validation | Create, export and install each starter; keyboard navigation, resizing, scales 1 and 2, bundle locks |

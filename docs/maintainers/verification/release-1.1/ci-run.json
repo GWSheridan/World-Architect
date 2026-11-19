@@ -1,0 +1,22 @@
+{
+  "format": 1,
+  "status": "passed",
+  "source_commit": "830c144212cdbe8a0d48483ea4d739bddc3d3d7d",
+  "run_id": 44529656774,
+  "url": "https://github.com/GWSheridan/World-Architect/actions/runs/44529656774",
+  "jobs": {
+    "linux": 135579301997,
+    "windows": 135579302656
+  },
+  "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
+  "platforms": [
+    "ubuntu-latest",
+    "windows-latest"
+  ],
+  "unit_tests_per_platform": 51,
+  "public_mod_comparisons_per_platform": 4,
+  "clean_bundles_per_platform": 6,
+  "preview_cases": 25,
+  "preview_columns": 2700,
+  "preview_block_comparisons": 1009152
+}

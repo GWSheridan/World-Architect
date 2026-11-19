@@ -2,7 +2,7 @@
   "format": 1,
   "platform": "linux",
   "profile": "single-block",
-  "jar_sha256": "43ef37a97b72b7b5da20e313479e621db17f5f59fdb52d19a1698c92043b3065",
+  "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
   "tests": [
     {
       "case": "fresh",
@@ -11,8 +11,17 @@
     {
       "case": "restart",
       "status": "passed"
+    },
+    {
+      "case": "generation-pins-intact",
+      "status": "passed",
+      "files": 2
     }
   ],
   "status": "passed",
-  "suite": "authoring"
+  "suite": "authoring",
+  "generation_sha256": {
+    "worldarchitect-generation-v1.dat": "02586afdc681974814cb8b59e59b0760ab91bc1bbcf9ca8c95245dc71cc847a7",
+    "minecraft/world_gen_settings.dat": "60108d3622f0618774713085bbccd9a96b99bbc6ebfe4b409b611d683f625d76"
+  }
 }

@@ -1,0 +1,181 @@
+{
+  "format": 1,
+  "version": "1.1.0",
+  "cases": [
+    {
+      "name": "single-block",
+      "format": 1,
+      "platform": "win32",
+      "profile": "single-block",
+      "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "2db4a1d6fc38b4ec13864653306f26ddb8b9697402fe85a2fd4fa003d0f5bdad",
+        "minecraft/world_gen_settings.dat": "2ec73dad6f9e2f60e89d3f3b4184d9e3605d346338bb4f06e1573ddba897b46c",
+        "worldarchitect/generation/788b65540a0431601f675416136ec1e8ee70ae28c31e0771572bd92e5dc74590.zip": "788b65540a0431601f675416136ec1e8ee70ae28c31e0771572bd92e5dc74590"
+      }
+    },
+    {
+      "name": "layered",
+      "format": 1,
+      "platform": "win32",
+      "profile": "single-block",
+      "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "cd5bf506b88ed3dae89c79918bed1057b6ced59d4027dc73a172b8f98274c6f5",
+        "minecraft/world_gen_settings.dat": "be60b38a368ef457fa0ac30a65cfc0eabb58a80bf38e0413030b84ba5901e73f",
+        "worldarchitect/generation/0209a011b87375724206873ca9350ce913f63ba0fad0af88f8c73f9f03ce42a2.zip": "0209a011b87375724206873ca9350ce913f63ba0fad0af88f8c73f9f03ce42a2"
+      }
+    },
+    {
+      "name": "skyblock",
+      "format": 1,
+      "platform": "win32",
+      "profile": "single-block",
+      "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "06eb15ae0a3f60f9d777efb82c8e154f87376c8372482768bb7521d163a24c78",
+        "minecraft/world_gen_settings.dat": "73995cce72348f84f2a10748b3890e9473a59beab49aa9802f00536a07f9812c",
+        "worldarchitect/generation/72c4d81a1294d99f2e4a1264dd81516d65a99cfa1fa3756772783b1abdd406e5.zip": "72c4d81a1294d99f2e4a1264dd81516d65a99cfa1fa3756772783b1abdd406e5"
+      }
+    },
+    {
+      "name": "custom-end",
+      "format": 1,
+      "platform": "win32",
+      "profile": "single-block",
+      "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "43fa372e4b0036781ccca3ec0513ce9e390ca93e9367b898fef773b126cfa23b",
+        "minecraft/world_gen_settings.dat": "0d0ae4d145a1e7692a3c59d9c91348312c500325637514ab47e07c5a9985093f",
+        "worldarchitect/generation/9d88d16ed5d89b925cb20b3a9f5ba3ccf9a2a1854bd2f842c4dbe54255a242bd.zip": "9d88d16ed5d89b925cb20b3a9f5ba3ccf9a2a1854bd2f842c4dbe54255a242bd"
+      }
+    },
+    {
+      "name": "locked-partial",
+      "format": 1,
+      "platform": "win32",
+      "profile": "single-block",
+      "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "97b843297e164025652188bb4f005b1062743dd4782104e93a47731f0445264f",
+        "minecraft/world_gen_settings.dat": "b569a7142ba757aa8aa832126232e5919b8dde62d3c8629cd0294db9576cba08",
+        "worldarchitect/generation/6486b95440cf5b77b4959a140541e0a8a284ace17f393b7e9d578edc804b809d.zip": "6486b95440cf5b77b4959a140541e0a8a284ace17f393b7e9d578edc804b809d"
+      }
+    },
+    {
+      "name": "locked-skyblock",
+      "format": 1,
+      "platform": "win32",
+      "profile": "single-block",
+      "jar_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "2eff80c93e3eb38478824e58464932e542a56f92e7fc87d5551ea0b8451c958c",
+        "minecraft/world_gen_settings.dat": "f57500ab0b1bf795ed7338fabf10fa62a7eb09062e2ccc8d1f15cab1d7b0bbe5",
+        "worldarchitect/generation/525f63b7c073362c5ed6031a564a41d5d02bc971bf943cf769bb0ad48748a4f6.zip": "525f63b7c073362c5ed6031a564a41d5d02bc971bf943cf769bb0ad48748a4f6"
+      }
+    }
+  ],
+  "status": "passed"
+}
