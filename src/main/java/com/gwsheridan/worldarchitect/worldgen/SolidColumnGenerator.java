@@ -62,7 +62,7 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     }
 
     protected SolidColumnGenerator(Holder<Biome> biome, TerrainShape shape, List<Stratum> strata, Optional<DimensionProfile> dimensionProfile) {
-        super(RegionBiomeSource.forContent(biome, dimensionProfile.map(DimensionProfile::content).orElse(ContentProfile.EMPTY)),
+        super(arenaBiomes(biome, dimensionProfile),
                 ignored -> BiomeGenerationSettings.EMPTY);
         this.biome = biome;
         this.shape = shape;
@@ -73,6 +73,12 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
         this.rules = dimensionProfile.map(DimensionProfile::rules).orElse(RuleSet.EMPTY);
         this.structureRules = RuleExecution.structures(content, rules);
         this.hasMaterialRules = rules.ordered().stream().anyMatch(rule -> rule.action().type() == RuleSet.Kind.MATERIAL);
+    }
+
+    private static net.minecraft.world.level.biome.BiomeSource arenaBiomes(Holder<Biome> biome, Optional<DimensionProfile> profile) {
+        var outer = RegionBiomeSource.forContent(biome, profile.map(DimensionProfile::content).orElse(ContentProfile.EMPTY));
+        return profile.flatMap(DimensionProfile::endProgression).<net.minecraft.world.level.biome.BiomeSource>map(
+                arena -> new EndArenaBiomeSource(outer, arena.biome())).orElse(outer);
     }
 
     @Override
@@ -104,7 +110,7 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     public final List<ContentProfile.StructureRule> structureRules() { return structureRules; }
 
     public final RuleSet.Context ruleContext(long seed, int x, int y, int z) {
-        Holder<Biome> selected = biomeSource instanceof RegionBiomeSource regions ? regions.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biome;
+        Holder<Biome> selected = biomeSource instanceof EndArenaBiomeSource arena ? arena.sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biomeSource instanceof RegionBiomeSource regions ? regions.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biome;
         return new RuleSet.Context(rules.dimension(), selected.unwrapKey().orElseThrow().identifier(), x, y, z, seed, RuleDependencies.loaded());
     }
 
@@ -183,6 +189,10 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
 
     @Override
     public void applyBiomeDecoration(WorldGenLevel level, ChunkAccess chunk, StructureManager structures) {
+        if (endProgression().isPresent() && com.gwsheridan.worldarchitect.config.EndProgression.contains(chunk.getPos().getMinBlockX(), chunk.getPos().getMinBlockZ())) {
+            endProgression().orElseThrow().generator().applyBiomeDecoration(level, chunk, structures);
+            return;
+        }
         if (!rules.isEmpty() || !content.nativeFeatures().isEmpty()) {
             ContentPlacement.decorate(level, chunk, this, content.decorations());
             RuleExecution.decorations(this, level, chunk);
@@ -203,6 +213,10 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     @Override
     public CompletableFuture<ChunkAccess> buildTerrain(ChunkAccess chunk, Blender blender, RandomState state,
             StructureManager structures, BiomeManager biomes, @Nullable WorldGenRegion region, Set<Holder<Biome>> possibleBiomes) {
+        if (endProgression().isPresent() && com.gwsheridan.worldarchitect.config.EndProgression.contains(chunk.getPos().getMinBlockX(), chunk.getPos().getMinBlockZ())) {
+            var arena = endProgression().orElseThrow();
+            return arena.generator().buildTerrain(chunk, blender, arena.state(state.seed()), structures, biomes, region, Set.of(arena.biome()));
+        }
         if (shape.advanced().isEmpty() && strata.isEmpty() && !hasMaterialRules && content.caves().isEmpty() && content.sea().isEmpty()) {
             return buildSimpleTerrain(chunk, state.seed());
         }
@@ -297,6 +311,10 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     }
 
     final int baseHeight(int x, int z, Heightmap.Types type, LevelHeightAccessor height, long seed) {
+        if (endProgression().isPresent() && com.gwsheridan.worldarchitect.config.EndProgression.contains(x, z)) {
+            var arena = endProgression().orElseThrow();
+            return arena.generator().getBaseHeight(x, z, type, height, arena.state(seed));
+        }
         Column column = sampleColumn(x, z, height, seed);
         var sea = content.sea().orElse(null);
         CaveSpan cave = cave(x, z, seed, column);
@@ -320,6 +338,10 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     }
 
     public final NoiseColumn baseColumn(int x, int z, LevelHeightAccessor height, long seed) {
+        if (endProgression().isPresent() && com.gwsheridan.worldarchitect.config.EndProgression.contains(x, z)) {
+            var arena = endProgression().orElseThrow();
+            return arena.generator().getBaseColumn(x, z, height, arena.state(seed));
+        }
         BlockState[] blocks = new BlockState[height.getHeight()];
         Column column = sampleColumn(x, z, height, seed);
         CaveSpan cave = cave(x, z, seed, column);

@@ -68,6 +68,7 @@ public final class WorldArchitect {
         generators.register(modBus);
         DeferredRegister<MapCodec<? extends BiomeSource>> biomeSources = DeferredRegister.create(Registries.BIOME_SOURCE, ID);
         biomeSources.register("regions", () -> RegionBiomeSource.CODEC);
+        biomeSources.register("end_arena", () -> com.gwsheridan.worldarchitect.worldgen.EndArenaBiomeSource.CODEC);
         biomeSources.register(modBus);
         NeoForge.EVENT_BUS.addListener(WorldArchitect::createSpawn);
         NeoForge.EVENT_BUS.addListener(SaveProtection::recordNewWorld);

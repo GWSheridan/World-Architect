@@ -1,6 +1,6 @@
 # Same-host 0.9.0 comparison
 
-Run from the repository root with Java 25 in `JAVA_HOME`. Build the candidate and prepare the Gradle run artifacts first. The profiles and datapacks are the exact 0.9.0 acceptance workload, with local test server settings and no server management credentials. See [verification results](../../docs/MILESTONE_19_VERIFICATION.md).
+Run from the repository root with Java 25 in `JAVA_HOME`. Build the candidate and prepare the Gradle run artifacts first. The profiles and datapacks are the fixed 0.9.0 benchmark workload, with local test server settings and no server management credentials. See [verification results](../../docs/TESTING.md).
 
 ```powershell
 .\gradlew.bat build

@@ -1,0 +1,13 @@
+{
+  "pack": {
+    "description": "Native dragon arena with custom outer End terrain",
+    "min_format": [
+      121,
+      0
+    ],
+    "max_format": [
+      121,
+      0
+    ]
+  }
+}

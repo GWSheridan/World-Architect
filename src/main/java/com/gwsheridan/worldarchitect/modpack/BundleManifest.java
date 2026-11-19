@@ -22,7 +22,7 @@ public record BundleManifest(Identifier preset, String title, String description
             StringRepresentable.fromEnum(Lock::values).fieldOf("lock").forGetter(BundleManifest::lock),
             WorldOptions.CODEC.codec().fieldOf("options").forGetter(BundleManifest::options),
             Identifier.CODEC.listOf(0, 128).optionalFieldOf("editable_dimensions", List.of()).forGetter(BundleManifest::editableDimensions),
-            Codec.unboundedMap(Identifier.CODEC, StringRepresentable.fromEnum(Feature::values).listOf(1, 6))
+            Codec.unboundedMap(Identifier.CODEC, StringRepresentable.fromEnum(Feature::values).listOf(1, Feature.values().length))
                     .optionalFieldOf("editable_features", Map.of()).forGetter(BundleManifest::editableFeatures),
             StringRepresentable.fromEnum(Option::values).listOf(0, 3).optionalFieldOf("editable_options", List.of()).forGetter(BundleManifest::editableOptions),
             Codec.STRING.listOf(0, 256).optionalFieldOf("required_mods", List.of()).forGetter(BundleManifest::requiredMods),

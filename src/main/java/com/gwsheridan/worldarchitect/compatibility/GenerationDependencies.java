@@ -110,6 +110,7 @@ public final class GenerationDependencies {
                 .forEach(flag -> flags.add(StringTag.valueOf(flag.toString())));
         pins.put("feature_flags", flags);
         if (dimensions.dimensions().values().stream().anyMatch(stem -> !(stem.generator() instanceof ManagedGenerator)
+                  || stem.generator() instanceof ManagedGenerator managed && managed.endProgression().isPresent()
                   || stem.generator() instanceof SolidColumnGenerator solid && (com.gwsheridan.worldarchitect.worldgen.GenerationExtensions.needsResourcePins(solid)
                           || solid.structureRules().stream().anyMatch(rule -> rule.structure().value() instanceof EndCityStructure)))) {
             pins.put(RESOURCES, captureNativeResources(resources, generated));

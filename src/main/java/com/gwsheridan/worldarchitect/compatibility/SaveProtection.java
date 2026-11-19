@@ -270,6 +270,10 @@ public final class SaveProtection {
             }
         });
         var type = stem.type().value();
+        if (generator.endProgression().isPresent() && (!key.equals(LevelStem.END) || !type.hasEnderDragonFight()
+                || type.minY() != 0 || type.height() != 256 || generator.dimensionProfile().orElseThrow().adapter().isPresent())) {
+            throw incompatible("Vanilla End progression requires minecraft:the_end with its native fight and 0..255 build range");
+        }
         if (type.minY() != chunkGenerator.getMinY() || type.height() != chunkGenerator.getGenDepth()) {
             throw incompatible("The vertical range of " + key.identifier() + " changed from the saved generator's range");
         }

@@ -15,6 +15,6 @@ abstract class ServerLevelMixin {
     private boolean worldarchitect$strictDragonFight(DimensionType type, Operation<Boolean> original) {
         ServerLevel level = (ServerLevel) (Object) this;
         return original.call(type) && !(level.getChunkSource().getGenerator() instanceof ManagedGenerator generator
-                && generator.dimensionProfile().isPresent());
+                && generator.dimensionProfile().isPresent() && generator.endProgression().isEmpty());
     }
 }

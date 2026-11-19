@@ -1,0 +1,7 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+[[mods]]
+modId="wa_dragon_probe"
+version="1.0.0-test"
+displayName="Dragon Test Probe"

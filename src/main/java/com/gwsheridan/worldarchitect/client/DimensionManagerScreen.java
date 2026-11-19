@@ -62,6 +62,7 @@ final class DimensionManagerScreen extends Screen {
     private Button voidButton;
     private Button previewButton;
     private Button rulesButton;
+    private Button endButton;
     private int detailLeft;
     private int detailWidth;
     private int actionTop;
@@ -109,6 +110,8 @@ final class DimensionManagerScreen extends Screen {
                 .bounds(detailLeft + detailHalf + 6, actionTop + 44, detailHalf, 20).build());
         rulesButton = addRenderableWidget(Button.builder(Component.literal("World Generation Rules"), button -> editRules())
                 .bounds(detailLeft, actionTop + 66, detailWidth, 20).build());
+        endButton = addRenderableWidget(Button.builder(Component.literal("Dragon fight"), button -> toggleEndProgression())
+                .bounds(detailLeft + detailHalf + 6, actionTop + 66, detailHalf, 20).build());
         var studio = addRenderableWidget(Button.builder(Component.literal("Preset Studio"), button -> {
             try {
                 var all = new LinkedHashMap<ResourceKey<LevelStem>, LevelStem>(); keys.forEach(key -> all.put(key, effective(key)));
@@ -184,9 +187,29 @@ final class DimensionManagerScreen extends Screen {
         rulesButton.active = canEdit && stem != null && stem.generator() instanceof ManagedGenerator;
         featuresButton.setTooltip(featuresButton.active ? null : Tooltip.create(canEditFeatures ? GenerationRuleScreen.text("requires_terrain")
                 : Component.translatable("worldarchitect.modpack.option_locked")));
+        endButton.visible = key != null && key.equals(LevelStem.END) && stem.generator() instanceof ManagedGenerator;
+        endButton.active = endButton.visible && canEdit && stem.type().value().hasEnderDragonFight() && stem.type().value().minY() == 0 && stem.type().value().height() == 256
+                && ((ManagedGenerator) stem.generator()).dimensionProfile().flatMap(DimensionProfile::adapter).isEmpty();
+        endButton.setMessage(Component.literal("Dragon fight: " + (stem != null && stem.generator() instanceof ManagedGenerator managed && managed.endProgression().isPresent() ? "On" : "Off")));
+        endButton.setTooltip(Tooltip.create(Component.literal("Reserves the central 512 by 512 blocks for vanilla End progression. Gateway travel may create landing islands. Starting templates in the reservation are replaced by the native arena.")));
+        rulesButton.setMessage(endButton.visible ? text("rules_short") : Component.literal("World Generation Rules"));
+        rulesButton.setWidth(endButton.visible ? (detailWidth - 6) / 2 : detailWidth);
         Tooltip warning = stem != null && stem.type().value().hasEnderDragonFight() ? Tooltip.create(text("dragon_warning")) : null;
         singleButton.setTooltip(warning);
         layeredButton.setTooltip(warning);
+    }
+
+    private void toggleEndProgression() {
+        if (selected == null || !canEditDimension(selected)) return;
+        var stem = effective(selected);
+        if (!(stem.generator() instanceof ManagedGenerator generator)) return;
+        var profile = generator.dimensionProfile().orElseThrow();
+        var changed = profile.withEndProgression(generator.endProgression().isPresent() ? Optional.empty()
+                : Optional.of(com.gwsheridan.worldarchitect.config.EndProgression.vanillaArena(context.worldgenLoadContext())));
+        var edited = stem.generator() instanceof SolidColumnGenerator solid ? solid.withDimensionProfile(changed)
+                : new VoidGenerator(((VoidGenerator) stem.generator()).biome(), changed, ((VoidGenerator) stem.generator()).island(), ((VoidGenerator) stem.generator()).allowUnsafeSpawn());
+        draft.put(selected, new LevelStem(stem.type(), edited));
+        updateActions();
     }
 
     private void openPreview() {
@@ -255,7 +278,8 @@ final class DimensionManagerScreen extends Screen {
         LevelStem stem = effective(key);
         var type = stem.type().value();
         var retainedRules = stem.generator() instanceof ManagedGenerator managed ? managed.dimensionProfile().map(DimensionProfile::rules).orElse(com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY) : com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY;
-        var profile = new DimensionProfile(type.minY(), type.height(), support.adapter()).withRules(retainedRules);
+        var profile = new DimensionProfile(type.minY(), type.height(), support.adapter()).withRules(retainedRules)
+                .withEndProgression(stem.generator() instanceof ManagedGenerator managed ? managed.endProgression() : Optional.empty());
         var current = stem.generator() instanceof VoidGenerator generator ? generator.island() : Optional.<IslandProfile>empty();
         minecraft.gui.setScreen(new IslandScreen(this, key, profile, support, current,
                 edited -> draft.put(key, new LevelStem(stem.type(), edited))));
@@ -271,7 +295,10 @@ final class DimensionManagerScreen extends Screen {
         var type = stem.type().value();
         ContentProfile retained = stem.generator() instanceof SolidColumnGenerator generator ? generator.content() : ContentProfile.EMPTY;
         var retainedRules = stem.generator() instanceof ManagedGenerator managed ? managed.dimensionProfile().map(DimensionProfile::rules).orElse(com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY) : com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY;
-        var profile = Optional.of(new DimensionProfile(type.minY(), type.height(), support.adapter(), retained, retainedRules));
+        var profile = Optional.of(new DimensionProfile(type.minY(), type.height(), support.adapter(), retained, retainedRules)
+                .withEndProgression(stem.generator() instanceof ManagedGenerator managed ? managed.endProgression()
+                        : key.equals(LevelStem.END) && type.hasEnderDragonFight() && type.minY() == 0 && type.height() == 256 && support.adapter().isEmpty()
+                                ? Optional.of(com.gwsheridan.worldarchitect.config.EndProgression.vanillaArena(context.worldgenLoadContext())) : Optional.empty()));
         var biome = support.biome().orElseThrow();
         BlockState material = key.equals(LevelStem.NETHER) ? Blocks.NETHERRACK.defaultBlockState()
                 : key.equals(LevelStem.END) ? Blocks.END_STONE.defaultBlockState() : Blocks.STONE.defaultBlockState();

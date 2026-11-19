@@ -33,6 +33,7 @@ public final class GenerationPreview {
         if (generator instanceof SolidColumnGenerator solid) {
             BiomeResolver biomes = switch (solid.getBiomeSource()) {
                 case FixedBiomeSource fixed -> fixed::getNoiseBiome;
+                case EndArenaBiomeSource arena -> arena::sample;
                 case RegionBiomeSource regions -> regions::getNoiseBiome;
                 default -> throw new IllegalStateException("Managed terrain has an unsupported biome source for preview");
             };
@@ -41,8 +42,10 @@ public final class GenerationPreview {
         }
         if (generator instanceof VoidGenerator sky) {
             return Optional.of(new GenerationPreview(height,
-                    (x, z) -> sky.baseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height),
-                    (x, y, z) -> sky.biome(), sky.island()));
+                    (x, z) -> sky.endProgression().filter(ignored -> com.gwsheridan.worldarchitect.config.EndProgression.contains(x, z))
+                            .map(arena -> arena.generator().getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height, arena.state(seed)))
+                            .orElseGet(() -> sky.baseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height)),
+                    (x, y, z) -> sky.getBiomeSource() instanceof EndArenaBiomeSource arena ? arena.sample(x, y, z) : sky.biome(), sky.island()));
         }
         return Optional.empty();
     }

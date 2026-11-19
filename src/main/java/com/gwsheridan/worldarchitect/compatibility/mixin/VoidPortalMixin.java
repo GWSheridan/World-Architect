@@ -32,6 +32,9 @@ abstract class VoidPortalMixin {
             callback.setReturnValue(null);
             return;
         }
+        if (level != null && endPortal && current.dimension() != Level.END
+                && level.getChunkSource().getGenerator() instanceof com.gwsheridan.worldarchitect.worldgen.ManagedGenerator managed
+                && managed.endProgression().isPresent()) return;
         if (level != null && entity instanceof ServerPlayer
                 && SpawnPolicies.portalPolicy(level).isPresent()) {
             callback.setReturnValue(SpawnPolicies.portal(level, entity).orElse(null));

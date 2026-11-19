@@ -1,6 +1,6 @@
 # Preset Studio examples
 
-These bundles were exported through Preset Studio in 0.17.0 and reverified with World Architect **1.0.0**, Minecraft **26.3** and NeoForge **26.3.0.103** in clean client and dedicated-server instances. Their original bytes are retained for saved-world compatibility.
+These ready-to-install bundles demonstrate partial and full locks for World Architect **1.0.0**, Minecraft **26.3** and NeoForge **26.3.0.103**. Their source resources are included. Keep the original ZIP bytes when recovering an existing bundled world.
 
 | Bundle | Policy |
 | --- | --- |

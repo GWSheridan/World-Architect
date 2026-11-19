@@ -60,7 +60,8 @@ public final class VoidGenerator extends ChunkGenerator implements ManagedGenera
     private final Map<ChunkPos, List<Cell>> islandChunks;
 
     public VoidGenerator(Holder<Biome> biome, DimensionProfile dimension, Optional<IslandProfile> island, boolean allowUnsafeSpawn) {
-        super(new FixedBiomeSource(biome), ignored -> BiomeGenerationSettings.EMPTY);
+        super(dimension.endProgression().<net.minecraft.world.level.biome.BiomeSource>map(
+                arena -> new EndArenaBiomeSource(new FixedBiomeSource(biome), arena.biome())).orElseGet(() -> new FixedBiomeSource(biome)), ignored -> BiomeGenerationSettings.EMPTY);
         this.biome = biome;
         this.dimension = dimension;
         this.island = island;
@@ -130,7 +131,11 @@ public final class VoidGenerator extends ChunkGenerator implements ManagedGenera
     }
 
     @Override
-    public void applyBiomeDecoration(WorldGenLevel level, ChunkAccess chunk, StructureManager structures) {}
+    public void applyBiomeDecoration(WorldGenLevel level, ChunkAccess chunk, StructureManager structures) {
+        if (endProgression().isPresent() && com.gwsheridan.worldarchitect.config.EndProgression.contains(chunk.getPos().getMinBlockX(), chunk.getPos().getMinBlockZ())) {
+            endProgression().orElseThrow().generator().applyBiomeDecoration(level, chunk, structures);
+        }
+    }
 
     @Override
     public void spawnOriginalMobs(WorldGenRegion region) {}
@@ -138,6 +143,10 @@ public final class VoidGenerator extends ChunkGenerator implements ManagedGenera
     @Override
     public CompletableFuture<ChunkAccess> buildTerrain(ChunkAccess chunk, Blender blender, RandomState state,
             StructureManager structures, BiomeManager biomes, @Nullable WorldGenRegion region, Set<Holder<Biome>> possibleBiomes) {
+        if (endProgression().isPresent() && com.gwsheridan.worldarchitect.config.EndProgression.contains(chunk.getPos().getMinBlockX(), chunk.getPos().getMinBlockZ())) {
+            var arena = endProgression().orElseThrow();
+            return arena.generator().buildTerrain(chunk, blender, arena.state(state.seed()), structures, biomes, region, Set.of(arena.biome()));
+        }
         if (island.isPresent()) {
             IslandProfile config = island.orElseThrow();
             int x = chunk.getPos().getMinBlockX();
@@ -162,6 +171,10 @@ public final class VoidGenerator extends ChunkGenerator implements ManagedGenera
 
     @Override
     public int getBaseHeight(int x, int z, Heightmap.Types type, LevelHeightAccessor height, RandomState state) {
+        if (endProgression().isPresent() && com.gwsheridan.worldarchitect.config.EndProgression.contains(x, z)) {
+            var arena = endProgression().orElseThrow();
+            return arena.generator().getBaseHeight(x, z, type, height, arena.state(state.seed()));
+        }
         return baseHeight(x, z, type, height);
     }
 
@@ -188,6 +201,10 @@ public final class VoidGenerator extends ChunkGenerator implements ManagedGenera
 
     @Override
     public NoiseColumn getBaseColumn(int x, int z, LevelHeightAccessor height, RandomState state) {
+        if (endProgression().isPresent() && com.gwsheridan.worldarchitect.config.EndProgression.contains(x, z)) {
+            var arena = endProgression().orElseThrow();
+            return arena.generator().getBaseColumn(x, z, height, arena.state(state.seed()));
+        }
         BlockState[] column = new BlockState[height.getHeight()];
         Arrays.fill(column, Blocks.AIR.defaultBlockState());
         if (island.isPresent()) {

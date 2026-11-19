@@ -119,7 +119,7 @@
   "worldarchitect.dimensions.adapter_needed": "This generator needs a dimension adapter to use World Architect terrain.",
   "worldarchitect.dimensions.adapter_invalid": "The installed dimension adapter is incompatible.",
   "worldarchitect.dimensions.missing_biome": "A registered biome is required to replace this generator.",
-  "worldarchitect.dimensions.dragon_warning": "Custom terrain disables the dragon fight and its exit portal.",
+  "worldarchitect.dimensions.dragon_warning": "Dragon fight reserves a native central arena. Existing presets keep their selected policy.",
   "worldarchitect.features.title": "Features & Structures",
   "worldarchitect.features.requires_terrain": "Choose Single Block or Layered terrain to edit generation rules.",
   "worldarchitect.features.explicit": "Only the rules added here change this dimension's terrain.",
@@ -165,5 +165,6 @@
   "worldarchitect.features.structure": "Registered structure ID",
   "worldarchitect.features.spacing": "Spacing (chunks)",
   "worldarchitect.features.separation": "Separation (chunks)",
-  "worldarchitect.features.biome_required": "Select a compatible biome for"
+  "worldarchitect.features.biome_required": "Select a compatible biome for",
+  "worldarchitect.dimensions.rules_short": "Generation Rules"
 }

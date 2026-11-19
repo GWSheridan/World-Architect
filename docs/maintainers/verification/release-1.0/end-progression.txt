@@ -1,0 +1,12 @@
+End progression and final release checks
+
+51 unit tests passed; 51 Markdown files checked.
+Two-client dedicated native End progression: first kill, gateway round trip, exit, crystal respawn, restart during the ritual, second kill and interrupted-ritual recovery passed.
+Unsafe gateway refusal and bounded vertical fallback passed. Rewards: one dragon egg; native experience orbs observed.
+Native arena block/biome/preview and structure exclusion audits passed for Single Block, Layered, Void and Skyblock. Final JAR arena reopening passed.
+Existing generation snapshots, bundle archives and monitored island data retained their hashes.
+Four older save types reopened; new terrain, rules, adapter features and archived Skyblock templates passed saved-block audits.
+Nine dependency/file incompatibilities rejected without monitored save mutation.
+Partial/full End-policy lock violations and invalid arena version/dimension rejected.
+Structure option permission: allowed false toggle saved with seed 18 and no bonus chest; changed seed and fully locked toggle rejected.
+All generation, dragon, gateway, spawning and island class bytes in the final JAR match the candidate used for the comprehensive dedicated matrix. The final change exposes the existing option validator to regression tests; dedicated option checks also passed on the final JAR.

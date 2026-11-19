@@ -35,6 +35,17 @@ tasks.named('test', Test).configure {
     workingDir = temporaryDir
 }
 
+tasks.register('checkDocumentation', JavaExec) {
+    group = 'verification'
+    description = 'Check local and versioned-source links in the shipped Markdown guides.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.DocumentationAudit'
+    args layout.projectDirectory.asFile.absolutePath
+}
+
+tasks.named('check').configure { dependsOn tasks.named('checkDocumentation') }
+
 tasks.named('runServer', JavaExec).configure {
     standardInput = System.in
 }
@@ -171,9 +182,10 @@ def releaseSources = tasks.register('releaseSources', Zip) {
     destinationDirectory = releaseDirectory
     from(layout.projectDirectory) {
         exclude '**/build/**', '**/.gradle/**', '**/.gradle-local/**', '**/run/**'
-        include 'src/**', 'gradle/**', 'docs/**', 'examples/**', '.gitignore',
+        include 'src/**', 'gradle/**', 'docs/**', 'examples/**',
                 'gradlew', 'gradlew.bat', 'build.gradle', 'settings.gradle', 'gradle.properties', 'README.md', 'CHANGELOG.md'
     }
+    from('.gitignore', '.gitattributes')
 }
 
 tasks.register('packageRelease', Zip) {
