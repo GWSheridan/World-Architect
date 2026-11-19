@@ -1,0 +1,210 @@
+{
+  "format": 1,
+  "version": "1.2.0",
+  "cases": [
+    {
+      "name": "single-block",
+      "format": 1,
+      "platform": "linux",
+      "profile": "single-block",
+      "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "e981bded65087104fe165dbc59d44ba31b7259c73e8cb0d1b0370abe6c349fff",
+        "minecraft/world_gen_settings.dat": "2ec73dad6f9e2f60e89d3f3b4184d9e3605d346338bb4f06e1573ddba897b46c",
+        "worldarchitect/generation/e06a66b4dc8c24252cc0bc75b35a9f5c02d87fb16909bc5863f9868be9ea40b6.zip": "e06a66b4dc8c24252cc0bc75b35a9f5c02d87fb16909bc5863f9868be9ea40b6"
+      }
+    },
+    {
+      "name": "layered",
+      "format": 1,
+      "platform": "linux",
+      "profile": "single-block",
+      "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "ec662f7882af36ad552694eeca829824e3afefea38ae20dbb1f5b775160823ee",
+        "minecraft/world_gen_settings.dat": "be60b38a368ef457fa0ac30a65cfc0eabb58a80bf38e0413030b84ba5901e73f",
+        "worldarchitect/generation/3937cf3ec473d3535d6c4739b6e7dd0e1d1ec9adf1c1f6ce143d13d29820925d.zip": "3937cf3ec473d3535d6c4739b6e7dd0e1d1ec9adf1c1f6ce143d13d29820925d"
+      }
+    },
+    {
+      "name": "skyblock",
+      "format": 1,
+      "platform": "linux",
+      "profile": "single-block",
+      "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "1fb111c77022e1707563969cd4bd644e489ef5ae4d9611b8f744f16bfc8e93e6",
+        "minecraft/world_gen_settings.dat": "73995cce72348f84f2a10748b3890e9473a59beab49aa9802f00536a07f9812c",
+        "worldarchitect/generation/3885422b16f6ec3da6badfd77d80fd5b084fce99d954b0552c69cc41e5fe02fa.zip": "3885422b16f6ec3da6badfd77d80fd5b084fce99d954b0552c69cc41e5fe02fa"
+      }
+    },
+    {
+      "name": "custom-end",
+      "format": 1,
+      "platform": "linux",
+      "profile": "single-block",
+      "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "5f63e1d13ffb7290836e36b249ff17cfdfb3860f753abbb3a1b190ff9c68f9ae",
+        "minecraft/world_gen_settings.dat": "0d0ae4d145a1e7692a3c59d9c91348312c500325637514ab47e07c5a9985093f",
+        "worldarchitect/generation/6dde30c74969f38614fafd5ceceeec0b2ef884cac1dadcff6caf114b06cada62.zip": "6dde30c74969f38614fafd5ceceeec0b2ef884cac1dadcff6caf114b06cada62"
+      }
+    },
+    {
+      "name": "locked-partial",
+      "format": 1,
+      "platform": "linux",
+      "profile": "single-block",
+      "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "0543e596efb9a9629685d620d18755a78cd6537119240d3eb59b3d7a24c18fb2",
+        "minecraft/world_gen_settings.dat": "b569a7142ba757aa8aa832126232e5919b8dde62d3c8629cd0294db9576cba08",
+        "worldarchitect/generation/bc654a57b800744f1a4853217dfa253450d1b8d3ce179b6a41065482a5859bce.zip": "bc654a57b800744f1a4853217dfa253450d1b8d3ce179b6a41065482a5859bce"
+      }
+    },
+    {
+      "name": "locked-skyblock",
+      "format": 1,
+      "platform": "linux",
+      "profile": "single-block",
+      "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "767010727e9538fabdaff50ee4d7eea4abe479239712741924d6e71916858178",
+        "minecraft/world_gen_settings.dat": "f57500ab0b1bf795ed7338fabf10fa62a7eb09062e2ccc8d1f15cab1d7b0bbe5",
+        "worldarchitect/generation/db200f9b47e3398f26f3c18d791f11c0630834f78f4f041f5cc1e501c7e3e81e.zip": "db200f9b47e3398f26f3c18d791f11c0630834f78f4f041f5cc1e501c7e3e81e"
+      }
+    },
+    {
+      "name": "assembly-demo",
+      "format": 1,
+      "platform": "linux",
+      "profile": "single-block",
+      "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "dfd21734f2daf373ecaf346b60619231613273e456b0b80eae8aae54fba95af2",
+        "minecraft/world_gen_settings.dat": "0dcd2014017816b9464f30fe52dd8608fe55afa2eed10b8716b904af587d1ce4",
+        "worldarchitect/generation/eaf56fd575653951555c71d1666583765080ba2e54ac7e80dec932057d55904e.zip": "eaf56fd575653951555c71d1666583765080ba2e54ac7e80dec932057d55904e"
+      }
+    }
+  ],
+  "status": "passed"
+}

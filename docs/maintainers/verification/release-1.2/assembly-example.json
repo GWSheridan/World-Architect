@@ -1,0 +1,28 @@
+{
+  "format": 1,
+  "platform": "win32",
+  "profile": "single-block",
+  "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+  "tests": [
+    {
+      "case": "fresh",
+      "status": "passed"
+    },
+    {
+      "case": "restart",
+      "status": "passed"
+    },
+    {
+      "case": "generation-pins-intact",
+      "status": "passed",
+      "files": 3
+    }
+  ],
+  "status": "passed",
+  "suite": "compatibility",
+  "generation_sha256": {
+    "worldarchitect-generation-v1.dat": "dfd21734f2daf373ecaf346b60619231613273e456b0b80eae8aae54fba95af2",
+    "minecraft/world_gen_settings.dat": "0dcd2014017816b9464f30fe52dd8608fe55afa2eed10b8716b904af587d1ce4",
+    "worldarchitect/generation/eaf56fd575653951555c71d1666583765080ba2e54ac7e80dec932057d55904e.zip": "eaf56fd575653951555c71d1666583765080ba2e54ac7e80dec932057d55904e"
+  }
+}

@@ -1,4 +1,4 @@
-param([ValidateSet('baseline','candidate')][string]$Version='baseline', [string]$OutputRoot='build/performance', [string]$JavaHome=$env:JAVA_HOME, [string]$Jdk21=$env:JAVA21_HOME)
+param([ValidateSet('baseline','candidate')][string]$Version='baseline', [string]$OutputRoot='build/performance', [string]$JavaHome=$env:JAVA_HOME, [string]$Jdk21=$env:JAVA21_HOME, [ValidateSet('normal','void','single-block','layered','structure-heavy')][string[]]$Profiles=@('normal','void','single-block','layered','structure-heavy'))
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path ($OutputRoot+'/bench-'+$Version)).Path
 if (!$JavaHome) { throw 'Set JAVA_HOME to a Java 25 JDK' }; $env:JAVA_HOME=$JavaHome
@@ -62,7 +62,7 @@ function Measure-Batch([int]$base,[int]$size,[string]$label) {
     Send 'forceload remove all'
     return @{Elapsed=$timer.Elapsed.TotalSeconds;Resident=$peak}
 }
-foreach ($fixture in 'normal','void','single-block','layered','structure-heavy') {
+foreach ($fixture in $Profiles) {
     $caseDirectory="$root/$fixture"
     $log="$caseDirectory/logs/latest.log"
     $regions="$caseDirectory/world/dimensions/minecraft/overworld/region"

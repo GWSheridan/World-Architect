@@ -1,0 +1,12 @@
+{
+  "repository": "GWSheridan/World-Architect",
+  "run_id": 44578290062,
+  "url": "https://github.com/GWSheridan/World-Architect/actions/runs/44578290062",
+  "commit": "15a3d42fbefdfd0393012c0e742727d3f4414cd3",
+  "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+  "jobs": [
+    {"id": 135751668452, "platform": "windows-latest", "conclusion": "success"},
+    {"id": 135751669307, "platform": "ubuntu-latest", "conclusion": "success"}
+  ],
+  "scope": "Exact production binary and seven examples; subsequent changes are documentation and diagnostic tools."
+}

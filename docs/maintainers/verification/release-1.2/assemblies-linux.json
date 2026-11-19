@@ -1,0 +1,94 @@
+{
+  "format": 1,
+  "version": "1.2.0",
+  "cases": [
+    {
+      "dimension": "minecraft:overworld",
+      "format": 1,
+      "platform": "linux",
+      "profile": "single-block",
+      "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "e8efe91b18fd1a8390adf77a0521b945bc4f88745e129f4bc5f895148ad0f305",
+        "minecraft/world_gen_settings.dat": "64df180e596199aae133f17057c5a8e5c78dacf19c828aa0c93a02c9da1450dd",
+        "worldarchitect/generation/b6ef117099d0a6fd1908ba7fe593b3fd4524fb0cdada52860d2fc6212b17547e.zip": "b6ef117099d0a6fd1908ba7fe593b3fd4524fb0cdada52860d2fc6212b17547e"
+      }
+    },
+    {
+      "dimension": "minecraft:the_nether",
+      "format": 1,
+      "platform": "linux",
+      "profile": "single-block",
+      "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "9800315ee3c6f5f50d7c8185ecccad5b5ec5b0545a6373562ecc9644a8e9445d",
+        "minecraft/world_gen_settings.dat": "91350abb1d968ae4a033f7f575aa22de91d4b81ec7e5af11ae506bdb5faab25a",
+        "worldarchitect/generation/d5e23fba34eb06c0993fa8ab05df6b9538881699c2ffe96ada1a1597c6650e5e.zip": "d5e23fba34eb06c0993fa8ab05df6b9538881699c2ffe96ada1a1597c6650e5e"
+      }
+    },
+    {
+      "dimension": "minecraft:the_end",
+      "format": 1,
+      "platform": "linux",
+      "profile": "single-block",
+      "jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+      "tests": [
+        {
+          "case": "fresh",
+          "status": "passed"
+        },
+        {
+          "case": "restart",
+          "status": "passed"
+        },
+        {
+          "case": "generation-pins-intact",
+          "status": "passed",
+          "files": 3
+        }
+      ],
+      "status": "passed",
+      "suite": "compatibility",
+      "generation_sha256": {
+        "worldarchitect-generation-v1.dat": "a7f998c6b5967e471a9757943f02918ea27b49b717710e25d1867c8a18c27bf5",
+        "minecraft/world_gen_settings.dat": "30008b026825c2f5aa656191bea162f71c5f154db8c2ff8c8bf892b4b68e3ddd",
+        "worldarchitect/generation/81e275beaf025292f74029fa3b365c40be8abd08d9a213822dc4b0b2289bfea1.zip": "81e275beaf025292f74029fa3b365c40be8abd08d9a213822dc4b0b2289bfea1"
+      }
+    }
+  ],
+  "status": "passed"
+}

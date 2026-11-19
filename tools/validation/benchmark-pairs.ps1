@@ -28,7 +28,7 @@ try {
             & ./examples/performance/benchmark.ps1 -Version $version -OutputRoot $directory -JavaHome $JavaHome -Jdk21 $Jdk21
             if(-not $?){throw "Benchmark failed: $pair/$version"}
         }
-        $toolchain=if($Jdk21){@("-Porg.gradle.java.installations.paths=$Jdk21")}else{@()}
+        $toolchain=@();if($Jdk21){$toolchain+="-Porg.gradle.java.installations.paths=$Jdk21"}
         & ./gradlew.bat auditBenchmarkWorlds --offline --console=plain "-PbenchmarkBaseline=$directory/bench-baseline" "-PbenchmarkCandidate=$directory/bench-candidate" @toolchain
         if($LASTEXITCODE -ne 0){throw "Saved-region comparison failed: $pair"}
     }

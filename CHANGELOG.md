@@ -7,6 +7,7 @@
 - Added a server administration panel for island assignments, teams, spawn policies and protection, with staged confirmations and current-state checks.
 - Cached complete assembly previews and retained the existing module, cell and session budgets.
 - Fixed overlapping rule-editor navigation controls at 320 × 240 and kept the new confirmation screens usable after resizing.
+- Fixed the Windows benchmark launcher’s toolchain argument handling.
 - Added a versioned assembly example and expanded dedicated-server fixtures and combined public-mod comparisons against 1.1.0.
 - Retained API 1 and existing generation, preset, template, island and administration formats. Matching 1.2 clients and servers are required for authoring networking.
 

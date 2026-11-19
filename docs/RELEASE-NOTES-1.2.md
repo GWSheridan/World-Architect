@@ -28,3 +28,11 @@ Existing worlds retain their saved algorithms, templates, archived presets and E
 Place the JAR in `mods/`. Keep preset bundles zipped in `config/worldarchitect/bundles/` and select the required bundle in `developer.json`. Test fixtures and third-party compatibility mods are excluded from the gameplay distribution.
 
 See [Assembly Studio](https://github.com/GWSheridan/World-Architect/blob/v1.2.0/docs/wiki/Assembly-Studio.md), [Rule Inspector](https://github.com/GWSheridan/World-Architect/blob/v1.2.0/docs/wiki/Rule-Inspector.md), [Administration Panel](https://github.com/GWSheridan/World-Architect/blob/v1.2.0/docs/wiki/Administration-Panel.md) and [Backups and Upgrades](https://github.com/GWSheridan/World-Architect/blob/v1.2.0/docs/wiki/Backups-and-Upgrades.md).
+
+## Verification
+
+The exact release JAR passed 61 unit tests, Windows/Linux dedicated validation, seven clean example installations and six pinned public-mod combinations on each platform. Four real clients completed more than an hour of exploration, native End progression and restart checks; a locked two-client pack also passed a thirty-minute run. Assembly exports generated in all three vanilla dimensions and an external adapter dimension. Permission revocation and stale administrative confirmations were refused, including closure of an already-open protected container without losing its contents.
+
+Upgrade and rejection tests preserved existing save data. Complete audits left 593 files across seven original saves unchanged; all 711 monitored files in twelve rejected save copies also remained intact. Thirty-two unexplored custom End chunks matched the published baseline, including configured End Cities. Earlier releases remain unchanged.
+
+Initial short-run timing flags for Void and Single Block did not reproduce in three fresh alternating pairs. A vanilla pyramid burial difference reproduced with the same binary; biomes and terrain outside its footprint matched strictly. Raw measurements and the precise test scope are retained in the [verification report](https://github.com/GWSheridan/World-Architect/blob/v1.2.0/docs/maintainers/verification/release-1.2/README.md).

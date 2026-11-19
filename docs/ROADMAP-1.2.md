@@ -13,3 +13,5 @@ Milestones 27–31 focus on visual authoring and server administration on Minecr
 API 1, immutable saved generation, native End policies and existing preset/template formats remain supported. Assemblies retain the existing limits: 16 modules, 96 blocks per axis and 65,536 occupied cells; each source template remains limited to 32 blocks per axis. Authoring drafts and administration controls do not replace generation snapshots. Upgrade runs use copies of saved worlds.
 
 Earlier release downloads and tags remain unchanged. Publication of the prepared 1.2 release is a separate step.
+
+Implementation and validation are recorded in the [1.2 verification report](maintainers/verification/release-1.2/README.md), including exact-JAR platform checks, both four-client hour-long runs, upgrade copies and the performance investigation. Release artifacts and the wiki are staged for review before publication.

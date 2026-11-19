@@ -24,7 +24,7 @@ public final class BenchmarkWorldAudit {
         for (int origin : new int[] {1000, -1000}) for (int x = origin; x < origin + 6; x++) for (int z = origin; z < origin + 6; z++) {
             var old = CrossDimensionWorldAudit.chunk(left, "minecraft:overworld", x * 16, z * 16, a);
             var current = CrossDimensionWorldAudit.chunk(right, "minecraft:overworld", x * 16, z * 16, b);
-            if (!Objects.equals(old.get("structures"), current.get("structures"))) { structures++; require(!strict, profile + " changed structures at " + x + "," + z); }
+            if (!Objects.equals(old.get("structures"), current.get("structures"))) { structures++; require(!strict, profile + " changed structures at " + x + "," + z + " BASELINE=" + old.get("structures") + " CANDIDATE=" + current.get("structures")); }
             if (!Objects.equals(old.get("Heightmaps"), current.get("Heightmaps"))) { heightmaps++; require(!strict, profile + " changed heightmaps at " + x + "," + z); }
             for (var value : old.getListOrEmpty("sections")) {
                 var section = (CompoundTag) value; int y = section.getIntOr("Y", -9999);

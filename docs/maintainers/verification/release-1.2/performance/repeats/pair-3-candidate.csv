@@ -1,0 +1,5 @@
+"Profile","Sample","Chunks","Seconds","WarmWorkingSetMiB","PeakSampledWorkingSetMiB"
+"void","1","36","1.52","705","795"
+"void","2","36","0.7","705","810"
+"single-block","1","36","1.97","749","754"
+"single-block","2","36","1.31","749","759"

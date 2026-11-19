@@ -1,0 +1,407 @@
+{
+  "date": "2026-11-19T17:38:17.4729551Z",
+  "milestone": 31,
+  "tested_version": "1.2.0",
+  "integration_jar_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+  "minecraft": "26.3",
+  "neoforge": "26.3.0.103",
+  "java": 25,
+  "unit_tests": 61.0,
+  "dedicated_matrix": [
+    {
+      "monitored_files": 0,
+      "outcome": "loaded-and-generated-new-chunks",
+      "case": "upgrade-nine",
+      "finished": "2026-11-19T16:45:49.0372423Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "loaded-and-generated-new-chunks",
+      "case": "upgrade-rules",
+      "finished": "2026-11-19T16:46:25.8119219Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "loaded-and-generated-new-chunks",
+      "case": "upgrade-studio",
+      "finished": "2026-11-19T16:47:00.785212Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "loaded-and-generated-new-chunks",
+      "case": "upgrade-eleven",
+      "finished": "2026-11-19T16:47:42.0604951Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "external-provider-and-persistence-passed",
+      "case": "api",
+      "finished": "2026-11-19T16:48:18.7019843Z"
+    },
+    {
+      "monitored_files": 57,
+      "outcome": "rejected-with-unchanged-save",
+      "case": "missing-dimension",
+      "finished": "2026-11-19T16:48:39.6595054Z"
+    },
+    {
+      "monitored_files": 57,
+      "outcome": "rejected-with-unchanged-save",
+      "case": "changed-dimension",
+      "finished": "2026-11-19T16:49:02.1027368Z"
+    },
+    {
+      "monitored_files": 57,
+      "outcome": "rejected-with-unchanged-save",
+      "case": "missing-feature",
+      "finished": "2026-11-19T16:49:22.8632859Z"
+    },
+    {
+      "monitored_files": 57,
+      "outcome": "rejected-with-unchanged-save",
+      "case": "changed-feature",
+      "finished": "2026-11-19T16:49:43.6732452Z"
+    },
+    {
+      "monitored_files": 57,
+      "outcome": "rejected-with-unchanged-save",
+      "case": "missing-structure",
+      "finished": "2026-11-19T16:50:03.3914186Z"
+    },
+    {
+      "monitored_files": 57,
+      "outcome": "rejected-with-unchanged-save",
+      "case": "changed-structure",
+      "finished": "2026-11-19T16:50:23.5155886Z"
+    },
+    {
+      "monitored_files": 57,
+      "outcome": "rejected-with-unchanged-save",
+      "case": "changed-api",
+      "finished": "2026-11-19T16:50:45.0999715Z"
+    },
+    {
+      "monitored_files": 61,
+      "outcome": "rejected-with-unchanged-save",
+      "case": "missing-both",
+      "finished": "2026-11-19T16:51:06.5967119Z"
+    },
+    {
+      "monitored_files": 62,
+      "outcome": "rejected-with-unchanged-save",
+      "case": "missing-archive",
+      "finished": "2026-11-19T16:51:28.4269883Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "fresh-bundle-loaded",
+      "case": "partial-final",
+      "finished": "2026-11-19T16:52:07.2465968Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "fresh-bundle-loaded",
+      "case": "full-final",
+      "finished": "2026-11-19T16:52:42.8485628Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "invalid-fresh-world-rejected",
+      "case": "arena-bad-dimension",
+      "finished": "2026-11-19T16:53:03.4038373Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "invalid-fresh-world-rejected",
+      "case": "bad-progression-full",
+      "finished": "2026-11-19T16:53:25.4455505Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "invalid-fresh-world-rejected",
+      "case": "bad-terrain-final",
+      "finished": "2026-11-19T16:53:44.367772Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "invalid-fresh-world-rejected",
+      "case": "bad-seed-final",
+      "finished": "2026-11-19T16:54:03.5633922Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "invalid-fresh-world-rejected",
+      "case": "bad-progression",
+      "finished": "2026-11-19T16:54:21.4782692Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "invalid-fresh-world-rejected",
+      "case": "arena-bad-version",
+      "finished": "2026-11-19T16:54:41.0090688Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "invalid-fresh-world-rejected",
+      "case": "bad-rules-final",
+      "finished": "2026-11-19T16:54:59.6251467Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "native-arena-and-boundary-passed",
+      "case": "arena-layered",
+      "finished": "2026-11-19T16:55:40.9790306Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "native-arena-and-boundary-passed",
+      "case": "arena-void",
+      "finished": "2026-11-19T16:56:15.9484693Z"
+    },
+    {
+      "monitored_files": 0,
+      "outcome": "native-arena-and-boundary-passed",
+      "case": "arena-skyblock",
+      "finished": "2026-11-19T16:56:46.7277636Z"
+    },
+    {
+      "monitored_files": 2,
+      "outcome": "unchanged",
+      "case": "upgrade-nine-pins",
+      "finished": "2026-11-19T16:56:46.7491356Z"
+    },
+    {
+      "monitored_files": 5,
+      "outcome": "unchanged",
+      "case": "upgrade-eleven-pins",
+      "finished": "2026-11-19T16:56:46.7518456Z"
+    },
+    {
+      "monitored_files": 2,
+      "outcome": "unchanged",
+      "case": "upgrade-rules-pins",
+      "finished": "2026-11-19T16:56:46.7627939Z"
+    },
+    {
+      "monitored_files": 4,
+      "outcome": "unchanged",
+      "case": "upgrade-studio-pins",
+      "finished": "2026-11-19T16:56:46.765391Z"
+    },
+    {
+      "monitored_files": 3,
+      "outcome": "unchanged",
+      "case": "api-pins",
+      "finished": "2026-11-19T16:56:46.7783659Z"
+    }
+  ],
+  "end_phases": [
+    "fresh",
+    "active",
+    "ritual",
+    "finish"
+  ],
+  "api_multiplayer": [
+    "fresh",
+    "restart"
+  ],
+  "skyblock_multiplayer": [
+    "fresh",
+    "restart",
+    "soak",
+    "after-soak"
+  ],
+  "soak": {
+    "connected_seconds": 1825.4304724,
+    "rounds": 10,
+    "forced_chunks": 320
+  },
+  "rejected_saves": [
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 57,
+      "case": "missing-dimension"
+    },
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 57,
+      "case": "changed-dimension"
+    },
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 57,
+      "case": "missing-feature"
+    },
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 57,
+      "case": "changed-feature"
+    },
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 57,
+      "case": "missing-structure"
+    },
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 57,
+      "case": "changed-structure"
+    },
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 57,
+      "case": "changed-api"
+    },
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 61,
+      "case": "missing-both"
+    },
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 62,
+      "case": "missing-archive"
+    },
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 63,
+      "case": "corrupt-snapshot"
+    },
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 63,
+      "case": "unknown-snapshot"
+    },
+    {
+      "file_set_unchanged": true,
+      "contents_unchanged": true,
+      "files": 63,
+      "case": "tampered-archive"
+    }
+  ],
+  "originals": {
+    "original_save_types": 6,
+    "unchanged": true,
+    "pinned_files": 20
+  },
+  "artifacts": [
+    {
+      "unchanged": true,
+      "name": "SHA256SUMS-1.0.0.txt",
+      "sha256": "fbc7665b867a80646dfddfcebda9c6b28cf7e15494dafd018897290c24443717"
+    },
+    {
+      "unchanged": true,
+      "name": "studio-partial-1.0.0.zip",
+      "sha256": "309732fc927c63cfca34585ef702c2f24cecbae18c50891eb263ccf8f12cd842"
+    },
+    {
+      "unchanged": true,
+      "name": "studio-skyblock-1.0.0.zip",
+      "sha256": "7e9ee3dd307971660b3feecf2bb690d6813819f8e63359ada3f4f4ccdfb3e612"
+    },
+    {
+      "unchanged": true,
+      "name": "worldarchitect-1.0.0-release.zip",
+      "sha256": "59a43f7e45b154b827abede5afc82adcd878b383bdb8a612855599efc3394b90"
+    },
+    {
+      "unchanged": true,
+      "name": "worldarchitect-1.0.0-source.zip",
+      "sha256": "66a149910fc7ec9fe3733254623dbe310a2f6b8647fa1732b443a01c4064256e"
+    },
+    {
+      "unchanged": true,
+      "name": "worldarchitect-1.0.0.jar",
+      "sha256": "14fe208d2fed07e8dec98e33b1f06c519cb35a81a95412e60b1c808d94b332cd"
+    },
+    {
+      "unchanged": true,
+      "name": "SHA256SUMS.txt",
+      "sha256": "b47b18905be13658085fa357705a93ed0db5e6b5a55831b591a2f32099bdf966"
+    },
+    {
+      "unchanged": true,
+      "name": "worldarchitect-0.9.0-release.zip",
+      "sha256": "68c6d4ef7f5a5f4fa6fe68da0623d4e56465841ac01c83f73cd9ff07d92d7c2b"
+    },
+    {
+      "unchanged": true,
+      "name": "worldarchitect-0.9.0-source.zip",
+      "sha256": "bc37c4161541491073c7f522d1fa32c16ef3649dfc13a81eb520f05bc337d4cb"
+    },
+    {
+      "unchanged": true,
+      "name": "worldarchitect-0.9.0.jar",
+      "sha256": "7d87acdec4c53908a59d856c33ade0c16096e473b5a8ce7ccf8fa0b648385672"
+    },
+    {
+      "unchanged": true,
+      "name": "custom-end-1.1.0.zip",
+      "sha256": "9d88d16ed5d89b925cb20b3a9f5ba3ccf9a2a1854bd2f842c4dbe54255a242bd"
+    },
+    {
+      "unchanged": true,
+      "name": "layered-1.1.0.zip",
+      "sha256": "0209a011b87375724206873ca9350ce913f63ba0fad0af88f8c73f9f03ce42a2"
+    },
+    {
+      "unchanged": true,
+      "name": "SHA256SUMS-1.1.0.txt",
+      "sha256": "3f1317a6994e92ee6aaa057bace65df9526c8121bb4f5995b7ea6090475439ee"
+    },
+    {
+      "unchanged": true,
+      "name": "single-block-1.1.0.zip",
+      "sha256": "788b65540a0431601f675416136ec1e8ee70ae28c31e0771572bd92e5dc74590"
+    },
+    {
+      "unchanged": true,
+      "name": "skyblock-1.1.0.zip",
+      "sha256": "72c4d81a1294d99f2e4a1264dd81516d65a99cfa1fa3756772783b1abdd406e5"
+    },
+    {
+      "unchanged": true,
+      "name": "studio-partial-1.1.0.zip",
+      "sha256": "6486b95440cf5b77b4959a140541e0a8a284ace17f393b7e9d578edc804b809d"
+    },
+    {
+      "unchanged": true,
+      "name": "studio-skyblock-1.1.0.zip",
+      "sha256": "525f63b7c073362c5ed6031a564a41d5d02bc971bf943cf769bb0ad48748a4f6"
+    },
+    {
+      "unchanged": true,
+      "name": "worldarchitect-1.1.0-release.zip",
+      "sha256": "6179702db4f12b8ba7bf700176ccfa1c1048606e2659a122bdb4a4f63f15fc08"
+    },
+    {
+      "unchanged": true,
+      "name": "worldarchitect-1.1.0-source.zip",
+      "sha256": "e5269fbcb2362fbfd3f575c3235f10bb40053392a397633116a4f92aa458a9fa"
+    },
+    {
+      "unchanged": true,
+      "name": "worldarchitect-1.1.0.jar",
+      "sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa"
+    }
+  ],
+  "critical_error_logs_checked": 40,
+  "fixed_issues": [
+    "compact rule navigation overlap",
+    "confirmation layout after resizing"
+  ],
+  "release_blockers_remaining": 0,
+  "passed": true
+}

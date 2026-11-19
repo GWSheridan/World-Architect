@@ -276,3 +276,13 @@ tasks.register('auditSavedChunkPair', JavaExec) {
         file(providers.gradleProperty('candidateWorld').get()).absolutePath,
         providers.gradleProperty('terrainDimension').get(), providers.gradleProperty('terrainChunks').get()] } as CommandLineArgumentProvider)
 }
+
+tasks.register('auditNativePyramidPair', JavaExec) {
+    group = 'verification'
+    description = 'Diagnose native pyramid burial variation while strictly comparing terrain outside its footprint.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.worldgen.NativePyramidPairAudit'
+    argumentProviders.add({ [file(providers.gradleProperty('baselineWorld').get()).absolutePath,
+        file(providers.gradleProperty('candidateWorld').get()).absolutePath] } as CommandLineArgumentProvider)
+}

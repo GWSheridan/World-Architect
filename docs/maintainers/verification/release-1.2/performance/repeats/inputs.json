@@ -1,0 +1,13 @@
+{
+  "other_game_build_and_artifact_workloads_stopped": true,
+  "profiles": [
+    "void",
+    "single-block"
+  ],
+  "pairs": 3,
+  "candidate_sha256": "4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1",
+  "sample_poll_milliseconds": 200,
+  "measured_chunks_per_region": 36,
+  "warmup_chunks": 16,
+  "baseline_sha256": "2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa"
+}
