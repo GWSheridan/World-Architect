@@ -160,6 +160,7 @@ final class WorldPreviewScreen extends Screen {
         graphics.centeredText(font, font.plainSubstrByWidth(dimension.toString(), width - 24), width / 2, 17, 0xFFCCCCCC);
         graphics.fill(mapLeft - 1, MAP_TOP - 1, mapLeft + mapSide + 1, MAP_TOP + mapSide + 1, 0xFF7588A0);
         graphics.fill(mapLeft, MAP_TOP, mapLeft + mapSide, MAP_TOP + mapSide, 0xFF141E2B);
+        graphics.enableScissor(mapLeft, MAP_TOP, mapLeft + mapSide, MAP_TOP + mapSide);
         if (view == View.TERRAIN) renderTerrain(graphics);
         else if (view == View.SECTION) renderSection(graphics);
         else for (int row = 0; row < GRID; row++) {
@@ -179,6 +180,7 @@ final class WorldPreviewScreen extends Screen {
             int y = pixelZ(index / GRID);
             graphics.fill(x, y, Math.min(x + 3, mapLeft + mapSide), Math.min(y + 3, MAP_TOP + mapSide), 0xFFFFD560);
         }
+        graphics.disableScissor();
         Component status = cursor(mouseX, mouseY);
         graphics.centeredText(font, font.plainSubstrByWidth(status.getString(), width - 20), width / 2, height - 48, 0xFFFFFFFF);
         Component caption = Component.literal("Base terrain · decorations and structures excluded" + (nextSample < samples.length ? " · sampling " + nextSample * 100 / samples.length + "%" : ""));

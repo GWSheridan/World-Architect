@@ -58,8 +58,9 @@ final class StructurePlacementScreen extends Screen {
     @Override public boolean isPauseScreen() { return false; }
     @Override public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float tick) {
         super.extractRenderState(g, mx, my, tick);
-        g.centeredText(font, Component.literal(visual.getStringOr("id", "Structure")), width / 2, 9, 0xFFF1E7CE);
+        g.centeredText(font, font.plainSubstrByWidth(visual.getStringOr("id", "Structure"), width - 24), width / 2, 9, 0xFFF1E7CE);
         int top = 52, bottom = height - 86;
+        g.enableScissor(12, top, width - 12, bottom);
         double scale = Math.max(.5, Math.min((width - 32.0) / (size[0] + size[2] + 2), (bottom - top) / (size[1] + (size[0] + size[2]) * .5 + 2)));
         for (int i : order) {
             int p = cells[i * 2]; double x = (p & 31) - size[0] / 2.0, y = (p >> 5 & 31) - size[1] / 2.0, z = (p >> 10 & 31) - size[2] / 2.0;
@@ -76,6 +77,7 @@ final class StructurePlacementScreen extends Screen {
             g.fill(dot[0]-2, dot[1]-2, dot[0]+3, dot[1]+3, 0xFFFFD560);
             g.text(font, tag.getStringOr("name", "spawn") + " · " + tag.getStringOr("facing", ""), dot[0]+4, dot[1], 0xFFFFD560);
         }
+        g.disableScissor();
         var lines = font.split(Component.literal(visual.getStringOr("status", "")), width - 24);
         for (int i = 0; i < Math.min(2, lines.size()); i++) g.text(font, lines.get(i), 12, height - 51 + i * 10, visual.getBooleanOr("valid", false) ? 0xFFACEAB8 : 0xFFFFC080);
     }

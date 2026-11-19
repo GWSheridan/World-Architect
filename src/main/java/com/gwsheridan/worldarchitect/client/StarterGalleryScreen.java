@@ -37,6 +37,6 @@ final class StarterGalleryScreen extends Screen {
     @Override public void extractRenderState(GuiGraphicsExtractor g, int x, int y, float tick) {
         super.extractRenderState(g, x, y, tick);
         g.centeredText(font, title, width / 2, 9, 0xFFF1E7CE);
-        g.centeredText(font, Component.literal("Choose a starting point, then customize its dimensions."), width / 2, 26, 0xFFCCCCCC);
+        g.centeredText(font, Component.literal("Choose a starter, then edit its dimensions."), width / 2, 26, 0xFFCCCCCC);
     }
 }
