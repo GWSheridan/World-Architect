@@ -1,0 +1,51 @@
+{
+  "upgrade-nine": {
+    "protected_files": 2,
+    "changed": []
+  },
+  "upgrade-adapter": {
+    "protected_files": 2,
+    "changed": []
+  },
+  "upgrade-studio": {
+    "protected_files": 4,
+    "changed": []
+  },
+  "upgrade-rules": {
+    "protected_files": 2,
+    "changed": []
+  },
+  "missing-dimension": {
+    "protected_files": 41,
+    "changed": []
+  },
+  "changed-dimension": {
+    "protected_files": 41,
+    "changed": []
+  },
+  "missing-feature": {
+    "protected_files": 41,
+    "changed": []
+  },
+  "changed-feature": {
+    "protected_files": 41,
+    "changed": []
+  },
+  "missing-structure": {
+    "protected_files": 41,
+    "changed": []
+  },
+  "changed-structure": {
+    "protected_files": 41,
+    "changed": []
+  },
+  "changed-api": {
+    "protected_files": 41,
+    "changed": []
+  },
+  "jar_sha256": "78a951afa565431f5f06eaf8429680678f207c82256dfc25baf270e45258e642",
+  "upgrade-multiplayer": {
+    "protected_files": 4,
+    "changed": []
+  }
+}

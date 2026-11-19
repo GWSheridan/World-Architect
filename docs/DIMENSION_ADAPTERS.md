@@ -4,7 +4,7 @@ World Architect reads dimensions from the active world preset and Minecraft's `L
 
 ## Register an adapter
 
-Compile against World Architect 0.4.0-alpha to offer `TerrainMode.VOID` or `TerrainMode.SKYBLOCK`. Existing adapters continue to offer the modes they declare. On both physical sides, register a `DimensionAdapter` with NeoForge `DeferredRegister` during your mod's constructor. Use the exact dimension registry ID.
+Compile against World Architect 1.0.0 and call `WorldArchitectApi.requireVersion(1)`. Existing adapters continue to offer the modes they declare. On both physical sides, register a `DimensionAdapter` with NeoForge `DeferredRegister` during your mod's constructor. Use the exact dimension registry ID. The [public API contract](EXTENSION_API.md) also covers structures, features, blocks, spawning, environments and presets.
 
 ```java
 var adapters = DeferredRegister.create(DimensionAdapterRegistry.KEY, "examplemod");

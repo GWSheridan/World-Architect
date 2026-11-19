@@ -11,6 +11,7 @@ import com.gwsheridan.worldarchitect.dimension.DimensionCatalog;
 import com.gwsheridan.worldarchitect.dimension.DimensionCatalog.Replacement;
 import com.gwsheridan.worldarchitect.modpack.BundleManifest;
 import com.gwsheridan.worldarchitect.modpack.ModpackRuntime;
+import com.gwsheridan.worldarchitect.worldgen.GenerationPreview;
 import com.gwsheridan.worldarchitect.worldgen.LayeredGenerator;
 import com.gwsheridan.worldarchitect.worldgen.ManagedGenerator;
 import com.gwsheridan.worldarchitect.worldgen.SingleBlockGenerator;
@@ -46,7 +47,9 @@ final class DimensionManagerScreen extends Screen {
     private final Map<ResourceKey<LevelStem>, LevelStem> draft;
     private final Map<ResourceKey<LevelStem>, LevelStem> preset;
     private final Map<ResourceKey<LevelStem>, LevelStem> vanilla;
-    private final List<ResourceKey<LevelStem>> keys;
+    private List<ResourceKey<LevelStem>> keys;
+    private net.minecraft.world.level.levelgen.WorldOptions draftOptions;
+    private boolean studioOptionsChanged;
     private final Optional<BundleManifest> lock;
     private @Nullable ResourceKey<LevelStem> selected;
     private @Nullable Replacement replacement;
@@ -57,13 +60,17 @@ final class DimensionManagerScreen extends Screen {
     private Button layeredButton;
     private Button featuresButton;
     private Button voidButton;
+    private Button previewButton;
+    private Button rulesButton;
     private int detailLeft;
     private int detailWidth;
+    private int actionTop;
 
     DimensionManagerScreen(CreateWorldScreen parent, WorldCreationContext context) {
         super(text("title"));
         this.parent = parent;
         this.context = context;
+        this.draftOptions = context.options();
         this.draft = new LinkedHashMap<>(context.selectedDimensions().dimensions());
         var holder = parent.getUiState().getWorldType().preset();
         lock = ModpackRuntime.locked().filter(bundle -> holder != null && holder.is(bundle.key())).map(bundle -> bundle.manifest());
@@ -81,24 +88,52 @@ final class DimensionManagerScreen extends Screen {
         int listWidth = span / 2 - 8;
         detailLeft = left + listWidth + 16;
         detailWidth = span - listWidth - 16;
-        EditBox search = addRenderableWidget(new EditBox(font, left, 36, listWidth, 20, text("search")));
+        actionTop = Math.max(66, Math.min(109, height - 154));
+        EditBox search = addRenderableWidget(new EditBox(font, left, 25, listWidth, 20, text("search")));
         search.setHint(text("search"));
         search.setMaxLength(256);
         search.setValue(query);
-        rows = addRenderableWidget(new DimensionList(left, listWidth, height - 99));
+        rows = addRenderableWidget(new DimensionList(left, listWidth, height - 86));
+        previewButton = addRenderableWidget(Button.builder(Component.translatable("worldarchitect.preview.open"), button -> openPreview())
+                .bounds(detailLeft, 25, detailWidth, 20).build());
         originalButton = addRenderableWidget(Button.builder(text("original"), button -> restoreOriginal())
-                .bounds(detailLeft, 121, detailWidth, 20).build());
+                .bounds(detailLeft, actionTop, detailWidth, 20).build());
         int detailHalf = (detailWidth - 6) / 2;
         singleButton = addRenderableWidget(Button.builder(text("single"), button -> edit(TerrainMode.SINGLE_BLOCK))
-                .bounds(detailLeft, 147, detailHalf, 20).build());
+                .bounds(detailLeft, actionTop + 22, detailHalf, 20).build());
         layeredButton = addRenderableWidget(Button.builder(text("layered"), button -> edit(TerrainMode.LAYERED))
-                .bounds(detailLeft + detailHalf + 6, 147, detailHalf, 20).build());
+                .bounds(detailLeft + detailHalf + 6, actionTop + 22, detailHalf, 20).build());
         featuresButton = addRenderableWidget(Button.builder(text("features"), button -> editFeatures())
-                .bounds(detailLeft, 173, detailHalf, 20).build());
+                .bounds(detailLeft, actionTop + 44, detailHalf, 20).build());
         voidButton = addRenderableWidget(Button.builder(text("void_sky"), button -> editVoid())
-                .bounds(detailLeft + detailHalf + 6, 173, detailHalf, 20).build());
+                .bounds(detailLeft + detailHalf + 6, actionTop + 44, detailHalf, 20).build());
+        rulesButton = addRenderableWidget(Button.builder(Component.literal("World Generation Rules"), button -> editRules())
+                .bounds(detailLeft, actionTop + 66, detailWidth, 20).build());
+        var studio = addRenderableWidget(Button.builder(Component.literal("Preset Studio"), button -> {
+            try {
+                var all = new LinkedHashMap<ResourceKey<LevelStem>, LevelStem>(); keys.forEach(key -> all.put(key, effective(key)));
+                minecraft.gui.setScreen(new PresetStudioScreen(this, context.worldgenLoadContext(), new WorldDimensions(all), draftOptions, edited -> {
+                    try {
+                        var replacement = com.gwsheridan.worldarchitect.modpack.PresetStudio.forApply(edited, context.worldgenLoadContext()).createWorldDimensions().dimensions();
+                        draft.clear(); draft.putAll(replacement);
+                        draftOptions = edited.manifest().options();
+                        studioOptionsChanged = true;
+                        keys = DimensionCatalog.discover(draft, context.datapackDimensions());
+                        refreshRows();
+                    } catch (java.io.IOException e) { throw new IllegalArgumentException(e.getMessage(), e); }
+                }));
+            } catch (java.io.IOException e) {
+                minecraft.gui.setScreen(new StudioReportScreen(this, "Cannot open Preset Studio", List.of(e.getMessage())));
+            }
+        }).bounds(detailLeft, actionTop + 88, detailWidth, 20).build());
+        studio.active = lock.isEmpty();
         int half = (span - 8) / 2;
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
+            if (studioOptionsChanged) {
+                parent.getUiState().setSeed(Long.toString(draftOptions.seed()));
+                parent.getUiState().setGenerateStructures(draftOptions.generateStructures());
+                parent.getUiState().setBonusChest(draftOptions.generateBonusChest());
+            }
             parent.getUiState().updateDimensions((registries, old) -> new WorldDimensions(Map.copyOf(draft)));
             onClose();
         }).bounds(left, height - 30, half, 20).build());
@@ -138,16 +173,29 @@ final class DimensionManagerScreen extends Screen {
         LevelStem configured = key == null ? null : draft.get(key);
         boolean canEdit = key != null && canEditDimension(key);
         boolean canEditFeatures = key != null && (canEdit || lock.map(policy -> policy.editableFeatures().containsKey(key.identifier())).orElse(false));
+        previewButton.active = stem != null && stem.generator() instanceof ManagedGenerator;
+        previewButton.setTooltip(previewButton.active || stem == null ? null
+                : Tooltip.create(Component.translatable("worldarchitect.preview.unavailable")));
         originalButton.active = canEdit && configured != null && configured.generator() instanceof ManagedGenerator && original.isPresent();
         singleButton.active = canEdit && replacement != null && replacement.modes().contains(TerrainMode.SINGLE_BLOCK);
         layeredButton.active = canEdit && replacement != null && replacement.modes().contains(TerrainMode.LAYERED);
         voidButton.active = canEdit && replacement != null && (replacement.modes().contains(TerrainMode.VOID) || replacement.modes().contains(TerrainMode.SKYBLOCK));
         featuresButton.active = canEditFeatures && stem != null && stem.generator() instanceof SolidColumnGenerator;
+        rulesButton.active = canEdit && stem != null && stem.generator() instanceof ManagedGenerator;
         featuresButton.setTooltip(featuresButton.active ? null : Tooltip.create(canEditFeatures ? GenerationRuleScreen.text("requires_terrain")
                 : Component.translatable("worldarchitect.modpack.option_locked")));
         Tooltip warning = stem != null && stem.type().value().hasEnderDragonFight() ? Tooltip.create(text("dragon_warning")) : null;
         singleButton.setTooltip(warning);
         layeredButton.setTooltip(warning);
+    }
+
+    private void openPreview() {
+        ResourceKey<LevelStem> key = selected;
+        if (key != null) {
+            long seed = draftOptions.seed();
+            GenerationPreview.forStem(effective(key), seed).ifPresent(preview -> minecraft.gui.setScreen(
+                    new WorldPreviewScreen(this, key.identifier(), seed, preview)));
+        }
     }
 
     private boolean canEditDimension(ResourceKey<LevelStem> key) {
@@ -164,10 +212,23 @@ final class DimensionManagerScreen extends Screen {
             var type = stem.type().value();
             var profile = generator.dimensionProfile().orElseGet(() -> new DimensionProfile(type.minY(), type.height(), Optional.empty()));
             minecraft.gui.setScreen(new DimensionFeaturesScreen(this, Component.literal(key.identifier().toString()), generator, profile,
-                    context.worldgenLoadContext(), context.options().seed(),
+                    context.worldgenLoadContext(), draftOptions.seed(),
                     feature -> lock.map(policy -> policy.canEditFeature(key.identifier(), feature)).orElse(true),
                     edited -> draft.put(key, new LevelStem(stem.type(), edited))));
         }
+    }
+
+    private void editRules() {
+        if (selected == null) return;
+        var key = selected; var stem = effective(key);
+        if (!(stem.generator() instanceof ManagedGenerator generator)) return;
+        var profile = generator.dimensionProfile().orElseGet(() -> new DimensionProfile(stem.type().value().minY(), stem.type().value().height(), Optional.empty()));
+        var all = new LinkedHashMap<ResourceKey<LevelStem>, LevelStem>(); keys.forEach(dimension -> all.put(dimension, effective(dimension)));
+        minecraft.gui.setScreen(new RuleEngineScreen(this, key.identifier(), stem.generator(), profile, context.worldgenLoadContext(), all, draftOptions.seed(), edited -> {
+            var changed = stem.generator() instanceof SolidColumnGenerator solid ? solid.withDimensionProfile(edited)
+                    : new VoidGenerator(((VoidGenerator) stem.generator()).biome(), edited, ((VoidGenerator) stem.generator()).island(), ((VoidGenerator) stem.generator()).allowUnsafeSpawn());
+            draft.put(key, new LevelStem(stem.type(), changed)); updateActions();
+        }));
     }
 
     private void restoreOriginal() {
@@ -193,7 +254,8 @@ final class DimensionManagerScreen extends Screen {
         }
         LevelStem stem = effective(key);
         var type = stem.type().value();
-        var profile = new DimensionProfile(type.minY(), type.height(), support.adapter());
+        var retainedRules = stem.generator() instanceof ManagedGenerator managed ? managed.dimensionProfile().map(DimensionProfile::rules).orElse(com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY) : com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY;
+        var profile = new DimensionProfile(type.minY(), type.height(), support.adapter()).withRules(retainedRules);
         var current = stem.generator() instanceof VoidGenerator generator ? generator.island() : Optional.<IslandProfile>empty();
         minecraft.gui.setScreen(new IslandScreen(this, key, profile, support, current,
                 edited -> draft.put(key, new LevelStem(stem.type(), edited))));
@@ -208,22 +270,23 @@ final class DimensionManagerScreen extends Screen {
         LevelStem stem = effective(key);
         var type = stem.type().value();
         ContentProfile retained = stem.generator() instanceof SolidColumnGenerator generator ? generator.content() : ContentProfile.EMPTY;
-        var profile = Optional.of(new DimensionProfile(type.minY(), type.height(), support.adapter(), retained));
+        var retainedRules = stem.generator() instanceof ManagedGenerator managed ? managed.dimensionProfile().map(DimensionProfile::rules).orElse(com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY) : com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY;
+        var profile = Optional.of(new DimensionProfile(type.minY(), type.height(), support.adapter(), retained, retainedRules));
         var biome = support.biome().orElseThrow();
         BlockState material = key.equals(LevelStem.NETHER) ? Blocks.NETHERRACK.defaultBlockState()
                 : key.equals(LevelStem.END) ? Blocks.END_STONE.defaultBlockState() : Blocks.STONE.defaultBlockState();
         int elevation = Math.clamp(TerrainShape.HILLS.elevation(), type.minY(), type.minY() + type.height() - 4);
         if (mode == TerrainMode.SINGLE_BLOCK) {
             var settings = stem.generator() instanceof SingleBlockGenerator current ? current.profile()
-                    : new SingleBlockProfile(SingleBlockProfile.VERSION, material, elevation, TerrainShape.HILLS.relief());
+                    : new SingleBlockProfile(material, new TerrainShape(elevation, TerrainShape.HILLS.relief()));
             var generator = new SingleBlockGenerator(biome, settings, profile);
             minecraft.gui.setScreen(new SingleBlockScreen(this, Component.literal(key.identifier().toString()), generator,
                     edited -> draft.put(key, new LevelStem(stem.type(), edited))));
         } else {
             var settings = stem.generator() instanceof LayeredGenerator current ? current.profile()
-                    : new LayeredProfile(1, material, List.of(), elevation, TerrainShape.HILLS.relief());
+                    : new LayeredProfile(material, List.of(), new TerrainShape(elevation, TerrainShape.HILLS.relief()), List.of());
             var generator = new LayeredGenerator(biome, settings, profile);
-            minecraft.gui.setScreen(new LayeredScreen(this, generator, () -> context.options().seed(),
+            minecraft.gui.setScreen(new LayeredScreen(this, generator, context.worldgenLoadContext(), () -> draftOptions.seed(),
                     edited -> draft.put(key, new LevelStem(stem.type(), edited))));
         }
     }
@@ -231,10 +294,10 @@ final class DimensionManagerScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float tick) {
         super.extractRenderState(graphics, mouseX, mouseY, tick);
-        graphics.centeredText(font, title, width / 2, 15, 0xFFF1E7CE);
+        graphics.centeredText(font, title, width / 2, 9, 0xFFF1E7CE);
         ResourceKey<LevelStem> key = selected;
         if (key == null) {
-            graphics.text(font, text("no_matches"), detailLeft, 63, 0xFFFFFFFF);
+            graphics.text(font, text("no_matches"), detailLeft, 52, 0xFFFFFFFF);
             return;
         }
         LevelStem stem = effective(key);
@@ -245,16 +308,17 @@ final class DimensionManagerScreen extends Screen {
             case SKYBLOCK -> "skyblock";
         } : "original";
         var type = stem.type().value();
-        graphics.text(font, text(mode), detailLeft, 62, 0xFFF1E7CE);
-        graphics.text(font, Component.translatable("worldarchitect.dimensions.height", type.minY(), type.minY() + type.height() - 1), detailLeft, 76, 0xFFCCCCCC);
+        graphics.text(font, text(mode), detailLeft, 51, 0xFFF1E7CE);
+        graphics.text(font, Component.translatable("worldarchitect.dimensions.height", type.minY(), type.minY() + type.height() - 1), detailLeft, 64, 0xFFCCCCCC);
         var detail = type.hasEnderDragonFight() && replacement != null && !replacement.modes().isEmpty()
                 ? text("dragon_warning") : replacement == null ? CommonComponents.EMPTY : replacement.detail();
         if (!canEditDimension(key)) {
             detail = Component.translatable("worldarchitect.modpack.option_locked");
         }
         var lines = font.split(detail, detailWidth);
-        for (int index = 0; index < Math.min(3, lines.size()); index++) {
-            graphics.text(font, lines.get(index), detailLeft, 89 + index * 9, 0xFFE8E8E8);
+        int visible = Math.min(3, (actionTop - 78) / 9);
+        for (int index = 0; index < Math.min(visible, lines.size()); index++) {
+            graphics.text(font, lines.get(index), detailLeft, 78 + index * 9, 0xFFE8E8E8);
         }
     }
 
@@ -269,7 +333,7 @@ final class DimensionManagerScreen extends Screen {
 
     private final class DimensionList extends ObjectSelectionList<DimensionRow> {
         DimensionList(int left, int width, int height) {
-            super(DimensionManagerScreen.this.minecraft, width, height, 62, 22);
+            super(DimensionManagerScreen.this.minecraft, width, height, 50, 22);
             setX(left);
         }
 

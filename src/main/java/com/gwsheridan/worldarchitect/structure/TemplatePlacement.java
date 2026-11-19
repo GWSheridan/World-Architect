@@ -38,6 +38,15 @@ record TemplatePlacement(BlockPos origin, Rotation rotation, Mirror mirror) {
         return rotation.rotate(mirror.mirror(direction));
     }
 
+    BlockPos size(BlockPos original) {
+        return rotation == Rotation.CLOCKWISE_90 || rotation == Rotation.COUNTERCLOCKWISE_90
+                ? new BlockPos(original.getZ(), original.getY(), original.getX()) : original;
+    }
+
+    BlockState state(BlockState state) {
+        return state.mirror(mirror).rotate(rotation);
+    }
+
     int place(ServerLevel level, LibraryEntry entry, @Nullable Entity actor) throws IOException {
         if (!level.isInWorldBounds(origin)) {
             throw new IOException("Placement origin is outside the dimension's build bounds.");
@@ -69,7 +78,7 @@ record TemplatePlacement(BlockPos origin, Rotation rotation, Mirror mirror) {
             if (rules.terrain() == TemplateRules.Terrain.SUPPORTED) {
                 bottom.merge(new BlockPos(pos.getX(), 0, pos.getZ()), pos, (first, second) -> first.getY() < second.getY() ? first : second);
             }
-            BlockState state = cell.state().mirror(mirror).rotate(rotation);
+            BlockState state = state(cell.state());
             BlockState existing = level.getBlockState(pos);
             if (!existing.isAir()) {
                 if (rules.collision() == TemplateRules.Collision.MATCHING && existing == state && !existing.hasBlockEntity()) {
@@ -92,10 +101,9 @@ record TemplatePlacement(BlockPos origin, Rotation rotation, Mirror mirror) {
                 throw new IOException("Placement would obstruct a saved spawn marker at " + pos.toShortString());
             }
         }
-        boolean rotated = rotation == Rotation.CLOCKWISE_90 || rotation == Rotation.COUNTERCLOCKWISE_90;
+        BlockPos transformedSize = size(size);
         AABB volume = new AABB(origin.getX(), origin.getY(), origin.getZ(),
-                origin.getX() + (rotated ? size.getZ() : size.getX()), origin.getY() + size.getY(),
-                origin.getZ() + (rotated ? size.getX() : size.getZ()));
+                origin.getX() + transformedSize.getX(), origin.getY() + transformedSize.getY(), origin.getZ() + transformedSize.getZ());
         if (!plan.isEmpty() && !level.getEntitiesOfClass(LivingEntity.class, volume, living -> !living.isSpectator()).isEmpty()) {
             throw new IOException("A player or mob occupies the placement volume.");
         }

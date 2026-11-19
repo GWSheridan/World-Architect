@@ -2,6 +2,12 @@
 
 World Architect bundles package a world preset, developer policy, and native structure files in one ZIP. A bundle declares the preset ID, title, author, release, and required mod IDs. The packaged starter island is embedded in the generator and the original native template is included as a datapack structure.
 
+## Preset Studio
+
+Use [Preset Studio](PRESET_STUDIO.md) to save immutable releases, duplicate, import/export and validate presets, edit locks, inspect dependencies and read help in game. Ready-to-install partial and full examples are included in [the Studio examples](../examples/preset-studio). The original JSON authoring workflow remains available below.
+
+Bundles in 0.17.0 can also embed selected `worldarchitect:modular` definitions under `data/<namespace>/worldgen/structure/`. Studio captures those definitions and native starting islands automatically. The dedicated authoring export shares Studio validation.
+
 ## Author and export
 
 1. In an authoring instance, create `config/worldarchitect/developer.json` with `{"format":1,"developer_mode":true}`. Restart the instance. The server console and administrators can now use `/wa_modpack export`.

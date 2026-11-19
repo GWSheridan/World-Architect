@@ -16,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.NumericTag;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
@@ -28,6 +29,16 @@ public record NativeTemplate(BlockPos size, List<Cell> blocks) {
     public NativeTemplate {
         size = size.immutable();
         blocks = List.copyOf(blocks);
+    }
+
+    /** Detached template with only supported decorative block-entity metadata. */
+    public NativeTemplate sanitized(net.minecraft.core.HolderLookup.Provider registries) throws IOException {
+        var cells = new ArrayList<Cell>();
+        for (var cell : blocks) {
+            if (TemplateMetadata.restricted(cell.state())) throw new IOException("Unsupported generation template block " + cell.state());
+            cells.add(new Cell(cell.pos(), cell.state(), TemplateMetadata.sanitize(cell.state(), cell.metadata(), registries)));
+        }
+        return NativeTemplate.read(new NativeTemplate(size, cells).toTag());
     }
 
     public static NativeTemplate read(CompoundTag root) throws IOException {
@@ -52,7 +63,7 @@ public record NativeTemplate(BlockPos size, List<Cell> blocks) {
         Set<BlockPos> occupied = new HashSet<>();
         List<Cell> blocks = new ArrayList<>();
         for (var value : entries) {
-            if (!(value instanceof CompoundTag block) || !(block.get("state") instanceof IntTag)) {
+            if (!(value instanceof CompoundTag block) || !isInteger(block.get("state"))) {
                 throw new IOException("Invalid native structure block entry.");
             }
             int index = block.getIntOr("state", -1);
@@ -143,10 +154,14 @@ public record NativeTemplate(BlockPos size, List<Cell> blocks) {
     }
 
     static BlockPos readPosition(ListTag tag) throws IOException {
-        if (tag.size() != 3 || tag.stream().anyMatch(value -> !(value instanceof IntTag))) {
+        if (tag.size() != 3 || tag.stream().anyMatch(value -> !isInteger(value))) {
             throw new IOException("Expected three integer structure coordinates.");
         }
         return new BlockPos(tag.getIntOr(0, 0), tag.getIntOr(1, 0), tag.getIntOr(2, 0));
+    }
+
+    private static boolean isInteger(net.minecraft.nbt.Tag value) {
+        return value instanceof NumericTag number && number.doubleValue() == number.intValue();
     }
 
     public record Cell(BlockPos pos, BlockState state, @Nullable CompoundTag metadata) {

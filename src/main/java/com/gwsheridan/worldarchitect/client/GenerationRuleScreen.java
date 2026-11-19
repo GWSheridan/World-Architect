@@ -32,6 +32,7 @@ final class GenerationRuleScreen<T> extends Screen {
     private int top;
     private int left;
     private int span;
+    private boolean compact;
     private Button done;
     private Component status = CommonComponents.EMPTY;
 
@@ -61,17 +62,21 @@ final class GenerationRuleScreen<T> extends Screen {
     @Override
     protected void init() {
         span = Math.min(392, width - 24);
+        compact = height < (fields.size() > 6 ? 235 : 218);
         int footer = footerY();
-        top = Math.max(5, (height - footer - 24) / 2);
+        top = compact ? 0 : (height - footer - 24) / 2;
         left = (width - span) / 2;
         int half = (span - 8) / 2;
-        control(Component.literal("←"), left, 30, 34, () -> select(index - 1)).active = index > 0;
-        control(Component.literal("→"), left + span - 34, 30, 34, () -> select(index + 1)).active = index < drafts.size() - 1;
-        control(text("add"), left, 55, half, () -> {
+        int navigationY = compact ? 20 : 30;
+        int editY = compact ? 20 : 55;
+        int offset = compact ? 38 : 0;
+        control(Component.literal("←"), left, navigationY, 34, () -> select(index - 1)).active = index > 0;
+        control(Component.literal("→"), left + span - 34, navigationY, 34, () -> select(index + 1)).active = index < drafts.size() - 1;
+        control(text("add"), left + offset, editY, half - offset, () -> {
             drafts.add(new ArrayList<>(fields.stream().map(Field::initial).toList()));
             select(drafts.size() - 1);
         }).active = drafts.size() < limit;
-        control(text("remove"), left + half + 8, 55, half, () -> {
+        control(text("remove"), left + half + 8, editY, half - offset, () -> {
             drafts.remove(index);
             select(Math.max(0, Math.min(index, drafts.size() - 1)));
         }).active = !drafts.isEmpty();
@@ -84,7 +89,7 @@ final class GenerationRuleScreen<T> extends Screen {
                 Field field = fields.get(fieldIndex);
                 int x = left + (fieldIndex % 2) * (half + 8);
                 int y = top + fieldY(fieldIndex);
-                int fieldHeight = fields.size() > 6 ? 16 : 18;
+                int fieldHeight = compact ? 14 : fields.size() > 6 ? 16 : 18;
                 EditBox entry = addRenderableWidget(new EditBox(font, x, y, half, fieldHeight, label(field)));
                 entry.setMaxLength(switch (field.kind()) {
                     case TEXT -> 512;
@@ -114,11 +119,11 @@ final class GenerationRuleScreen<T> extends Screen {
     }
 
     private int fieldY(int slot) {
-        return fields.size() > 6 ? 89 + (slot / 2) * 26 : 93 + (slot / 2) * 30;
+        return compact ? 59 + (slot / 2) * 23 : fields.size() > 6 ? 89 + (slot / 2) * 26 : 93 + (slot / 2) * 30;
     }
 
     private int footerY() {
-        return fields.size() > 6 ? 211 : 194;
+        return compact ? height - 24 : fields.size() > 6 ? 211 : 194;
     }
 
     private DataResult<List<T>> parse() {
@@ -186,9 +191,11 @@ final class GenerationRuleScreen<T> extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float tick) {
         super.extractRenderState(graphics, mouseX, mouseY, tick);
-        graphics.centeredText(font, title, width / 2, top + 7, 0xFFF1E7CE);
         Component position = drafts.isEmpty() ? text("none") : Component.translatable("worldarchitect.features.position", index + 1, drafts.size());
-        graphics.centeredText(font, position, width / 2, top + 36, 0xFFEAEAEA);
+        graphics.centeredText(font, compact ? title.copy().append(" · ").append(position) : title, width / 2, top + 7, 0xFFF1E7CE);
+        if (!compact) {
+            graphics.centeredText(font, position, width / 2, top + 36, 0xFFEAEAEA);
+        }
         int half = (span - 8) / 2;
         if (!drafts.isEmpty()) {
             for (int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
@@ -198,8 +205,8 @@ final class GenerationRuleScreen<T> extends Screen {
             }
         }
         var lines = font.split(status, span);
-        for (int i = 0; i < Math.min(2, lines.size()); i++) {
-            graphics.text(font, lines.get(i), left, top + footerY() - 20 + i * 9, done.active ? 0xFFCCCCCC : 0xFFFFAAAA);
+        for (int i = 0; i < Math.min(compact ? 1 : 2, lines.size()); i++) {
+            graphics.text(font, lines.get(i), left, top + footerY() - (compact ? 11 : 20) + i * 9, done.active ? 0xFFCCCCCC : 0xFFFFAAAA);
         }
     }
 

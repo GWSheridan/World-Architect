@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 
 /** Explicit generation exceptions. Empty settings retain the pre-0.3 pipeline. */
 public record ContentProfile(List<Holder<Biome>> biomes, int biomeScale, long biomeSeed, List<Ore> ores, List<Decoration> decorations,
-        Optional<Caves> caves, Optional<Sea> sea, List<StructureRule> structures) {
+        Optional<Caves> caves, Optional<Sea> sea, List<StructureRule> structures, List<com.gwsheridan.worldarchitect.api.NativeFeatureRule> nativeFeatures) {
     public static final int MAX_RULES = 16;
     private static final Codec<Integer> ALTITUDE = Codec.intRange(DimensionType.MIN_Y, DimensionType.MAX_Y);
     private static final Codec<List<Holder<Biome>>> BIOMES = Biome.CODEC.listOf(0, MAX_RULES).validate(list ->
@@ -37,15 +37,22 @@ public record ContentProfile(List<Holder<Biome>> biomes, int biomeScale, long bi
             Decoration.CODEC.listOf(0, MAX_RULES).optionalFieldOf("decorations", List.of()).forGetter(ContentProfile::decorations),
             Caves.CODEC.optionalFieldOf("caves").forGetter(ContentProfile::caves),
             Sea.CODEC.optionalFieldOf("sea").forGetter(ContentProfile::sea),
-            StructureRule.CODEC.listOf(0, MAX_RULES).optionalFieldOf("structures", List.of()).forGetter(ContentProfile::structures)
-    ).apply(builder, (version, biomes, scale, seed, ores, decorations, caves, sea, structures) ->
-            new ContentProfile(biomes, scale, seed, ores, decorations, caves, sea, structures))).validate(ContentProfile::validate);
+            StructureRule.CODEC.listOf(0, MAX_RULES).optionalFieldOf("structures", List.of()).forGetter(ContentProfile::structures),
+            com.gwsheridan.worldarchitect.api.NativeFeatureRule.CODEC.listOf(0, MAX_RULES).optionalFieldOf("native_features", List.of()).forGetter(ContentProfile::nativeFeatures)
+    ).apply(builder, (version, biomes, scale, seed, ores, decorations, caves, sea, structures, nativeFeatures) ->
+            new ContentProfile(biomes, scale, seed, ores, decorations, caves, sea, structures, nativeFeatures))).validate(ContentProfile::validate);
 
     public ContentProfile {
         biomes = List.copyOf(biomes);
         ores = List.copyOf(ores);
         decorations = List.copyOf(decorations);
         structures = List.copyOf(structures);
+        nativeFeatures = List.copyOf(nativeFeatures);
+    }
+
+    public ContentProfile(List<Holder<Biome>> biomes, int biomeScale, long biomeSeed, List<Ore> ores, List<Decoration> decorations,
+            Optional<Caves> caves, Optional<Sea> sea, List<StructureRule> structures) {
+        this(biomes, biomeScale, biomeSeed, ores, decorations, caves, sea, structures, List.of());
     }
 
     private DataResult<ContentProfile> validate() {
@@ -56,27 +63,31 @@ public record ContentProfile(List<Holder<Biome>> biomes, int biomeScale, long bi
     }
 
     public ContentProfile withBiomes(List<Holder<Biome>> list, int scale, long seed) {
-        return new ContentProfile(list, scale, seed, ores, decorations, caves, sea, structures);
+        return new ContentProfile(list, scale, seed, ores, decorations, caves, sea, structures, nativeFeatures);
     }
 
     public ContentProfile withOres(List<Ore> list) {
-        return new ContentProfile(biomes, biomeScale, biomeSeed, list, decorations, caves, sea, structures);
+        return new ContentProfile(biomes, biomeScale, biomeSeed, list, decorations, caves, sea, structures, nativeFeatures);
     }
 
     public ContentProfile withDecorations(List<Decoration> list) {
-        return new ContentProfile(biomes, biomeScale, biomeSeed, ores, list, caves, sea, structures);
+        return new ContentProfile(biomes, biomeScale, biomeSeed, ores, list, caves, sea, structures, nativeFeatures);
     }
 
     public ContentProfile withCaves(Optional<Caves> rule) {
-        return new ContentProfile(biomes, biomeScale, biomeSeed, ores, decorations, rule, sea, structures);
+        return new ContentProfile(biomes, biomeScale, biomeSeed, ores, decorations, rule, sea, structures, nativeFeatures);
     }
 
     public ContentProfile withSea(Optional<Sea> rule) {
-        return new ContentProfile(biomes, biomeScale, biomeSeed, ores, decorations, caves, rule, structures);
+        return new ContentProfile(biomes, biomeScale, biomeSeed, ores, decorations, caves, rule, structures, nativeFeatures);
     }
 
     public ContentProfile withStructures(List<StructureRule> list) {
-        return new ContentProfile(biomes, biomeScale, biomeSeed, ores, decorations, caves, sea, list);
+        return new ContentProfile(biomes, biomeScale, biomeSeed, ores, decorations, caves, sea, list, nativeFeatures);
+    }
+
+    public ContentProfile withNativeFeatures(List<com.gwsheridan.worldarchitect.api.NativeFeatureRule> list) {
+        return new ContentProfile(biomes, biomeScale, biomeSeed, ores, decorations, caves, sea, structures, list);
     }
 
     public record Ore(BlockState material, Optional<BlockState> target, int attempts, int size, int minY, int maxY, List<Holder<Biome>> biomes) {

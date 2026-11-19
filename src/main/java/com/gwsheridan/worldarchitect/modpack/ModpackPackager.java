@@ -57,15 +57,10 @@ final class ModpackPackager {
                     .parse(JsonOps.INSTANCE, BundleFiles.readJson(islandFile)).getOrThrow(IOException::new);
             bindIslands(preset, structures, bindings);
         }
-        WorldPreset checked = WorldPreset.DIRECT_CODEC.parse(ops, preset).getOrThrow(IOException::new);
-        WorldDimensions dimensions = checked.createWorldDimensions();
-        ModpackRuntime.validateManifestDimensions(manifest, dimensions);
-        dimensions.dimensions().forEach((key, stem) -> {
-            if (stem.generator() instanceof ManagedGenerator) {
-                SaveProtection.validateGenerator(key, stem);
-            }
-        });
-        byte[] encodedPreset = BundleFiles.jsonBytes(WorldPreset.DIRECT_CODEC.encodeStart(ops, checked).getOrThrow(IOException::new));
+        var checked = PresetStudio.validate(new PresetStudio.Draft(manifest, preset, structures), server.registryAccess());
+        structures.putAll(PresetStudio.capture(manifest, checked.preset().createWorldDimensions(), checked.registries()).templates());
+        checked = PresetStudio.validate(new PresetStudio.Draft(manifest, checked.draft().preset(), structures), server.registryAccess());
+        byte[] encodedPreset = BundleFiles.jsonBytes(checked.draft().preset());
         if (encodedPreset.length > BundleFiles.MAX_JSON_BYTES) {
             throw new IOException("The assembled preset exceeds the JSON size limit.");
         }
@@ -88,12 +83,12 @@ final class ModpackPackager {
         }
     }
 
-    private static JsonObject currentPreset(MinecraftServer server, RegistryOps<JsonElement> ops) throws IOException {
+    static JsonObject currentPreset(MinecraftServer server, RegistryOps<JsonElement> ops) throws IOException {
         var live = new WorldDimensions(server.registryAccess().lookupOrThrow(Registries.LEVEL_STEM));
         return WorldPreset.DIRECT_CODEC.encodeStart(ops, new WorldPreset(live.dimensions())).getOrThrow(IOException::new).getAsJsonObject();
     }
 
-    private static SortedMap<String, byte[]> collectStructures(Path draft) throws IOException {
+    static SortedMap<String, byte[]> collectStructures(Path draft) throws IOException {
         var structures = new TreeMap<String, byte[]>();
         Path root = draft.resolve("data");
         if (!Files.exists(root)) {
@@ -105,7 +100,7 @@ final class ModpackPackager {
             while (files.hasNext()) {
                 var file = files.next();
                 var name = draft.relativize(file).toString().replace('\\', '/');
-                if (!BundleFiles.templatePath(name)) {
+                if (!BundleFiles.templatePath(name) && !BundleFiles.modularPath(name)) {
                     throw new IOException("Expected a native structure under data/<namespace>/structure/: " + name);
                 }
                 if (structures.size() == BundleFiles.MAX_TEMPLATES) {
@@ -118,7 +113,7 @@ final class ModpackPackager {
                 if ((total += bytes.length) > BundleFiles.MAX_ARCHIVE_BYTES) {
                     throw new IOException("Bundled native structure files exceed 32 MiB.");
                 }
-                NativeTemplate.read(NbtIo.readCompressed(new ByteArrayInputStream(bytes), NbtAccounter.create(16L * 1024 * 1024)));
+                if (BundleFiles.templatePath(name)) NativeTemplate.read(NbtIo.readCompressed(new ByteArrayInputStream(bytes), NbtAccounter.create(16L * 1024 * 1024)));
                 structures.put(name, bytes);
             }
         }
@@ -146,7 +141,7 @@ final class ModpackPackager {
         }
     }
 
-    private static JsonObject packMetadata(String title) {
+    static JsonObject packMetadata(String title) {
         var metadata = new JsonObject();
         var pack = new JsonObject();
         var current = SharedConstants.getCurrentVersion().packVersion(PackType.SERVER_DATA);
@@ -160,7 +155,7 @@ final class ModpackPackager {
         return metadata;
     }
 
-    private static void add(ZipOutputStream zip, String path, byte[] bytes) throws IOException {
+    static void add(ZipOutputStream zip, String path, byte[] bytes) throws IOException {
         var entry = new ZipEntry(path);
         entry.setTime(0L);
         zip.putNextEntry(entry);

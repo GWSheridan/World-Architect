@@ -38,6 +38,8 @@ import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.WorldDimensions;
+import net.minecraft.world.level.levelgen.structure.structures.EndCityStructure;
+import com.gwsheridan.worldarchitect.worldgen.SolidColumnGenerator;
 import net.minecraft.world.level.storage.LevelResource;
 
 public final class GenerationDependencies {
@@ -95,11 +97,21 @@ public final class GenerationDependencies {
         }
         pins.put("dimension_types", types);
         pins.put("managed_biomes", biomes);
+        var ruleMods = new CompoundTag();
+        dimensions.dimensions().values().stream().filter(stem -> stem.generator() instanceof ManagedGenerator)
+                .map(stem -> (ManagedGenerator) stem.generator()).flatMap(generator -> generator.dimensionProfile().stream())
+                .flatMap(profile -> profile.rules().rules().stream()).flatMap(rule -> rule.when().mods().stream()).distinct().sorted()
+                .forEach(id -> ruleMods.putString(id, com.gwsheridan.worldarchitect.rules.RuleDependencies.version(id)));
+        if (!ruleMods.isEmpty()) pins.put("rule_mods", ruleMods);
+        var extensions = com.gwsheridan.worldarchitect.worldgen.GenerationExtensions.pins(dimensions, registries);
+        if (!extensions.isEmpty()) pins.put("native_extensions", extensions);
         ListTag flags = new ListTag();
         FeatureFlags.REGISTRY.toNames(configuration.enabledFeatures()).stream().sorted()
                 .forEach(flag -> flags.add(StringTag.valueOf(flag.toString())));
         pins.put("feature_flags", flags);
-        if (dimensions.dimensions().values().stream().anyMatch(stem -> !(stem.generator() instanceof ManagedGenerator))) {
+        if (dimensions.dimensions().values().stream().anyMatch(stem -> !(stem.generator() instanceof ManagedGenerator)
+                  || stem.generator() instanceof SolidColumnGenerator solid && (com.gwsheridan.worldarchitect.worldgen.GenerationExtensions.needsResourcePins(solid)
+                          || solid.structureRules().stream().anyMatch(rule -> rule.structure().value() instanceof EndCityStructure)))) {
             pins.put(RESOURCES, captureNativeResources(resources, generated));
         }
         return pins;
@@ -109,7 +121,7 @@ public final class GenerationDependencies {
         if (saved.getIntOr("contract", 0) != GENERATION_CONTRACT) {
             throw SaveProtection.incompatible("Unsupported world-generation contract " + saved.getIntOr("contract", 0));
         }
-        for (String section : List.of("effective_dimensions", "dimension_types", "managed_biomes", "feature_flags", RESOURCES)) {
+        for (String section : List.of("effective_dimensions", "dimension_types", "managed_biomes", "feature_flags", RESOURCES, "rule_mods", "native_extensions")) {
             if (!java.util.Objects.equals(saved.get(section), current.get(section))) {
                 String subject = firstDifference(saved.getCompoundOrEmpty(section), current.getCompoundOrEmpty(section));
                 throw SaveProtection.incompatible("A saved world-generation dependency changed in " + section + subject);

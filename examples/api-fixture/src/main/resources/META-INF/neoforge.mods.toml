@@ -1,0 +1,18 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+[[mods]]
+modId="wa_api_fixture"
+version="1.0.0"
+displayName="World Architect External API Fixture"
+[[dependencies.wa_api_fixture]]
+modId="worldarchitect"
+type="required"
+versionRange="[1.0.0,2.0.0)"
+ordering="AFTER"
+side="BOTH"
+[[dependencies.wa_api_fixture]]
+modId="neoforge"
+type="required"
+versionRange="[26.3.0.103,)"
+side="BOTH"

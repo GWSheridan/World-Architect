@@ -35,6 +35,10 @@ final class BundleFiles {
         return name.matches("[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}");
     }
 
+    static boolean archiveFilename(String name) {
+        return name.matches("[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}\\.zip");
+    }
+
     static String presetPath(Identifier id) {
         return "data/" + id.getNamespace() + "/worldgen/world_preset/" + id.getPath() + ".json";
     }
@@ -45,6 +49,14 @@ final class BundleFiles {
 
     static boolean templatePath(String path) {
         return path.matches("data/[a-z0-9_-]{1,64}/structure/[a-z0-9_-]+(/[a-z0-9_-]+)*\\.nbt") && path.length() <= 205;
+    }
+
+    static boolean modularPath(String path) {
+        return path.matches("data/[a-z0-9_-]{1,64}/worldgen/structure/[a-z0-9_-]+(/[a-z0-9_-]+)*\\.json") && path.length() <= 220;
+    }
+
+    static String modularPath(Identifier id) {
+        return "data/" + id.getNamespace() + "/worldgen/structure/" + id.getPath() + ".json";
     }
 
     static JsonObject readJson(Path path) throws IOException {

@@ -2,6 +2,9 @@ package com.gwsheridan.worldarchitect.compatibility.mixin;
 
 import com.gwsheridan.worldarchitect.skyblock.IslandSpawns;
 import com.gwsheridan.worldarchitect.worldgen.VoidGenerator;
+import com.gwsheridan.worldarchitect.spawn.SpawnPolicies;
+import com.gwsheridan.worldarchitect.spawn.WorldAdministration;
+import com.gwsheridan.worldarchitect.environment.WorldEnvironment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,6 +28,15 @@ abstract class VoidPortalMixin {
         var destination = endPortal ? (current.dimension() == Level.END ? current.getRespawnData().dimension() : Level.END)
                 : (current.dimension() == Level.NETHER ? Level.OVERWORLD : Level.NETHER);
         ServerLevel level = current.getServer().getLevel(destination);
+        if (level != null && !WorldEnvironment.canEnterPortal(level, entity)) {
+            callback.setReturnValue(null);
+            return;
+        }
+        if (level != null && entity instanceof ServerPlayer
+                && SpawnPolicies.portalPolicy(level).isPresent()) {
+            callback.setReturnValue(SpawnPolicies.portal(level, entity).orElse(null));
+            return;
+        }
         if (level != null && level.getChunkSource().getGenerator() instanceof VoidGenerator generator) {
             if (endPortal && current.dimension() == Level.END && generator.island().isPresent()
                     && entity instanceof ServerPlayer player && player.getRespawnConfig() != null) {

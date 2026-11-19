@@ -47,10 +47,14 @@ final class SingleBlockScreen extends Screen {
         EditBox input = addRenderableWidget(new EditBox(font, left, formTop + 48, formWidth, 20, MATERIAL_LABEL));
         input.setMaxLength(512);
         input.setValue(material);
+        int quickWidth = (formWidth - 8) / 3;
         addRenderableWidget(Button.builder(Component.translatable("worldarchitect.editor.sand"), button -> input.setValue("minecraft:sand"))
-                .bounds(left, formTop + 74, half, 20).build());
+                .bounds(left, formTop + 74, quickWidth, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("worldarchitect.editor.stone"), button -> input.setValue("minecraft:stone"))
-                .bounds(left + half + 8, formTop + 74, half, 20).build());
+                .bounds(left + quickWidth + 4, formTop + 74, quickWidth, 20).build());
+        addRenderableWidget(Button.builder(Component.translatable("worldarchitect.blocks.browse"), button ->
+                minecraft.gui.setScreen(new BlockPickerScreen(this, material, picked -> material = picked)))
+                .bounds(left + 2 * (quickWidth + 4), formTop + 74, quickWidth, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("worldarchitect.terrain.title"), button ->
                 minecraft.gui.setScreen(new TerrainShapeScreen(this, shape, original.getMinY(), original.getGenDepth(), updated -> shape = updated)))
                 .bounds(left, formTop + 122, formWidth, 20).build());
@@ -82,7 +86,7 @@ final class SingleBlockScreen extends Screen {
 
     private DataResult<SingleBlockGenerator> configured() {
         return TerrainMaterial.parse(material).flatMap(state -> {
-            var profile = new SingleBlockProfile(original.profile().generatorVersion(), state, shape.elevation(), shape.relief());
+            var profile = new SingleBlockProfile(state, shape);
             SingleBlockGenerator candidate = original.withProfile(profile);
             return candidate.contentProblem().<DataResult<SingleBlockGenerator>>map(problem -> DataResult.error(() -> problem))
                     .orElseGet(() -> DataResult.success(candidate));

@@ -150,7 +150,7 @@ public final class FeatureWorldAudit {
         return sections(chunk, min, height, "block_states", 4);
     }
 
-    private static Section[] sections(CompoundTag chunk, int min, int height, String key, int minimumBits) {
+    static Section[] sections(CompoundTag chunk, int min, int height, String key, int minimumBits) {
         Section[] result = new Section[height / 16];
         var list = chunk.getListOrEmpty("sections");
         for (int i = 0; i < list.size(); i++) {
@@ -163,7 +163,7 @@ public final class FeatureWorldAudit {
         return result;
     }
 
-    private static String block(Section[] sections, int min, int y, int xz) {
+    static String block(Section[] sections, int min, int y, int xz) {
         Section section = sections[(y - min) / 16];
         return section == null ? "minecraft:air" : section.blockAt((y & 15) * 256 + xz);
     }

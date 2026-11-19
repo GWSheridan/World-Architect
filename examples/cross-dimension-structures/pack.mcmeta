@@ -1,0 +1,13 @@
+{
+  "pack": {
+    "description": "World Architect End Cities and modular template generation",
+    "min_format": [
+      121,
+      0
+    ],
+    "max_format": [
+      121,
+      0
+    ]
+  }
+}

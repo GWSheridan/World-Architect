@@ -1,5 +1,85 @@
 # Development changelog
 
+## 1.0.0 - World Architect 1.0 Release
+
+- Promoted the integrated dimension, terrain, structure, Skyblock, environment, rule-engine and Preset Studio features to the 1.0 release; public API 1 and existing generation codecs remain compatible.
+- Updated the independent fixture's dependency range and build defaults for 1.0.0. Production client and dedicated-server acceptance use the shipped JAR, with diagnostic probes in a separate test mod.
+- Added installation/upgrade instructions, a complete example index, current release notes and an `assembleRelease` task that stages the distribution assets and generates SHA-256 checksums.
+- Passed 46 tests, two-player/restart/capacity checks, clean client/server locks, four save upgrades, nine saved-world and three new-world rejection cases, and 4,226,048 audited positions. A clean source extraction rebuilt the identical tested JAR.
+- Retained the exact example-bundle bytes and historical verification reports. See [Milestone 20 verification](docs/MILESTONE_20_VERIFICATION.md) for the final checks and supported limits.
+
+## 0.18.0 - Public APIs, Compatibility and Performance
+
+- Defined public API contract 1 with version negotiation, dimension/structure/feature registries, block capability helpers, detached template validation and checked spawn, environment and preset operations.
+- Added explicit bounded native feature selections, adapter dependency pinning, a native-feature lock category and dependency diagnostics. Empty existing profiles retain their encoding and generation path.
+- Added custom portal-policy support declarations to dimension adapters and a separate fixture mod that compiles against the production JAR.
+- Restored a simple fill path for legacy solid terrain without caves, fluids, strata or material rules. The repeated Layered workload improved from 1.860 to 1.317 seconds per 36 chunks; 288 managed benchmark chunks matched 0.9.0.
+- Passed 46 unit tests, the independent fixture, seven missing/version rejection cases, five save upgrades, and saved-region/template/ledger audits. Native Original Generation variability was measured against a same-binary control and is documented separately.
+- See [Milestone 19 verification](docs/MILESTONE_19_VERIFICATION.md) for dedicated-server compatibility checks and the same-host 0.9.0 benchmark comparison.
+
+## 0.17.0 - Preset Studio and Modpack Authoring
+
+- Added a local preset library with immutable releases, save/load, duplicate, import, export and validation workflows. Explicitly saved versions remain available when a new-world draft is cancelled.
+- Added a visual partial/full lock editor, world defaults, metadata editing, dependency reports and paged in-game help. Generation edits remain separate from activating an installed bundle policy.
+- Bundles can carry registered modular structure definitions as well as native templates and embedded starting islands. Validation uses an isolated registry overlay; new definitions require installation/restart before applying them to a world draft.
+- Added administrator/developer authoring commands and shared validation for the original JSON export workflow. Existing saved-world archives retain their original format and fingerprint.
+- Added ready-to-install partial and fully locked Skyblock examples, with their source resources. See [Preset Studio](docs/PRESET_STUDIO.md) for workflows and limits.
+
+- Clean client and dedicated partial/full enforcement, version-history/overwrite checks, missing-block rejection, and two-player restart persistence passed. Existing rule-engine saves retained their generation hashes and unexplored generation. All 45 unit tests passed; the distributable matched the tested server JAR.
+
+## 0.16.0 · World Generation Rule Engine
+
+- Added immutable per-dimension rule sets with fixed phases, stable priority/order, same-candidate dependencies, coordinate-seeded decisions and bounded work.
+- Added dimension, biome, height, region, radius, exact-seed, seeded-partition and mod dependency filters; material, ore, decoration, modular template and safe spawn actions.
+- Added a new-world editor with paged forms, ordering controls and validation, plus read-only rule inspection and explanations for multiplayer users.
+- Material rules share the terrain sampler. Feature writes and whole modular assemblies respect strict filter boundaries. Generated-marker policies integrate with existing spawn safety and administrative precedence.
+- Saved rules and declared mod presence/versions are pinned alongside existing templates. Profiles without rules retain their earlier codecs and generation behavior.
+- Added a floating Sky City datapack with competing templates and generated-marker spawning. See [the rule guide](docs/WORLDGEN_RULES.md) and [verification](docs/TESTING.md#world-generation-rule-engine).
+
+- Dedicated rule audits checked 5,013,504 positions; older-save audits checked 720,896. Two-client joins, respawns, restart persistence, editor validation, strict assembly rejection and dependency/budget failures passed. Protected files retained their hashes; all 40 unit tests passed.
+
+## 0.15.0 · Dimension Environment Designer
+
+- Added per-dimension fixed and offset clocks, fixed weather, native mob/spawner restrictions, and Nether/End portal-entry policies. Clock and weather views preserve the underlying shared records.
+- Added server-synchronized air fog, sky colours, cloud visibility, colour and height through native environment attributes.
+- Added a permission-checked in-game designer, commands, dimension capability diagnostics, and a contrasting environment example.
+- Environment settings persist in the existing world-local administration file, preserve spawn/protection settings, and respect preset dimension locks. Earlier saves retain vanilla behaviour until explicitly configured.
+- Dedicated multiplayer, restart, native spawning, designer input, portal permissions and offset/reset checks passed. Compatibility audits verified 622,592 block positions and preserved protected files in older saves. All 33 unit tests passed.
+
+## 0.14.0 · Spawn Policies, Island Administration and Protection
+
+- Added world-local policies for initial joins, death respawns, and portal arrivals. Destinations support safe fixed positions, individual or scoreboard-team islands, library markers, and saved modular-structure markers.
+- Added island inspection, reassignment, atomic player swaps, and team reservations. Existing player allocation files remain readable; team reservations use allocation format 2.
+- Added independent player block-breaking, placement, and designated-container protection, with owner/team access and operator bypass. Container input rechecks ownership, including connected double-chest halves and sessions opened before protection was enabled.
+- Administration settings persist separately from immutable generation snapshots. Saved worlds that require the settings refuse startup if the administration file is missing.
+- Dedicated multiplayer checks covered permissions, reassignment, team and container access, operator bypass, respawn precedence, and restart persistence. Fixed, portal, library-marker and generated-marker policies passed dedicated-client checks, including obstruction recovery.
+
+## 0.13.0 · Cross-Dimension Structure Generation
+
+- Enabled native End Cities on managed solid terrain, including the Overworld. End City worlds pin their native template resources.
+- Added offset-based modular assemblies from saved library templates, with seeded rotation, whole-assembly base-terrain validation, and persisted transformed templates and markers.
+- Added generation export and append commands, generated-marker inspection and safe operator travel, and an example datapack with custom-dimension village and fortress assemblies.
+- Dedicated-server audits verified native End City pieces, modular block states and metadata, five placement-rule rejections, and generation at negative coordinates after a preset change. A client verified permissions, blocked-marker rejection, and saved-marker arrival.
+- Legacy terrain generation, snapshots, island assignments, and existing library templates passed compatibility checks. Changed modular definitions and native End City templates were rejected before generation.
+## 0.12.0 · Structure Builder and Schematic Import
+
+- Added in-game controls to capture a selection, edit a template palette and its spawn markers, rotate and mirror saved templates, and place them.
+- Added Sponge version 3 schematic import alongside native structures. Imported templates keep supported block states and decorative metadata in the world-local library.
+- New floating-island Overworlds look for a safe initial spawn on nearby terrain.
+- Verified both import formats, transformed metadata, invalid schematic rejection, and in-game editor actions on a dedicated server. Template and marker access persisted after restart. The 0.9.0 fixture kept its generation files, island assignments, and an existing library entry byte-identical.
+
+## 0.11.0 · Advanced Terrain, Layers, and Biomes
+
+- Added opt-in version 2 profiles for mountains, valleys, plateaus, canyons, basins, craters, continents, archipelagos, and floating islands.
+- Layered terrain can apply strata by absolute height or surface-relative depth. Strata support biome filters, explicit priority, and seeded transitions. The terrain preview samples the same generator.
+- Tested continuity and seed response for all nine landforms. A dedicated server audited 1,835,008 block positions before and after changing the starting preset. A 0.9.0 Layered fixture matched existing and unexplored version 1 chunks and preserved its generation files.
+
+## 0.10.0 · Advanced GUI and Preview
+
+- Added a block picker for Single Block and Layered terrain with name and registry ID search, a mod namespace filter, favourites, recents, and block-state controls.
+- Added seed-based height and biome maps with pan and zoom. Skyblock maps show reserved spawn markers from the configured island layout.
+- Compared previews with 3,328 dedicated-server columns. Client checks covered keyboard navigation, applying and cancelling changes, and GUI scales 1 and 2.
+
 ## 0.9.0 · Final Integration and Release
 
 - Fixed intermittent startup failures in presets that referenced a structure before its registry had finished loading. The server checks placement support after the registry is ready.

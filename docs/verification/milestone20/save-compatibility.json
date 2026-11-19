@@ -1,0 +1,55 @@
+{
+  "upgrade-nine": {
+    "protected_files": 2,
+    "unchanged": true
+  },
+  "upgrade-studio": {
+    "protected_files": 4,
+    "unchanged": true
+  },
+  "upgrade-rules": {
+    "protected_files": 2,
+    "unchanged": true
+  },
+  "api": {
+    "protected_files": 2,
+    "unchanged": true
+  },
+  "missing-dimension": {
+    "protected_files": 52,
+    "unchanged": true
+  },
+  "changed-dimension": {
+    "protected_files": 52,
+    "unchanged": true
+  },
+  "missing-feature": {
+    "protected_files": 52,
+    "unchanged": true
+  },
+  "changed-feature": {
+    "protected_files": 52,
+    "unchanged": true
+  },
+  "missing-structure": {
+    "protected_files": 52,
+    "unchanged": true
+  },
+  "changed-structure": {
+    "protected_files": 52,
+    "unchanged": true
+  },
+  "changed-api": {
+    "protected_files": 52,
+    "unchanged": true
+  },
+  "missing-both": {
+    "protected_files": 55,
+    "unchanged": true
+  },
+  "missing-archive": {
+    "protected_files": 57,
+    "unchanged": true
+  },
+  "production_jar_sha256": "c2daf450ea6507c51fe8484e3aa4fe573f74c2ebc48d06637e5bd6d152feac26"
+}

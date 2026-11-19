@@ -13,6 +13,9 @@ public interface DimensionAdapter {
     /** Change this number when an earlier compatibility contract can no longer be honored. */
     int version();
 
+    /** Opt in only when every custom portal entry calls EnvironmentApi.canEnter before teleporting. */
+    default boolean supportsPortalPolicies() { return false; }
+
     /** Inspect the original stem. Implementations must be side-effect free. */
     Support inspect(ResourceKey<LevelStem> dimension, LevelStem original);
 

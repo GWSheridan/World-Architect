@@ -71,6 +71,22 @@ final class StructureLibrary {
         return LibraryEntry.read(template, nativeTag, id.getPath(), author);
     }
 
+    static LibraryEntry importSchematic(MinecraftServer server, Identifier source, Identifier id, String author) throws IOException {
+        Path file = path(server.getWorldPath(LevelResource.GENERATED_DIR), source, "structure", ".schem");
+        if (!Files.isRegularFile(file)) {
+            throw new IOException("Schematic " + source + " is missing. Place the .schem file in the world's generated structure directory.");
+        }
+        CompoundTag nativeTag = SpongeSchematic.toNative(read(file));
+        NativeTemplate imported = NativeTemplate.read(upgrade(server, nativeTag));
+        for (var cell : imported.blocks()) {
+            var data = cell.metadata();
+            if (data != null) {
+                TemplateMetadata.validateSchematic(cell.state(), data, cell.pos());
+            }
+        }
+        return LibraryEntry.read(sanitize(server, imported), nativeTag, nativeTag.getStringOr("title", id.getPath()), author);
+    }
+
     static LibraryEntry load(MinecraftServer server, Identifier id) throws IOException {
         Path file = libraryPath(server, id);
         if (!Files.isRegularFile(file)) {
@@ -159,12 +175,16 @@ final class StructureLibrary {
     }
 
     private static Path path(Path root, Identifier id, String folder) throws IOException {
+        return path(root, id, folder, ".nbt");
+    }
+
+    private static Path path(Path root, Identifier id, String folder, String extension) throws IOException {
         if (!id.getNamespace().matches("[a-z0-9_-]{1,48}") || id.getPath().length() > 120
                 || !id.getPath().matches("[a-z0-9_.-]+(/[a-z0-9_.-]+)*")
                 || List.of(id.getPath().split("/")).stream().anyMatch(part -> part.equals(".") || part.equals("..") || part.endsWith("."))) {
             throw new IOException("Invalid structure file ID " + id);
         }
-        return root.resolve(id.getNamespace()).resolve(folder).resolve(id.getPath() + ".nbt");
+        return root.resolve(id.getNamespace()).resolve(folder).resolve(id.getPath() + extension);
     }
 
     private static CompoundTag read(Path path) throws IOException {

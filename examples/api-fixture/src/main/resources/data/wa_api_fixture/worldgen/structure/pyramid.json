@@ -1,0 +1,7 @@
+{
+  "type": "wa_api_fixture:pyramid",
+  "biomes": "minecraft:plains",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

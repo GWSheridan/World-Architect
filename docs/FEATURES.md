@@ -19,14 +19,42 @@ These editors configure World Architect's generation pipeline. Native tree featu
 
 ## Cross-dimension placement
 
-The current native structure IDs are `minecraft:desert_pyramid`, `minecraft:jungle_pyramid`, and `minecraft:swamp_hut`. They retain native generation, pieces, biome checks, and `/locate structure` support. Choose a compatible biome and suitable terrain in the destination dimension, and keep Minecraft's **Generate Structures** option enabled.
+The supported native structure IDs are `minecraft:desert_pyramid`, `minecraft:jungle_pyramid`, `minecraft:swamp_hut`, and `minecraft:end_city`. They retain native generation, pieces, biome checks, and `/locate structure` support. Choose a compatible biome and suitable terrain in the destination dimension, and keep Minecraft's **Generate Structures** option enabled.
 
 To generate a desert pyramid in the End, choose a flat sandstone Single Block profile for the End. In **Features & Structures → Biomes**, enter `minecraft:desert`. Under **Structures**, add `minecraft:desert_pyramid` and choose its spacing and separation. Custom End terrain disables the dragon fight and the exit portal that fight creates.
 
 The [dedicated-server demo](../examples/features-and-structures) includes a desert pyramid in the End, a Nether lava sea, and an Overworld with gold in forests, amethyst decorations at Y 57 in plains, and dry caves.
 
+For an End City in the Overworld, choose solid terrain with its surface at least Y 60 and enable `minecraft:end_highlands` or `minecraft:end_midlands`. Add `minecraft:end_city` under **Structures**. The [cross-dimension example](../examples/cross-dimension-structures) includes an Overworld End City and modular templates in two custom dimensions.
+
+## Modular template generation
+
+Export saved library templates into a generation datapack, then register its structure ID under the destination dimension's **Structures** rules. Spacing and separation use chunks. The assembly's bounding span must fit between neighbouring candidates. The native pipeline handles chunk references, `/locate structure`, and piece persistence.
+
+```text
+/wa_structure export_generation builds:house pack:village minecraft:plains
+/wa_structure append_generation builds:house pack:village east 16 0 0
+/wa_structure append_generation builds:tower pack:village south 0 0 24
+```
+
+These commands write `world/datapacks/worldarchitect-generated/data/<namespace>/worldgen/structure/<path>.json`. Install that datapack in a new world and enable `file/worldarchitect-generated`. Templates are embedded in the definition. Editing the source library entry leaves those copies intact.
+
+Each module has a unique name, a nonnegative local offset, and a copied template with its saved placement rules and spawn markers. Saved rotations and mirrors carry through to the copy. The whole assembly can receive a seeded random rotation. Assemblies support up to 16 modules, 65,536 occupied cells, and 96 blocks per axis. Occupied cells and marker clearance must remain free of overlap.
+
+The structure JSON supports `y_offset` from −64 to 64, `max_slope` from 0 to 32, and `random_rotation`. The origin follows the sampled solid surface at the candidate chunk. Every module retains its dimension, biome, height, support, and collision rules. **Supported** requires a safe block below each occupied column and honours the assembly slope limit. **Free** allows suspended placement. **Buried** requires terrain above the occupied cells. **Air** requires empty destination cells. **Matching** also allows identical terrain blocks without block entities.
+
+Placement validates the complete assembly against the destination generator's base terrain before creating a start. It checks the allowed biomes throughout the occupied footprint. Rejected candidates create no module pieces. Native structures and decorations run through Minecraft's generation stages.
+
+Inspect saved generated markers or travel to one with an operator account. Supply a location inside the generated structure's bounding box. Marker travel checks the current floor, headroom, loaded chunks, and world border.
+
+```text
+/execute in pack:dimension run wa_structure generated_markers pack:village 1 81 1
+/execute in pack:dimension run wa_structure generated_spawn pack:village 1 81 1 east entry
+```
 ## Save format
 
 The optional `dimension_profile.content` contains this dimension's rules. Empty content retains the earlier generator encoding and behavior. Version 1 content stores biome IDs and the layout seed, rule materials and limits, and native structure IDs. The example datapack contains a complete profile.
 
 World Architect records the registered structure definitions, effective structure settings, and resolved permitted biomes in the save's generation snapshot. Startup blocks when those dependencies change. Existing saves use their saved rules after an update to the starting preset. The world seed continues to control terrain, cave, ore, decoration, and structure placement. The separate biome layout seed is initialized from the world seed when the biome editor first opens.
+
+Modular definitions pin the embedded templates, rules, and markers. Generated pieces also save their own transformed template and marker data. End City worlds pin native generation resources, including the native template files. A changed registered definition or pinned resource stops startup before chunk generation.

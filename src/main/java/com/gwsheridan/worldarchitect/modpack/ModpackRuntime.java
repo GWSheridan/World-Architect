@@ -242,7 +242,7 @@ public final class ModpackRuntime {
         }
 
         private static PresetBundle readBundle(String filename) {
-            if (!filename.endsWith(".zip") || !BundleFiles.filename(filename.substring(0, filename.length() - 4))) {
+            if (!BundleFiles.archiveFilename(filename)) {
                 throw problem("Choose a local ZIP filename in developer.json");
             }
             try {

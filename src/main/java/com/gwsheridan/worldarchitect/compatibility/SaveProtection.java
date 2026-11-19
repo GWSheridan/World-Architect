@@ -7,6 +7,8 @@ import com.gwsheridan.worldarchitect.modpack.ModpackRuntime;
 import com.gwsheridan.worldarchitect.modpack.PresetBundle;
 import com.gwsheridan.worldarchitect.modpack.WorldBundles;
 import com.gwsheridan.worldarchitect.skyblock.IslandAllocations;
+import com.gwsheridan.worldarchitect.structure.ModularStructure;
+import com.gwsheridan.worldarchitect.spawn.WorldAdministration;
 import com.gwsheridan.worldarchitect.worldgen.ManagedGenerator;
 import com.gwsheridan.worldarchitect.worldgen.NativeStructures;
 import com.gwsheridan.worldarchitect.worldgen.SolidColumnGenerator;
@@ -42,6 +44,7 @@ public final class SaveProtection {
     private SaveProtection() {}
 
     public static void markLevelData(CompoundTag root, Path dataDirectory) {
+        WorldAdministration.markLevelData(root, dataDirectory);
         if (GenerationSnapshot.exists(dataDirectory)) {
             root.getCompound("Data").ifPresent(data -> data.putBoolean(PROTECTED_SAVE, true));
         }
@@ -70,6 +73,7 @@ public final class SaveProtection {
             }
         });
         var dataDirectory = server.getWorldPath(LevelResource.DATA);
+        com.gwsheridan.worldarchitect.rules.RuleSpawns.validate(settings.dimensions().dimensions(), server.registryAccess());
         var original = GenerationSnapshot.load(dataDirectory);
         if (original.isEmpty() && bundle.isEmpty()
                 && settings.dimensions().dimensions().values().stream().noneMatch(stem -> stem.generator() instanceof ManagedGenerator)) {
@@ -140,9 +144,16 @@ public final class SaveProtection {
         CompoundTag result = new CompoundTag();
         settings.dimensions().dimensions().forEach((key, stem) -> {
             if (stem.generator() instanceof SolidColumnGenerator generator) {
-                for (var rule : generator.content().structures()) {
+                for (var rule : generator.structureRules()) {
                     var id = rule.structure().unwrapKey().orElseThrow().identifier();
                     var structure = rule.structure().value();
+                    if (structure instanceof ModularStructure modular) {
+                        try {
+                            modular.validateTemplates(registries);
+                        } catch (IOException e) {
+                            throw incompatible("Invalid template metadata in " + id + ". " + e.getMessage());
+                        }
+                    }
                     if (generator.getBiomeSource().possibleBiomes().stream().noneMatch(structure.biomes()::contains)) {
                         throw incompatible("Structure " + id + " has no matching biome in " + key.identifier());
                     }
@@ -158,6 +169,7 @@ public final class SaveProtection {
     public static void verify(LevelStorageSource.LevelStorageAccess access, Dynamic<?> levelData, WorldDataConfiguration configuration,
             Registry<LevelStem> datapackDimensions, HolderLookup.Provider registries) {
         var dataDirectory = access.getLevelPath(LevelResource.DATA);
+        WorldAdministration.verify(dataDirectory, levelData);
         var original = GenerationSnapshot.load(dataDirectory);
         var savedBundlePacks = levelData.get("DataPacks").get("Enabled").asStream()
                 .flatMap(value -> value.asString().result().stream()).filter(WorldBundles::isBundlePack).toList();
@@ -209,7 +221,7 @@ public final class SaveProtection {
                 datapackDimensions.getOptional(dimension).ifPresent(source -> validateOverride(dimension, stem, source));
             }
             if (stem.generator() instanceof SolidColumnGenerator generator) {
-                for (var rule : generator.content().structures()) {
+                for (var rule : generator.structureRules()) {
                     String id = rule.structure().unwrapKey().orElseThrow().identifier().toString();
                     var pinned = structurePins.getCompoundOrEmpty(id).get("registered");
                     if (!Objects.equals(pinned, NativeStructures.registeredDefinition(rule.structure().value(), registries))) {
@@ -252,6 +264,11 @@ public final class SaveProtection {
     public static void validateGenerator(ResourceKey<LevelStem> key, LevelStem stem) {
         var chunkGenerator = stem.generator();
         ManagedGenerator generator = (ManagedGenerator) chunkGenerator;
+        generator.dimensionProfile().ifPresent(profile -> {
+            if (!profile.rules().isEmpty() && !profile.rules().dimension().equals(key.identifier())) {
+                throw incompatible("Rule engine binding " + profile.rules().dimension() + " does not match " + key.identifier());
+            }
+        });
         var type = stem.type().value();
         if (type.minY() != chunkGenerator.getMinY() || type.height() != chunkGenerator.getGenDepth()) {
             throw incompatible("The vertical range of " + key.identifier() + " changed from the saved generator's range");

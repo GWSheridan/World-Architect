@@ -1,0 +1,9 @@
+gradle.beforeProject { project ->
+ project.pluginManager.withPlugin('net.neoforged.moddev') {
+  project.neoForge.runs.configureEach {if(name=='server'){
+   loadedMods=[]
+   jvmArgument '-Xmx1300m';jvmArgument '-XX:ActiveProcessorCount=4'
+   if(project.providers.gradleProperty('waPerformance').isPresent())jvmArgument '-Xlog:gc:file=benchmark-jvm-%p.log'
+  }}
+ }
+}

@@ -1,7 +1,10 @@
 package com.gwsheridan.worldarchitect.structure;
 
 import com.gwsheridan.worldarchitect.config.IslandTemplate;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -14,6 +17,19 @@ import net.minecraft.world.level.block.state.BlockState;
 
 record LibraryEntry(NativeTemplate template, String title, String category, String author, int revision,
         TemplateRules rules, Map<String, Marker> markers) {
+    static final Codec<LibraryEntry> CODEC = CompoundTag.CODEC.comapFlatMap(root -> {
+        try {
+            NativeTemplate template = NativeTemplate.read(root);
+            for (var cell : template.blocks()) {
+                if (TemplateMetadata.restricted(cell.state())) {
+                    throw new IOException("Unsupported generation template block " + cell.state());
+                }
+            }
+            return DataResult.success(read(template, root, "Generated structure", ""));
+        } catch (IOException | IllegalArgumentException e) {
+            return DataResult.error(() -> e.getMessage());
+        }
+    }, LibraryEntry::toTag);
     private static final String HEADER = "worldarchitect";
     private static final int MAX_MARKERS = 16;
 
@@ -97,6 +113,47 @@ record LibraryEntry(NativeTemplate template, String title, String category, Stri
 
     LibraryEntry duplicate() {
         return new LibraryEntry(template, title, category, author, 1, rules, markers);
+    }
+
+    LibraryEntry transformed(TemplatePlacement transform) throws IOException {
+        BlockPos size = template.size();
+        var blocks = template.blocks().stream().map(cell -> new NativeTemplate.Cell(
+                transform.position(size, cell.pos()), transform.state(cell.state()), cell.metadata())).toList();
+        var transformedMarkers = new TreeMap<String, Marker>();
+        markers.forEach((name, marker) -> transformedMarkers.put(name,
+                new Marker(transform.position(size, marker.pos()), transform.facing(marker.facing()))));
+        return withTemplate(new NativeTemplate(transform.size(size), blocks), transformedMarkers);
+    }
+
+    LibraryEntry replaceState(BlockState original, BlockState replacement) throws IOException {
+        if (original == replacement || TemplateMetadata.restricted(replacement)) {
+            throw new IOException("Choose a different, supported replacement block state.");
+        }
+        var blocks = new ArrayList<NativeTemplate.Cell>(template.blocks().size());
+        boolean found = false;
+        for (var cell : template.blocks()) {
+            if (cell.state() != original) {
+                blocks.add(cell);
+                continue;
+            }
+            found = true;
+            var metadata = cell.metadata();
+            if (metadata != null && original.getBlock() != replacement.getBlock()) {
+                throw new IOException("A block with saved metadata can only change properties of the same block type.");
+            }
+            var edited = new NativeTemplate.Cell(cell.pos(), replacement, metadata);
+            if (edited.isSolidContent()) {
+                blocks.add(edited);
+            }
+        }
+        if (!found) {
+            throw new IOException("The selected block state is absent from this template. Use an exact state from its palette.");
+        }
+        return withTemplate(new NativeTemplate(template.size(), blocks), markers);
+    }
+
+    private LibraryEntry withTemplate(NativeTemplate replacement, Map<String, Marker> replacementMarkers) throws IOException {
+        return new LibraryEntry(replacement, title, category, author, Math.incrementExact(revision), rules, replacementMarkers).validated();
     }
 
     private LibraryEntry validated() throws IOException {

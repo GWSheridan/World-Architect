@@ -3,6 +3,7 @@ package com.gwsheridan.worldarchitect.skyblock;
 import com.gwsheridan.worldarchitect.config.IslandProfile;
 import com.gwsheridan.worldarchitect.config.IslandTemplate;
 import com.gwsheridan.worldarchitect.worldgen.VoidGenerator;
+import com.gwsheridan.worldarchitect.spawn.SafeSpawns;
 import com.mojang.logging.LogUtils;
 import java.util.Comparator;
 import java.util.Optional;
@@ -79,7 +80,7 @@ public final class IslandSpawns {
                 level.getServer().getWorldPath(LevelResource.DATA), profile.personalSlots(), player);
     }
 
-    private static Optional<BlockPos> position(ServerLevel level, IslandProfile profile, int slot) {
+    public static Optional<BlockPos> position(ServerLevel level, IslandProfile profile, int slot) {
         var personal = safePosition(level, profile, slot);
         return personal.isPresent() || slot == 0 ? personal : safePosition(level, profile, 0);
     }
@@ -96,8 +97,6 @@ public final class IslandSpawns {
     }
 
     private static boolean safe(ServerLevel level, BlockPos pos) {
-        return pos.getY() > level.getMinY() && pos.getY() < level.getMaxY() && level.getWorldBorder().isWithinBounds(pos)
-                && level.getBlockState(pos).isAir() && level.getBlockState(pos.above()).isAir()
-                && IslandTemplate.safeFloor(level.getBlockState(pos.below()), level, pos.below());
+        return SafeSpawns.safe(level, pos);
     }
 }

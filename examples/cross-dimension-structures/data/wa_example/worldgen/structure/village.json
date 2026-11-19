@@ -1,0 +1,605 @@
+{
+  "biomes": "minecraft:plains",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "modules": [
+    {
+      "name": "main",
+      "offset": [
+        0,
+        0,
+        0
+      ],
+      "template": {
+        "worldarchitect": {
+          "author": "Fixture",
+          "format": 1,
+          "rules": {
+            "max_y": 100,
+            "biome": "minecraft:plains",
+            "min_y": 81,
+            "terrain": "supported",
+            "dimension": "wa_example:workshop"
+          },
+          "title": "Sponge Workshop",
+          "category": "Custom Structures",
+          "markers": {
+            "entry": {
+              "pos": [
+                1,
+                1,
+                1
+              ],
+              "facing": "west"
+            }
+          },
+          "revision": 2
+        },
+        "size": [
+          2,
+          4,
+          3
+        ],
+        "entities": [],
+        "blocks": [
+          {
+            "pos": [
+              0,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              1,
+              0
+            ],
+            "state": 1
+          },
+          {
+            "nbt": {
+              "is_waxed": 1,
+              "id": "minecraft:sign",
+              "front_text": {
+                "has_glowing_text": 1,
+                "color": "blue",
+                "messages": [
+                  "Sponge Sign",
+                  "",
+                  "",
+                  ""
+                ]
+              }
+            },
+            "pos": [
+              0,
+              1,
+              1
+            ],
+            "state": 2
+          },
+          {
+            "nbt": {
+              "CustomName": "Schematic Supply",
+              "id": "minecraft:chest"
+            },
+            "pos": [
+              0,
+              1,
+              2
+            ],
+            "state": 3
+          },
+          {
+            "nbt": {
+              "patterns": [
+                {
+                  "color": "red",
+                  "pattern": "minecraft:stripe_bottom"
+                }
+              ],
+              "id": "minecraft:banner"
+            },
+            "pos": [
+              1,
+              1,
+              0
+            ],
+            "state": 4
+          },
+          {
+            "pos": [
+              1,
+              1,
+              2
+            ],
+            "state": 5
+          }
+        ],
+        "palette": [
+          {
+            "id": "minecraft:polished_deepslate"
+          },
+          {
+            "id": "minecraft:oak_log",
+            "properties": {
+              "axis": "z"
+            }
+          },
+          {
+            "id": "minecraft:oak_wall_sign",
+            "properties": {
+              "waterlogged": "false",
+              "facing": "south"
+            }
+          },
+          {
+            "id": "minecraft:chest",
+            "properties": {
+              "waterlogged": "false",
+              "facing": "west",
+              "type": "single"
+            }
+          },
+          {
+            "id": "minecraft:white_banner",
+            "properties": {
+              "rotation": "12"
+            }
+          },
+          {
+            "id": "minecraft:polished_andesite_stairs",
+            "properties": {
+              "half": "top",
+              "waterlogged": "false",
+              "shape": "straight",
+              "facing": "west"
+            }
+          }
+        ],
+        "DataVersion": 5023
+      }
+    },
+    {
+      "name": "east",
+      "offset": [
+        16,
+        0,
+        0
+      ],
+      "template": {
+        "worldarchitect": {
+          "author": "Fixture",
+          "format": 1,
+          "rules": {
+            "max_y": 100,
+            "biome": "minecraft:plains",
+            "min_y": 81,
+            "terrain": "supported",
+            "dimension": "wa_example:workshop"
+          },
+          "title": "Sponge Workshop",
+          "category": "Custom Structures",
+          "markers": {
+            "entry": {
+              "pos": [
+                1,
+                1,
+                1
+              ],
+              "facing": "west"
+            }
+          },
+          "revision": 2
+        },
+        "size": [
+          2,
+          4,
+          3
+        ],
+        "entities": [],
+        "blocks": [
+          {
+            "pos": [
+              0,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              1,
+              0
+            ],
+            "state": 1
+          },
+          {
+            "nbt": {
+              "is_waxed": 1,
+              "id": "minecraft:sign",
+              "front_text": {
+                "has_glowing_text": 1,
+                "color": "blue",
+                "messages": [
+                  "Sponge Sign",
+                  "",
+                  "",
+                  ""
+                ]
+              }
+            },
+            "pos": [
+              0,
+              1,
+              1
+            ],
+            "state": 2
+          },
+          {
+            "nbt": {
+              "CustomName": "Schematic Supply",
+              "id": "minecraft:chest"
+            },
+            "pos": [
+              0,
+              1,
+              2
+            ],
+            "state": 3
+          },
+          {
+            "nbt": {
+              "patterns": [
+                {
+                  "color": "red",
+                  "pattern": "minecraft:stripe_bottom"
+                }
+              ],
+              "id": "minecraft:banner"
+            },
+            "pos": [
+              1,
+              1,
+              0
+            ],
+            "state": 4
+          },
+          {
+            "pos": [
+              1,
+              1,
+              2
+            ],
+            "state": 5
+          }
+        ],
+        "palette": [
+          {
+            "id": "minecraft:polished_deepslate"
+          },
+          {
+            "id": "minecraft:oak_log",
+            "properties": {
+              "axis": "z"
+            }
+          },
+          {
+            "id": "minecraft:oak_wall_sign",
+            "properties": {
+              "waterlogged": "false",
+              "facing": "south"
+            }
+          },
+          {
+            "id": "minecraft:chest",
+            "properties": {
+              "waterlogged": "false",
+              "facing": "west",
+              "type": "single"
+            }
+          },
+          {
+            "id": "minecraft:white_banner",
+            "properties": {
+              "rotation": "12"
+            }
+          },
+          {
+            "id": "minecraft:polished_andesite_stairs",
+            "properties": {
+              "half": "top",
+              "waterlogged": "false",
+              "shape": "straight",
+              "facing": "west"
+            }
+          }
+        ],
+        "DataVersion": 5023
+      }
+    },
+    {
+      "name": "south",
+      "offset": [
+        0,
+        0,
+        16
+      ],
+      "template": {
+        "worldarchitect": {
+          "author": "Fixture",
+          "format": 1,
+          "rules": {
+            "max_y": 100,
+            "biome": "minecraft:plains",
+            "min_y": 81,
+            "terrain": "supported",
+            "dimension": "wa_example:workshop"
+          },
+          "title": "Sponge Workshop",
+          "category": "Custom Structures",
+          "markers": {
+            "entry": {
+              "pos": [
+                1,
+                1,
+                1
+              ],
+              "facing": "west"
+            }
+          },
+          "revision": 2
+        },
+        "size": [
+          2,
+          4,
+          3
+        ],
+        "entities": [],
+        "blocks": [
+          {
+            "pos": [
+              0,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              1,
+              0
+            ],
+            "state": 1
+          },
+          {
+            "nbt": {
+              "is_waxed": 1,
+              "id": "minecraft:sign",
+              "front_text": {
+                "has_glowing_text": 1,
+                "color": "blue",
+                "messages": [
+                  "Sponge Sign",
+                  "",
+                  "",
+                  ""
+                ]
+              }
+            },
+            "pos": [
+              0,
+              1,
+              1
+            ],
+            "state": 2
+          },
+          {
+            "nbt": {
+              "CustomName": "Schematic Supply",
+              "id": "minecraft:chest"
+            },
+            "pos": [
+              0,
+              1,
+              2
+            ],
+            "state": 3
+          },
+          {
+            "nbt": {
+              "patterns": [
+                {
+                  "color": "red",
+                  "pattern": "minecraft:stripe_bottom"
+                }
+              ],
+              "id": "minecraft:banner"
+            },
+            "pos": [
+              1,
+              1,
+              0
+            ],
+            "state": 4
+          },
+          {
+            "pos": [
+              1,
+              1,
+              2
+            ],
+            "state": 5
+          }
+        ],
+        "palette": [
+          {
+            "id": "minecraft:polished_deepslate"
+          },
+          {
+            "id": "minecraft:oak_log",
+            "properties": {
+              "axis": "z"
+            }
+          },
+          {
+            "id": "minecraft:oak_wall_sign",
+            "properties": {
+              "waterlogged": "false",
+              "facing": "south"
+            }
+          },
+          {
+            "id": "minecraft:chest",
+            "properties": {
+              "waterlogged": "false",
+              "facing": "west",
+              "type": "single"
+            }
+          },
+          {
+            "id": "minecraft:white_banner",
+            "properties": {
+              "rotation": "12"
+            }
+          },
+          {
+            "id": "minecraft:polished_andesite_stairs",
+            "properties": {
+              "half": "top",
+              "waterlogged": "false",
+              "shape": "straight",
+              "facing": "west"
+            }
+          }
+        ],
+        "DataVersion": 5023
+      }
+    }
+  ],
+  "type": "worldarchitect:modular"
+}

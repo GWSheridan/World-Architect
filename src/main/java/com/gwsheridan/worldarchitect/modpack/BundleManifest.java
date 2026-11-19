@@ -33,7 +33,7 @@ public record BundleManifest(Identifier preset, String title, String description
 
     public BundleManifest {
         editableDimensions = List.copyOf(editableDimensions);
-        editableFeatures = Map.copyOf(editableFeatures);
+        editableFeatures = editableFeatures.entrySet().stream().collect(java.util.stream.Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> List.copyOf(entry.getValue())));
         editableOptions = List.copyOf(editableOptions);
         requiredMods = List.copyOf(requiredMods);
     }
@@ -97,7 +97,7 @@ public record BundleManifest(Identifier preset, String title, String description
     public enum Feature implements StringRepresentable {
         BIOMES("biomes", "biomes", "biome_scale", "biome_seed"), ORES("ores", "ores"),
         DECORATIONS("decorations", "decorations"), CAVES("caves", "caves"), FLUIDS("fluids", "sea"),
-        STRUCTURES("structures", "structures");
+        STRUCTURES("structures", "structures"), NATIVE_FEATURES("native_features", "native_features");
 
         private final String name;
         private final List<String> fields;

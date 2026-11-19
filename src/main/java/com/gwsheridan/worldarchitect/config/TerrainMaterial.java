@@ -16,14 +16,17 @@ public final class TerrainMaterial {
 
     public static DataResult<BlockState> parse(String input) {
         try {
-            BlockState state = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, input, false).blockState();
-            if (state.isAir() || !state.getFluidState().isEmpty() || state.hasBlockEntity() || state.isRandomlyTicking()
-                    || !state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) {
-                return DataResult.error(() -> "Terrain requires a full solid block without fluids, block entities or random ticks.");
-            }
-            return DataResult.success(state);
+            return validate(BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, input, false).blockState());
         } catch (CommandSyntaxException e) {
             return DataResult.error(() -> e.getRawMessage().getString());
         }
+    }
+
+    public static DataResult<BlockState> validate(BlockState state) {
+        if (state.isAir() || !state.getFluidState().isEmpty() || state.hasBlockEntity() || state.isRandomlyTicking()
+                || !state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) {
+            return DataResult.error(() -> "Terrain requires a full solid block without fluids, block entities or random ticks.");
+        }
+        return DataResult.success(state);
     }
 }

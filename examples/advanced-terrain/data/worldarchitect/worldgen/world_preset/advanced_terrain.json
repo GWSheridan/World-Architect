@@ -1,0 +1,63 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "worldarchitect:layered",
+        "biome": "minecraft:plains",
+        "dimension_profile": {
+          "min_y": -64,
+          "height": 384,
+          "content": {
+            "biomes": ["minecraft:plains", "minecraft:forest"],
+            "biome_scale": 48,
+            "biome_seed": 194723
+          }
+        },
+        "profile": {
+          "generator_version": 2,
+          "base_material": "minecraft:stone",
+          "layers": [{"material": "minecraft:green_terracotta", "depth": 1}, {"material": "minecraft:dirt", "depth": 3}],
+          "elevation": 112,
+          "relief": 52,
+          "terrain": {"landform": "mountains", "scale": 192, "seed_salt": -70711},
+          "strata": [
+            {"material": "minecraft:moss_block", "anchor": "depth", "from": 0, "to": 0, "biomes": ["minecraft:forest"]},
+            {"material": "minecraft:calcite", "anchor": "height", "from": 5, "to": 16, "transition": 6},
+            {"material": "minecraft:deepslate", "anchor": "height", "from": -64, "to": 0}
+          ]
+        }
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "worldarchitect:single_block",
+        "biome": "minecraft:nether_wastes",
+        "dimension_profile": {"min_y": 0, "height": 256},
+        "profile": {
+          "generator_version": 2,
+          "material": "minecraft:netherrack",
+          "elevation": 71,
+          "relief": 39,
+          "terrain": {"landform": "plateaus", "scale": 192}
+        }
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "worldarchitect:single_block",
+        "biome": "minecraft:the_end",
+        "dimension_profile": {"min_y": 0, "height": 256},
+        "profile": {
+          "generator_version": 2,
+          "material": "minecraft:end_stone",
+          "elevation": 118,
+          "relief": 60,
+          "terrain": {"landform": "floating_islands", "scale": 192}
+        }
+      }
+    }
+  }
+}

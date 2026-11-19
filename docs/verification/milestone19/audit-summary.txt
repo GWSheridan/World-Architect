@@ -1,0 +1,15 @@
+same-binary 0.9.0 native control: native diagnostic, changed heightmap chunks=23, structures=0, changed blocks=8471, transition types=527
+normal: native diagnostic, changed heightmap chunks=27, structures=0, changed blocks=12362, transition types=631
+void: PASS, 72 identical managed chunks
+single-block: PASS, 72 identical managed chunks
+layered: PASS, 72 identical managed chunks
+structure-heavy: PASS, 72 identical managed chunks
+Compared 360 measured chunks: 288 managed chunks strictly; 72 native chunks diagnostically.
+Verified 359,424 extension positions, 143 native markers, 4 adapted structure starts, original dimension and adapter/resource pins.
+Verified 393,216 block positions in minecraft:overworld, surface Y 68 to 97, saved layered profile with base minecraft:stone, and no structure starts.
+Verified island allocation ledger with 0 owners.
+Verified 196,608 positions in minecraft:overworld, 145 template blocks, and no natural structures.
+Verified island allocation ledger with 2 owners.
+Verified 393,216 positions in minecraft:overworld, 435 template blocks, and no natural structures.
+Verified 1,867,776 rule-filtered positions, 2,252 template cells, 8 markers, 465 ore cells and 8 decorations; strict filters and priority passed.
+RULE_SAMPLE_SHA256 19b0c11d3bf1f7402abc07dc81e083139c79d1796f288d01986bcf9b66d76952
