@@ -24,6 +24,6 @@ node tools/validation/multiplayer.mjs --jar build/libs/worldarchitect-1.1.0-dev.
 
 This starts two real clients and a dedicated server for staged placement, ordinary-player denial, stale revision/destination rejection, ghost previews, undo, client block synchronization and restart checks. Use `--options <test-instance-options.txt>` to reuse accessibility and graphics settings. It uses synthetic offline identities on loopback. It must not be pointed at a production server.
 
-The GitHub workflow repeats the dedicated fixture on Windows and Linux. It uploads sanitized diagnostic reports, structured results and JUnit XML. A scheduled workflow is not created; runs follow source changes or a manual dispatch.
+The GitHub workflow repeats the dedicated fixture and pinned public-mod matrix on Windows and Linux. `node tools/validation/compatibility.mjs` compares original and managed terrain with the verified 1.0.0 baseline. Candidate-only failures fail the job; matching identified upstream failures are recorded as blocked. The workflow uploads diagnostics, structured results, JUnit XML and CI server logs. A scheduled workflow is not created; runs follow source changes or a manual dispatch.
 
 The release additionally requires the pack, End progression, dependency rejection, older-save audit, thirty-minute multiplayer soak and alternating same-host performance suites described in [the roadmap](../../docs/ROADMAP-1.1.md). A passing smoke test does not substitute for those checks.

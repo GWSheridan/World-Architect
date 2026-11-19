@@ -17,7 +17,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 @EventBusSubscriber(modid="wa_validation", value=Dist.CLIENT)
 public final class CreatorAcceptance {
     private static final Deque<Runnable> STEPS = new ArrayDeque<>();
-    private static final KeyEvent ENTER = new KeyEvent(257,0,0);
+    private static final KeyEvent ENTER = new KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_RETURN,0,0);
     private static boolean started;
     private static int ticks;
     private static CreateWorldScreen parent;
@@ -30,7 +30,7 @@ public final class CreatorAcceptance {
             started=true; ticks=0;
             CreateWorldScreen.openFresh(mc,mc::stop,(screen,layers,settings,rules,packs)->true);
             parent=(CreateWorldScreen)mc.gui.screen(); var ui=parent.getUiState();
-            ui.setWorldType(ui.getNormalPresetList().stream().filter(t->t.preset().is(WorldArchitect.PRESET)).findFirst().orElseThrow());
+            ui.setWorldType(ui.getNormalPresetList().stream().filter(t->t.preset().is(WorldArchitect.DIMENSIONS_PRESET)).findFirst().orElseThrow());
             for (int scale : new int[]{1,2}) for (String starter : List.of("Single Block","Layered","Skyblock","Custom End")) queue(scale,starter);
             STEPS.add(()->{System.out.println("WA_CREATOR_WORKFLOW_PASS starters,exports,library,drafts,preview,scales1and2");mc.stop();});
         }
@@ -43,6 +43,8 @@ public final class CreatorAcceptance {
         var mc=Minecraft.getInstance();
         STEPS.add(()->{
             mc.options.guiScale().set(scale);mc.resizeGui();
+            var ui=parent.getUiState();ui.setSeed("18");ui.updateDimensions((registries,old)->ui.getSettings().worldgenLoadContext()
+                    .lookupOrThrow(net.minecraft.core.registries.Registries.WORLD_PRESET).getOrThrow(WorldArchitect.DIMENSIONS_PRESET).value().createWorldDimensions());
             manager=parent.getUiState().getPresetEditor().createEditScreen(parent,parent.getUiState().getSettings());mc.gui.setScreen(manager);bounds();press("Starters");bounds();
         });
         STEPS.add(()->{press(starter);bounds();press("Preview terrain");});
@@ -59,8 +61,7 @@ public final class CreatorAcceptance {
             press("Apply");press("Validate draft");press("Save version");press("Export ZIP");Screenshot.grab(mc,false);
             press("Browse saved presets");bounds();
             var search=mc.gui.screen().children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast).findFirst().orElseThrow();search.setValue(name);
-            var list=mc.gui.screen().children().stream().filter(ObjectSelectionList.class::isInstance).map(ObjectSelectionList.class::cast).findFirst().orElseThrow();
-            mc.gui.screen().setFocused(list);mc.gui.screen().keyPressed(new KeyEvent(264,0,0));press("Load selected");press("Continue");
+            mc.gui.screen().keyPressed(new KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_TAB,0,0));press("Load selected");press("Continue");
         });
         STEPS.add(()->{press("Apply to world");press("Done");
             var gen=parent.getUiState().getSettings().selectedDimensions().get(starter.equals("Custom End")?LevelStem.END:LevelStem.OVERWORLD).orElseThrow().generator();

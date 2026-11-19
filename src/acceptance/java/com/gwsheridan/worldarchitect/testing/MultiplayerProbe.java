@@ -20,7 +20,7 @@ import org.joml.Vector3fc;
 @EventBusSubscriber(modid="wa_validation",value=Dist.CLIENT)
 public final class MultiplayerProbe {
     private static final String FOLDER=System.getProperty("wa.validation.probe");
-    private static final KeyEvent ENTER=new KeyEvent(257,0,0);
+    private static final KeyEvent ENTER=new KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_RETURN,0,0);
     private static int ticks,action,finish;
     private static String previous="";
     @SubscribeEvent public static void tick(ClientTickEvent.Post event)throws Exception {
