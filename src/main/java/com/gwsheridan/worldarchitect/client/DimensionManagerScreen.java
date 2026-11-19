@@ -66,6 +66,8 @@ final class DimensionManagerScreen extends Screen {
     private int detailLeft;
     private int detailWidth;
     private int actionTop;
+    private final Map<ResourceKey<LevelStem>, LevelStem> initial;
+    private boolean applied;
 
     DimensionManagerScreen(CreateWorldScreen parent, WorldCreationContext context) {
         super(text("title"));
@@ -80,6 +82,7 @@ final class DimensionManagerScreen extends Screen {
                 .map(normal -> normal.value().createWorldDimensions().dimensions()).orElseGet(Map::of);
         this.keys = DimensionCatalog.discover(draft, context.datapackDimensions());
         this.selected = keys.getFirst();
+        this.initial = Map.copyOf(draft);
     }
 
     @Override
@@ -130,6 +133,10 @@ final class DimensionManagerScreen extends Screen {
             }
         }).bounds(detailLeft, actionTop + 88, detailWidth, 20).build());
         studio.active = lock.isEmpty();
+        studio.setWidth((detailWidth - 6) / 2);
+        addRenderableWidget(Button.builder(Component.literal("Starters"), b -> minecraft.gui.setScreen(
+                new StarterGalleryScreen(this, lock.isEmpty(), this::applyStarter)))
+                .bounds(detailLeft + (detailWidth + 6) / 2, actionTop + 88, (detailWidth - 6) / 2, 20).build());
         int half = (span - 8) / 2;
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
             if (studioOptionsChanged) {
@@ -138,6 +145,7 @@ final class DimensionManagerScreen extends Screen {
                 parent.getUiState().setBonusChest(draftOptions.generateBonusChest());
             }
             parent.getUiState().updateDimensions((registries, old) -> new WorldDimensions(Map.copyOf(draft)));
+            applied = true;
             onClose();
         }).bounds(left, height - 30, half, 20).build());
         addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> onClose())
@@ -176,7 +184,7 @@ final class DimensionManagerScreen extends Screen {
         LevelStem configured = key == null ? null : draft.get(key);
         boolean canEdit = key != null && canEditDimension(key);
         boolean canEditFeatures = key != null && (canEdit || lock.map(policy -> policy.editableFeatures().containsKey(key.identifier())).orElse(false));
-        previewButton.active = stem != null && stem.generator() instanceof ManagedGenerator;
+        previewButton.active = stem != null;
         previewButton.setTooltip(previewButton.active || stem == null ? null
                 : Tooltip.create(Component.translatable("worldarchitect.preview.unavailable")));
         originalButton.active = canEdit && configured != null && configured.generator() instanceof ManagedGenerator && original.isPresent();
@@ -216,8 +224,11 @@ final class DimensionManagerScreen extends Screen {
         ResourceKey<LevelStem> key = selected;
         if (key != null) {
             long seed = draftOptions.seed();
-            GenerationPreview.forStem(effective(key), seed).ifPresent(preview -> minecraft.gui.setScreen(
-                    new WorldPreviewScreen(this, key.identifier(), seed, preview)));
+            var preview = GenerationPreview.forStem(effective(key), seed);
+            if (preview.isPresent()) minecraft.gui.setScreen(new WorldPreviewScreen(this, key.identifier(), seed, preview.orElseThrow()));
+            else minecraft.gui.setScreen(new StudioReportScreen(this, "Preview unavailable", List.of(
+                    "This original or modded generator does not expose a base-terrain sampler.",
+                    "World Architect does not create chunks to simulate unsupported generators.")));
         }
     }
 
@@ -349,9 +360,45 @@ final class DimensionManagerScreen extends Screen {
         }
     }
 
+    private void applyStarter(StarterGalleryScreen.Starter starter) {
+        if (lock.isPresent()) return;
+        var key = starter == StarterGalleryScreen.Starter.END ? LevelStem.END : LevelStem.OVERWORLD;
+        var stem = effective(key);
+        var support = DimensionCatalog.inspect(context.worldgenLoadContext(), key, original(key).orElse(stem));
+        var mode = switch (starter) {
+            case SINGLE, END -> TerrainMode.SINGLE_BLOCK;
+            case LAYERED -> TerrainMode.LAYERED;
+            case SKYBLOCK -> TerrainMode.SKYBLOCK;
+        };
+        if (!support.modes().contains(mode) || support.biome().isEmpty()
+                || starter == StarterGalleryScreen.Starter.END && (support.adapter().isPresent() || !stem.type().value().hasEnderDragonFight()
+                    || stem.type().value().minY() != 0 || stem.type().value().height() != 256)) {
+            minecraft.gui.setScreen(new StudioReportScreen(this, "Starter unavailable", List.of("This dimension does not support that starter. " + support.detail().getString())));
+            return;
+        }
+        var type = stem.type().value();
+        var profile = new DimensionProfile(type.minY(), type.height(), support.adapter());
+        if (starter == StarterGalleryScreen.Starter.END) profile = profile.withEndProgression(Optional.of(
+                com.gwsheridan.worldarchitect.config.EndProgression.vanillaArena(context.worldgenLoadContext())));
+        var shape = new TerrainShape(Math.clamp(68, type.minY(), type.minY() + type.height() - 4), 44);
+        net.minecraft.world.level.chunk.ChunkGenerator generator = switch (starter) {
+            case SINGLE, END -> new SingleBlockGenerator(support.biome().orElseThrow(), new SingleBlockProfile(
+                    (starter == StarterGalleryScreen.Starter.END ? Blocks.END_STONE : Blocks.STONE).defaultBlockState(), shape), Optional.of(profile));
+            case LAYERED -> new LayeredGenerator(support.biome().orElseThrow(), new LayeredProfile(Blocks.STONE.defaultBlockState(), List.of(
+                    new LayeredProfile.Layer(Blocks.DIRT.defaultBlockState(), 1), new LayeredProfile.Layer(Blocks.ANDESITE.defaultBlockState(), 3)), shape, List.of()), Optional.of(profile));
+            case SKYBLOCK -> new VoidGenerator(support.biome().orElseThrow(), profile, Optional.of(new IslandProfile(
+                    com.gwsheridan.worldarchitect.config.IslandTemplate.classic(), Math.clamp(64, type.minY(), type.minY() + type.height() - 6), 128, 64)), false);
+        };
+        draft.put(key, new LevelStem(stem.type(), generator)); selected = key; refreshRows();
+    }
+
     @Override
     public void onClose() {
-        minecraft.gui.setScreen(parent);
+        if (!applied && (!draft.equals(initial) || studioOptionsChanged)) {
+            minecraft.gui.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen(discard -> minecraft.gui.setScreen(discard ? parent : this),
+                    Component.literal("Discard world draft?"), Component.literal("Changes in this editing session have not been applied to the new world."),
+                    Component.literal("Discard changes"), Component.literal("Keep editing")));
+        } else minecraft.gui.setScreen(parent);
     }
 
     private static Component text(String name) {

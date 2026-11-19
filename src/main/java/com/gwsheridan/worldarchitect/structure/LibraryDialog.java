@@ -88,6 +88,8 @@ final class LibraryDialog {
                 actions.add(button("Slice above", "/wa_structure preview " + id + " " + (layer + 1)));
             }
         }
+        actions.add(button("3D viewer", "/wa_structure view3d " + id));
+        actions.add(button("Stage here", "/wa_structure stage " + id + " ~ ~ ~"));
         actions.add(button("Edit template", "/wa_structure editor " + id));
         show(player, entry.title(), body, actions, Optional.of(button("Library", "/wa_structure")));
     }

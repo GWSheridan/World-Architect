@@ -1,0 +1,13 @@
+gradle.beforeProject { project ->
+    project.pluginManager.withPlugin('net.neoforged.moddev') {
+        project.neoForge.runs.create('creatorValidation') {
+            client()
+            loadedMods = []
+            gameDirectory = project.file(project.providers.gradleProperty('validationClientDirectory').get())
+            programArguments.addAll('--username', 'ValidationCreator', '--width', '1000', '--height', '760')
+            jvmArgument '-Xmx1500m'
+            jvmArgument '-XX:ActiveProcessorCount=4'
+            jvmArgument '-Dwa.creator.acceptance=true'
+        }
+    }
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "sha512": "8977435a39edd63a6d6b7f67bc1cea94ddd6f254474a4413cee57ae14a0bc060c845af190314858b6b9925c904f8ac3d9f40e96972fd12bc829c48642654cad5",
+    "version": "26.3.0.0.16",
+    "sha256": "b4d22fddccca00211504114928a1e2f35d479a974fd77565132cc8e3271b8f7a",
+    "version_id": "FYI2Aswc",
+    "filename": "BiomesOPlenty-neoforge-26.3-26.3.0.0.16.jar",
+    "url": "https://cdn.modrinth.com/data/HXF82T3G/versions/FYI2Aswc/BiomesOPlenty-neoforge-26.3-26.3.0.0.16.jar",
+    "project": "HXF82T3G"
+  },
+  {
+    "sha512": "81b59e545bf7f0573519d1a621d696192058c844fcca8c3eba75a0d6547fe6febb17ff3752c5d079cbc6f6850d0b662b119dc53f06d109dcd4c9ae4759a8d72e",
+    "version": "26.3.0.0.5",
+    "sha256": "a0459020efb2df6da15a6c86a8dd6b9a5e0f86ca7abd29f2b69bad07a14e09b5",
+    "version_id": "pQgy3bfh",
+    "filename": "GlitchCore-neoforge-26.3-26.3.0.0.5.jar",
+    "url": "https://cdn.modrinth.com/data/s3dmwKy5/versions/pQgy3bfh/GlitchCore-neoforge-26.3-26.3.0.0.5.jar",
+    "project": "s3dmwKy5"
+  },
+  {
+    "sha512": "9d9276e01ffd97cd27830d12e23da1f6862365b1babf5c7a92ff2a264c9af69e9c83926c2dc211ecef2ef8d38804641ee5a14444b23be55163508313a8a3b71c",
+    "version": "2.6.5+26.3",
+    "sha256": "306461c39a5d45373ea6ff74e3f7ca453b49f8bb48fc2c531c84e6aa8d96d780",
+    "version_id": "GpiePbRq",
+    "filename": "Terralith_v2.6.5+26.3-neoforge.jar",
+    "url": "https://cdn.modrinth.com/data/8oi3bsk5/versions/GpiePbRq/Terralith_v2.6.5%2B26.3-neoforge.jar",
+    "project": "8oi3bsk5"
+  },
+  {
+    "sha512": "0d085656fae32b09c2ef338f351eff3819349e7ad8ff895d34e9f763619fee7ca2bcb99d5443dc077db014088873dbdb661edeee45d8b0034ef39e86a877972c",
+    "version": "2.0.6-neoforge-26.3",
+    "sha256": "88241e12586f8a04271b68c02300e1b02ec2c0098e3a0add879398a14c6e271d",
+    "version_id": "sQznZoKs",
+    "filename": "lithostitched-2.0.6-neoforge-26.3.jar",
+    "url": "https://cdn.modrinth.com/data/XaDC71GB/versions/sQznZoKs/lithostitched-2.0.6-neoforge-26.3.jar",
+    "project": "XaDC71GB"
+  },
+  {
+    "version_id": "Vmc9zVfq",
+    "version": "26.3.0.0.9",
+    "filename": "TerraBlender-neoforge-26.3-26.3.0.0.9.jar",
+    "sha256": "c6ad9bcc08fa40c1097d026d25e5f851bbb70d9d87ab201f7426514c741e0190",
+    "url": "https://cdn.modrinth.com/data/kkmrDlKT/versions/Vmc9zVfq/TerraBlender-neoforge-26.3-26.3.0.0.9.jar",
+    "sha512": "9a5ad8c5532a6a04158d42a6d25b5ad578b39dda6eeba042e4b16ebe799a0332fbd4db76576f6505cf6f93fbf216097abe980fd82c471f2beb2497c02403be2c",
+    "project": "kkmrDlKT"
+  }
+]

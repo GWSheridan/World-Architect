@@ -30,6 +30,11 @@ final class WorldPreviewScreen extends Screen {
     private int centerZ;
     private int mapLeft;
     private int mapSide;
+    private int nextSample;
+    private int nextColumn;
+    private final net.minecraft.world.level.NoiseColumn[] section = new net.minecraft.world.level.NoiseColumn[GRID];
+    private double yaw = Math.PI / 4;
+    private java.util.List<Integer> renderOrder = java.util.List.of();
     private Button zoomOut;
     private Button zoomIn;
 
@@ -62,6 +67,15 @@ final class WorldPreviewScreen extends Screen {
             zoom = preview.islands().isPresent() ? 3 : 2;
             resample();
         });
+        control("↶", "rotate", left + 114, 28, () -> rotate(-1));
+        control("↷", "rotate", left + 142, 28, () -> rotate(1));
+        addRenderableWidget(Button.builder(Component.literal("Go to"), b -> minecraft.gui.setScreen(new StudioFormScreen(this,
+                "Preview coordinates", "Coordinates sample base terrain using the current draft seed.", java.util.List.of(
+                new StudioFormScreen.Field("X", Integer.toString(centerX)), new StudioFormScreen.Field("Z", Integer.toString(centerZ))), values -> {
+                    for (var value : values) if (Math.abs((long)Integer.parseInt(value)) > WORLD_LIMIT - GRID * 64) return "Coordinates exceed the preview boundary.";
+                    return "";
+                }, values -> { centerX = Integer.parseInt(values.get(0)); centerZ = Integer.parseInt(values.get(1)); resample(); })))
+                .bounds(left + 114, height - 26, 62, 20).build());
         int controls = height - 26;
         control("←", "west", left, controls, () -> move(-1, 0));
         control("↑", "north", left + 28, controls, () -> move(0, -1));
@@ -98,11 +112,8 @@ final class WorldPreviewScreen extends Screen {
         int step = STEPS[zoom];
         int x = start(centerX);
         int z = start(centerZ);
-        for (int row = 0; row < GRID; row++) {
-            for (int column = 0; column < GRID; column++) {
-                samples[row * GRID + column] = preview.sample(x + column * step, z + row * step);
-            }
-        }
+        nextSample = 0; nextColumn = 0;
+        java.util.Arrays.fill(samples, null); java.util.Arrays.fill(section, null);
         markers.clear();
         preview.islands().ifPresent(island -> {
             for (int slot = 0; slot <= island.personalSlots(); slot++) {
@@ -129,6 +140,7 @@ final class WorldPreviewScreen extends Screen {
         int range = Math.max(1, preview.maxY() - preview.minY());
         for (int index = 0; index < samples.length; index++) {
             var sample = samples[index];
+            if (sample == null) { colors[index] = 0xFF202733; continue; }
             if (view == View.BIOMES) {
                 int hash = sample.biome().map(Identifier::hashCode).orElse(0);
                 colors[index] = 0xFF000000 | Color.HSBtoRGB(Math.floorMod(hash, 360) / 360f, 0.59f, 0.78f);
@@ -147,26 +159,29 @@ final class WorldPreviewScreen extends Screen {
         graphics.centeredText(font, title, width / 2, 7, 0xFFF1E7CE);
         graphics.centeredText(font, font.plainSubstrByWidth(dimension.toString(), width - 24), width / 2, 17, 0xFFCCCCCC);
         graphics.fill(mapLeft - 1, MAP_TOP - 1, mapLeft + mapSide + 1, MAP_TOP + mapSide + 1, 0xFF7588A0);
-        for (int row = 0; row < GRID; row++) {
+        graphics.fill(mapLeft, MAP_TOP, mapLeft + mapSide, MAP_TOP + mapSide, 0xFF141E2B);
+        if (view == View.TERRAIN) renderTerrain(graphics);
+        else if (view == View.SECTION) renderSection(graphics);
+        else for (int row = 0; row < GRID; row++) {
             int start = 0;
             while (start < GRID) {
-                int color = colors[row * GRID + start];
+                int color = arenaEdge(row * GRID + start) ? 0xFF80DFFF : colors[row * GRID + start];
                 int end = start + 1;
-                while (end < GRID && colors[row * GRID + end] == color) {
+                while (end < GRID && !arenaEdge(row * GRID + end) && colors[row * GRID + end] == color) {
                     end++;
                 }
                 graphics.fill(pixelX(start), pixelZ(row), pixelX(end), pixelZ(row + 1), color);
                 start = end;
             }
         }
-        for (int index = markers.nextSetBit(0); index >= 0; index = markers.nextSetBit(index + 1)) {
+        if (view != View.TERRAIN && view != View.SECTION) for (int index = markers.nextSetBit(0); index >= 0; index = markers.nextSetBit(index + 1)) {
             int x = pixelX(index % GRID);
             int y = pixelZ(index / GRID);
             graphics.fill(x, y, Math.min(x + 3, mapLeft + mapSide), Math.min(y + 3, MAP_TOP + mapSide), 0xFFFFD560);
         }
         Component status = cursor(mouseX, mouseY);
         graphics.centeredText(font, font.plainSubstrByWidth(status.getString(), width - 20), width / 2, height - 48, 0xFFFFFFFF);
-        Component caption = text(preview.islands().isPresent() ? "island_caption" : "surface_caption");
+        Component caption = Component.literal("Base terrain · decorations and structures excluded" + (nextSample < samples.length ? " · sampling " + nextSample * 100 / samples.length + "%" : ""));
         graphics.centeredText(font, font.plainSubstrByWidth(caption.getString(), width - 20), width / 2, height - 38, 0xFFCCCCCC);
     }
 
@@ -185,9 +200,66 @@ final class WorldPreviewScreen extends Screen {
         int column = ((mouseX - mapLeft + 1) * GRID - 1) / mapSide;
         int row = ((mouseY - MAP_TOP + 1) * GRID - 1) / mapSide;
         var sample = samples[row * GRID + column];
+        if (sample == null) return Component.literal("Sampling base terrain…");
         return Component.translatable("worldarchitect.preview.point", start(centerX) + column * STEPS[zoom],
                 start(centerZ) + row * STEPS[zoom], sample.occupied() ? Integer.toString(sample.surfaceY()) : text("empty").getString(),
                 sample.biome().map(Identifier::toString).orElse("—"));
+    }
+
+    @Override public void tick() {
+        super.tick();
+        long deadline = System.nanoTime() + 3_000_000;
+        int count = 0;
+        while (nextSample < samples.length && count++ < 64 && System.nanoTime() < deadline) {
+            int index = nextSample++;
+            samples[index] = preview.sample(start(centerX) + index % GRID * STEPS[zoom], start(centerZ) + index / GRID * STEPS[zoom]);
+        }
+        if (count > 0) colorize();
+        if (view == View.SECTION) {
+            count = 0;
+            while (nextColumn < GRID && count++ < 4 && System.nanoTime() < deadline) {
+                section[nextColumn] = preview.column(start(centerX) + nextColumn * STEPS[zoom], centerZ); nextColumn++;
+            }
+        }
+    }
+
+    private void renderTerrain(GuiGraphicsExtractor g) {
+        double scale = mapSide / (GRID * 1.6);
+        if (renderOrder.isEmpty()) rotate(0);
+        for (int index : renderOrder) {
+            var sample = samples[index]; if (sample == null || !sample.occupied()) continue;
+            double x = index % GRID - GRID / 2.0, z = index / GRID - GRID / 2.0;
+            double y = (sample.surfaceY() - (preview.minY() + preview.maxY()) / 2.0) * GRID / Math.max(1, preview.maxY() - preview.minY());
+            int cx = mapLeft + mapSide / 2, cy = MAP_TOP + mapSide / 2;
+            int color = markers.get(index) ? 0xFFFFD560 : arenaEdge(index) ? 0xFF80DFFF : colors[index];
+            IsoCanvas.quad(g, color, IsoCanvas.point(x,y,z,yaw,scale,cx,cy), IsoCanvas.point(x+1,y,z,yaw,scale,cx,cy),
+                    IsoCanvas.point(x+1,y,z+1,yaw,scale,cx,cy), IsoCanvas.point(x,y,z+1,yaw,scale,cx,cy));
+        }
+    }
+
+    private void rotate(int direction) {
+        yaw += direction * Math.PI / 4;
+        renderOrder = java.util.stream.IntStream.range(0, samples.length).boxed().sorted(java.util.Comparator.comparingDouble(i ->
+                (i % GRID - GRID / 2.0) * Math.sin(yaw) + (i / GRID - GRID / 2.0) * Math.cos(yaw))).toList();
+    }
+
+    private boolean arenaEdge(int index) {
+        if (!preview.endArena()) return false;
+        int x = start(centerX) + index % GRID * STEPS[zoom], z = start(centerZ) + index / GRID * STEPS[zoom], step = STEPS[zoom];
+        return (x <= -256 && x + step > -256 || x <= 255 && x + step > 255) && z >= -256 && z <= 255
+                || (z <= -256 && z + step > -256 || z <= 255 && z + step > 255) && x >= -256 && x <= 255;
+    }
+
+    private void renderSection(GuiGraphicsExtractor g) {
+        int rows = Math.min(160, preview.maxY() - preview.minY());
+        for (int x = 0; x < GRID; x++) for (int row = 0; row < rows; row++) {
+            var column = section[x]; if (column == null) continue;
+            int y = preview.maxY() - 1 - row * (preview.maxY() - preview.minY()) / rows;
+            var block = column.getBlock(y);
+            int color = block.isAir() ? 0xFF141E2B : !block.getFluidState().isEmpty() ? 0xFF397CC4
+                    : 0xFF000000 | Color.HSBtoRGB(Math.floorMod(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block.getBlock()).hashCode(), 360) / 360f, .3f, .75f);
+            g.fill(pixelX(x), MAP_TOP + row * mapSide / rows, pixelX(x + 1), MAP_TOP + (row + 1) * mapSide / rows, color);
+        }
     }
 
     @Override
@@ -200,10 +272,10 @@ final class WorldPreviewScreen extends Screen {
     }
 
     private enum View {
-        HEIGHT, BIOMES;
+        HEIGHT, BIOMES, TERRAIN, SECTION;
 
         Component label() {
-            return text(this == HEIGHT ? "height" : "biomes");
+            return Component.literal(switch(this) { case HEIGHT -> "Height map"; case BIOMES -> "Biome map"; case TERRAIN -> "3D terrain"; case SECTION -> "Cross-section"; });
         }
     }
 }

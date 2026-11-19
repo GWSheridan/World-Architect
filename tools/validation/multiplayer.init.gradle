@@ -1,0 +1,19 @@
+gradle.beforeProject { project ->
+    project.pluginManager.withPlugin('net.neoforged.moddev') {
+        def root = project.file(project.providers.gradleProperty('validationRoot').get())
+        ['Alice', 'Bob'].each { player ->
+            project.neoForge.runs.create("validation${player}") {
+                client()
+                loadedMods = []
+                gameDirectory = new File(root, 'client-' + player.toLowerCase())
+                programArguments.addAll('--username', 'WA11' + player, '--quickPlayMultiplayer', '127.0.0.1:' + project.providers.gradleProperty('validationPort').orElse('25946').get(), '--width', '1000', '--height', '760')
+                jvmArgument '-Xmx1100m'
+                jvmArgument '-XX:ActiveProcessorCount=4'
+                jvmArgument '-Dwa.validation.probe=' + new File(root, 'evidence/' + project.providers.gradleProperty('validationStage').orElse('fresh').get() + '/' + player).absolutePath
+            }
+        }
+        project.neoForge.runs.configureEach {
+            if (name == 'server') { loadedMods = []; jvmArgument '-Xmx1400m'; jvmArgument '-XX:ActiveProcessorCount=4' }
+        }
+    }
+}

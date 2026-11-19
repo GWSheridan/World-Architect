@@ -14,6 +14,8 @@ public final class WorldArchitectClient {
     public WorldArchitectClient(IEventBus modBus) {
         modBus.addListener(WorldArchitectClient::registerEditors);
         modBus.addListener(ClientEnvironment::register);
+        modBus.addListener(ClientStructurePreview::register);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(ClientStructurePreview::tick);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(ClientEnvironment::logout);
     }
 

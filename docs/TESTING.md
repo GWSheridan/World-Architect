@@ -31,3 +31,11 @@ The 1.0.0 release checks completed on Windows with Java 25, Minecraft 26.3 and N
 The final saved-chunk audits checked 393,216 terrain positions, 2,064,384 rule-filtered positions, 359,424 extension positions, 491,520 Skyblock positions and 393,216 partial-lock positions. They also checked 2,252 rule-template cells, eight markers, 254 bundled template cells and chest metadata.
 
 Supporting [API and performance data](maintainers/verification/api-compatibility/) includes the same-host 0.9.0 comparison: 288 managed chunks matched exactly; native chunks were compared diagnostically because decoration and ticking can vary. [Release data](maintainers/verification/release-1.0/) records the earlier multiplayer and compatibility checks. These results cover the supplied fixtures and game version, not every possible modpack.
+
+## Post-release stabilization
+
+Milestone 21 rechecked the published 1.0.0 JAR on 19 November 2026. All 51 unit tests passed. Two-client Skyblock and external-provider packs passed permission, dimension, restart and persistence checks. A 321-second multiplayer run requested 320 additional chunks and passed another restart. Native End progression completed both kills, gateways, exit travel, crystal respawning across restart and interrupted-ritual recovery.
+
+The dedicated matrix rejected nineteen dependency, missing-file, corruption and preset/policy cases. All 711 monitored files across twelve rejected existing saves retained their hashes and file sets; all fifteen pinned files across five original source worlds remained unchanged. Saved-region audits checked 36,370,432 positions, along with templates, markers and container metadata.
+
+No World Architect defect was confirmed, so no 1.0.1 patch was prepared. The tested gameplay JAR and all ten released assets remain unchanged. See the [stabilization report and supporting results](maintainers/verification/stabilization-1.0/) for the fixture scope, checks and artifact hashes.

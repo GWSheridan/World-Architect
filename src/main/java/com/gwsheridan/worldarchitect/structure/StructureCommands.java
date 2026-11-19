@@ -87,6 +87,10 @@ public final class StructureCommands {
                 .then(literal("preview").then(saved().executes(run(c -> preview(c, -1)))
                         .then(integerArgument("layer", 0, NativeTemplate.MAX_SIDE - 1).executes(run(c -> preview(c, getInteger(c, "layer")))))))
                 .then(literal("place").then(saved().then(destination(false))))
+                .then(literal("stage").then(saved().then(stageDestination())))
+                .then(literal("view3d").then(saved().executes(run(c -> PlacementStudio.stage(c.getSource().getPlayerOrException(), getId(c, "template"), new TemplatePlacement(BlockPos.ZERO, Rotation.NONE, Mirror.NONE), true)))))
+                .then(literal("confirm").then(arg("token", word()).executes(run(c -> PlacementStudio.confirm(c.getSource().getPlayerOrException(), getString(c, "token"))))))
+                .then(literal("undo").executes(run(c -> { int count = PlacementHistory.undo(c.getSource().getPlayerOrException()); success(c, "Undid " + count + " blocks."); return count; })))
                 .then(literal("transform").then(saved().then(rotationArgument().then(mirrorArgument().executes(run(c -> saveChange(c,
                         entry(c).transformed(new TemplatePlacement(BlockPos.ZERO, rotation(c), mirror(c))))))))))
                 .then(literal("replace").then(saved().then(arg("original", BlockStateArgument.block(event.getBuildContext()))
@@ -99,6 +103,7 @@ public final class StructureCommands {
 
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            PlacementStudio.logout(player);
             var selections = SELECTIONS.get(player.level().getServer());
             if (selections != null) {
                 selections.remove(player.getStringUUID());
@@ -142,6 +147,15 @@ public final class StructureCommands {
     private static int editor(CommandContext<CommandSourceStack> context, String section) throws IOException, CommandSyntaxException {
         LibraryDialog.editor(context.getSource().getPlayerOrException(), getId(context, "template"), entry(context), section);
         return 1;
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> stageDestination() {
+        return posArgument("origin").executes(run(c -> stage(c, Rotation.NONE, Mirror.NONE)))
+                .then(rotationArgument().executes(run(c -> stage(c, rotation(c), Mirror.NONE)))
+                        .then(mirrorArgument().executes(run(c -> stage(c, rotation(c), mirror(c))))));
+    }
+    private static int stage(CommandContext<CommandSourceStack> c, Rotation rotation, Mirror mirror) throws IOException, CommandSyntaxException {
+        return PlacementStudio.stage(c.getSource().getPlayerOrException(), getId(c, "template"), new TemplatePlacement(getBlockPos(c, "origin"), rotation, mirror), false);
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> destination(boolean spawn) {

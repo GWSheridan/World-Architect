@@ -201,9 +201,13 @@ public final class VoidGenerator extends ChunkGenerator implements ManagedGenera
 
     @Override
     public NoiseColumn getBaseColumn(int x, int z, LevelHeightAccessor height, RandomState state) {
+        return baseColumn(x, z, height, state.seed());
+    }
+
+    public NoiseColumn baseColumn(int x, int z, LevelHeightAccessor height, long seed) {
         if (endProgression().isPresent() && com.gwsheridan.worldarchitect.config.EndProgression.contains(x, z)) {
             var arena = endProgression().orElseThrow();
-            return arena.generator().getBaseColumn(x, z, height, arena.state(state.seed()));
+            return arena.generator().getBaseColumn(x, z, height, arena.state(seed));
         }
         BlockState[] column = new BlockState[height.getHeight()];
         Arrays.fill(column, Blocks.AIR.defaultBlockState());

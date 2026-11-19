@@ -17,13 +17,17 @@ public final class GenerationPreview {
     private final Surface surface;
     private final BiomeResolver biomes;
     private final Optional<IslandProfile> islands;
+    private final Columns columns;
+    private final boolean endArena;
 
-    private GenerationPreview(LevelHeightAccessor height, Surface surface, BiomeResolver biomes, Optional<IslandProfile> islands) {
+    private GenerationPreview(LevelHeightAccessor height, Surface surface, BiomeResolver biomes, Optional<IslandProfile> islands, Columns columns, boolean endArena) {
         this.minY = height.getMinY();
         this.maxY = height.getMaxY();
         this.surface = surface;
         this.biomes = biomes;
         this.islands = islands;
+        this.columns = columns;
+        this.endArena = endArena;
     }
 
     public static Optional<GenerationPreview> forStem(LevelStem stem, long seed) {
@@ -38,14 +42,16 @@ public final class GenerationPreview {
                 default -> throw new IllegalStateException("Managed terrain has an unsupported biome source for preview");
             };
             return Optional.of(new GenerationPreview(height,
-                    (x, z) -> solid.baseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height, seed), biomes, Optional.empty()));
+                    (x, z) -> solid.baseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height, seed), biomes, Optional.empty(),
+                    (x, z) -> solid.baseColumn(x, z, height, seed), solid.endProgression().isPresent()));
         }
         if (generator instanceof VoidGenerator sky) {
             return Optional.of(new GenerationPreview(height,
                     (x, z) -> sky.endProgression().filter(ignored -> com.gwsheridan.worldarchitect.config.EndProgression.contains(x, z))
                             .map(arena -> arena.generator().getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height, arena.state(seed)))
                             .orElseGet(() -> sky.baseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height)),
-                    (x, y, z) -> sky.getBiomeSource() instanceof EndArenaBiomeSource arena ? arena.sample(x, y, z) : sky.biome(), sky.island()));
+                    (x, y, z) -> sky.getBiomeSource() instanceof EndArenaBiomeSource arena ? arena.sample(x, y, z) : sky.biome(), sky.island(),
+                    (x, z) -> sky.baseColumn(x, z, height, seed), sky.endProgression().isPresent()));
         }
         return Optional.empty();
     }
@@ -61,6 +67,13 @@ public final class GenerationPreview {
     public Optional<IslandProfile> islands() {
         return islands;
     }
+
+    public boolean endArena() { return endArena; }
+
+    /** Base terrain only; this never runs decoration or loads a chunk. */
+    public net.minecraft.world.level.NoiseColumn column(int x, int z) { return columns.at(x, z); }
+
+    @FunctionalInterface private interface Columns { net.minecraft.world.level.NoiseColumn at(int x, int z); }
 
     public Sample sample(int x, int z) {
         int firstAir = surface.firstFree(x, z);

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.0 · in development
+
+- Added starter recipes and a searchable preset library, with explicit draft-discard prompts.
+- Added rotatable base-terrain previews, vertical cross-sections and coordinate navigation.
+- Added a 3D template viewer, staged structure placement, temporary world ghosts and guarded session undo.
+- Added administrator-only local diagnostics and portable dedicated-server validation fixtures.
+- Retained API 1, preset and template formats, saved generation settings and native End policies.
+
+The release remains in development while integration and platform checks are completed.
+
 ## 1.0.0
 
 - Added a native End arena option so new custom End worlds can keep the dragon fight, exit portal, gateways and crystal respawning.

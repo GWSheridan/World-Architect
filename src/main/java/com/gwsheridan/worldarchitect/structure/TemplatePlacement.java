@@ -48,6 +48,19 @@ record TemplatePlacement(BlockPos origin, Rotation rotation, Mirror mirror) {
     }
 
     int place(ServerLevel level, LibraryEntry entry, @Nullable Entity actor) throws IOException {
+        var plan = plan(level, entry, actor);
+        int result = apply(level, plan);
+        if (actor instanceof ServerPlayer player && !plan.isEmpty()) {
+            try { PlacementHistory.record(level, player, plan); }
+            catch (IOException | RuntimeException error) {
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Placement completed, but its undo snapshot could not be recorded."));
+                com.mojang.logging.LogUtils.getLogger().error("Cannot record manual placement history", error);
+            }
+        }
+        return result;
+    }
+
+    List<Change> plan(ServerLevel level, LibraryEntry entry, @Nullable Entity actor) throws IOException {
         if (!level.isInWorldBounds(origin)) {
             throw new IOException("Placement origin is outside the dimension's build bounds.");
         }
@@ -66,6 +79,10 @@ record TemplatePlacement(BlockPos origin, Rotation rotation, Mirror mirror) {
             }
             if (actor != null && !level.mayInteract(actor, pos)) {
                 throw new IOException("Placement is protected at " + pos.toShortString());
+            }
+            if (actor instanceof ServerPlayer player && com.gwsheridan.worldarchitect.spawn.WorldAdministration.get(level.getServer()).protection().placement()
+                    && com.gwsheridan.worldarchitect.skyblock.IslandProtection.denied(player, pos)) {
+                throw new IOException("Island protection denies placement at " + pos.toShortString());
             }
             if (rules.biome().isPresent() && !level.getBiome(pos).unwrapKey()
                     .filter(key -> key.identifier().equals(rules.biome().orElseThrow())).isPresent()) {
@@ -107,7 +124,7 @@ record TemplatePlacement(BlockPos origin, Rotation rotation, Mirror mirror) {
         if (!plan.isEmpty() && !level.getEntitiesOfClass(LivingEntity.class, volume, living -> !living.isSpectator()).isEmpty()) {
             throw new IOException("A player or mob occupies the placement volume.");
         }
-        return apply(level, plan);
+        return List.copyOf(plan);
     }
 
     void spawn(ServerLevel level, ServerPlayer player, LibraryEntry entry, String markerName) throws IOException {
@@ -129,7 +146,7 @@ record TemplatePlacement(BlockPos origin, Rotation rotation, Mirror mirror) {
         }
     }
 
-    private static void requireAvailable(ServerLevel level, BlockPos pos) throws IOException {
+    static void requireAvailable(ServerLevel level, BlockPos pos) throws IOException {
         if (!level.isInWorldBounds(pos) || !level.getWorldBorder().isWithinBounds(pos)) {
             throw new IOException("Placement falls outside the build bounds or world border at " + pos.toShortString());
         }
@@ -170,5 +187,5 @@ record TemplatePlacement(BlockPos origin, Rotation rotation, Mirror mirror) {
         return plan.size();
     }
 
-    private record Change(BlockPos pos, BlockState previous, BlockState next, @Nullable CompoundTag metadata) {}
+    record Change(BlockPos pos, BlockState previous, BlockState next, @Nullable CompoundTag metadata) {}
 }

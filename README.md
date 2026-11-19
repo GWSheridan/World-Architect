@@ -5,6 +5,8 @@ Design each Minecraft dimension before creating a world. Choose terrain and laye
 **Minecraft Java 26.3 · NeoForge 26.3.0.103 · Java 25**
 Created and maintained by **GWSHERIDAN**.
 
+The stable release is 1.0.0. The working tree is preparing 1.1; see the [milestones](docs/ROADMAP-1.1.md) and [creator tools guide](docs/wiki/Creator-Tools.md).
+
 ## Get started
 
 Install `worldarchitect-1.0.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.

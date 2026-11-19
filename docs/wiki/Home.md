@@ -9,3 +9,5 @@ Start with [Installation](Installation.md) and [Getting Started](Getting-Started
 [Download the release](https://github.com/GWSheridan/World-Architect/releases/latest), or browse [Example Presets](Example-Presets.md). These guides describe the released 1.0.0 mod.
 
 Existing worlds keep the generation settings they were created with. Changes to a preset affect future worlds. Read [Backups and Upgrades](Backups-and-Upgrades.md) before updating a server.
+
+[Creator tools in the 1.1 development series](Creator-Tools.md)

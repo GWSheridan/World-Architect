@@ -21,7 +21,7 @@ In **Create New World → Customize**, configure the dimensions, then choose **P
 5. Choose **Save version**. Studio writes `config/worldarchitect/studio/<name>/<release>.zip`. Versions are immutable. Saving over an existing version fails. Use a new release to retain another version, or **Duplicate** to start a separate preset ID and library name.
 6. Choose **Export ZIP** to copy the saved version into `config/worldarchitect/exports/<name>-<release>.zip`. Existing exports are preserved. Export uses the saved version; save changes under a new release first.
 
-Use the arrows to select a library revision, then **Load version** to restore it into the Studio draft. **Apply to world** updates the new-world dimension-manager draft. Choose **Done** there to apply dimensions and world defaults. **Cancel** in the manager discards those changes. Explicitly saved library versions remain on disk.
+In 1.1, use **Browse saved presets** to search by name, title, version, author or lock status, then **Load selected** to restore a revision into the Studio draft. A changed draft prompts before replacement. **Apply to world** updates the new-world dimension-manager draft. Choose **Done** there to apply dimensions and world defaults. **Cancel** in the manager discards those changes. Explicitly saved library versions remain on disk.
 
 Applying a Studio draft transfers its generation settings for authoring and testing. Install its exported bundle to activate the manifest's lock and Structure Library policies.
 

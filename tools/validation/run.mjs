@@ -1,0 +1,133 @@
+// Node 22+, Java 25. All game writes stay in a new disposable output directory.
+import { spawn } from 'node:child_process';
+import { promises as fs, createWriteStream } from 'node:fs';
+import { resolve, relative, join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+const options = Object.fromEntries(Array.from({length: (process.argv.length - 2) / 2}, (_, i) => process.argv.slice(2 + i * 2, 4 + i * 2)));
+for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle'].includes(key)) throw new Error(`Unknown option ${key}`);
+if (!options['--jar'] || !options['--fixture'] || !options['--output']) throw new Error('Use --jar JAR --fixture VALIDATION_JAR --output NEW_DIRECTORY [--world COPIED_SAVE] [--profile single-block] [--port 25945]');
+const output = resolve(root, options['--output']);
+if (!relative(root, output).startsWith('build' + (process.platform === 'win32' ? '\\' : '/'))) throw new Error('Output must be under build/');
+await fs.mkdir(output, {recursive:false});
+const server = join(output, 'server'); await fs.mkdir(join(server,'mods'), {recursive:true});
+const profile = options['--profile'] || 'single-block';
+if (!['normal','single-block','layered','void','structure-heavy'].includes(profile)) throw new Error('Unknown fixture profile');
+const port = Number(options['--port'] || 25945); if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('Invalid port');
+const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+const results = {format:1, platform:process.platform, profile, jar_sha256:'', tests:[], status:'running'};
+const suite = options['--suite'] || 'authoring';
+if (!['authoring','compatibility'].includes(suite)) throw new Error('Unknown validation suite');
+results.suite = suite;
+async function hashes(path) {
+    const found = {};
+    async function walk(dir) {
+        for (const entry of await fs.readdir(dir,{withFileTypes:true})) {
+            const file = join(dir,entry.name);
+            if (entry.isSymbolicLink()) throw new Error('Symlinks are not allowed in a fixture world');
+            if (entry.isDirectory()) await walk(file);
+            else if (entry.isFile() && entry.name !== 'session.lock') found[relative(path,file).replaceAll('\\','/')] = sha(await fs.readFile(file));
+        }
+    }
+    await walk(path); return found;
+}
+let original;
+if (options['--world']) {
+    const source = resolve(root,options['--world']); original = await hashes(source);
+    await fs.cp(source,join(server,'world'),{recursive:true,errorOnExist:true,force:false});
+}
+for (const [flag,name] of [['--jar','worldarchitect.jar'],['--fixture','validation.jar']]) {
+    const bytes = await fs.readFile(resolve(root,options[flag]));
+    if (flag === '--jar') results.jar_sha256 = sha(bytes);
+    await fs.writeFile(join(server,'mods',name),bytes,{flag:'wx'});
+}
+if (options['--mods']) {
+    results.external_mods = [];
+    const directory = resolve(root,options['--mods']);
+    for (const name of (await fs.readdir(directory)).filter(name=>name.endsWith('.jar')).sort()) {
+        if (!/^[a-zA-Z0-9+_.-]+\.jar$/.test(name)) throw new Error('Invalid mod filename');
+        const bytes = await fs.readFile(join(directory,name));
+        await fs.writeFile(join(server,'mods',name),bytes,{flag:'wx'}); results.external_mods.push({file:name,sha256:sha(bytes)});
+    }
+}
+let properties = await fs.readFile(join(root,'examples/performance/profiles',profile,'server.properties'),'utf8');
+properties = properties.split(/\r?\n/).filter(line => !/^(server-port|management-server|rcon\.|resource-pack|text-filter|log-ips|motd)=/.test(line)).join('\n');
+if (options['--bundle']) {
+    if (options['--world']) throw new Error('Use a pack-specific upgrade fixture for an existing bundled world');
+    const config=join(server,'config/worldarchitect');await fs.mkdir(join(config,'bundles'),{recursive:true});
+    await fs.copyFile(resolve(root,options['--bundle']),join(config,'bundles/preset.zip'));
+    await fs.writeFile(join(config,'developer.json'),JSON.stringify({format:1,bundle:'preset.zip'}));
+    properties=properties.split(/\r?\n/).filter(line=>!/^(level-type|level-seed|generator-settings|generate-structures|initial-enabled-packs)=/.test(line)).join('\n');
+}
+await fs.writeFile(join(server,'server.properties'),properties + `\nserver-port=${port}\nmanagement-server-enabled=false\nlog-ips=false\nmotd=World Architect validation\n`);
+await fs.writeFile(join(server,'eula.txt'),'eula=true\n');
+try { await fs.cp(join(root,'examples/performance/profiles',profile,'datapacks'),join(server,'world/datapacks'),{recursive:true}); }
+catch (error) { if (error.code !== 'ENOENT') throw error; }
+
+function launch(stage) {
+    const args = ['-I','tools/validation/server.init.gradle','runServer','--offline','--console=plain',`-PtestWorldDirectory=${server}`];
+    if (process.env.JAVA21_HOME) args.push(`-Porg.gradle.java.installations.paths=${process.env.JAVA21_HOME}`);
+    let child;
+    if (process.platform === 'win32') {
+        const quote = s => { if (/["\r\n%&|<>^]/.test(s)) throw new Error('Unsupported shell character in argument'); return `"${s}"`; };
+        child = spawn(process.env.ComSpec || 'cmd.exe',['/d','/s','/c',`"${[join(root,'gradlew.bat'),...args].map(quote).join(' ')}"`],{cwd:root,windowsHide:true,windowsVerbatimArguments:true});
+    } else child = spawn('sh',[join(root,'gradlew'),...args],{cwd:root});
+    const log = createWriteStream(join(output,`${stage}.log`)); let text = '', ended = false;
+    for (const stream of [child.stdout,child.stderr]) stream.on('data',chunk => { log.write(chunk); text = (text + chunk).slice(-2_000_000); });
+    const exit = new Promise((accept,reject) => { child.on('error',reject); child.on('close',code => { ended=true; log.end(); accept(code); }); });
+    const send = command => { if (!ended) child.stdin.write(command+'\n'); };
+    async function wait(marker,seconds=150) {
+        const until = Date.now()+seconds*1000;
+        while (!text.includes(marker)) {
+            if (ended || Date.now()>until) throw new Error(`Missing ${marker}; inspect ${stage}.log`);
+            if (text.includes('WA_VALIDATION_STRUCTURES_FAILED')) throw new Error('Dedicated structure assertions failed');
+            await new Promise(done=>setTimeout(done,200));
+        }
+    }
+    return {child,exit,send,wait};
+}
+let running;
+try {
+    for (const stage of ['fresh','restart']) {
+        running = launch(stage); await running.wait('Done (');
+        if (suite === 'authoring') {
+            running.send(stage === 'fresh' ? 'wa_validate structures' : 'wa_validate restart');
+            await running.wait(stage === 'fresh' ? 'WA_VALIDATION_STRUCTURES_PASS' : 'WA_VALIDATION_RESTART_PASS');
+            running.send('wa_diagnose report'); await running.wait('Saved local diagnostics');
+        } else {
+            const base = stage === 'fresh' ? 16000 : 32000, end = base + 48;
+            running.send(`forceload add ${base} ${base} ${end} ${end}`);
+            const marker = `WA_COMPATIBILITY_${stage.toUpperCase()}_PASS`;
+            for (let poll=0; poll<150; poll++) {
+                running.send(`execute if loaded ${base} 100 ${base} if loaded ${end} 100 ${end} run say ${marker}`);
+                try { await running.wait(marker,1); break; } catch(error) { if(poll===149)throw error; }
+            }
+            running.send('forceload remove all');
+        }
+        running.send('save-all flush'); await running.wait('Saved the game');
+        running.send('stop');
+        const code = await Promise.race([running.exit,new Promise((_,fail)=>setTimeout(()=>fail(new Error('Shutdown timed out')),40000).unref())]);
+        if (code !== 0) throw new Error('Server exited with an error');
+        results.tests.push({case:stage,status:'passed'}); running = undefined;
+    }
+    if (original) {
+        const after = await hashes(resolve(root,options['--world']));
+        if (JSON.stringify(original) !== JSON.stringify(after)) throw new Error('Original save changed');
+        results.tests.push({case:'source-save-intact',status:'passed',files:Object.keys(original).length});
+    }
+    results.status='passed';
+} catch (error) { results.status='failed'; results.error=error.message; process.exitCode=1; }
+finally {
+    if (running) {
+        running.send('stop');
+        await Promise.race([running.exit,new Promise(done=>setTimeout(done,20000))]);
+        if (running.child.exitCode === null) {
+            if (process.platform === 'win32') spawn('taskkill',['/PID',String(running.child.pid),'/T','/F'],{windowsHide:true});
+            else running.child.kill('SIGTERM');
+        }
+    }
+    await fs.writeFile(join(output,'results.json'),JSON.stringify(results,null,2)+'\n');
+    console.log(`Dedicated validation ${results.status}: ${relative(root,output)}/results.json`);
+}

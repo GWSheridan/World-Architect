@@ -61,6 +61,7 @@ public final class WorldArchitect {
         modBus.addListener(com.gwsheridan.worldarchitect.api.StructureAdapters::registerRegistry);
         modBus.addListener(ModpackRuntime::addPack);
         modBus.addListener(EnvironmentPayload::register);
+        modBus.addListener(com.gwsheridan.worldarchitect.structure.PlacementPreviewPayload::register);
         DeferredRegister<MapCodec<? extends ChunkGenerator>> generators = DeferredRegister.create(Registries.CHUNK_GENERATOR, ID);
         generators.register(GENERATOR_ID.getPath(), () -> SingleBlockGenerator.CODEC);
         generators.register(LAYERED_PRESET.identifier().getPath(), () -> LayeredGenerator.CODEC);
@@ -75,6 +76,7 @@ public final class WorldArchitect {
         NeoForge.EVENT_BUS.addListener(WorldAdministration::load);
         NeoForge.EVENT_BUS.addListener(WorldEnvironment::validateSaved);
         NeoForge.EVENT_BUS.addListener(EnvironmentCommands::register);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.diagnostics.DiagnosticCommands::register);
         NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.rules.RuleCommands::register);
         NeoForge.EVENT_BUS.addListener(WorldEnvironment::spawnPlacement);
         NeoForge.EVENT_BUS.addListener(WorldEnvironment::spawnPosition);
