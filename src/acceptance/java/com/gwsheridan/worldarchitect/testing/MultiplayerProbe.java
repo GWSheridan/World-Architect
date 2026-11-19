@@ -41,7 +41,8 @@ public final class MultiplayerProbe {
         }
         if(finish>0){if(ticks>=finish){record("DONE "+(action-1)+" SCREEN "+(mc.gui.screen()==null?"none":mc.gui.screen().getTitle().getString()));finish=0;}return;}
         var file=root.resolve("action-"+action+".txt");if(!Files.exists(file))return;
-        for(String line:Files.readAllLines(file)){
+        var commands=Files.readAllLines(file);if(commands.isEmpty())throw new AssertionError("Empty published action file");
+        for(String line:commands){
             if(line.startsWith("COMMAND "))mc.player.connection.send(new ServerboundChatCommandPacket(line.substring(8)));
             else if(line.equals("SHOT"))Screenshot.grab(mc,false);
             else if(line.equals("CLOSE"))mc.gui.setScreen(null);

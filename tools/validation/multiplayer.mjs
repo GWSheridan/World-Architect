@@ -32,7 +32,7 @@ async function read(file){try{return await fs.readFile(file,'utf8');}catch(error
 async function wait(file,marker,seconds=180){const end=Date.now()+seconds*1000;while(!(await read(file)).includes(marker)){if(Date.now()>end)throw new Error('Missing '+marker);await new Promise(done=>setTimeout(done,200));}}
 function start(task,key,stage){const params=['-I','tools/validation/multiplayer.init.gradle',task,'--offline','--console=plain',`-PvalidationRoot=${output}`,`-PvalidationStage=${stage}`,`-PtestWorldDirectory=${join(output,'server')}`];if(process.env.JAVA21_HOME)params.push(`-Porg.gradle.java.installations.paths=${process.env.JAVA21_HOME}`);const run=gradle(root,params,join(output,`${stage}-${key}.log`));running.push(run);return run;}
 let counters={};
-async function act(player,commands,stage){const index=counters[player]++,dir=join(output,'evidence',stage,player);await fs.writeFile(join(dir,`action-${index}.txt`),commands.join('\n')+'\n');await wait(join(dir,'observed.log'),`DONE ${index} SCREEN`);}
+async function act(player,commands,stage){const index=counters[player]++,dir=join(output,'evidence',stage,player);const pending=join(dir,`pending-${index}.tmp`);await fs.writeFile(pending,commands.join('\n')+'\n');await fs.rename(pending,join(dir,`action-${index}.txt`));await wait(join(dir,'observed.log'),`DONE ${index} SCREEN`);}
 const observed=(player,stage)=>join(output,'evidence',stage,player,'observed.log');
 try {
     let pins;
@@ -61,6 +61,7 @@ try {
             await server.wait('Changed the block at 5120, 200, 5120');
             await act('Alice',['PRESS Confirm'],stage);await wait(observed('Alice',stage),'Placement collides');
             server.send('setblock 5120 200 5120 air');
+            server.send('execute if block 5120 200 5120 air run say WA_DESTINATION_CLEAR');await server.wait('WA_DESTINATION_CLEAR');
             await act('Alice',['COMMAND wa_structure stage validation:fixture 5120 200 5120'],stage);
             await act('Alice',['PRESS World ghost','SHOT'],stage);
             await act('Alice',['COMMAND wa_structure stage validation:fixture 5120 200 5120'],stage);
