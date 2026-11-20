@@ -7,7 +7,7 @@ Created and maintained by **GWSHERIDAN**.
 
 See the [1.3 milestones](docs/ROADMAP-1.3.md) and [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
-This release branch prepares 1.3.0. The public latest release stays at 1.2.0 until the draft is published.
+World Architect 1.3.0 is the latest release. See the [release notes](docs/RELEASE-NOTES-1.3.md) for changes and verification results.
 
 ## Get started
 

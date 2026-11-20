@@ -88,4 +88,4 @@ Three alternating same-host performance pairs used 64 warmup chunks and five mea
 
 The original three-pair managed-terrain checks matched 320 measured chunks per profile and pair. Native pyramid burial offsets of 0–2 blocks varied in two candidate comparisons and in unchanged-1.2.0 controls. Structure references, terrain outside the pyramid footprints and all biomes matched; the repeat pyramid comparisons were identical. Strict old-save comparisons were not relaxed. This benchmark covers the fixed legacy fixtures, not every regional/pool configuration or other modpack.
 
-Raw logs, failed setup attempts, superseded candidates and all timing samples remain in local verification output and CI artifacts; they are not additional release assets. The 1.3 release remains a draft until publication is requested.
+Raw logs, failed setup attempts, superseded candidates and all timing samples remain in local verification output and CI artifacts; they are not additional release assets. World Architect 1.3.0 is published with the verified gameplay JAR and updated guides.

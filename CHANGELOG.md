@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.0 (draft)
+## 1.3.0
 
 - Added World Inspector for saved generation profiles, archived-resource checks and preset comparisons, with explicit local reports.
 - Added coordinate-based rectangle and circle regions, priority, biome selection and smooth height transitions in opt-in generator version 3.

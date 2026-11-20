@@ -17,4 +17,4 @@ The distribution includes the JAR, complete ZIP, buildable source ZIP, nine vers
 
 Release checks passed on Windows and Linux with the exact gameplay JAR, including 70 unit tests, public-mod compatibility and nine clean example installs. Seven older-save comparisons matched 224 unexplored chunks and left 732 original files intact. Four real clients completed 62.7 minutes of exploration, native End progression and restart checks. Initial performance flags did not reproduce in three fresh alternating pairs; the original values and repeat results are documented in [Testing](TESTING.md).
 
-The release and wiki changes are prepared for review. 1.2.0 remains the public latest release until the 1.3 draft is published. Earlier release files are retained.
+World Architect 1.3.0 is available as the latest release, with updated source, documentation and wiki guides. All earlier releases remain available.
