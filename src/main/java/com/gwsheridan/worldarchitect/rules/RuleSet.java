@@ -222,7 +222,7 @@ public final class RuleSet {
             if(context.regions.isEmpty())return false;
             var regions=context.regions.orElseThrow();var selected=regions.zones().stream().filter(z->z.name().equals(name)).findFirst();
             if(selected.isEmpty())return false;
-            boolean inside=mode==RegionMode.MASK?selected.orElseThrow().edgeDistance(context.x,context.z)>=0:regions.ordered().stream().filter(z->z.edgeDistance(context.x,context.z)>=0).findFirst().map(z->z.name().equals(name)).orElse(false);
+            boolean inside=mode==RegionMode.MASK?regions.edgeDistance(selected.orElseThrow(),context.x,context.z)>=0:regions.ordered().stream().filter(z->regions.edgeDistance(z,context.x,context.z)>=0).findFirst().map(z->z.name().equals(name)).orElse(false);
             return exclude?!inside:inside;
         }
     }

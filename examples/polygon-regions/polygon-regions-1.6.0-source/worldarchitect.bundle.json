@@ -1,0 +1,17 @@
+{
+  "format": 1,
+  "preset": "worldarchitect_examples:polygon_regions",
+  "title": "Polygon regions",
+  "description": "A concave region shared by material, ore, decoration, structure and spawn rules.",
+  "author": "GWSHERIDAN",
+  "release": "1.6.0",
+  "lock": "unlocked",
+  "options": {
+    "seed": 194723,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "worldarchitect"
+  ]
+}

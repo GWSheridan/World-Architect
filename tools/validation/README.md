@@ -5,7 +5,7 @@ Use Node 22 or newer and Java 25. The asset tools also require Java 21. Set `JAV
 The `validation` JAR is a separate test mod. It is excluded from the gameplay JAR. The portable runner installs the packaged gameplay JAR and fixture into a new disposable directory under `build/`, starts a loopback dedicated server, runs assertions and restarts it. It writes results and local logs to that directory. It refuses to reuse an output directory. Local runs default to offline Gradle. Add `--network online` for a clean host that still needs runtime dependencies such as NeoForge DevLaunch; CI uses that option.
 
 ```text
-node tools/validation/run.mjs --jar build/libs/worldarchitect-1.5.0.jar --fixture build/validation-tools/worldarchitect-1.5.0-validation.jar --output build/validation-new
+node tools/validation/run.mjs --jar build/libs/worldarchitect-1.6.0.jar --fixture build/validation-tools/worldarchitect-1.6.0-validation.jar --output build/validation-new
 ```
 
 Use `--world <source-world>` to copy an existing save before testing. Source files are hashed before and after; the runner writes only to its disposable copy. Provider mods, bundles and datapacks required by that save must also be installed in the copy. The current basic runner accepts extra JARs through `--mods <directory>`; use the complete pack-specific harness for saves with bundled configuration. For a fresh bundled world, pass `--bundle <export.zip>`; omitted server generation properties then come from its manifest.
@@ -19,7 +19,7 @@ Use `--world <source-world>` to copy an existing save before testing. Source fil
 Install the gameplay and validation JARs in a clean client directory, enable `developer_mode` in that instance, and run `runCreatorValidation` with `-I tools/validation/client.init.gradle -PvalidationClientDirectory=<directory>`. The fixture checks starter exports, draft cancellation, bounds and preview views at GUI scales 1 and 2. It prints `WA_CREATOR_WORKFLOW_PASS`; Gradle exit status alone does not establish that the assertions passed. Screenshots remain in the instance's `screenshots/` directory.
 
 ```text
-node tools/validation/multiplayer.mjs --jar build/libs/worldarchitect-1.5.0.jar --fixture build/validation-tools/worldarchitect-1.5.0-validation.jar --output build/multiplayer-new
+node tools/validation/multiplayer.mjs --jar build/libs/worldarchitect-1.6.0.jar --fixture build/validation-tools/worldarchitect-1.6.0-validation.jar --output build/multiplayer-new
 ```
 
 This starts two real clients and a dedicated server for staged placement, ordinary-player denial, stale revision/destination rejection, ghost previews, undo, client block synchronization and restart checks. Use `--options <test-instance-options.txt>` to reuse accessibility and graphics settings. It uses synthetic offline identities on loopback. It must not be pointed at a production server.
@@ -28,7 +28,7 @@ The GitHub workflow repeats the dedicated fixture and pinned public-mod matrix o
 
 The release additionally requires the pack, End progression, dependency rejection, older-save audit, one-hour multiplayer soak and alternating same-host performance suites described by the runners below. A passing smoke test does not substitute for those checks.
 
-`node tools/validation/bundles.mjs` checks all fifteen versioned examples in clean dedicated-server instances. Each successful case compares pinned generation files across restart. For Windows resident-memory comparisons, use `benchmark-pairs.ps1 -BaselineJar <1.1.0.jar> -CandidateJar <candidate.jar> -OutputRoot build/<new-directory>` with other game/build workloads stopped. It runs three alternating pairs and writes a threshold report. A threshold flag requires investigation and a fresh repeat before being classified as a reproducible regression.
+`node tools/validation/bundles.mjs` checks all eighteen versioned examples in clean dedicated-server instances. Each successful case compares pinned generation files across restart. For Windows resident-memory comparisons, use `benchmark-pairs.ps1 -BaselineJar <1.1.0.jar> -CandidateJar <candidate.jar> -OutputRoot build/<new-directory>` with other game/build workloads stopped. It runs three alternating pairs and writes a threshold report. A threshold flag requires investigation and a fresh repeat before being classified as a reproducible regression.
 
 ## 1.2 authoring and administration
 
@@ -48,7 +48,7 @@ The [performance instructions](../../examples/performance/README.md) distinguish
 
 The authoring suite checks draft history/recovery across restart, immutable workbench bindings and server permissions, shared named-region rules and format-2 pool constraints. It compares 256 legacy pool layouts directly with the published 1.3 JAR. Use `--baseline JAR` to supply that exact baseline offline; online runs verify and cache its pinned download under `build/validation-inputs/`.
 
-`assemblies.mjs` now covers static, format-1 and constrained format-2 exports in each available fixture dimension. `run.mjs --named-regions true --bundle examples/shared-regions/bundles/shared-regions-1.4.0.zip --suite compatibility` checks actual filtered material/ore/decor/template writes and spawn decisions, then repeats the block/biome fingerprint after restart. `bundles.mjs` installs all fifteen current examples.
+`assemblies.mjs` now covers static, format-1 and constrained format-2 exports in each available fixture dimension. `run.mjs --named-regions true --bundle examples/shared-regions/bundles/shared-regions-1.4.0.zip --suite compatibility` checks actual filtered material/ore/decor/template writes and spawn decisions, then repeats the block/biome fingerprint after restart. `bundles.mjs` installs all eighteen current examples.
 
 The four-client soak also exercises connected history, pool constraints, background seed sampling, scenario editing, exact seeds, server acknowledgements and permission revocation before its native End and exploration workload. Its default twenty rounds remain the release requirement.
 
@@ -61,3 +61,11 @@ The authoring suite exports polygon, coastal, vertical and maximum-bound stress 
 Authoring compares 256 format-1 layouts against the pinned published 1.3 input and 256 format-2 layouts against frozen 1.4. Supply `--baseline14 <JAR>` or place the exact 1.4 JAR under `build/validation-inputs/worldarchitect-1.4.0.jar`. Its SHA-256 is `3684963461df2331c7f0fa4968d12b972fceff6c73c3568c77a19dcc66474fe4`. CI builds that input from source commit `c062da90c909e9883a54007651abfd37536fa14a` before testing the candidate.
 
 The four-client soak accepts `--explore-dimension` and `--site-structure` to exercise the integration pack's custom highlands and persisted tower. It also checks the connected site screen at both GUI scales, closed-session late-result suppression and a fresh request after permission revocation.
+
+## Composite regions, preparation, themes and searches
+
+The 1.6 authoring suite validates shared composite masks, bounded supports and clearance, captured weighted variants and palettes, native-candidate searches, permission revocation, cancellation and immutable report export. It verifies that detached work leaves loaded chunk counts and generation files unchanged. The site suite then generates prepared structures in each available fixture dimension and compares their embedded pieces, block states, metadata and markers after restart. Clean bundle installation covers all eighteen current examples.
+
+Format-3 pool layouts are compared exactly against 256 seeds from the published 1.5 JAR. Supply `--baseline15 <JAR>` or place that input at `build/validation-inputs/worldarchitect-1.5.0.jar`, with SHA-256 `27a6a5e55567e04db4c93818daa2a866bd9bc0d0313780b08f17dcba1e20be42`. CI builds it from tag `v1.5.0`. The frozen 1.3 and 1.4 comparisons remain in place.
+
+The four-client soak also exercises foundation/theme editing, captured variant history, search results, report export and cancellation through real screens. Use `--site-kind themed` with `--site-structure` for a prepared themed integration fixture. Keep its default twenty 180-second rounds for a release endurance run; a shortened rehearsal does not replace that run. Reports and disposable worlds stay under `build/`.

@@ -33,7 +33,7 @@ final class TerrainRegionsScreen extends Screen {
         add("Add rectangle",right,56,half,()->addRegion(Mask.RECTANGLE)).active=zones.size()<RegionalTerrain.MAX_REGIONS;
         add("Add circle",right,80,half,()->addRegion(Mask.CIRCLE)).active=zones.size()<RegionalTerrain.MAX_REGIONS;
         add(!zones.isEmpty()&&current().mask()==Mask.POLYGON?"Polygon / priority":"Bounds & priority",right,104,half,this::bounds).active=!zones.isEmpty();add("Terrain & biome",right,128,half,this::terrain).active=!zones.isEmpty();
-        add("Remove region",right,152,half,()->{zones.remove(selected);selected=Math.max(0,selected-1);rebuildWidgets();}).active=!zones.isEmpty();
+        add("Remove region",right,152,half,()->{if(zones.stream().anyMatch(z->z.composition().map(c->c.regions().contains(current().name())).orElse(false))){error="Remove incoming composite references first.";return;}zones.remove(selected);selected=Math.max(0,selected-1);rebuildWidgets();}).active=!zones.isEmpty();
         add("Map view",right,176,half,this::view);
         int footer=(span-8)/2;add("Done",left,height-26,footer,()->{save.accept(zones.isEmpty()?Optional.empty():Optional.of(new RegionalTerrain(zones)));onClose();}).active=!journal.pending();add("Cancel",left+footer+8,height-26,footer,this::onClose);
         if(journal.offer())history();
@@ -42,11 +42,14 @@ final class TerrainRegionsScreen extends Screen {
     private void restore(com.google.gson.JsonElement value){var next=Zone.CODEC.listOf(0,32).parse(net.minecraft.resources.RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE,registries),value).getOrThrow();if(!next.isEmpty())new RegionalTerrain(next).validate().getOrThrow();zones.clear();zones.addAll(next);selected=Math.clamp(selected,0,Math.max(0,zones.size()-1));}
     private void history(){minecraft.gui.setScreen(new AuthoringHistoryScreen(this,journal,this::snapshot,this::restore,List.of(
         new AuthoringHistoryScreen.Action("Add polygon region",()->zones.size()<32,()->addRegion(Mask.POLYGON)),
+        new AuthoringHistoryScreen.Action("Add composite region",()->zones.size()>=2&&zones.size()<32,this::addComposite),
         new AuthoringHistoryScreen.Action("Duplicate selected region",()->!zones.isEmpty()&&zones.size()<32,this::duplicate),
         new AuthoringHistoryScreen.Action("Move selected region earlier",()->!zones.isEmpty()&&selected>0,()->{Collections.swap(zones,selected,selected-1);selected--;}),
         new AuthoringHistoryScreen.Action("Move selected region later",()->selected+1<zones.size(),()->{Collections.swap(zones,selected,selected+1);selected++;})
     )));}
-    private void duplicate(){var z=current();int n=1;String prefix=z.name().substring(0,Math.min(24,z.name().length()))+"_copy";while(indexOfName(prefix+n))n++;var copy=new ArrayList<>(zones);copy.add(new Zone(prefix+n,z.mask(),z.minX(),z.minZ(),z.maxX(),z.maxZ(),z.priority(),z.transition(),z.elevation(),z.relief(),z.terrain(),z.biome(),z.vertices()));if(new RegionalTerrain(copy).validate().isSuccess()){zones.clear();zones.addAll(copy);selected=zones.size()-1;}else error="Duplicate refused: polygon vertex budget reached.";}
+    private void duplicate(){var z=current();int n=1;String prefix=z.name().substring(0,Math.min(24,z.name().length()))+"_copy";while(indexOfName(prefix+n))n++;var copy=new ArrayList<>(zones);copy.add(new Zone(prefix+n,z.mask(),z.minX(),z.minZ(),z.maxX(),z.maxZ(),z.priority(),z.transition(),z.elevation(),z.relief(),z.terrain(),z.biome(),z.vertices(),z.composition()));if(new RegionalTerrain(copy).validate().isSuccess()){zones.clear();zones.addAll(copy);selected=zones.size()-1;}else error="Duplicate refused: polygon vertex budget reached.";}
+    private void addComposite(){int n=1;while(indexOfName("combined_"+n))n++;var a=zones.getFirst();var refs=List.of(zones.get(0).name(),zones.get(1).name());var next=new Zone("combined_"+n,Mask.COMPOSITE,a.minX(),a.minZ(),a.maxX(),a.maxZ(),1,0,base.elevation(),base.relief(),a.terrain(),Optional.empty(),List.of(),Optional.of(new Composition(Operation.UNION,refs)));var copy=new ArrayList<>(zones);copy.add(next);zones.clear();zones.addAll(new RegionalTerrain(copy).normalized().zones());selected=zones.size()-1;bounds();}
+    private List<Zone> replaced(Zone next){var copy=new ArrayList<>(zones);String before=current().name();copy.set(selected,next);if(!before.equals(next.name()))for(int i=0;i<copy.size();i++){var z=copy.get(i);if(z.composition().isPresent()){var c=z.composition().orElseThrow();copy.set(i,new Zone(z.name(),z.mask(),z.minX(),z.minZ(),z.maxX(),z.maxZ(),z.priority(),z.transition(),z.elevation(),z.relief(),z.terrain(),z.biome(),z.vertices(),Optional.of(new Composition(c.operation(),c.regions().stream().map(s->s.equals(before)?next.name():s).toList()))));}}var result=new RegionalTerrain(copy).normalized();result.validate().getOrThrow();return result.zones();}
     private boolean indexOfName(String name){return zones.stream().anyMatch(z->z.name().equals(name));}
     private int index(String name){for(int i=0;i<zones.size();i++)if(zones.get(i).name().equals(name))return i;return 0;}
     private Zone current(){return zones.get(Math.clamp(selected,0,zones.size()-1));}
@@ -58,11 +61,11 @@ final class TerrainRegionsScreen extends Screen {
         if(mask==Mask.POLYGON)zone=zone.withVertices(List.of(new Vertex(x-128,z-128),new Vertex(x+128,z-128),new Vertex(x+128,z+128),new Vertex(x-128,z+128)));
         var copy=new ArrayList<>(zones);copy.add(zone);if(!new RegionalTerrain(copy).validate().isSuccess()){error="Polygon vertex budget reached.";return;}zones.add(zone);selected=zones.size()-1;focus(current());bounds();}
     private void form(String title,List<StudioFormScreen.Field> fields,Function<List<String>,Zone> parse){
-        minecraft.gui.setScreen(new StudioFormScreen(this,title,"Changes remain in this draft. Existing worlds retain their saved generation.",fields,v->{try{var zone=parse.apply(v);var copy=new ArrayList<>(zones);copy.set(selected,zone);new RegionalTerrain(copy).validate().getOrThrow();return "";}catch(RuntimeException e){return e.getMessage()==null?"Check the region fields.":e.getMessage();}},v->{zones.set(selected,parse.apply(v));focus(current());}));
+        minecraft.gui.setScreen(new StudioFormScreen(this,title,"Changes remain in this draft. Existing worlds retain their saved generation.",fields,v->{try{replaced(parse.apply(v));return "";}catch(RuntimeException e){return e.getMessage()==null?"Check the region fields.":e.getMessage();}},v->{var next=replaced(parse.apply(v));zones.clear();zones.addAll(next);focus(current());}));
     }
     private StudioFormScreen.Field f(String name,Object value){return new StudioFormScreen.Field(name,""+value);}
     private int integer(List<String> values,int i){return Integer.parseInt(values.get(i));}
-    private void bounds(){var z=current();if(z.mask()==Mask.POLYGON){minecraft.gui.setScreen(new StudioChoiceScreen(this,"Polygon region",List.of("Name, priority and transition","Edit polygon vertices","Stop map vertex editing"),choice->{
+    private void bounds(){var z=current();if(z.mask()==Mask.COMPOSITE){var c=z.composition().orElseThrow();form("Composite region",List.of(f("Name",z.name()),f("Operation · union/intersection/subtract",c.operation().getSerializedName()),f("Operand names · comma separated",String.join(",",c.regions())),f("Priority",z.priority()),f("Transition blocks",z.transition())),v->new Zone(v.get(0),Mask.COMPOSITE,z.minX(),z.minZ(),z.maxX(),z.maxZ(),integer(v,3),integer(v,4),z.elevation(),z.relief(),z.terrain(),z.biome(),List.of(),Optional.of(new Composition(Operation.valueOf(v.get(1).toUpperCase(Locale.ROOT)),Arrays.stream(v.get(2).split(",",-1)).map(String::trim).toList()))));return;}if(z.mask()==Mask.POLYGON){minecraft.gui.setScreen(new StudioChoiceScreen(this,"Polygon region",List.of("Name, priority and transition","Edit polygon vertices","Stop map vertex editing"),choice->{
         if(choice.startsWith("Name"))form("Polygon settings",List.of(f("Name",z.name()),f("Priority",z.priority()),f("Transition blocks",z.transition())),v->new Zone(v.get(0),z.mask(),z.minX(),z.minZ(),z.maxX(),z.maxZ(),integer(v,1),integer(v,2),z.elevation(),z.relief(),z.terrain(),z.biome(),z.vertices()));
         else if(choice.startsWith("Edit"))vertices();else{vertexMap="";minecraft.gui.setScreen(this);}
     }));return;}form(z.mask().getSerializedName()+" bounds",List.of(f("Name",z.name()),f("Priority",z.priority()),f("Minimum X",z.minX()),f("Minimum Z",z.minZ()),f("Maximum X",z.maxX()),f("Maximum Z",z.maxZ()),f("Transition blocks",z.transition())),v->new Zone(v.get(0),z.mask(),integer(v,2),integer(v,3),integer(v,4),integer(v,5),integer(v,1),integer(v,6),z.elevation(),z.relief(),z.terrain(),z.biome()));}
@@ -73,28 +76,30 @@ final class TerrainRegionsScreen extends Screen {
         else if(choice.startsWith("Remove")){var points=new ArrayList<>(z.vertices());points.remove(vertexIndex);applyVertices(points);minecraft.gui.setScreen(this);}
         else{vertexMap=choice.startsWith("Move")?"move":"insert";minecraft.gui.setScreen(this);}
     }));}
-    private void applyVertices(List<Vertex> points){var copy=new ArrayList<>(zones);copy.set(selected,current().withVertices(points));var result=new RegionalTerrain(copy).validate();if(result.isSuccess()){zones.set(selected,copy.get(selected));journal.observe(snapshot());error="";}else error=result.error().orElseThrow().message();}
+    private void applyVertices(List<Vertex> points){try{var next=replaced(current().withVertices(points));zones.clear();zones.addAll(next);journal.observe(snapshot());error="";}catch(RuntimeException e){error=e.getMessage();}}
     private void terrain(){var z=current();form("Region terrain and biome",List.of(f("Elevation",z.elevation()),f("Relief",z.relief()),f("Landform",z.terrain().landform().getSerializedName()),f("Scale",z.terrain().scale()),f("Seed offset",z.terrain().seedSalt()),f("Biome ID or none",z.biome().flatMap(b->b.unwrapKey()).map(k->k.identifier().toString()).orElse("none"))),v->{
         var biome=v.get(5).equals("none")?Optional.<net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>>empty():Optional.<net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>>of(registries.lookupOrThrow(Registries.BIOME).get(ResourceKey.create(Registries.BIOME,Identifier.parse(v.get(5)))).orElseThrow(()->new IllegalArgumentException("Choose an installed biome ID.")));
-        return new Zone(z.name(),z.mask(),z.minX(),z.minZ(),z.maxX(),z.maxZ(),z.priority(),z.transition(),integer(v,0),integer(v,1),new AdvancedTerrain(AdvancedTerrain.Landform.valueOf(v.get(2).toUpperCase(Locale.ROOT)),integer(v,3),Long.parseLong(v.get(4))),biome,z.vertices());
+        return new Zone(z.name(),z.mask(),z.minX(),z.minZ(),z.maxX(),z.maxZ(),z.priority(),z.transition(),integer(v,0),integer(v,1),new AdvancedTerrain(AdvancedTerrain.Landform.valueOf(v.get(2).toUpperCase(Locale.ROOT)),integer(v,3),Long.parseLong(v.get(4))),biome,z.vertices(),z.composition());
     });}
     private void view(){minecraft.gui.setScreen(new StudioFormScreen(this,"Region map view","The map shows coordinate masks. Left-click selects; right-click moves the selected draft region.",List.of(f("Centre X",centerX),f("Centre Z",centerZ),f("Blocks per cell",scale)),v->{try{return Math.abs((long)integer(v,0))<=RegionalTerrain.WORLD_BOUND&&Math.abs((long)integer(v,1))<=RegionalTerrain.WORLD_BOUND&&integer(v,2)>=1&&integer(v,2)<=65536?"":"Keep coordinates within world bounds and scale at 1–65536.";}catch(RuntimeException e){return "Enter integer coordinates and scale.";}},v->{centerX=integer(v,0);centerZ=integer(v,1);scale=integer(v,2);}));}
     @Override public boolean mouseClicked(MouseButtonEvent event,boolean twice){
         if(event.x()>=mapX&&event.x()<mapX+mapSize&&event.y()>=mapY&&event.y()<mapY+mapSize){
             int x=centerX+((int)((event.x()-mapX)*48/mapSize)-24)*scale,z=centerZ+((int)((event.y()-mapY)*48/mapSize)-24)*scale;
             if(event.button()==InputConstants.MOUSE_BUTTON_RIGHT&&!zones.isEmpty()){
+                if(current().mask()==Mask.COMPOSITE){error="Move this composite's operand regions instead.";return true;}
                 if(!vertexMap.isEmpty()&&current().mask()==Mask.POLYGON){var points=new ArrayList<>(current().vertices());vertexIndex=Math.clamp(vertexIndex,0,points.size()-1);if(vertexMap.equals("insert"))points.add(vertexIndex+1,new Vertex(x,z));else points.set(vertexIndex,new Vertex(x,z));applyVertices(points);return true;}
                 var a=current();int dx=x-(int)(((long)a.minX()+a.maxX())/2),dz=z-(int)(((long)a.minZ()+a.maxZ())/2);
                 var moved=a.translated(dx,dz);
-                if(moved.validate().isSuccess()){zones.set(selected,moved);journal.observe(snapshot());error="";}else error="Move refused: outside world bounds.";
-            }else if(event.button()==InputConstants.MOUSE_BUTTON_LEFT){vertexMap="";for(var a:new RegionalTerrain(zones).ordered())if(a.edgeDistance(x,z)>=0){selected=index(a.name());break;}}
+                try{var next=replaced(moved);zones.clear();zones.addAll(next);journal.observe(snapshot());error="";}catch(RuntimeException e){error="Move refused: "+e.getMessage();}
+            }else if(event.button()==InputConstants.MOUSE_BUTTON_LEFT){vertexMap="";var regions=new RegionalTerrain(zones);for(var a:regions.ordered())if(regions.edgeDistance(a,x,z)>=0){selected=index(a.name());break;}}
             return true;
         }return super.mouseClicked(event,twice);
     }
     @Override public void extractRenderState(GuiGraphicsExtractor g,int x,int y,float tick){super.extractRenderState(g,x,y,tick);g.centeredText(font,title,width/2,8,0xFFF1E7CE);
-        var ordered=new RegionalTerrain(zones).ordered();for(int row=0;row<48;row++)for(int col=0;col<48;col++){
+        var regions=new RegionalTerrain(zones);var ordered=regions.ordered();for(int row=0;row<48;row++)for(int col=0;col<48;col++){
             int wx=centerX+(col-24)*scale,wz=centerZ+(row-24)*scale,color=0xFF252B32;
-            for(var zone:ordered)if(zone.edgeDistance(wx,wz)>=0){color=0xFF000000|(zone.name().hashCode()&0x007F7F7F)|0x00303030;if(!zones.isEmpty()&&zone.name().equals(current().name())&&zone.edgeDistance(wx,wz)<scale*2)color=0xFFFFCF50;break;}
+            var distances=regions.version()==RegionalTerrain.COMPOSITE_VERSION?regions.distances(wx,wz):null;
+            for(var zone:ordered){double edge=distances==null?zone.edgeDistance(wx,wz):distances.get(zone.name());if(edge>=0){color=0xFF000000|(zone.name().hashCode()&0x007F7F7F)|0x00303030;if(!zones.isEmpty()&&zone.name().equals(current().name())&&edge<scale*2)color=0xFFFFCF50;break;}}
             g.fill(mapX+col*mapSize/48,mapY+row*mapSize/48,mapX+(col+1)*mapSize/48,mapY+(row+1)*mapSize/48,color);
         }
         String label=zones.isEmpty()?"No regions":current().name();g.text(font,font.plainSubstrByWidth(label,mapSize),mapX,mapY+mapSize+4,0xFFFFFFFF);

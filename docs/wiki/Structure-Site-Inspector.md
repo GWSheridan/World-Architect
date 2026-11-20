@@ -21,3 +21,13 @@ An **eligible** result means the production planner accepted the base-terrain ge
 Each request has a cooperative 500 ms sampling budget. Work uses one background worker with a bounded queue. A newer request cancels its predecessor, closing cancels the session, and old results cannot replace a newer view. Sessions expire after thirty minutes, with at most sixteen authors and a shared estimated 64 MiB working budget. Current permissions, pack policy, session token, request serial and saved source fingerprint are checked on the server. Reports and previews are not uploaded automatically.
 
 See [Assembly Studio](Assembly-Studio.md), [Procedural Pools](Procedural-Pools.md), [Regional Terrain](Regional-Terrain.md) and [World Generation Rules](World-Generation-Rules.md).
+
+## Find several sites
+
+In 1.6, choose **Tools → Search nearby sites** after selecting a dimension and assembly. Set a center chunk, radius of 1–128 chunks and candidate limit of 1–256 native placement regions. The finder uses all matching placement bindings, samples only their native candidate chunks and returns up to 32 eligible sites. It stops after five seconds of cooperative work; individual samples retain their 500 ms budget. A time, result or candidate limit produces an explicitly incomplete report. Results are a bounded sample, not a promise that every site or the globally nearest site was found.
+
+**Tools → Search results** opens a coordinate list. Select one to inspect its geometry, foundation supports, clearance, transformed markers and terrain section. An eligible search result agrees with the production base-terrain planner; later generation and ticking can still affect the live site. No search step loads chunks or changes generation files.
+
+**Tools → Export search report** writes a new JSON file to the server's `config/worldarchitect/site-reports/` directory. Reports include exact seed, dimension, structure, bounds, limits, source release and SHA-256 fingerprint. Use a simple filename; existing reports cannot be overwritten. Export requires the current permission, pack policy, token, serial and unchanged saved source. It never uploads a report.
+
+**Tools → Cancel search**, a replacement request, closing or losing permission invalidates pending work. A changed source fingerprint also refuses late results and export. Sessions and memory limits are shared with single-site previews.

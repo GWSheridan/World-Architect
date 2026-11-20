@@ -14,7 +14,7 @@ final class ClientStudioViews {
                 case "workbench" -> mc.gui.setScreen(new WorkbenchScenarioScreen(payload.view()));
                 case "workbench_export" -> WorkbenchScenarioScreen.acknowledge(payload.view());
                 case "site" -> SiteInspectorScreen.show(payload.view());
-                case "assembly" -> mc.gui.setScreen(payload.view().getBooleanOr("pool_editor",false)?new AssemblyPoolScreen(payload.view()):new AssemblyStudioScreen(payload.view()));
+                case "assembly" -> mc.gui.setScreen(payload.view().getBooleanOr("theme_editor",false)?new AssemblyThemeScreen(payload.view()):payload.view().getBooleanOr("pool_editor",false)?new AssemblyPoolScreen(payload.view()):new AssemblyStudioScreen(payload.view()));
                 case "administration" -> mc.gui.setScreen(new AdministrationPanelScreen(payload.view()));
                 case "administration_confirmation" -> mc.gui.setScreen(new StudioConfirmScreen(answer -> {
                     if(mc.getConnection()!=null)mc.getConnection().sendCommand(answer

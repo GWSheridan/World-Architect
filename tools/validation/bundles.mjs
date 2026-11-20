@@ -12,6 +12,7 @@ cases.push({name:'pool-demo',bundle:`examples/procedural-pools/bundles/pool-demo
 cases.push({name:'shared-regions',bundle:`examples/shared-regions/bundles/shared-regions-${version}.zip`});
 cases.push({name:'constrained-pool',bundle:`examples/constrained-pools/bundles/constrained-pool-${version}.zip`});
 for(const [directory,name,site,id] of [['polygon-regions','polygon-regions','polygon','polygon_marker'],['terrain-anchors','coastal-ruins','coastal','coastal_ruin'],['vertical-pools','vertical-tower','vertical','vertical_tower'],['locked-archipelago','locked-archipelago',null,null]])cases.push({name,bundle:`examples/${directory}/bundles/${name}-${version}.zip`,site,id});
+for(const [directory,name,site,id] of [['composite-regions','composite-regions','composite','composite_marker'],['structure-foundations','foundation-platform','prepared','foundation_platform'],['structure-themes','themed-platform','themed','themed_platform']])cases.push({name,bundle:`examples/${directory}/bundles/${name}-${version}.zip`,site,id});
 const report={format:1,version,cases:[],status:'passed'};
 for(const entry of cases) {
     const output=`build/ci-bundle-${entry.name}`;

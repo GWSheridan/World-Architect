@@ -221,7 +221,9 @@ tasks.register('releaseChecksums', JavaExec) {
         file('examples/regional-terrain/bundles').absolutePath, file('examples/procedural-pools/bundles').absolutePath,
         file('examples/shared-regions/bundles').absolutePath, file('examples/constrained-pools/bundles').absolutePath,
         file('examples/polygon-regions/bundles').absolutePath, file('examples/terrain-anchors/bundles').absolutePath,
-        file('examples/vertical-pools/bundles').absolutePath, file('examples/locked-archipelago/bundles').absolutePath] } as CommandLineArgumentProvider)
+        file('examples/vertical-pools/bundles').absolutePath, file('examples/locked-archipelago/bundles').absolutePath,
+        file('examples/composite-regions/bundles').absolutePath, file('examples/structure-foundations/bundles').absolutePath,
+        file('examples/structure-themes/bundles').absolutePath] } as CommandLineArgumentProvider)
 }
 
 tasks.register('assembleRelease') {
@@ -275,6 +277,16 @@ tasks.register('prepareCycle15Examples', JavaExec) {
     mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseCycle15Examples'
 }
 
+tasks.register('prepareCycle16Examples', JavaExec) {
+    group = 'distribution'
+    description = 'Prepare composite, foundation and theme examples from verified exports.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseCycle16Examples'
+    argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
+        file(providers.gradleProperty('compositeExport').get()).absolutePath,
+        file(providers.gradleProperty('preparedExport').get()).absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
+}
 tasks.register('prepareWorkbenchInputs', JavaExec) {
     group = 'verification'
     classpath = sourceSets.test.runtimeClasspath

@@ -1,0 +1,56 @@
+{
+  "biomes": "minecraft:plains",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "modules": [
+    {
+      "name": "ruin",
+      "offset": [
+        0,
+        0,
+        0
+      ],
+      "template": {
+        "worldarchitect": {
+          "author": "GWSHERIDAN",
+          "format": 1,
+          "rules": {
+            "collision": "air_or_water"
+          },
+          "title": "Coastal remains",
+          "category": "Custom Structures",
+          "markers": {},
+          "revision": 3
+        },
+        "size": [
+          2,
+          3,
+          2
+        ],
+        "entities": [],
+        "blocks": [
+          {
+            "pos": [
+              0,
+              0,
+              0
+            ],
+            "state": 0
+          }
+        ],
+        "palette": [
+          {
+            "id": "minecraft:bricks"
+          }
+        ],
+        "DataVersion": 5023
+      }
+    }
+  ],
+  "random_rotation": false,
+  "placement": {
+    "version": 1,
+    "mode": "seabed"
+  },
+  "type": "worldarchitect:modular"
+}

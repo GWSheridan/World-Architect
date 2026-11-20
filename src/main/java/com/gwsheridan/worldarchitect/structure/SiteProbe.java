@@ -6,7 +6,9 @@ import net.minecraft.core.BlockPos;
 /** Request-local instrumentation of the production planner; no world or player references. */
 final class SiteProbe {
     static final ThreadLocal<SiteProbe> CURRENT=new ThreadLocal<>();
-    final long deadline=System.nanoTime()+500_000_000L;
+    final long deadline;
+    SiteProbe(){this(System.nanoTime()+500_000_000L);}
+    SiteProbe(long deadline){this.deadline=Math.min(deadline,System.nanoTime()+500_000_000L);}
     String reason="Native biome or placement checks rejected this candidate.";
     List<ModularPiece> pieces=List.of();BlockPos origin=BlockPos.ZERO;
     List<ProceduralPool.Connection> connections=List.of();BlockPos layoutSize=new BlockPos(1,1,1);TemplatePlacement transform=new TemplatePlacement(BlockPos.ZERO,net.minecraft.world.level.block.Rotation.NONE,net.minecraft.world.level.block.Mirror.NONE);

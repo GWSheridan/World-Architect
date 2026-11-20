@@ -23,3 +23,13 @@ Polygons may be convex or concave. Use 3–64 unique vertices in perimeter order
 Polygon profiles opt into **generator version 4**. Rectangle/circle-only profiles retain version 3 and their original encoding. The base and regional landforms must remain solid. Polygon edges and vertices are inclusive; transition height weights feather inward using the nearest edge. Priority winners use geometric containment independently of feathering. Biomes retain the four-block grid and transition threshold described above. Named rules and Inspector overlays use the same evaluator.
 
 See the [polygon example](https://github.com/GWSheridan/World-Architect/tree/v1.5.0/examples/polygon-regions) and [site inspector](Structure-Site-Inspector.md).
+
+## Composite regions
+
+In 1.6, **History / organize → Add composite region** combines two or more named regions. Choose `union`, `intersection` or `subtract`, enter comma-separated operand names, and set the composite's own priority, terrain, biome and transition. Subtraction keeps the first operand and removes every later operand. Operands remain ordinary regions with their own priorities; lower their priorities when only the combined region should win.
+
+A composite opts that dimension into **generator version 5**. Its geometry is shared by terrain, biome selection, named rule conditions and inspector overlays. Union and intersection include their boundaries. A subtracted operand removes its boundary too, so a hole has no overlapping rim. Height transitions feather inward from the composed boundary; biome choices still use the half-weight threshold. Existing versions 1–4 retain their original evaluators and saved encoding.
+
+Use 2–8 distinct operands per composite, at most 32 regions per dimension and at most eight reference levels including primitive regions. Unknown names, cycles and intersections with bounding spans smaller than two blocks are refused. The editor derives composite bounds from its operands; it updates dependent composites when operands move or are renamed. A composite cannot be dragged independently. Remove its incoming references before deleting an operand. Rule references still need updating when a referenced name changes.
+
+JSON adds `"mask": "composite"` and `"composition": {"operation": "subtract", "regions": ["mainland", "lake"]}` to a normal region entry. The min/max fields describe the derived bounds; they do not clip the referenced geometry. The [composite example](https://github.com/GWSheridan/World-Architect/tree/release/1.6.0/examples/composite-regions) demonstrates a concave outline with an excluded hole.

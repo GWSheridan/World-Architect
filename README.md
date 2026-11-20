@@ -7,16 +7,16 @@ Created and maintained by **GWSHERIDAN**.
 
 See the [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
-World Architect 1.5.0 adds polygon terrain regions, explicit placement anchors, vertical procedural pools and a read-only structure site inspector. See the [changelog](CHANGELOG.md) for details.
+This branch prepares World Architect 1.6.0: composite terrain regions, bounded foundations, weighted structure themes and batch site searches. The current public release remains [1.5.0](https://github.com/GWSheridan/World-Architect/releases/tag/v1.5.0). See the [changelog](CHANGELOG.md) for details.
 
 ## Get started
 
-Install `worldarchitect-1.5.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
+Install `worldarchitect-1.6.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
 
 In **Create New World → World**, choose **World Architect · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
 
 - **World Inspector:** saved profiles, dependency pins and new-world preset comparisons.
-- **Regional terrain:** rectangles, circles and polygon outlines, with priority, biome choices and feathered heights.
+- **Regional terrain:** rectangles, circles, polygon outlines and named compositions, with priority, biome choices and feathered heights.
 - **Procedural pools:** seeded modules, named connections, branches and end caps.
 - **Test workbench:** isolated preset scenarios and local reports from the source tools.
 - **Draft history:** bounded Undo/Redo, duplication, ordering and explicit interrupted-draft recovery.

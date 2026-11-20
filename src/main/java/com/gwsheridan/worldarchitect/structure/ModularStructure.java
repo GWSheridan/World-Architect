@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
@@ -49,12 +50,16 @@ public final class ModularStructure extends Structure {
             Codec.intRange(0, 32).optionalFieldOf("max_slope", 4).forGetter(structure -> structure.maxSlope),
             Codec.BOOL.optionalFieldOf("random_rotation", true).forGetter(structure -> structure.randomRotation),
             ProceduralPool.CODEC.optionalFieldOf("assembly_pool").forGetter(structure -> structure.pool),
-            PlacementAnchor.CODEC.optionalFieldOf("placement").forGetter(structure -> structure.anchor)
+            PlacementAnchor.CODEC.optionalFieldOf("placement").forGetter(structure -> structure.anchor),
+            StructureFoundation.CODEC.optionalFieldOf("foundation").forGetter(structure -> structure.foundation),
+            StructureThemes.CODEC.optionalFieldOf("themes").forGetter(structure -> structure.themes)
     ).apply(builder, ModularStructure::new)).validate(ModularStructure::validate);
 
     private final List<Module> modules;
     private final Optional<ProceduralPool> pool;
     private final Optional<PlacementAnchor> anchor;
+    private final Optional<StructureFoundation> foundation;
+    private final Optional<StructureThemes> themes;
     private final ThreadLocal<List<Module>> selectedLayout = new ThreadLocal<>();
     private final int yOffset;
     private final int maxSlope;
@@ -67,8 +72,12 @@ public final class ModularStructure extends Structure {
         this(settings,modules,yOffset,maxSlope,randomRotation,pool,Optional.empty());
     }
     ModularStructure(StructureSettings settings, List<Module> modules, int yOffset, int maxSlope, boolean randomRotation, Optional<ProceduralPool> pool,Optional<PlacementAnchor> anchor) {
+        this(settings,modules,yOffset,maxSlope,randomRotation,pool,anchor,Optional.empty(),Optional.empty());
+    }
+    ModularStructure(StructureSettings settings,List<Module> modules,int yOffset,int maxSlope,boolean randomRotation,Optional<ProceduralPool> pool,Optional<PlacementAnchor> anchor,Optional<StructureFoundation> foundation,Optional<StructureThemes> themes){
         super(settings);
         this.anchor=anchor;
+        this.foundation=foundation;this.themes=themes;
         this.pool = pool;
         this.modules = List.copyOf(modules);
         this.yOffset = yOffset;
@@ -87,6 +96,8 @@ public final class ModularStructure extends Structure {
     }
 
     private DataResult<ModularStructure> validate() {
+        if(foundation.isPresent()&&foundation.orElseThrow().validate().error().isPresent())return DataResult.error(()->"Invalid structure foundation.");
+        if(themes.isPresent()&&themes.orElseThrow().validate().error().isPresent())return DataResult.error(()->"Invalid structure themes.");
         if(anchor.isPresent()&&anchor.orElseThrow().validate().error().isPresent())return DataResult.error(()->"Invalid placement anchor.");
         if (pool.isEmpty() && (size.getX() > MAX_SPAN || size.getY() > MAX_SPAN || size.getZ() > MAX_SPAN)
                 || modules.stream().mapToInt(module -> module.entry().template().blocks().size()).sum() > MAX_BLOCKS) {
@@ -122,6 +133,7 @@ public final class ModularStructure extends Structure {
     }
 
     public void validateTemplates(net.minecraft.core.HolderLookup.Provider registries) throws IOException {
+        if(themes.isPresent())themes.orElseThrow().validateCatalog(modules,pool,registries);
         if (pool.isPresent()) pool.orElseThrow().validateCatalog(modules).getOrThrow(IOException::new);
         for (var module : modules) {
             for (var cell : module.entry().template().blocks()) {
@@ -137,13 +149,16 @@ public final class ModularStructure extends Structure {
     public int blockCount() { return pool.isPresent() ? Math.min(MAX_BLOCKS, modules.stream().mapToInt(m -> m.entry().template().blocks().size()).max().orElse(0) * pool.orElseThrow().maxModules()) : modules.stream().mapToInt(module -> module.entry().template().blocks().size()).sum(); }
     String placementDescription(){return anchor.map(a->a.mode().getSerializedName()+(a.mode()==PlacementAnchor.Mode.FIXED?" Y "+a.fixedY():"")).orElse("legacy seabed")+"; height offset "+yOffset;}
     boolean rootAnchored(){return pool.filter(p->p.format()==3).isPresent();}
+    String preparationDescription(){return foundation.map(f->f.mode().getSerializedName()+" · depth "+f.maxDepth()+" · clearance "+f.clearHeight()+" · replace water "+f.replaceWater()).orElse("none");}
+    Set<String> themeNamespaces(){return themes.map(StructureThemes::namespaces).orElse(Set.of());}
     public boolean hasMarker(String module, String marker) {
         if (pool.isEmpty()) return modules.stream().anyMatch(part -> part.name().equals(module) && part.entry().markers().containsKey(marker));
         if (module.equals("root")) return modules.stream().anyMatch(part -> part.name().equals(pool.orElseThrow().root()) && part.entry().markers().containsKey(marker));
         return module.matches("module_([1-9]|1[0-5])") && Integer.parseInt(module.substring(7)) < pool.orElseThrow().maxModules() && modules.stream().anyMatch(part -> part.entry().markers().containsKey(marker));
     }
-    Optional<List<Module>> previewLayout(long seed) throws IOException { return pool.isPresent() ? pool.orElseThrow().layout(modules, seed) : Optional.of(modules); }
-    ProceduralPool.LayoutReport previewReport(long seed)throws IOException{return pool.isPresent()?pool.orElseThrow().plan(modules,seed):new ProceduralPool.LayoutReport(Optional.of(modules),0,0,Map.of(),List.of("Static assembly."));}
+    private List<Module> catalog(long seed)throws IOException{return themes.isPresent()?themes.orElseThrow().catalog(modules,seed):modules;}
+    Optional<List<Module>> previewLayout(long seed) throws IOException {var catalog=catalog(seed);return pool.isPresent()?pool.orElseThrow().layout(catalog,seed):Optional.of(catalog);}
+    ProceduralPool.LayoutReport previewReport(long seed)throws IOException{var catalog=catalog(seed);return pool.isPresent()?pool.orElseThrow().plan(catalog,seed):new ProceduralPool.LayoutReport(Optional.of(catalog),0,0,Map.of(),List.of("Static assembly."));}
 
     @Override
     public StructureStart generate(Holder<Structure> selected, ResourceKey<Level> dimension, RegistryAccess registries,
@@ -155,14 +170,14 @@ public final class ModularStructure extends Structure {
             return StructureStart.INVALID_START;
         }
         List<Module> layout;
-        try { layout = pool.isPresent() ? pool.orElseThrow().layout(modules, ProceduralPool.seed(seed,chunk.x(),chunk.z())).orElse(null) : modules; }
+        try { layout = previewLayout(ProceduralPool.seed(seed,chunk.x(),chunk.z())).orElse(null); }
         catch(IOException e) { throw new IllegalStateException("Invalid pool template",e); }
         if (layout == null) {SiteProbe.reject("Pool requirements, connections or bounded layout search rejected this seed.");return StructureStart.INVALID_START;}
         if (layout.stream().anyMatch(module -> module.entry().rules().dimension().filter(id -> !id.equals(dimension.identifier())).isPresent())) {
             SiteProbe.reject("A module requires a different dimension.");
             return StructureStart.INVALID_START;
         }
-        if (pool.isEmpty()) return super.generate(selected, dimension, registries, generator, biomes, sampler, random, templates, seed, chunk, references, height, validBiome);
+        if (pool.isEmpty()&&themes.isEmpty()) return super.generate(selected, dimension, registries, generator, biomes, sampler, random, templates, seed, chunk, references, height, validBiome);
         var previous = selectedLayout.get(); selectedLayout.set(layout);
         try { return super.generate(selected, dimension, registries, generator, biomes, sampler, random, templates, seed, chunk, references, height, validBiome); }
         finally { if(previous==null)selectedLayout.remove();else selectedLayout.set(previous); }
@@ -173,7 +188,7 @@ public final class ModularStructure extends Structure {
         if (!(context.chunkGenerator() instanceof SolidColumnGenerator generator)) {
             return Optional.empty();
         }
-        List<Module> layout = pool.isPresent() ? selectedLayout.get() : modules;
+        List<Module> layout = pool.isPresent()||themes.isPresent() ? selectedLayout.get() : modules;
         if (layout == null) { try { layout = previewLayout(ProceduralPool.seed(context.seed(),context.chunkPos().x(),context.chunkPos().z())).orElse(null); } catch(IOException e) { throw new IllegalStateException(e); } }
         if (layout == null) return Optional.empty();
         BlockPos layoutSize = pool.isPresent() ? new BlockPos(layout.stream().mapToInt(m->m.offset().getX()+m.entry().template().size().getX()).max().orElse(1),layout.stream().mapToInt(m->m.offset().getY()+m.entry().template().size().getY()).max().orElse(1),layout.stream().mapToInt(m->m.offset().getZ()+m.entry().template().size().getZ()).max().orElse(1)) : size;
@@ -191,10 +206,16 @@ public final class ModularStructure extends Structure {
                 SiteProbe.check();
                 LibraryEntry transformed = module.entry().transformed(transform);
                 BlockPos offset = transformedOffset(module,layoutSize,transform);
-                pieces.add(new ModularPiece(module.name(), origin.offset(offset), transformed));
+                pieces.add(new ModularPiece(module.name(), origin.offset(offset), transformed,foundation.isPresent()?"prepared":"",false));
+            }
+            Map<BlockPos,BlockState> prepared=Map.of();
+            if(foundation.isPresent()){
+                var columns=new HashMap<Long,NoiseColumn>();var plan=foundation.orElseThrow().plan(pieces,pos->column(context,generator,columns,pos),context.heightAccessor());if(plan.isEmpty())return Optional.empty();
+                prepared=plan.orElseThrow().writes();if(pieces.stream().mapToInt(p->p.entry().template().blocks().size()).sum()+prepared.size()>MAX_BLOCKS){SiteProbe.reject("The prepared assembly exceeds 65,536 cells.");return Optional.empty();}
+                pieces.addAll(0,plan.orElseThrow().pieces());
             }
             SiteProbe.geometry(origin,pieces,layoutSize,transform);
-            if (!accepts(context, generator, pieces)) {
+            if (!accepts(context, generator, pieces,prepared)) {
                 return Optional.empty();
             }
         } catch (IOException e) {
@@ -203,11 +224,15 @@ public final class ModularStructure extends Structure {
         return Optional.of(new GenerationStub(origin, builder -> pieces.forEach(builder::addPiece)));
     }
 
-    private boolean accepts(GenerationContext context, SolidColumnGenerator generator, List<ModularPiece> pieces) throws IOException {
+    private boolean accepts(GenerationContext context, SolidColumnGenerator generator, List<ModularPiece> pieces,Map<BlockPos,BlockState> prepared) throws IOException {
         var columns = new HashMap<Long, NoiseColumn>();
         var occupied = new HashMap<BlockPos, BlockState>();
         var planned=new HashMap<BlockPos,BlockState>();
-        if(pool.filter(p->p.format()==3).isPresent())for(var piece:pieces)for(var cell:piece.entry().template().blocks())planned.put(piece.origin().offset(cell.pos()),cell.state());
+        var preparationRules=new HashMap<Long,Set<TemplateRules>>();
+        if(foundation.isPresent())for(var piece:pieces)if(piece.operation().equals("prepared"))for(var cell:piece.entry().template().blocks()){
+            var pos=piece.origin().offset(cell.pos());preparationRules.computeIfAbsent(columnKey(pos),k->new java.util.LinkedHashSet<>()).add(piece.entry().rules());
+        }
+        if(pool.filter(p->p.format()==3).isPresent()||foundation.isPresent())for(var piece:pieces)for(var cell:piece.entry().template().blocks())planned.put(piece.origin().offset(cell.pos()),cell.state());
         int minSurface = Integer.MAX_VALUE;
         int maxSurface = Integer.MIN_VALUE;
         for (var piece : pieces) {
@@ -217,7 +242,7 @@ public final class ModularStructure extends Structure {
             for (var cell : entry.template().blocks()) {
                 SiteProbe.check();
                 BlockPos pos = piece.origin().offset(cell.pos());
-                if((anchor.isPresent()||pool.filter(p->p.format()==3).isPresent())&&generator.endProgression().isPresent()
+                if((anchor.isPresent()||foundation.isPresent()||themes.isPresent()||pool.filter(p->p.format()==3).isPresent())&&generator.endProgression().isPresent()
                         &&!com.gwsheridan.worldarchitect.config.EndProgression.allowsGenerationWrite(context.chunkPos().getMinBlockX(),context.chunkPos().getMinBlockZ(),pos.getX(),pos.getZ()))return SiteProbe.reject("A template cell crosses the native End arena reservation.");
                 if (!com.gwsheridan.worldarchitect.worldgen.RuleExecution.templateCell(generator, this, context.seed(), pos)) return SiteProbe.reject("A template cell falls outside its height, biome or region rule at "+pos.toShortString());
                 if (!context.heightAccessor().isInsideBuildHeight(pos) || pos.getY() < rules.minY() || pos.getY() > rules.maxY()
@@ -226,12 +251,14 @@ public final class ModularStructure extends Structure {
                 }
                 Holder<Biome> biome = context.biomeResolver().getNoiseBiome(QuartPos.fromBlock(pos.getX()),
                         QuartPos.fromBlock(pos.getY()), QuartPos.fromBlock(pos.getZ()));
+                boolean preparation=piece.operation().equals("support")||piece.operation().equals("clear");
+                if(preparation)for(var inherited:preparationRules.getOrDefault(columnKey(pos),Set.of()))if(pos.getY()<inherited.minY()||pos.getY()>inherited.maxY()||inherited.biome().filter(id->!biome.is(id)).isPresent())return SiteProbe.reject("Preparation exceeds its source module's height or biome restrictions at "+pos.toShortString());
                 if (!context.validBiome().test(biome) || rules.biome().filter(id -> !biome.is(id)).isPresent()) {
                     return SiteProbe.reject("A template cell fails its biome restrictions at "+pos.toShortString());
                 }
                 NoiseColumn column = column(context, generator, columns, pos);
-                BlockState existing = column.getBlock(pos.getY());
-                if (!rules.collision().allows(existing,cell.state())) {
+                BlockState existing = prepared.getOrDefault(pos,column.getBlock(pos.getY()));
+                if (!preparation&&!rules.collision().allows(existing,cell.state())) {
                     return SiteProbe.reject("Collision with "+existing.getBlock().getName().getString()+" at "+pos.toShortString());
                 }
                 if (rules.terrain() == TemplateRules.Terrain.BURIED && pos.getY() >= generator.getBaseHeight(pos.getX(), pos.getZ(),
@@ -242,7 +269,7 @@ public final class ModularStructure extends Structure {
                     bottom.merge(columnKey(pos), pos, (a, b) -> a.getY() < b.getY() ? a : b);
                 }
                 TemplateMetadata.sanitize(cell.state(), cell.metadata(), context.registryAccess());
-                occupied.put(pos, cell.state());
+                if(!preparation||!cell.state().isAir())occupied.put(pos, cell.state());
             }
             for (var pos : bottom.values()) {
                 NoiseColumn column = column(context, generator, columns, pos);
@@ -265,7 +292,7 @@ public final class ModularStructure extends Structure {
                     return SiteProbe.reject("A spawn marker exceeds build height or is blocked by an assembly cell at "+pos.toShortString());
                 }
                 NoiseColumn column = column(context, generator, columns, pos);
-                if (!column.getBlock(pos.getY()).isAir() || !column.getBlock(pos.getY() + 1).isAir()) {
+                if (!prepared.getOrDefault(pos,column.getBlock(pos.getY())).isAir() || !prepared.getOrDefault(pos.above(),column.getBlock(pos.getY() + 1)).isAir()) {
                     return SiteProbe.reject("A spawn marker requires two air cells at "+pos.toShortString());
                 }
             }

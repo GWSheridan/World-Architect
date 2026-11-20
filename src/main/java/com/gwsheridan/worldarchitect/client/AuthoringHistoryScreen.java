@@ -28,7 +28,7 @@ final class AuthoringHistoryScreen extends Screen {
         button("Discard recovery", left + half + 8, 58, half, journal::pending, () -> { journal.discard(); rebuildWidgets(); });
         for (int i = 0; i < actions.size(); i++) {
             var action = actions.get(i);
-            button(action.label(), left, 86 + i * 23, span, ()->!journal.pending()&&action.enabled().getAsBoolean(), () -> { action.run().run(); onClose(); });
+            button(action.label(), left, 86 + i * 23, span, ()->!journal.pending()&&action.enabled().getAsBoolean(), () -> { action.run().run(); if(minecraft.gui.screen()==this)onClose(); });
         }
         button("Back", left, height - 26, span, () -> true, this::onClose);
     }

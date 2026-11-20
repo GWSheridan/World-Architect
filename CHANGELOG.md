@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.6.0
+
+- Added named union, intersection and subtraction regions with shared terrain, biome, rule and inspector geometry in opt-in generator version 5.
+- Added bounded post or footprint foundations and clearance for generated assemblies, including source height/biome limits, strict write filtering and saved preparation pieces.
+- Added weighted material palettes and captured module variants with compatible block properties, decorative metadata and transformed spawn markers.
+- Added bounded native site searches, coordinate selection, cancellation and fingerprinted JSON reports through the site inspector.
+- Added composite, foundation and theme examples, retaining older preset versions.
+- Retained API 1, existing generation algorithms, archived templates, island assignments and End policies. Clients and servers require matching 1.6 authoring networking.
+
 ## 1.5.0
 
 - Added convex and concave polygon regions with vertex editing, shared rule masks, draft history and explicit terrain version 4.

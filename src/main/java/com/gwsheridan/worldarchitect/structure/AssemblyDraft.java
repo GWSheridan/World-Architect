@@ -24,7 +24,8 @@ import net.minecraft.world.level.levelgen.structure.TerrainAdjustment;
 import net.minecraft.world.level.storage.LevelResource;
 
 /** Mutable authoring documents live separately from immutable generated-world definitions. */
-record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset, int maxSlope, boolean randomRotation, List<Part> parts, Optional<ProceduralPool> pool,Optional<PlacementAnchor> anchor) {
+record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset, int maxSlope, boolean randomRotation, List<Part> parts, Optional<ProceduralPool> pool,Optional<PlacementAnchor> anchor,Optional<StructureFoundation> foundation,Optional<StructureThemes> themes) {
+    AssemblyDraft(Identifier id,int revision,Identifier biome,int y,int slope,boolean random,List<Part> parts,Optional<ProceduralPool> pool,Optional<PlacementAnchor> anchor){this(id,revision,biome,y,slope,random,parts,pool,anchor,Optional.empty(),Optional.empty());}
     static final int MAX_JSON = 8 * 1024 * 1024;
     static final Codec<AssemblyDraft> CODEC = RecordCodecBuilder.<AssemblyDraft>create(b -> b.group(
             Codec.intRange(1, 1).fieldOf("format").forGetter(d -> 1),
@@ -36,15 +37,19 @@ record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset,
             Codec.BOOL.fieldOf("random_rotation").forGetter(AssemblyDraft::randomRotation),
             Part.CODEC.listOf(0, ModularStructure.MAX_MODULES).fieldOf("parts").forGetter(AssemblyDraft::parts),
             ProceduralPool.CODEC.optionalFieldOf("assembly_pool").forGetter(AssemblyDraft::pool),
-            PlacementAnchor.CODEC.optionalFieldOf("placement").forGetter(AssemblyDraft::anchor)
-    ).apply(b, (format, id, revision, biome, y, slope, random, parts, pool,anchor) -> new AssemblyDraft(id, revision, biome, y, slope, random, parts, pool,anchor)));
+            PlacementAnchor.CODEC.optionalFieldOf("placement").forGetter(AssemblyDraft::anchor),
+            StructureFoundation.CODEC.optionalFieldOf("foundation").forGetter(AssemblyDraft::foundation),
+            StructureThemes.CODEC.optionalFieldOf("themes").forGetter(AssemblyDraft::themes)
+    ).apply(b, (format, id, revision, biome, y, slope, random, parts, pool,anchor,foundation,themes) -> new AssemblyDraft(id, revision, biome, y, slope, random, parts, pool,anchor,foundation,themes)));
 
     AssemblyDraft { parts = List.copyOf(parts); }
     AssemblyDraft(Identifier id,int revision,Identifier biome,int y,int slope,boolean random,List<Part> parts){this(id,revision,biome,y,slope,random,parts,Optional.empty());}
     AssemblyDraft(Identifier id,int revision,Identifier biome,int y,int slope,boolean random,List<Part> parts,Optional<ProceduralPool> pool){this(id,revision,biome,y,slope,random,parts,pool,Optional.empty());}
-    AssemblyDraft withPool(Optional<ProceduralPool> next){return new AssemblyDraft(id,revision,biome,yOffset,maxSlope,randomRotation,parts,next,anchor);}
-    AssemblyDraft withAnchor(Optional<PlacementAnchor> next){return new AssemblyDraft(id,revision,biome,yOffset,maxSlope,randomRotation,parts,pool,next);}
-    AssemblyDraft atRevision(int value){return new AssemblyDraft(id,value,biome,yOffset,maxSlope,randomRotation,parts,pool,anchor);}
+    AssemblyDraft withPool(Optional<ProceduralPool> next){return new AssemblyDraft(id,revision,biome,yOffset,maxSlope,randomRotation,parts,next,anchor,foundation,themes);}
+    AssemblyDraft withAnchor(Optional<PlacementAnchor> next){return new AssemblyDraft(id,revision,biome,yOffset,maxSlope,randomRotation,parts,pool,next,foundation,themes);}
+    AssemblyDraft withFoundation(Optional<StructureFoundation> next){return new AssemblyDraft(id,revision,biome,yOffset,maxSlope,randomRotation,parts,pool,anchor,next,themes);}
+    AssemblyDraft withThemes(Optional<StructureThemes> next){return new AssemblyDraft(id,revision,biome,yOffset,maxSlope,randomRotation,parts,pool,anchor,foundation,next);}
+    AssemblyDraft atRevision(int value){return new AssemblyDraft(id,value,biome,yOffset,maxSlope,randomRotation,parts,pool,anchor,foundation,themes);}
     record Part(String name, Identifier source, BlockPos offset, Rotation rotation, Mirror mirror, LibraryEntry original) {
         static final Codec<Part> CODEC = RecordCodecBuilder.create(b -> b.group(
                 Codec.STRING.fieldOf("name").forGetter(Part::name), Identifier.CODEC.fieldOf("source").forGetter(Part::source),
@@ -55,11 +60,13 @@ record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset,
         ).apply(b, Part::new));
         LibraryEntry transformed() throws IOException { return original.transformed(new TemplatePlacement(BlockPos.ZERO, rotation, mirror)); }
     }
-    AssemblyDraft withParts(List<Part> next) { return new AssemblyDraft(id, revision, biome, yOffset, maxSlope, randomRotation, next, pool,anchor); }
-    AssemblyDraft withSettings(Identifier biome, int y, int slope, boolean random) { return new AssemblyDraft(id, revision, biome, y, slope, random, parts, pool,anchor); }
+    AssemblyDraft withParts(List<Part> next) { return new AssemblyDraft(id, revision, biome, yOffset, maxSlope, randomRotation, next, pool,anchor,foundation,themes); }
+    AssemblyDraft withSettings(Identifier biome, int y, int slope, boolean random) { return new AssemblyDraft(id, revision, biome, y, slope, random, parts, pool,anchor,foundation,themes); }
     AssemblyDraft check() throws IOException {
         safeId(id);
         if(anchor.isPresent())anchor.orElseThrow().validate().getOrThrow(IOException::new);
+        if(foundation.isPresent())foundation.orElseThrow().validate().getOrThrow(IOException::new);
+        if(themes.isPresent())themes.orElseThrow().validate().getOrThrow(IOException::new);
         if(pool.isPresent())pool.orElseThrow().validate().getOrThrow(IOException::new);
         if (parts.size() > ModularStructure.MAX_MODULES || yOffset < -64 || yOffset > 64 || maxSlope < 0 || maxSlope > 32) throw new IOException("Assembly settings exceed their bounds.");
         var names = new HashSet<String>(); long cells = 0;
@@ -69,7 +76,8 @@ record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset,
             if (p.getX() < 0 || p.getY() < 0 || p.getZ() < 0 || p.getX() > 95 || p.getY() > 95 || p.getZ() > 95) throw new IOException("Module offsets must be 0–95 on every axis.");
             cells += part.original.template().blocks().size();
         }
-        if (cells > ModularStructure.MAX_BLOCKS) throw new IOException("Assemblies support at most 65,536 occupied cells.");
+        cells+=themes.stream().flatMap(t->t.variants().stream()).mapToLong(v->v.snapshot().template().blocks().size()).sum();
+        if (cells > ModularStructure.MAX_BLOCKS) throw new IOException("The complete assembly and variant catalog supports at most 65,536 occupied cells.");
         return this;
     }
     ModularStructure structure(MinecraftServer server) throws IOException {
@@ -79,7 +87,8 @@ record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset,
         var modules = new ArrayList<ModularStructure.Module>();
         for (var part : parts) modules.add(new ModularStructure.Module(part.name, part.offset, part.transformed()));
         var settings = new Structure.StructureSettings(HolderSet.direct(biomeHolder), Map.of(), GenerationStep.Decoration.SURFACE_STRUCTURES, TerrainAdjustment.NONE);
-        var structure = new ModularStructure(settings, modules, yOffset, maxSlope, randomRotation, pool,anchor);
+        var transformedThemes=themes.isEmpty()?Optional.<StructureThemes>empty():Optional.of(themes.orElseThrow().transform(parts));
+        var structure = new ModularStructure(settings, modules, yOffset, maxSlope, randomRotation, pool,anchor,foundation,transformedThemes);
         var ops = RegistryOps.create(JsonOps.INSTANCE, server.registryAccess());
         var encoded = Structure.DIRECT_CODEC.encodeStart(ops, structure).getOrThrow(IOException::new);
         var checked = (ModularStructure) Structure.DIRECT_CODEC.parse(ops, encoded).getOrThrow(IOException::new);
@@ -92,6 +101,8 @@ record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset,
             NbtIo.write(part.original.toTag(), new DataOutputStream(output));
             bytes += output.size() * 4L + part.original.template().blocks().size() * 256L;
         }
+        for(var variant:themes.stream().flatMap(t->t.variants().stream()).toList()){var output=new ByteArrayOutputStream();NbtIo.write(variant.snapshot().toTag(),new DataOutputStream(output));bytes+=output.size()*4L+variant.snapshot().template().blocks().size()*256L;}
+        bytes+=themes.map(t->t.palettes().stream().mapToLong(p->512L*p.mappings().size()).sum()).orElse(0L);
         return bytes;
     }
     static AssemblyDraft load(MinecraftServer server, Identifier id) throws IOException {

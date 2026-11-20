@@ -25,3 +25,5 @@ The [Assembly Studio example](assembly-studio/) demonstrates two modules, indivi
 The 1.3 examples add [regional terrain](regional-terrain/README.md) and [procedural pools](procedural-pools/README.md), with embedded definitions and versioned bundles.
 
 The 1.4 examples add [shared terrain regions](shared-regions/README.md) and [constrained pools](constrained-pools/README.md). All eleven current bundles have versioned 1.4.0 source directories; older bundles are retained for existing worlds.
+
+The 1.6 examples add [composite regions](composite-regions/README.md), [foundations](structure-foundations/README.md) and [themes with captured variants](structure-themes/README.md). Each has a zipped preset and editable source resources.

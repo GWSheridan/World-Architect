@@ -21,16 +21,24 @@ import net.minecraft.world.level.storage.TagValueInput;
 public final class ModularPiece extends StructurePiece {
     private final String name;
     private final LibraryEntry entry;
+    private final String operation;
+    private final boolean preparationWater;
 
     ModularPiece(String name, BlockPos origin, LibraryEntry entry) {
+        this(name,origin,entry,"",false);
+    }
+    ModularPiece(String name,BlockPos origin,LibraryEntry entry,String operation,boolean preparationWater){
         super(WorldArchitect.MODULAR_PIECE.get(), 0, BoundingBox.fromCorners(origin, origin.offset(entry.template().size()).offset(-1, -1, -1)));
         this.name = name;
         this.entry = entry;
+        this.operation=operation;this.preparationWater=preparationWater;
     }
 
     public ModularPiece(StructurePieceSerializationContext context, CompoundTag tag) {
         super(WorldArchitect.MODULAR_PIECE.get(), tag);
         name = tag.getString("module").orElseThrow();
+        operation=tag.getStringOr("preparation","");preparationWater=tag.getBooleanOr("preparation_water",false);
+        if(!java.util.List.of("","prepared","support","clear").contains(operation))throw new IllegalStateException("Unknown piece preparation operation.");
         entry = LibraryEntry.CODEC.parse(NbtOps.INSTANCE, tag.getCompoundOrEmpty("template")).getOrThrow();
         BlockPos size = entry.template().size();
         if (size.getX() != boundingBox.getXSpan() || size.getY() != boundingBox.getYSpan() || size.getZ() != boundingBox.getZSpan()) {
@@ -45,6 +53,7 @@ public final class ModularPiece extends StructurePiece {
     LibraryEntry entry() {
         return entry;
     }
+    String operation(){return operation;}
 
     BlockPos origin() {
         return new BlockPos(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());
@@ -54,12 +63,19 @@ public final class ModularPiece extends StructurePiece {
     protected void addAdditionalSaveData(StructurePieceSerializationContext context, CompoundTag tag) {
         tag.putString("module", name);
         tag.put("template", entry.toTag());
+        if(!operation.isEmpty()){tag.putString("preparation",operation);if(preparationWater)tag.putBoolean("preparation_water",true);}
     }
 
     @Override
     public void postProcess(WorldGenLevel level, StructureManager structures, ChunkGenerator generator, RandomSource random,
             BoundingBox chunkBounds, ChunkPos chunk, BlockPos reference) {
         BlockPos origin = origin();
+        // Later features may differ from base-terrain planning. Preserve protected live blocks rather than overwriting them.
+        if(!operation.isEmpty())for(var cell:entry.template().blocks()){
+            BlockPos pos=origin.offset(cell.pos());if(!chunkBounds.isInside(pos))continue;var existing=level.getBlockState(pos);
+            if(existing.hasBlockEntity()||TemplateMetadata.restricted(existing)||existing.is(net.minecraft.world.level.block.Blocks.LAVA)||!existing.getFluidState().isEmpty()&&!existing.is(net.minecraft.world.level.block.Blocks.WATER))return;
+            if(operation.equals("support")&&!StructureFoundation.replaceable(existing,preparationWater)||operation.equals("clear")&&!StructureFoundation.clearable(existing,preparationWater)||operation.equals("prepared")&&!entry.rules().collision().allows(existing,cell.state()))return;
+        }
         for (var cell : entry.template().blocks()) {
             BlockPos pos = origin.offset(cell.pos());
             if (!chunkBounds.isInside(pos)) {

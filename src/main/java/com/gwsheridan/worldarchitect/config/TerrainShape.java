@@ -14,7 +14,7 @@ public record TerrainShape(int elevation, int relief, Optional<AdvancedTerrain> 
     public static final TerrainShape HILLS = new TerrainShape(68, 44);
     public static final TerrainShape HIGHLANDS = new TerrainShape(108, 72);
     public static final MapCodec<TerrainShape> CODEC = RecordCodecBuilder.<EncodedShape>mapCodec(builder -> builder.group(
-            Codec.intRange(SingleBlockProfile.VERSION, RegionalTerrain.POLYGON_VERSION).fieldOf("generator_version").forGetter(EncodedShape::version),
+            Codec.intRange(SingleBlockProfile.VERSION, RegionalTerrain.COMPOSITE_VERSION).fieldOf("generator_version").forGetter(EncodedShape::version),
             Codec.intRange(MIN_ELEVATION, MAX_ELEVATION).fieldOf("elevation").forGetter(encoded -> encoded.shape().elevation()),
             Codec.intRange(0, MAX_RELIEF).fieldOf("relief").forGetter(encoded -> encoded.shape().relief()),
             AdvancedTerrain.CODEC.optionalFieldOf("terrain").forGetter(encoded -> encoded.shape().advanced()),
@@ -22,7 +22,7 @@ public record TerrainShape(int elevation, int relief, Optional<AdvancedTerrain> 
     ).apply(builder, (version, elevation, relief, advanced, regions) -> new EncodedShape(version, new TerrainShape(elevation, relief, advanced, regions))))
             .flatXmap(encoded -> encoded.version() == encoded.shape().version()
                     ? encoded.shape().validate()
-                    : DataResult.error(() -> "Versions 1/2 retain legacy terrain; version 3 requires regions and version 4 requires a polygon."),
+                    : DataResult.error(() -> "Versions 1/2 retain legacy terrain; version 3 requires regions, version 4 a polygon and version 5 a composite."),
                     shape -> shape.validate().map(checked -> new EncodedShape(checked.version(), checked)));
     public TerrainShape(int elevation, int relief) { this(elevation, relief, Optional.empty(), Optional.empty()); }
     /** Retained API 1 constructor. */

@@ -18,6 +18,9 @@ final class LegacyPoolComparison {
     static void check14(MinecraftServer server,Object current,JsonElement definition)throws Exception{
         compare(server,current,definition,"1.4.0","3684963461df2331c7f0fa4968d12b972fceff6c73c3568c77a19dcc66474fe4");
     }
+    static void check15(MinecraftServer server,Object current,JsonElement definition)throws Exception{
+        compare(server,current,definition,"1.5.0","27a6a5e55567e04db4c93818daa2a866bd9bc0d0313780b08f17dcba1e20be42");
+    }
     private static void compare(MinecraftServer server,Object current,JsonElement definition,String version,String expected)throws Exception{
         var file=ModpackRuntime.directory().resolve("validation-baseline-"+version+".jar");byte[] bytes=Files.readAllBytes(file);
         String hash=HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes));

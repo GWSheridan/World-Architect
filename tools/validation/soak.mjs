@@ -5,10 +5,11 @@ import {createHash} from 'node:crypto';
 import {gradle} from './process.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const args=Object.fromEntries(Array.from({length:(process.argv.length-2)/2},(_,i)=>process.argv.slice(2+i*2,4+i*2)));
-for(const key of Object.keys(args))if(!['--jar','--fixture','--bundle','--output','--options','--port','--rounds','--round-seconds','--explore-dimension','--site-structure'].includes(key))throw Error('Unknown option '+key);
+for(const key of Object.keys(args))if(!['--jar','--fixture','--bundle','--output','--options','--port','--rounds','--round-seconds','--explore-dimension','--site-structure','--site-kind'].includes(key))throw Error('Unknown option '+key);
 for(const key of ['--jar','--fixture','--bundle','--output','--options'])if(!args[key])throw Error('Missing '+key);
 const output=resolve(root,args['--output']),port=Number(args['--port']||25960),rounds=Number(args['--rounds']||20),seconds=Number(args['--round-seconds']||180);
 const exploreDimension=args['--explore-dimension']||'minecraft:overworld';
+const siteKind=args['--site-kind']||'vertical';if(!['vertical','prepared','themed'].includes(siteKind))throw Error('Invalid site fixture kind');
 for(const id of [exploreDimension,args['--site-structure']].filter(Boolean))if(!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(id))throw Error('Invalid fixture resource ID');
 if(!relative(root,output).startsWith('build'+(process.platform==='win32'?'\\':'/')))throw Error('Use a new build/ directory');
 if(!Number.isInteger(port)||port<1024||port>65535||!Number.isInteger(rounds)||rounds<1||rounds>40||!Number.isInteger(seconds)||seconds<1||seconds>180)throw Error('Invalid workload bounds');
@@ -68,6 +69,10 @@ try{
  await act('Alice',['PRESS History / organize']);await act('Alice',['BOUNDS','PRESS Duplicate selected module']);await act('Alice',['PRESS History / organize']);await act('Alice',['PRESS Undo']);
  await act('Alice',['PRESS History / organize']);await act('Alice',['PRESS Redo']);await act('Alice',['PRESS History / organize']);await act('Alice',['PRESS Undo']);
  await act('Alice',['PRESS Add module']);await act('Alice',['ROW 0','PRESS Select']);await act('Alice',['PRESS Apply']);
+ await act('Alice',['PRESS Settings']);await act('Alice',['ROW 3','PRESS Select']);await act('Alice',['EDIT 0 posts','EDIT 1 minecraft:stone_bricks','EDIT 2 8','EDIT 3 2','EDIT 4 false','BOUNDS','PRESS Apply']);
+ await act('Alice',['PRESS Settings']);await act('Alice',['ROW 4','PRESS Select']);await act('Alice',['PRESS Add/edit palette mapping']);await act('Alice',['EDIT 0 masonry','EDIT 2 minecraft:stone','EDIT 3 minecraft:stone_bricks','BOUNDS','PRESS Apply']);
+ await act('Alice',['PRESS Add/edit template variant']);await act('Alice',['EDIT 0 captured','EDIT 1 module_1','EDIT 3 validation:soak','BOUNDS','PRESS Apply']);await act('Alice',['SCALE 2','BOUNDS','SHOT']);await act('Alice',['PRESS Review themes']);await act('Alice',['BOUNDS','SHOT','PRESS Back']);await act('Alice',['PRESS Back to assembly']);
+ await act('Alice',['PRESS History / organize']);await act('Alice',['PRESS Undo']);await act('Alice',['PRESS History / organize']);await act('Alice',['PRESS Redo']);
  await act('Alice',['PRESS Pools']);await act('Alice',['PRESS Enable pool']);await act('Alice',['PRESS Apply']);
  await act('Alice',['PRESS Add connection']);await act('Alice',['EDIT 4 0','PRESS Apply']);
  await act('Alice',['PRESS Add connection']);await act('Alice',['EDIT 0 module_2','EDIT 4 0','PRESS Apply']);
@@ -88,11 +93,15 @@ try{
   await command('op WA12Alice');await act('Alice',['COMMAND wa_site studio multiplayer_fixture one']);await wait(observed('Alice'),'SCREEN Structure site inspector');
   await act('Alice',['PRESS Coordinates']);await act('Alice',[`EDIT 0 ${exploreDimension}`,`EDIT 1 ${args['--site-structure']}`,'EDIT 2 18','EDIT 3 0','EDIT 4 0','BOUNDS','PRESS Apply']);
   await pause(1000);await act('Alice',['VIEW','BOUNDS','SHOT']);await wait(observed('Alice'),'status:"eligible"');
+  await act('Alice',['PRESS Tools']);await act('Alice',['ROW 1','PRESS Select']);await act('Alice',['EDIT 0 0','EDIT 1 0','EDIT 2 64','EDIT 3 32','BOUNDS','PRESS Apply']);await pause(2000);await act('Alice',['VIEW','BOUNDS']);await wait(observed('Alice'),'visited_regions:');
+  await act('Alice',['PRESS Tools']);await act('Alice',['ROW 2','PRESS Select']);await act('Alice',['ROW 0','PRESS Select']);await pause(1000);await act('Alice',['VIEW','BOUNDS','SHOT']);
+  await act('Alice',['PRESS Tools']);await act('Alice',['ROW 3','PRESS Select']);await act('Alice',['EDIT 0 connected-sites','BOUNDS','PRESS Apply']);await wait(observed('Alice'),'Exported search report');const searchReport=JSON.parse(await fs.readFile(join(config,'site-reports/connected-sites.json'),'utf8'));if(!searchReport.source_sha256?.match(/^[a-f0-9]{64}$/)||!searchReport.results.length||searchReport.token)throw Error('Connected site export lost its source or results');
+  await act('Alice',['PRESS Tools']);await act('Alice',['ROW 1','PRESS Select']);await act('Alice',['PRESS Apply']);await act('Alice',['PRESS Tools']);await act('Alice',['ROW 4','PRESS Select']);await pause(1000);await act('Alice',['VIEW']);await wait(observed('Alice'),'status:"cancelled"');
   await act('Alice',['SCALE 2','BOUNDS','SHOT']);await act('Alice',['PRESS Coordinates']);await act('Alice',['EDIT 3 1','PRESS Apply']);await act('Alice',['PRESS Close']);await pause(1000);await act('Alice',['SCREEN_CLOSED']);
   await act('Alice',['COMMAND wa_site studio multiplayer_fixture one']);await wait(observed('Alice'),'SCREEN Structure site inspector');await command('deop WA12Alice');
   const deniedAt=(await read(observed('Alice'))).length;await act('Alice',['PRESS Coordinates']);await act('Alice',[`EDIT 0 ${exploreDimension}`,`EDIT 1 ${args['--site-structure']}`,'EDIT 2 18','EDIT 3 0','EDIT 4 0','PRESS Apply']);
   const denialDeadline=Date.now()+10000;while(!(await read(observed('Alice'))).slice(deniedAt).includes('Unknown or incomplete command')){if(Date.now()>denialDeadline)throw Error('Revoked site permission did not produce a fresh denial');await pause(200);}await act('Alice',['CLOSE']);
-  await command(`wa_validate site_generation vertical ${args['--site-structure']} ${exploreDimension} 1`);await server.wait('WA15_GENERATION_PASS',180,['WA_SITE_GENERATION_FAILED']);
+  await command(`wa_validate site_generation ${siteKind} ${args['--site-structure']} ${exploreDimension} 1`);await server.wait(siteKind==='vertical'?'WA15_GENERATION_PASS':'WA16_GENERATION_PASS',180,['WA_SITE_GENERATION_FAILED']);
   results.tests.push({case:'connected-site-preview-scales-cancel-late-result-and-revoked-permission',status:'passed'});
  }
  await command('deop WA12Alice');await command('gamemode creative @a');await command('dragon_test entry');
@@ -118,7 +127,7 @@ try{
  }
  results.connected_seconds=(Date.now()-started)/1000;results.requested_chunks=rounds*64;results.homes=homes;results.final_positions=Object.fromEntries(await Promise.all(players.map(async p=>[p,location(await read(observed(p)))])));results.tests.push({case:'native-ritual-restart-second-kill-four-player-soak',status:'passed'});await close(clients);
  clients=await open('restart');for(const p of players){const saved=results.final_positions[p];await at(p,saved[0],Number(saved[1]),Number(saved[2]),Number(saved[3]));await act(p,['COMMAND wa_island home']);const h=homes[p];await at(p,h[0],Number(h[1]),Number(h[2]),Number(h[3]));}
- if(args['--site-structure']){await command(`wa_validate site_generation vertical ${args['--site-structure']} ${exploreDimension} 2`);await server.wait('WA15_GENERATION_PASS',180,['WA_SITE_GENERATION_FAILED']);}
+ if(args['--site-structure']){await command(`wa_validate site_generation ${siteKind} ${args['--site-structure']} ${exploreDimension} 2`);await server.wait(siteKind==='vertical'?'WA15_GENERATION_PASS':'WA16_GENERATION_PASS',180,['WA_SITE_GENERATION_FAILED']);}
  results.tests.push({case:'after-soak-positions-ledger-safe-home-and-generation-persistence',status:'passed'});await close(clients);results.status='passed';
 }catch(error){results.status='failed';results.error=error.stack;process.exitCode=1;}
 finally{

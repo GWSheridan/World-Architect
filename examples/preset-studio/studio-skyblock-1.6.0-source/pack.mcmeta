@@ -1,0 +1,13 @@
+{
+  "pack": {
+    "description": "Studio Skyblock for World Architect 1.6.0",
+    "min_format": [
+      121,
+      0
+    ],
+    "max_format": [
+      121,
+      0
+    ]
+  }
+}
