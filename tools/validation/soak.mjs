@@ -23,7 +23,7 @@ for(const name of ['server',...players.map(p=>'client-'+p.toLowerCase())]){
  }
 }
 const config=join(output,'server/config/worldarchitect');await fs.mkdir(join(config,'bundles'),{recursive:true});
-const bundle=await fs.readFile(resolve(root,args['--bundle']));await fs.writeFile(join(config,'bundles/preset.zip'),bundle);await fs.writeFile(join(config,'developer.json'),JSON.stringify({format:1,bundle:'preset.zip'}));
+const bundle=await fs.readFile(resolve(root,args['--bundle']));await fs.writeFile(join(config,'bundles/preset.zip'),bundle);await fs.writeFile(join(config,'developer.json'),JSON.stringify({format:1,bundle:'preset.zip',developer_mode:true}));
 await fs.writeFile(join(output,'server/eula.txt'),'eula=true\n');
 await fs.writeFile(join(output,'server/server.properties'),`server-ip=127.0.0.1\nserver-port=${port}\nonline-mode=false\nwhite-list=true\nenforce-whitelist=true\nview-distance=2\nsimulation-distance=2\nmax-players=8\nallow-flight=true\nlog-ips=false\nmanagement-server-enabled=false\nenable-rcon=false\nmotd=World Architect four-player validation\n`);
 await fs.writeFile(join(output,'server/whitelist.json'),JSON.stringify(players.map(player=>{
@@ -59,6 +59,29 @@ try{
  for(const p of players){await act(p,['BLOCK 5120 200 5120']);await wait(observed(p),'BLOCK 5120, 200, 5120 minecraft:stone');}
  await act('Alice',['COMMAND wa_structure undo']);await wait(observed('Alice'),'Undid 3 blocks');
  for(const p of players){await act(p,['BLOCK 5120 200 5120']);await wait(observed(p),'BLOCK 5120, 200, 5120 minecraft:air');}
+ // Exercise server-owned authoring through the same screens and payloads used by players.
+ await act('Bob',['COMMAND wa_workbench studio cycle14_soak one']);await wait(observed('Bob'),'Unknown or incomplete command');
+ await act('Alice',['COMMAND wa_assembly new validation:connected minecraft:plains']);await wait(observed('Alice'),'SCREEN Assembly Studio');
+ await act('Alice',['PRESS Add module']);await act('Alice',['ROW 0','PRESS Select']);await act('Alice',['PRESS Apply']);
+ await act('Alice',['PRESS History / organize']);await act('Alice',['BOUNDS','PRESS Duplicate selected module']);await act('Alice',['PRESS History / organize']);await act('Alice',['PRESS Undo']);
+ await act('Alice',['PRESS History / organize']);await act('Alice',['PRESS Redo']);await act('Alice',['PRESS History / organize']);await act('Alice',['PRESS Undo']);
+ await act('Alice',['PRESS Add module']);await act('Alice',['ROW 0','PRESS Select']);await act('Alice',['PRESS Apply']);
+ await act('Alice',['PRESS Pools']);await act('Alice',['PRESS Enable pool']);await act('Alice',['PRESS Apply']);
+ await act('Alice',['PRESS Add connection']);await act('Alice',['EDIT 4 0','PRESS Apply']);
+ await act('Alice',['PRESS Add connection']);await act('Alice',['EDIT 0 module_2','EDIT 4 0','PRESS Apply']);
+ await act('Alice',['PRESS Add choice']);await act('Alice',['EDIT 1 module_2','EDIT 3 true','PRESS Apply']);
+ await act('Alice',['PRESS Room constraints']);await act('Alice',['ROW 0','PRESS Select']);await act('Alice',['EDIT 0 1','EDIT 1 1','EDIT 2 2','BOUNDS','PRESS Apply']);
+ await act('Alice',['BOUNDS','PRESS Preview report']);await act('Alice',['ROW 1','PRESS Select']);await pause(1000);await act('Alice',['VIEW','SHOT']);await wait(observed('Alice'),'Seed 15: 2 modules');
+ await act('Alice',['PRESS Back to assembly']);await act('Alice',['PRESS Save draft']);await act('Alice',['PRESS Close']);
+ await command('wa_preset capture cycle14_soak one');
+ await act('Alice',['COMMAND wa_workbench studio cycle14_soak one']);await wait(observed('Alice'),'SCREEN Test workbench');
+ await act('Alice',['PRESS Run settings']);await act('Alice',['EDIT 1 -9223372036854775808','BOUNDS','PRESS Apply']);
+ await act('Alice',['PRESS History / recovery']);await act('Alice',['PRESS Undo']);await act('Alice',['PRESS History / recovery']);await act('Alice',['PRESS Redo']);
+ await act('Alice',['FIELDS','BOUNDS','PRESS Export scenario']);await act('Alice',['EDIT 0 connected-author','PRESS Apply']);await pause(1000);await act('Alice',['FIELDS','SHOT']);await wait(observed('Alice'),'Exported connected-author.scenario.json');
+ const authored=JSON.parse(await fs.readFile(join(config,'exports/connected-author.scenario.json'),'utf8'));if(authored.runs[0].seed!=='-9223372036854775808')throw Error('Connected scenario seed/history changed');
+ await command('deop WA12Alice');await act('Alice',['PRESS Export scenario']);await act('Alice',['EDIT 0 refused-author','PRESS Apply']);await pause(1000);await act('Alice',['FIELDS']);await wait(observed('Alice'),'permission level 4');
+ try{await fs.stat(join(config,'exports/refused-author.scenario.json'));throw Error('Revoked author exported a scenario');}catch(e){if(e.code!=='ENOENT')throw e;}
+ await act('Alice',['PRESS Cancel']);results.tests.push({case:'connected-history-pool-constraints-preview-workbench-ack-revoked-permission',status:'passed'});
  await command('deop WA12Alice');await command('gamemode creative @a');await command('dragon_test entry');
  await untilFight(d=>d.entities===1&&!d.dragon_killed);await command('dragon_test kill');await untilFight(d=>d.entities===0&&d.dragon_killed);
  await command('dragon_test travel');await server.wait('DRAGON_GATEWAY_ROUNDTRIP_PASS');await command('dragon_test rewards');await server.wait('DRAGON_REWARDS_PASS');await command('dragon_test ritual');await untilFight(d=>d.respawn_stage&&d.respawn_time>0);

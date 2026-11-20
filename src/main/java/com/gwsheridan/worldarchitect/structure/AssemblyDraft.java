@@ -41,6 +41,7 @@ record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset,
     AssemblyDraft { parts = List.copyOf(parts); }
     AssemblyDraft(Identifier id,int revision,Identifier biome,int y,int slope,boolean random,List<Part> parts){this(id,revision,biome,y,slope,random,parts,Optional.empty());}
     AssemblyDraft withPool(Optional<ProceduralPool> next){return new AssemblyDraft(id,revision,biome,yOffset,maxSlope,randomRotation,parts,next);}
+    AssemblyDraft atRevision(int value){return new AssemblyDraft(id,value,biome,yOffset,maxSlope,randomRotation,parts,pool);}
     record Part(String name, Identifier source, BlockPos offset, Rotation rotation, Mirror mirror, LibraryEntry original) {
         static final Codec<Part> CODEC = RecordCodecBuilder.create(b -> b.group(
                 Codec.STRING.fieldOf("name").forGetter(Part::name), Identifier.CODEC.fieldOf("source").forGetter(Part::source),

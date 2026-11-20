@@ -51,6 +51,7 @@ public final class MultiplayerProbe {
             else if(line.equals("SHOT"))Screenshot.grab(mc,false);
             else if(line.equals("CLOSE"))mc.gui.setScreen(null);
             else if(line.startsWith("EDIT ")){String[] parts=line.split(" ",3);widgets(mc.gui.screen()).filter(EditBox.class::isInstance).map(EditBox.class::cast).toList().get(Integer.parseInt(parts[1])).setValue(parts[2]);}
+            else if(line.equals("FIELDS")){var screen=mc.gui.screen();record("FIELDS "+widgets(screen).filter(EditBox.class::isInstance).map(EditBox.class::cast).map(EditBox::getValue).toList());for(String key:java.util.List.of("status","document")){try{var field=screen.getClass().getDeclaredField(key);field.setAccessible(true);record("FIELD "+key+" "+field.get(screen));}catch(NoSuchFieldException ignored){}}}
             else if(line.startsWith("PRESS ")){var button=widgets(mc.gui.screen()).filter(AbstractButton.class::isInstance).map(AbstractButton.class::cast).filter(b->b.getMessage().getString().equals(line.substring(6))).findFirst().orElseThrow();if(!button.active)throw new AssertionError("Disabled "+line);button.onPress(ENTER);}
             else if(line.startsWith("ROW "))select(mc.gui.screen(),Integer.parseInt(line.substring(4)));
             else if(line.startsWith("SCALE ")){mc.options.guiScale().set(Integer.parseInt(line.substring(6)));mc.resizeGui();}

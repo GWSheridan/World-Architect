@@ -29,7 +29,7 @@ public final class RuleSpawns {
             var source = target.getChunkSource();
             var biome = target.uncachedBiomeResolver().getNoiseBiome(QuartPos.fromBlock(pos.getX()), QuartPos.fromBlock(pos.getY()), QuartPos.fromBlock(pos.getZ()));
             var context = new RuleSet.Context(policy.dimension(), biome.unwrapKey().orElseThrow().identifier(), pos.getX(), pos.getY(), pos.getZ(),
-                    source.randomState().seed(), RuleDependencies.loaded());
+                    source.randomState().seed(), RuleDependencies.loaded(),generator instanceof SolidColumnGenerator solid?solid.terrainRegions():Optional.empty());
             if (rules.matches(rule, context)) return Optional.of(policy);
         }
         return Optional.empty();

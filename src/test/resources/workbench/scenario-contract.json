@@ -1,0 +1,29 @@
+{
+  "base": {"format":1,"bundle":{"file":"demo.zip","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"budgets":{"timeout_seconds":300,"heap_mib":1400},"runs":[{"name":"clean","seed":"9223372036854775807","expect_startup":"accept","safe_spawn":true,"restart":true,"dimensions":["minecraft:overworld"],"regions":[{"dimension":"minecraft:overworld","chunk_x":-32,"chunk_z":32,"width":2,"depth":2}],"probes":[{"dimension":"minecraft:overworld","x":-512,"y":64,"z":512,"block":"minecraft:stone","biome":"minecraft:plains"}]}]},
+  "cases": [
+    {"name":"base","valid":true},
+    {"name":"minimum seed","path":["runs",0,"seed"],"value":"-9223372036854775808","valid":true},
+    {"name":"overflow seed","path":["runs",0,"seed"],"value":"9223372036854775808","valid":false},
+    {"name":"numeric seed","path":["runs",0,"seed"],"value":18,"valid":false},
+    {"name":"fractional chunk","path":["runs",0,"regions",0,"chunk_x"],"value":0.5,"valid":false},
+    {"name":"integer decimal","path":["budgets","heap_mib"],"value":1400.0,"valid":true},
+    {"name":"string budget","path":["budgets","heap_mib"],"value":"1400","valid":false},
+    {"name":"excessive deadline","path":["budgets","timeout_seconds"],"value":901,"valid":false},
+    {"name":"string boolean","path":["runs",0,"safe_spawn"],"value":"true","valid":false},
+    {"name":"unknown field","path":["world"],"value":"production","valid":false},
+    {"name":"wrong version","path":["format"],"value":2,"valid":false},
+    {"name":"bundle traversal","path":["bundle","file"],"value":"../demo.zip","valid":false},
+    {"name":"bad fingerprint","path":["bundle","sha256"],"value":"abcd","valid":false},
+    {"name":"duplicate dimension","path":["runs",0,"dimensions"],"value":["minecraft:overworld","minecraft:overworld"],"valid":false},
+    {"name":"unselected probe dimension","path":["runs",0,"probes",0,"dimension"],"value":"minecraft:the_end","valid":false},
+    {"name":"malformed block state","path":["runs",0,"probes",0,"block"],"value":"stone; stop","valid":false},
+    {"name":"valid state","path":["runs",0,"probes",0,"block"],"value":"minecraft:oak_stairs[facing=west,half=top]","valid":true},
+    {"name":"missing rejection detail","path":["runs",0,"expect_startup"],"value":"reject","valid":false},
+    {"name":"typed rejection detail","path":["runs",0,"expected_error"],"value":18,"valid":false},
+    {"name":"specific rejection detail","path":["runs",0,"expected_error"],"value":"Locked preset seed differs","valid":true},
+    {"name":"multiline detail","path":["runs",0,"expected_error"],"value":"first error\nsecond error","valid":false},
+    {"name":"missing probes","path":["runs",0,"probes"],"remove":true,"valid":false},
+    {"name":"empty probes","path":["runs",0,"probes"],"value":[],"valid":true},
+    {"name":"probe without expectations","path":["runs",0,"probes"],"value":[{"dimension":"minecraft:overworld","x":0,"y":64,"z":0}],"valid":false}
+  ]
+}

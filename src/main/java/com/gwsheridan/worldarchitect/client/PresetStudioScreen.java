@@ -19,12 +19,16 @@ import net.minecraft.world.level.levelgen.WorldOptions;
 final class PresetStudioScreen extends Screen {
     private final Screen parent;private final HolderLookup.Provider registries;private final Consumer<PresetStudio.Draft> apply;
     private PresetStudio.Draft draft;private PresetStudio.Draft initial;private boolean applied;private String name="my-preset",status="";private List<PresetStudio.Revision> revisions=List.of();private int selected,left,span;
+    private final ClientDraftJournal journal;
     PresetStudioScreen(Screen parent,HolderLookup.Provider registries,WorldDimensions dimensions,WorldOptions options,Consumer<PresetStudio.Draft> apply)throws IOException{
-        super(Component.literal("Preset Studio"));this.parent=parent;this.registries=registries;this.apply=apply;draft=PresetStudio.capture(PresetStudio.defaults(name,"1.0.0",options),dimensions,registries);initial=draft;refreshLibrary();
+        super(Component.literal("Preset Studio"));this.parent=parent;this.registries=registries;this.apply=apply;draft=PresetStudio.capture(PresetStudio.defaults(name,"1.0.0",options),dimensions,registries);initial=draft;journal=new ClientDraftJournal("preset-studio",snapshot());refreshLibrary();
     }
     private void refreshLibrary(){try{revisions=PresetStudio.list(ModpackRuntime.directory());selected=Math.min(selected,Math.max(0,revisions.size()-1));}catch(IOException|RuntimeException e){status=e.getMessage();}}
     @Override protected void init(){span=Math.min(420,width-24);left=(width-span)/2;int half=(span-8)/2;int top=height<300?94:108,row=height<300?21:24;
-        button("Browse saved presets",left,38,span,()->minecraft.gui.setScreen(new PresetLibraryScreen(this,revisions,revision->confirmReplace(()->act(()->{
+        journal.observe(snapshot());
+        button("History",left+span-88,38,88,this::history);
+        button("Workbench",left+span-184,38,88,this::workbench).active=ModpackRuntime.developerMode();
+        button("Browse saved presets",left,38,span-192,()->minecraft.gui.setScreen(new PresetLibraryScreen(this,revisions,revision->confirmReplace(()->act(()->{
             draft=PresetStudio.load(ModpackRuntime.directory(),revision.name(),revision.release());name=revision.name();initial=draft;status="Loaded "+revision.label();minecraft.gui.setScreen(this);
         })))));
         button("Metadata",left,top,half,this::metadata);button("Locks",left+half+8,top,half,()->minecraft.gui.setScreen(new StudioLockScreen(this,draft.manifest(),draft.preset(),manifest->{draft=draft.withManifest(manifest);status="Lock policy updated in the Studio draft.";rebuildWidgets();})));
@@ -36,11 +40,20 @@ final class PresetStudioScreen extends Screen {
         button("Duplicate",left+half+8,top+3*row,half,()->{name=(name.length()>57?name.substring(0,57):name)+"-copy";draft=PresetStudio.duplicate(draft,name,"1.0.0");status="Copy is a draft. Set metadata and Save version.";rebuildWidgets();});
         button("Import ZIP",left,top+4*row,half,()->confirmReplace(this::importZip)).active=developer;button("Help",left+half+8,top+4*row,half,()->minecraft.gui.setScreen(new StudioReportScreen(this,"Preset Studio help",StudioReportScreen.help())));
         var use=button("Apply to world",left,height-26,half,()->act(()->{PresetStudio.forApply(draft,registries);apply.accept(draft);applied=true;onClose();}));
-        use.active=ModpackRuntime.locked().isEmpty();
+        use.active=ModpackRuntime.locked().isEmpty()&&!journal.pending();
         try{use.active&=PresetStudio.validate(draft,registries).canApply();if(!use.active)use.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Install this export as a bundle and restart to load its registered templates. Active bundle locks also restrict applying other presets.")));}catch(IOException e){use.active=false;status=e.getMessage();}
         button("Cancel",left+half+8,height-26,half,this::onClose);
         if(!developer&&status.isEmpty())status="Enable developer_mode and restart to save, import or export. Help explains setup.";
+        if(journal.offer())history();
     }
+    private JsonElement snapshot(){return com.gwsheridan.worldarchitect.authoring.PresetDraftDocument.encode(name,draft);}
+    private void restore(JsonElement value){
+        if(ModpackRuntime.locked().isPresent())throw new IllegalArgumentException("The active bundle locks this editor.");
+        try{var restored=com.gwsheridan.worldarchitect.authoring.PresetDraftDocument.decode(value);var checked=PresetStudio.validate(restored,registries);name=com.gwsheridan.worldarchitect.authoring.PresetDraftDocument.name(value);draft=checked.draft();}
+        catch(IOException e){throw new IllegalArgumentException(e.getMessage(),e);}
+    }
+    private void history(){minecraft.gui.setScreen(new AuthoringHistoryScreen(this,journal,this::snapshot,this::restore,List.of()));}
+    private void workbench(){act(()->{var saved=PresetStudio.load(ModpackRuntime.directory(),name,draft.manifest().release());var first=com.gwsheridan.worldarchitect.authoring.PresetDraftDocument.encode(name,PresetStudio.validate(saved,registries).draft());var current=com.gwsheridan.worldarchitect.authoring.PresetDraftDocument.encode(name,PresetStudio.validate(draft,registries).draft());if(!first.equals(current))throw new IOException("Save changed settings under a new version before authoring its tests.");var source=com.gwsheridan.worldarchitect.workbench.WorkbenchAuthoring.source(name,draft.manifest().release(),registries);minecraft.gui.setScreen(new WorkbenchScenarioScreen(this,source,registries));});}
     private BundleManifest metadata(List<String> values){var m=draft.manifest();return new BundleManifest(Identifier.parse(values.get(1).strip()),values.get(2).strip(),values.get(5),values.get(3).strip(),values.get(4).strip(),m.lock(),m.options(),m.editableDimensions(),m.editableFeatures(),m.editableOptions(),csv(values.get(6)),m.allowStructureLibrary());}
     private void metadata(){var m=draft.manifest();var fields=List.of(new StudioFormScreen.Field("Library name",name),new StudioFormScreen.Field("Preset registry ID",m.preset().toString()),new StudioFormScreen.Field("Title",m.title()),new StudioFormScreen.Field("Author",m.author()),new StudioFormScreen.Field("Release / version",m.release()),new StudioFormScreen.Field("Description",m.description()),new StudioFormScreen.Field("Required mod IDs · comma separated",String.join(",",m.requiredMods())));
         minecraft.gui.setScreen(new StudioFormScreen(this,"Preset metadata","Saved releases cannot be overwritten. Set a new release before saving changed settings.",fields,values->{if(!values.getFirst().matches("[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}"))return "Use a simple library name without directories.";var parsed=metadata(values);return BundleManifest.CODEC.encodeStart(JsonOps.INSTANCE,parsed).flatMap(json->BundleManifest.CODEC.parse(JsonOps.INSTANCE,json)).error().map(error->error.message()).orElse("");},values->{name=values.getFirst();draft=draft.withManifest(metadata(values));status="Metadata updated in the Studio draft.";}));}
@@ -54,6 +67,6 @@ final class PresetStudioScreen extends Screen {
     private boolean dirty(){return !initial.manifest().equals(draft.manifest())||!initial.preset().equals(draft.preset())||!sameTemplates(initial,draft);}
     private static boolean sameTemplates(PresetStudio.Draft a,PresetStudio.Draft b){var first=a.templates();var second=b.templates();return first.keySet().equals(second.keySet())&&first.entrySet().stream().allMatch(e->java.util.Arrays.equals(e.getValue(),second.get(e.getKey())));}
     private void confirmReplace(Runnable next){if(!dirty()){next.run();return;}minecraft.gui.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen(discard->{if(discard)next.run();else minecraft.gui.setScreen(this);},Component.literal("Replace Studio draft?"),Component.literal("Unsaved draft changes will be discarded. Saved library versions remain available."),Component.literal("Continue"),Component.literal("Keep editing")));}
-    @Override public void onClose(){if(!applied&&dirty())confirmReplace(()->minecraft.gui.setScreen(parent));else minecraft.gui.setScreen(parent);}
+    @Override public void onClose(){if(!applied&&dirty())confirmReplace(()->journal.close(this,()->minecraft.gui.setScreen(parent)));else journal.close(this,()->minecraft.gui.setScreen(parent));}
     @Override public void extractRenderState(GuiGraphicsExtractor graphics,int x,int y,float tick){super.extractRenderState(graphics,x,y,tick);graphics.centeredText(font,title,width/2,8,0xFFF1E7CE);graphics.centeredText(font,Component.literal("Versioned presets · new worlds only"),width/2,22,0xFFCCCCCC);String selectedLabel=revisions.isEmpty()?"Local library is empty":(selected+1)+"/"+revisions.size()+" · "+revisions.get(selected).label();graphics.text(font,font.plainSubstrByWidth("Draft: "+name+" / "+draft.manifest().release(),span),left,height<300?64:72,0xFFEAEAEA);graphics.text(font,font.plainSubstrByWidth(draft.manifest().preset()+" · "+draft.manifest().lock().getSerializedName(),span),left,height<300?78:88,0xFFCCCCCC);var lines=font.split(Component.literal(status),span);int statusTop=Math.max(height<300?201:230,height-62);for(int i=0;i<Math.min((height-30-statusTop)/10,lines.size());i++)graphics.text(font,lines.get(i),left,statusTop+i*10,0xFFEAEAEA);}
 }

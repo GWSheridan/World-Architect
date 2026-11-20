@@ -47,6 +47,7 @@ final class RuleEngineScreen extends Screen {
     private int index, left, span, navigation, addY, summaryY, formY, buttonHeight;
     private Button done;
     private String status = "";
+    private final ClientDraftJournal journal;
 
     RuleEngineScreen(Screen parent, Identifier dimension, ChunkGenerator original, DimensionProfile profile, RegistryAccess registries,
             Map<ResourceKey<LevelStem>, LevelStem> dimensions, long seed, Consumer<DimensionProfile> save) {
@@ -55,9 +56,11 @@ final class RuleEngineScreen extends Screen {
         this.registries = registries; this.dimensions = Map.copyOf(dimensions); this.seed = seed; this.save = save;
         ops = RegistryOps.create(JsonOps.INSTANCE, registries);
         profile.rules().rules().forEach(rule -> drafts.add(RuleSet.Rule.CODEC.encodeStart(ops, rule).getOrThrow().getAsJsonObject()));
+        journal = new ClientDraftJournal("rules:"+dimension+":"+seed,snapshot());
     }
 
     @Override protected void init() {
+        journal.observe(snapshot());
         span = Math.min(400, width - 24); left = (width - span) / 2;
         boolean compact = height < 260;
         navigation = compact ? 22 : 38; addY = compact ? 40 : 62; summaryY = compact ? 60 : 90; formY = compact ? 74 : 110; buttonHeight = compact ? 16 : 20;
@@ -86,14 +89,24 @@ final class RuleEngineScreen extends Screen {
         done = addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> { var parsed = parse(); if (parsed != null) { save.accept(profile.withRules(parsed)); onClose(); } }).bounds(left, height - 24, half, 20).build());
         addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, b -> onClose()).bounds(left + half + 8, height - 24, half, 20).build());
         validate();
+        control("History / organize",left,formY+3*(buttonHeight+4),(span-8)/2,this::history);
+        control("Named terrain region",left+(span+8)/2,formY+3*(buttonHeight+4),(span-8)/2,this::namedRegion).active=!drafts.isEmpty()&&original instanceof SolidColumnGenerator;
+        if(journal.offer())history();
     }
+    private JsonElement snapshot(){var list=new JsonArray();drafts.forEach(value->list.add(value.deepCopy()));return list;}
+    private void restore(JsonElement value){var list=value.getAsJsonArray();if(list.size()>RuleSet.MAX_RULES)throw new IllegalArgumentException("Too many recovery rules.");var checked=new ArrayList<JsonObject>();for(var entry:list){RuleSet.Rule.CODEC.parse(ops,entry).getOrThrow();checked.add(entry.getAsJsonObject().deepCopy());}drafts.clear();drafts.addAll(checked);index=Math.clamp(index,0,Math.max(0,drafts.size()-1));}
+    private void history(){minecraft.gui.setScreen(new AuthoringHistoryScreen(this,journal,this::snapshot,this::restore,List.of(
+        new AuthoringHistoryScreen.Action("Duplicate selected rule",()->!drafts.isEmpty()&&drafts.size()<RuleSet.MAX_RULES,()->{var copy=drafts.get(index).deepCopy();int n=1;while(contains("rule_"+n))n++;copy.addProperty("id","rule_"+n);drafts.add(copy);index=drafts.size()-1;}),
+        new AuthoringHistoryScreen.Action("Move selected rule earlier",()->!drafts.isEmpty()&&index>0,()->{Collections.swap(drafts,index,index-1);index--;}),
+        new AuthoringHistoryScreen.Action("Move selected rule later",()->index+1<drafts.size(),()->{Collections.swap(drafts,index,index+1);index++;})
+    )));}
     private Button control(String label, int x, int y, int width, Runnable action) { return addRenderableWidget(Button.builder(Component.literal(label), b -> action.run()).bounds(x, y, width, buttonHeight).build()); }
     private void select(int next) { index = next; rebuildWidgets(); }
     private void move(int delta) { Collections.swap(drafts, index, index + delta); select(index + delta); }
 
     private RuleSet parse() {
         try {
-            var json = new JsonObject(); json.addProperty("version", 1); json.addProperty("dimension", dimension.toString());
+            var json = new JsonObject(); json.addProperty("version", drafts.stream().anyMatch(r->r.has("when")&&r.getAsJsonObject("when").has("named_region"))?2:profile.rules().version()); json.addProperty("dimension", dimension.toString());
             var list = new JsonArray(); drafts.forEach(list::add); json.add("rules", list);
             var decoded = RuleSet.CODEC.parse(ops, json).getOrThrow(IllegalArgumentException::new);
             var changed = copy(profile.withRules(decoded));
@@ -109,7 +122,7 @@ final class RuleEngineScreen extends Screen {
         return original instanceof SolidColumnGenerator solid ? solid.withDimensionProfile(next)
                 : new VoidGenerator(((VoidGenerator) original).biome(), next, ((VoidGenerator) original).island(), ((VoidGenerator) original).allowUnsafeSpawn());
     }
-    private void validate() { done.active = parse() != null; }
+    private void validate() { done.active = parse() != null && !journal.pending(); }
 
     private void add(RuleSet.Kind kind) {
         int number = 1; while (contains("rule_" + number)) number++;
@@ -158,6 +171,7 @@ final class RuleEngineScreen extends Screen {
             field("when.region.min_z", "Region minimum Z", INTEGER, true), field("when.region.max_z", "Region maximum Z", INTEGER, true),
             field("when.distance.center_x", "Distance centre X · default 0", INTEGER, true), field("when.distance.center_z", "Distance centre Z · default 0", INTEGER, true),
             field("when.distance.min", "Minimum distance · default 0", INTEGER, true), field("when.distance.max", "Maximum distance", INTEGER, true))); }
+    private void namedRegion(){String available=original instanceof SolidColumnGenerator solid?solid.terrainRegions().map(regions->String.join(", ",regions.zones().stream().map(z->z.name()).toList())).orElse("none"):"none";form("Named terrain region","Available: "+available+". Mask includes edges; winner uses priority and list order. Feathering does not shrink these masks. Leave all fields blank to remove.",List.of(field("when.named_region.name","Terrain region name · optional",TEXT,true),field("when.named_region.mode","Mode · mask / winner",TEXT,true),field("when.named_region.exclude","Exclude · true/false",BOOLEAN,true)));}
     private void dependencies() { form("Seed and dependency conditions", "The seeded coordinate hash must have the chosen remainder. Required mods and their versions are pinned.", List.of(
             field("when.seed_modulus", "Seed modulus · default 1", INTEGER, true), field("when.seed_remainder", "Seed remainder · default 0", INTEGER, true),
             field("when.seed_salt", "Seed salt · default 0", LONG, true), field("when.mods", "Required mod IDs · optional", LIST, true), field("requires", "Earlier rule IDs · optional", LIST, true))); }
@@ -173,7 +187,7 @@ final class RuleEngineScreen extends Screen {
         }
         form("Edit " + kind + " action", "Template rules use saved modular assemblies. Generated spawns need an enabled structure and a valid marker.", fields);
     }
-    @Override public void onClose() { minecraft.gui.setScreen(parent); }
+    @Override public void onClose() { journal.close(this,()->minecraft.gui.setScreen(parent)); }
     @Override public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float tick) {
         super.extractRenderState(graphics, mouseX, mouseY, tick);
         graphics.centeredText(font, title, width / 2, 6, 0xFFF1E7CE);

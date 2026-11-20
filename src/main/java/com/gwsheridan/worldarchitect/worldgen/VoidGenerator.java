@@ -94,6 +94,7 @@ public final class VoidGenerator extends ChunkGenerator implements ManagedGenera
 
     @Override
     public Optional<String> profileProblem() {
+        var regionProblem=dimension.rules().regionProblem(Optional.empty());if(regionProblem.isPresent())return regionProblem;
         if (dimension.rules().ordered().stream().anyMatch(rule -> rule.action().type() != com.gwsheridan.worldarchitect.rules.RuleSet.Kind.SPAWN)) {
             return Optional.of("Void dimensions support spawn rules; material, feature and template rules require managed solid terrain.");
         }

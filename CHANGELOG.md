@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.0
+
+- Added bounded draft history, duplication/reordering and explicit recovery for interrupted authoring sessions.
+- Added named terrain-region conditions shared by material, ore, decoration, template and spawn rules, with matching Inspector maps and explanations.
+- Added format-2 procedural pool requirements, module count and branch-depth limits, rejection diagnostics and bounded background seed samples.
+- Added an in-game workbench scenario editor bound to an immutable saved preset, with server-side permission and fingerprint checks.
+- Added sequential fingerprinted batch matrices across versions, providers and exact seeds, with total budgets, cancellation and local HTML/JSON reports.
+- Added shared-region and constrained-pool examples while retaining all older versioned bundles.
+- Retained API 1, legacy generation, format-1 pools, saved templates, island assignments and End policies. Authoring networking requires matching 1.4 clients and servers.
+
 ## 1.3.0
 
 - Added World Inspector for saved generation profiles, archived-resource checks and preset comparisons, with explicit local reports.

@@ -18,20 +18,34 @@ import net.minecraft.resources.*;
 final class TerrainRegionsScreen extends Screen {
     private final Screen parent; private final RegistryAccess registries; private final Consumer<Optional<RegionalTerrain>> save;
     private final TerrainShape base; private final List<Zone> zones; private int selected,centerX,centerZ,scale=4,mapX,mapY,mapSize; private String error="";
+    private final ClientDraftJournal journal;
     TerrainRegionsScreen(Screen parent,TerrainShape base,RegistryAccess registries,Consumer<Optional<RegionalTerrain>> save){
         super(Component.literal("Regional terrain · version 3"));this.parent=parent;this.base=base;this.registries=registries;this.save=save;
         zones=new ArrayList<>(base.regions().map(RegionalTerrain::zones).orElse(List.of()));if(!zones.isEmpty())focus(zones.getFirst());
+        journal=new ClientDraftJournal("regions:"+(parent instanceof AuthoringContext context?context.authoringKey():"terrain"),snapshot());
     }
     @Override protected void init(){
         int left=12,span=width-24,half=(span-12)/2,right=left+half+12;mapX=left;mapY=56;mapSize=Math.max(40,Math.min(half,height-116));
-        add("Select region",left,28,span,()->minecraft.gui.setScreen(new StudioChoiceScreen(this,"Regions · highest priority first",zones.stream().map(z->z.name()+" · priority "+z.priority()).toList(),value->{selected=index(value.split(" · ")[0]);focus(current());minecraft.gui.setScreen(this);}))).active=!zones.isEmpty();
+        journal.observe(snapshot());
+        add("History / organize",right,28,half,this::history);
+        add("Select region",left,28,half,()->minecraft.gui.setScreen(new StudioChoiceScreen(this,"Regions · highest priority first",zones.stream().map(z->z.name()+" · priority "+z.priority()).toList(),value->{selected=index(value.split(" · ")[0]);focus(current());minecraft.gui.setScreen(this);}))).active=!zones.isEmpty();
         add("Add rectangle",right,56,half,()->addRegion(Mask.RECTANGLE)).active=zones.size()<RegionalTerrain.MAX_REGIONS;
         add("Add circle",right,80,half,()->addRegion(Mask.CIRCLE)).active=zones.size()<RegionalTerrain.MAX_REGIONS;
         add("Bounds & priority",right,104,half,this::bounds).active=!zones.isEmpty();add("Terrain & biome",right,128,half,this::terrain).active=!zones.isEmpty();
         add("Remove region",right,152,half,()->{zones.remove(selected);selected=Math.max(0,selected-1);rebuildWidgets();}).active=!zones.isEmpty();
         add("Map view",right,176,half,this::view);
-        int footer=(span-8)/2;add("Done",left,height-26,footer,()->{save.accept(zones.isEmpty()?Optional.empty():Optional.of(new RegionalTerrain(zones)));onClose();});add("Cancel",left+footer+8,height-26,footer,this::onClose);
+        int footer=(span-8)/2;add("Done",left,height-26,footer,()->{save.accept(zones.isEmpty()?Optional.empty():Optional.of(new RegionalTerrain(zones)));onClose();}).active=!journal.pending();add("Cancel",left+footer+8,height-26,footer,this::onClose);
+        if(journal.offer())history();
     }
+    private com.google.gson.JsonElement snapshot(){return Zone.CODEC.listOf(0,32).encodeStart(net.minecraft.resources.RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE,registries),zones).getOrThrow();}
+    private void restore(com.google.gson.JsonElement value){var next=Zone.CODEC.listOf(0,32).parse(net.minecraft.resources.RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE,registries),value).getOrThrow();if(!next.isEmpty())new RegionalTerrain(next).validate().getOrThrow();zones.clear();zones.addAll(next);selected=Math.clamp(selected,0,Math.max(0,zones.size()-1));}
+    private void history(){minecraft.gui.setScreen(new AuthoringHistoryScreen(this,journal,this::snapshot,this::restore,List.of(
+        new AuthoringHistoryScreen.Action("Duplicate selected region",()->!zones.isEmpty()&&zones.size()<32,this::duplicate),
+        new AuthoringHistoryScreen.Action("Move selected region earlier",()->!zones.isEmpty()&&selected>0,()->{Collections.swap(zones,selected,selected-1);selected--;}),
+        new AuthoringHistoryScreen.Action("Move selected region later",()->selected+1<zones.size(),()->{Collections.swap(zones,selected,selected+1);selected++;})
+    )));}
+    private void duplicate(){var z=current();int n=1;String prefix=z.name().substring(0,Math.min(24,z.name().length()))+"_copy";while(indexOfName(prefix+n))n++;zones.add(new Zone(prefix+n,z.mask(),z.minX(),z.minZ(),z.maxX(),z.maxZ(),z.priority(),z.transition(),z.elevation(),z.relief(),z.terrain(),z.biome()));selected=zones.size()-1;}
+    private boolean indexOfName(String name){return zones.stream().anyMatch(z->z.name().equals(name));}
     private int index(String name){for(int i=0;i<zones.size();i++)if(zones.get(i).name().equals(name))return i;return 0;}
     private Zone current(){return zones.get(Math.clamp(selected,0,zones.size()-1));}
     private void focus(Zone z){centerX=(int)(((long)z.minX()+z.maxX())/2);centerZ=(int)(((long)z.minZ()+z.maxZ())/2);}
@@ -56,7 +70,7 @@ final class TerrainRegionsScreen extends Screen {
             if(event.button()==InputConstants.MOUSE_BUTTON_RIGHT&&!zones.isEmpty()){
                 var a=current();int dx=x-(int)(((long)a.minX()+a.maxX())/2),dz=z-(int)(((long)a.minZ()+a.maxZ())/2);
                 var moved=new Zone(a.name(),a.mask(),a.minX()+dx,a.minZ()+dz,a.maxX()+dx,a.maxZ()+dz,a.priority(),a.transition(),a.elevation(),a.relief(),a.terrain(),a.biome());
-                if(moved.validate().isSuccess()){zones.set(selected,moved);error="";}else error="Move refused: outside world bounds.";
+                if(moved.validate().isSuccess()){zones.set(selected,moved);journal.observe(snapshot());error="";}else error="Move refused: outside world bounds.";
             }else if(event.button()==InputConstants.MOUSE_BUTTON_LEFT){for(var a:new RegionalTerrain(zones).ordered())if(a.edgeDistance(x,z)>=0){selected=index(a.name());break;}}
             return true;
         }return super.mouseClicked(event,twice);
@@ -70,5 +84,5 @@ final class TerrainRegionsScreen extends Screen {
         String label=zones.isEmpty()?"No regions":current().name();g.text(font,font.plainSubstrByWidth(label,mapSize),mapX,mapY+mapSize+4,0xFFFFFFFF);
         g.text(font,font.plainSubstrByWidth(error.isEmpty()?"Coordinate masks · "+scale+" blocks/cell":error,mapSize),mapX,mapY+mapSize+15,0xFFCCCCCC);
     }
-    @Override public void onClose(){minecraft.gui.setScreen(parent);}
+    @Override public void onClose(){journal.close(this,()->minecraft.gui.setScreen(parent));}
 }

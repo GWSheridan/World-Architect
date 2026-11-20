@@ -218,7 +218,8 @@ tasks.register('releaseChecksums', JavaExec) {
         tasks.named('packageRelease').get().archiveFile.get().asFile.absolutePath,
         file('examples/preset-studio/bundles').absolutePath, project.version.toString(),
         file('examples/creator-starters/bundles').absolutePath, file('examples/assembly-studio/bundles').absolutePath,
-        file('examples/regional-terrain/bundles').absolutePath, file('examples/procedural-pools/bundles').absolutePath] } as CommandLineArgumentProvider)
+        file('examples/regional-terrain/bundles').absolutePath, file('examples/procedural-pools/bundles').absolutePath,
+        file('examples/shared-regions/bundles').absolutePath, file('examples/constrained-pools/bundles').absolutePath] } as CommandLineArgumentProvider)
 }
 
 tasks.register('assembleRelease') {
@@ -246,6 +247,18 @@ tasks.register('prepareCycle13Examples', JavaExec) {
     argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
         file(providers.gradleProperty('regionalExport').get()).absolutePath,
         file(providers.gradleProperty('poolExport').get()).absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
+}
+
+tasks.register('prepareCycle14Examples', JavaExec) {
+    group = 'distribution'
+    description = 'Prepare new 1.4 examples from validated shared-region and constrained-pool exports.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseCycle14Examples'
+    argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
+        file(providers.gradleProperty('sharedRegionsExport').get()).absolutePath,
+        file(providers.gradleProperty('constrainedPoolExport').get()).absolutePath,
+        providers.gradleProperty('previousExampleVersion').orElse('1.3.0').get(), project.version.toString()] } as CommandLineArgumentProvider)
 }
 
 tasks.register('prepareWorkbenchInputs', JavaExec) {

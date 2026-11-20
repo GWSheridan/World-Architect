@@ -41,7 +41,8 @@ import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import org.jspecify.annotations.Nullable;
 
-final class DimensionManagerScreen extends Screen {
+final class DimensionManagerScreen extends Screen implements AuthoringContext {
+    @Override public String authoringKey() { return "dimension:" + selected + ":" + draftOptions.seed(); }
     private final CreateWorldScreen parent;
     private final WorldCreationContext context;
     private final Map<ResourceKey<LevelStem>, LevelStem> draft;

@@ -26,7 +26,7 @@ public final class WorkbenchCommands {
                 var path=bundle.resolveSibling(name+"-"+release+".scenario.json");Files.writeString(path,new GsonBuilder().setPrettyPrinting().create().toJson(json)+"\n",StandardOpenOption.CREATE_NEW);
                 c.getSource().sendSuccess(()->Component.literal("Exported test bundle and "+path.getFileName()+" to config/worldarchitect/exports. Review the scenario before running it."),false);return 1;
             } catch(Exception e){c.getSource().sendFailure(Component.literal("Workbench export failed: "+e.getMessage()));return 0;}
-        }))));event.getDispatcher().register(root);
+        }))));WorkbenchStudio.commands(root);event.getDispatcher().register(root);
     }
     public static JsonObject scenario(String file,String sha,long seed,List<String> dimensions) {
         var json=new JsonObject();json.addProperty("format",1);var bundle=new JsonObject();bundle.addProperty("file",file);bundle.addProperty("sha256",sha);json.add("bundle",bundle);

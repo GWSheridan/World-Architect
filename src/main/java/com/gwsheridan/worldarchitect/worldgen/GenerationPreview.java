@@ -19,8 +19,9 @@ public final class GenerationPreview {
     private final Optional<IslandProfile> islands;
     private final Columns columns;
     private final boolean endArena;
+    private final Optional<com.gwsheridan.worldarchitect.config.RegionalTerrain> regions;
 
-    private GenerationPreview(LevelHeightAccessor height, Surface surface, BiomeResolver biomes, Optional<IslandProfile> islands, Columns columns, boolean endArena) {
+    private GenerationPreview(LevelHeightAccessor height, Surface surface, BiomeResolver biomes, Optional<IslandProfile> islands, Columns columns, boolean endArena,Optional<com.gwsheridan.worldarchitect.config.RegionalTerrain> regions) {
         this.minY = height.getMinY();
         this.maxY = height.getMaxY();
         this.surface = surface;
@@ -28,6 +29,7 @@ public final class GenerationPreview {
         this.islands = islands;
         this.columns = columns;
         this.endArena = endArena;
+        this.regions=regions;
     }
 
     public static Optional<GenerationPreview> forStem(LevelStem stem, long seed) {
@@ -44,7 +46,7 @@ public final class GenerationPreview {
             };
             return Optional.of(new GenerationPreview(height,
                     (x, z) -> solid.baseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height, seed), biomes, Optional.empty(),
-                    (x, z) -> solid.baseColumn(x, z, height, seed), solid.endProgression().isPresent()));
+                    (x, z) -> solid.baseColumn(x, z, height, seed), solid.endProgression().isPresent(),solid.terrainRegions()));
         }
         if (generator instanceof VoidGenerator sky) {
             return Optional.of(new GenerationPreview(height,
@@ -52,7 +54,7 @@ public final class GenerationPreview {
                             .map(arena -> arena.generator().getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height, arena.state(seed)))
                             .orElseGet(() -> sky.baseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height)),
                     (x, y, z) -> sky.getBiomeSource() instanceof EndArenaBiomeSource arena ? arena.sample(x, y, z) : sky.biome(), sky.island(),
-                    (x, z) -> sky.baseColumn(x, z, height, seed), sky.endProgression().isPresent()));
+                    (x, z) -> sky.baseColumn(x, z, height, seed), sky.endProgression().isPresent(),Optional.empty()));
         }
         return Optional.empty();
     }
@@ -70,6 +72,7 @@ public final class GenerationPreview {
     }
 
     public boolean endArena() { return endArena; }
+    public Optional<com.gwsheridan.worldarchitect.config.RegionalTerrain> regions(){return regions;}
 
     /** Registered biome at the requested height, without loading a chunk. */
     public Optional<Identifier> biomeAt(int x, int y, int z) {

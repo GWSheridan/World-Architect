@@ -134,6 +134,7 @@ public final class ModularStructure extends Structure {
         return module.matches("module_([1-9]|1[0-5])") && Integer.parseInt(module.substring(7)) < pool.orElseThrow().maxModules() && modules.stream().anyMatch(part -> part.entry().markers().containsKey(marker));
     }
     Optional<List<Module>> previewLayout(long seed) throws IOException { return pool.isPresent() ? pool.orElseThrow().layout(modules, seed) : Optional.of(modules); }
+    ProceduralPool.LayoutReport previewReport(long seed)throws IOException{return pool.isPresent()?pool.orElseThrow().plan(modules,seed):new ProceduralPool.LayoutReport(Optional.of(modules),0,0,Map.of(),List.of("Static assembly."));}
 
     @Override
     public StructureStart generate(Holder<Structure> selected, ResourceKey<Level> dimension, RegistryAccess registries,

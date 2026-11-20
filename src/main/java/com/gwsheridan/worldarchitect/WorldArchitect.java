@@ -63,6 +63,8 @@ public final class WorldArchitect {
         modBus.addListener(EnvironmentPayload::register);
         modBus.addListener(com.gwsheridan.worldarchitect.structure.PlacementPreviewPayload::register);
         modBus.addListener(com.gwsheridan.worldarchitect.studio.StudioViewPayload::register);
+        modBus.addListener(com.gwsheridan.worldarchitect.workbench.WorkbenchEditPayload::register);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.workbench.WorkbenchStudio::logout);
         DeferredRegister<MapCodec<? extends ChunkGenerator>> generators = DeferredRegister.create(Registries.CHUNK_GENERATOR, ID);
         generators.register(GENERATOR_ID.getPath(), () -> SingleBlockGenerator.CODEC);
         generators.register(LAYERED_PRESET.identifier().getPath(), () -> LayeredGenerator.CODEC);

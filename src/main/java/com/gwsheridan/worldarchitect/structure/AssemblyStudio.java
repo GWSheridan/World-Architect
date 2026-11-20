@@ -13,6 +13,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.gwsheridan.worldarchitect.modpack.ModpackRuntime;
 import com.gwsheridan.worldarchitect.studio.StudioViewPayload;
+import com.gwsheridan.worldarchitect.authoring.*;
+import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.resources.RegistryOps;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
@@ -32,9 +36,11 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class AssemblyStudio {
     private static final long SHARED_BUDGET = 64L * 1024 * 1024;
     private static final Map<MinecraftServer, Map<UUID, Session>> SESSIONS = new WeakHashMap<>();
+    private static final java.util.concurrent.ThreadPoolExecutor PREVIEWS=new java.util.concurrent.ThreadPoolExecutor(1,1,0,java.util.concurrent.TimeUnit.SECONDS,new java.util.concurrent.ArrayBlockingQueue<>(1),Thread.ofPlatform().daemon().name("worldarchitect-pool-preview").factory(),new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
     private static final class Session {
         final UUID token = UUID.randomUUID(); AssemblyDraft draft; int serial, savedSerial, selected; long bytes, expires, previewSeed; boolean poolEditor;
-        Session(AssemblyDraft draft) { this.draft = draft; }
+        DraftHistory<AssemblyDraft> history; String base; boolean recoveryPending,recoveryAvailable; String recoveryProblem="";List<String> previewReport=List.of();java.util.concurrent.Future<?> previewJob;UUID previewToken;
+        Session(AssemblyDraft draft) { this.draft = draft; history=new DraftHistory<>(draft.atRevision(0),v->v,AssemblyStudio::historyBytes,32,SHARED_BUDGET); }
     }
     private AssemblyStudio() {}
     public static void register(RegisterCommandsEvent event) {
@@ -47,10 +53,10 @@ public final class AssemblyStudio {
                 })))))
                 .then(literal("open").then(argument("assembly", id()).executes(run(c -> { var p=c.getSource().getPlayerOrException();open(p,AssemblyDraft.load(p.level().getServer(),getId(c,"assembly")));return 1; }))))
                 .then(command("save", serial -> serial.executes(run(c -> {
-                    var s=session(c);s.draft=AssemblyDraft.save(c.getSource().getServer(),s.draft,s.draft.revision());s.serial++;s.savedSerial=s.serial;show(c.getSource().getPlayerOrException(),"Draft saved.");return 1;
+                    var s=session(c);resolved(s);s.draft=AssemblyDraft.save(c.getSource().getServer(),s.draft,s.draft.revision());s.base=DraftRecovery.fingerprint(document(c.getSource().getServer(),s.draft));s.serial++;s.savedSerial=s.serial;String status="Draft saved.";try{discardRecovery(c.getSource().getPlayerOrException(),s);}catch(IOException e){status="Draft saved; recovery cleanup unavailable: "+e.getMessage();}show(c.getSource().getPlayerOrException(),status);return 1;
                 }))))
                 .then(command("refresh", serial -> serial.executes(run(c -> {session(c);show(c.getSource().getPlayerOrException(),null);return 1;}))))
-                .then(command("close", serial -> serial.executes(run(c -> {session(c);logout(c.getSource().getPlayerOrException());return 1;}))))
+                .then(command("close", serial -> serial.executes(run(c -> {var s=session(c);discardRecovery(c.getSource().getPlayerOrException(),s);logout(c.getSource().getPlayerOrException());return 1;}))))
                 .then(command("add", serial -> serial.then(partArguments(false))))
                 .then(command("edit", serial -> serial.then(argument("index", integer(0,15)).then(partArguments(true)))))
                 .then(command("remove", serial -> serial.then(argument("index",integer(0,15)).executes(run(c -> {
@@ -68,27 +74,69 @@ public final class AssemblyStudio {
                     c.getSource().sendSuccess(()->Component.literal("Exported assembly preset to config/worldarchitect/exports/"+path.getFileName()),false);show(c.getSource().getPlayerOrException(),"Preset exported: "+path.getFileName());return 1;
                 }))))))));
         poolCommands(root);
+        historyCommands(root);
         event.getDispatcher().register(root);
+    }
+    private static long historyBytes(AssemblyDraft draft){try{return draft.estimatedBytes();}catch(IOException e){throw new IllegalArgumentException(e.getMessage(),e);}}
+    private static JsonElement document(MinecraftServer server,AssemblyDraft draft)throws IOException{return AssemblyDraft.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE,server.registryAccess()),draft).getOrThrow(IOException::new);}
+    private static java.nio.file.Path recoveryDirectory(MinecraftServer server){return server.getWorldPath(net.minecraft.world.level.storage.LevelResource.DATA).resolve("worldarchitect/assembly-recovery");}
+    private static String recoveryKey(ServerPlayer player,Session s){return player.getUUID()+"/"+s.draft.id();}
+    private static void resolved(Session s)throws IOException{if(s.recoveryPending)throw new IOException("Restore or discard the pending assembly recovery before editing or saving.");}
+    private static void discardRecovery(ServerPlayer p,Session s)throws IOException{DraftRecovery.discard(recoveryDirectory(p.level().getServer()),recoveryKey(p,s));s.recoveryAvailable=false;s.recoveryPending=false;s.recoveryProblem="";}
+    private static void writeRecovery(ServerPlayer p,Session s)throws IOException{DraftRecovery.write(recoveryDirectory(p.level().getServer()),recoveryKey(p,s),s.base,document(p.level().getServer(),s.draft));}
+    private static void historyCommands(LiteralArgumentBuilder<CommandSourceStack> root){
+        for(String op:List.of("undo","redo"))root.then(command(op,serial->serial.executes(run(c->{
+            var s=session(c);resolved(s);var next=s.history.fork();var restored=(op.equals("undo")?next.undo():next.redo()).atRevision(s.draft.revision());
+            changeHistory(c,restored,s.selected,next);return 1;
+        }))));
+        root.then(command("recover",serial->serial.executes(run(c->{var s=session(c);if(!s.recoveryAvailable)throw new IOException("No compatible recovery draft is available.");var json=DraftRecovery.read(recoveryDirectory(c.getSource().getServer()),recoveryKey(c.getSource().getPlayerOrException(),s),s.base).orElseThrow(()->new IOException("Recovery file is missing."));var recovered=AssemblyDraft.CODEC.parse(RegistryOps.create(JsonOps.INSTANCE,c.getSource().getServer().registryAccess()),json).getOrThrow(IOException::new).check();if(!recovered.id().equals(s.draft.id())||recovered.revision()!=s.draft.revision())throw new IOException("Recovery identity or revision differs.");var next=s.history.fork();next.checkpoint(recovered.atRevision(0));changeHistory(c,recovered,s.selected,next,true);return 1;}))));
+        root.then(command("discard_recovery",serial->serial.executes(run(c->{var s=session(c);discardRecovery(c.getSource().getPlayerOrException(),s);s.serial++;show(c.getSource().getPlayerOrException(),"Recovery discarded.");return 1;}))));
+        root.then(command("duplicate",serial->serial.then(argument("index",integer(0,15)).executes(run(c->{
+            var s=session(c);var parts=new ArrayList<>(s.draft.parts());var part=parts.get(getInteger(c,"index"));String prefix=part.name().substring(0,Math.min(24,part.name().length()))+"_copy";int n=1;var names=parts.stream().map(AssemblyDraft.Part::name).toList();while(names.contains(prefix+n))n++;
+            parts.add(new AssemblyDraft.Part(prefix+n,part.source(),part.offset(),part.rotation(),part.mirror(),part.original()));change(c,s.draft.withParts(parts),parts.size()-1);return 1;
+        })))));
+        root.then(command("move",serial->serial.then(argument("index",integer(0,15)).then(argument("to",integer(0,15)).executes(run(c->{var s=session(c);var parts=new ArrayList<>(s.draft.parts());var part=parts.remove(getInteger(c,"index"));parts.add(getInteger(c,"to"),part);change(c,s.draft.withParts(parts),getInteger(c,"to"));return 1;}))))));
     }
     private static ProceduralPool pool(CommandContext<CommandSourceStack> c) throws IOException,CommandSyntaxException { return session(c).draft.pool().orElseThrow(()->new IOException("Enable pool settings first.")); }
     private static void changePool(CommandContext<CommandSourceStack> c, Optional<ProceduralPool> pool) throws IOException,CommandSyntaxException { var s=session(c);s.poolEditor=true;change(c,s.draft.withPool(pool),s.selected); }
     private static void poolCommands(LiteralArgumentBuilder<CommandSourceStack> root) {
+        root.then(command("constraints",serial->serial.then(argument("module",word()).then(argument("min",integer(0,16)).then(argument("max",integer(0,16)).then(argument("depth",integer(1,15)).executes(run(c->{
+            var old=pool(c);String module=getString(c,"module");int min=getInteger(c,"min"),max=getInteger(c,"max");if(session(c).draft.parts().stream().noneMatch(p->p.name().equals(module)))throw new IOException("Choose an existing source module.");
+            var limits=new ArrayList<>(old.constraints().counts());limits.removeIf(v->v.module().equals(module));if(min!=0||max!=16)limits.add(new ProceduralPool.ModuleCount(module,min,max));
+            changePool(c,Optional.of(old.withConstraints(new ProceduralPool.Constraints(getInteger(c,"depth"),limits))));return 1;
+        }))))))));
+        root.then(command("move_choice",serial->serial.then(argument("index",integer(0,63)).then(argument("to",integer(0,63)).executes(run(c->{var old=pool(c);var choices=new ArrayList<>(old.choices());var choice=choices.remove(getInteger(c,"index"));choices.add(getInteger(c,"to"),choice);changePool(c,Optional.of(old.withChoices(choices)));return 1;}))))));
+        root.then(command("preview_batch",serial->serial.then(argument("seed",LongArgumentType.longArg()).then(argument("samples",integer(1,16)).executes(run(AssemblyStudio::previewBatch))))));
         root.then(command("pool_view",serial->serial.executes(run(c->{var s=session(c);s.poolEditor=true;show(c.getSource().getPlayerOrException(),null);return 1;}))));
         root.then(command("pool_back",serial->serial.executes(run(c->{var s=session(c);s.poolEditor=false;show(c.getSource().getPlayerOrException(),null);return 1;}))));
         root.then(command("static",serial->serial.executes(run(c->{changePool(c,Optional.empty());return 1;}))));
         root.then(command("preview_seed",serial->serial.then(argument("seed",LongArgumentType.longArg()).executes(run(c->{var s=session(c);s.previewSeed=LongArgumentType.getLong(c,"seed");show(c.getSource().getPlayerOrException(),null);return 1;})))));
         root.then(command("pool",serial->serial.then(argument("root",word()).then(argument("max",integer(2,16)).then(argument("attempts",integer(1,256)).then(argument("salt",LongArgumentType.longArg()).executes(run(c->{
-            var old=session(c).draft.pool();changePool(c,Optional.of(new ProceduralPool(getString(c,"root"),getInteger(c,"max"),getInteger(c,"attempts"),LongArgumentType.getLong(c,"salt"),old.map(ProceduralPool::ports).orElse(List.of()),old.map(ProceduralPool::choices).orElse(List.of()))));return 1;
+            var old=session(c).draft.pool();changePool(c,Optional.of(old.orElse(new ProceduralPool(getString(c,"root"),8,128,0,List.of(),List.of())).withSettings(getString(c,"root"),getInteger(c,"max"),getInteger(c,"attempts"),LongArgumentType.getLong(c,"salt"))));return 1;
         }))))))));
         root.then(command("connection",serial->serial.then(argument("module",word()).then(argument("name",word()).then(argument("position",blockPos()).then(argument("facing",word()).then(argument("pool",word()).then(argument("channel",word()).executes(run(c->{
             var old=pool(c);var ports=new ArrayList<>(old.ports());var direction=net.minecraft.core.Direction.byName(getString(c,"facing"));if(direction==null)throw new IOException("Use north, south, east or west.");
-            var port=new ProceduralPool.Port(getString(c,"module"),getString(c,"name"),getBlockPos(c,"position"),direction,getString(c,"pool"),getString(c,"channel"));ports.removeIf(p->p.module().equals(port.module())&&p.name().equals(port.name()));ports.add(port);changePool(c,Optional.of(new ProceduralPool(old.root(),old.maxModules(),old.attempts(),old.salt(),ports,old.choices())));return 1;
+            var port=new ProceduralPool.Port(getString(c,"module"),getString(c,"name"),getBlockPos(c,"position"),direction,getString(c,"pool"),getString(c,"channel"));ports.removeIf(p->p.module().equals(port.module())&&p.name().equals(port.name()));ports.add(port);changePool(c,Optional.of(old.withPorts(ports)));return 1;
         }))))))))));
-        root.then(command("remove_connection",serial->serial.then(argument("module",word()).then(argument("name",word()).executes(run(c->{var old=pool(c);var ports=old.ports().stream().filter(p->!p.module().equals(getString(c,"module"))||!p.name().equals(getString(c,"name"))).toList();changePool(c,Optional.of(new ProceduralPool(old.root(),old.maxModules(),old.attempts(),old.salt(),ports,old.choices())));return 1;}))))));
+        root.then(command("remove_connection",serial->serial.then(argument("module",word()).then(argument("name",word()).executes(run(c->{var old=pool(c);var ports=old.ports().stream().filter(p->!p.module().equals(getString(c,"module"))||!p.name().equals(getString(c,"name"))).toList();changePool(c,Optional.of(old.withPorts(ports)));return 1;}))))));
         root.then(command("choice",serial->serial.then(argument("pool",word()).then(argument("module",word()).then(argument("weight",integer(1,100)).then(argument("endcap",BoolArgumentType.bool()).executes(run(c->{
-            var old=pool(c);var choice=new ProceduralPool.Choice(getString(c,"pool"),getString(c,"module"),getInteger(c,"weight"),BoolArgumentType.getBool(c,"endcap"));var choices=new ArrayList<>(old.choices());choices.removeIf(v->v.pool().equals(choice.pool())&&v.module().equals(choice.module())&&v.endcap()==choice.endcap());choices.add(choice);changePool(c,Optional.of(new ProceduralPool(old.root(),old.maxModules(),old.attempts(),old.salt(),old.ports(),choices)));return 1;
+            var old=pool(c);var choice=new ProceduralPool.Choice(getString(c,"pool"),getString(c,"module"),getInteger(c,"weight"),BoolArgumentType.getBool(c,"endcap"));var choices=new ArrayList<>(old.choices());choices.removeIf(v->v.pool().equals(choice.pool())&&v.module().equals(choice.module())&&v.endcap()==choice.endcap());choices.add(choice);changePool(c,Optional.of(old.withChoices(choices)));return 1;
         }))))))));
-        root.then(command("remove_choice",serial->serial.then(argument("index",integer(0,63)).executes(run(c->{var old=pool(c);var choices=new ArrayList<>(old.choices());choices.remove(getInteger(c,"index"));changePool(c,Optional.of(new ProceduralPool(old.root(),old.maxModules(),old.attempts(),old.salt(),old.ports(),choices)));return 1;})))));
+        root.then(command("remove_choice",serial->serial.then(argument("index",integer(0,63)).executes(run(c->{var old=pool(c);var choices=new ArrayList<>(old.choices());choices.remove(getInteger(c,"index"));changePool(c,Optional.of(old.withChoices(choices)));return 1;})))));
+    }
+    private static int previewBatch(CommandContext<CommandSourceStack> c)throws IOException,CommandSyntaxException{
+        var s=session(c);resolved(s);if(s.previewToken!=null)throw new IOException("A pool preview is already running.");
+        var structure=s.draft.structure(c.getSource().getServer());var server=c.getSource().getServer();var owner=c.getSource().getPlayerOrException().getUUID();int expected=s.serial,samples=getInteger(c,"samples");long seed=LongArgumentType.getLong(c,"seed");PREVIEWS.purge();
+        UUID request=UUID.randomUUID();s.previewToken=request;try{s.previewJob=PREVIEWS.submit(()->{
+            var rows=new ArrayList<String>();long start=System.nanoTime();
+            try{for(int i=0;i<samples;i++){
+                if(Thread.currentThread().isInterrupted())return;
+                if(i>0&&System.nanoTime()-start>500_000_000L){rows.add("Sampling truncated at the preview time budget.");break;}
+                var report=structure.previewReport(seed+i);rows.add("Seed "+(seed+i)+": "+(report.modules().isPresent()?report.modules().orElseThrow().size()+" modules":"rejected")+" · "+report.reasons().getLast());
+            }}catch(IOException|RuntimeException e){rows.add("Preview failed: "+clip(e.getMessage()==null?"Invalid layout":e.getMessage(),256));}
+            server.execute(()->{var current=sessions(server).get(owner);var player=server.getPlayerList().getPlayer(owner);if(current!=s||!request.equals(s.previewToken))return;s.previewToken=null;if(s.serial!=expected||player==null||!hasPermission(LEVEL_GAMEMASTERS).test(player.createCommandSourceStack())||!ModpackRuntime.allowStructureLibrary(server))return;s.previewReport=List.copyOf(rows);s.previewSeed=seed;s.serial++;try{show(player,"Batch layout preview complete.");}catch(IOException e){player.sendSystemMessage(Component.literal("Cannot display completed preview."));}});
+        });}catch(java.util.concurrent.RejectedExecutionException e){s.previewToken=null;throw new IOException("Pool preview worker is busy. Try again after the current job.");}
+        c.getSource().sendSuccess(()->Component.literal("Sampling detached layouts in the preview worker."),false);return 1;
     }
     private static LiteralArgumentBuilder<CommandSourceStack> command(String name, Consumer<RequiredArgumentBuilder<CommandSourceStack,Integer>> configure) {
         var serial=argument("serial",integer(0));configure.accept(serial);return literal(name).then(argument("token",word()).then(serial));
@@ -108,7 +156,7 @@ public final class AssemblyStudio {
     static String rotationKey(Rotation rotation) {return switch(rotation){case NONE->"none";case CLOCKWISE_90->"cw90";case CLOCKWISE_180->"cw180";case COUNTERCLOCKWISE_90->"ccw90";};}
     static String mirrorKey(Mirror mirror) {return switch(mirror){case NONE->"none";case LEFT_RIGHT->"left_right";case FRONT_BACK->"front_back";};}
     private static Map<UUID,Session> sessions(MinecraftServer server) {
-        var sessions=SESSIONS.computeIfAbsent(server,unused->new HashMap<>());sessions.values().removeIf(s->s.expires<System.nanoTime());return sessions;
+        var sessions=SESSIONS.computeIfAbsent(server,unused->new HashMap<>());sessions.values().removeIf(s->{boolean expired=s.expires<System.nanoTime();if(expired&&s.previewJob!=null)s.previewJob.cancel(true);return expired;});return sessions;
     }
     private static Session session(CommandContext<CommandSourceStack> c) throws CommandSyntaxException,IOException {
         var p=c.getSource().getPlayerOrException();var s=sessions(p.level().getServer()).get(p.getUUID());
@@ -116,22 +164,43 @@ public final class AssemblyStudio {
         s.expires=System.nanoTime()+1_800_000_000_000L;return s;
     }
     private static void reserve(ServerPlayer player, Session candidate, AssemblyDraft draft) throws IOException {
-        long bytes=draft.check().estimatedBytes();var all=sessions(player.level().getServer());
+        long current=draft.check().estimatedBytes();var all=sessions(player.level().getServer());
         long total=all.entrySet().stream().filter(e->!e.getKey().equals(player.getUUID())).mapToLong(e->e.getValue().bytes).sum();
+        try{candidate.history.trimTo(SHARED_BUDGET-total);}catch(IllegalArgumentException e){throw new IOException("Assembly editor memory is full. Save and close another editing session.");}
+        long bytes=Math.max(current,candidate.history.bytes());
         if(total+bytes>SHARED_BUDGET||!all.containsKey(player.getUUID())&&all.size()>=16)throw new IOException("Assembly editor memory is full. Save and close another editing session.");
         candidate.bytes=bytes;candidate.expires=System.nanoTime()+1_800_000_000_000L;
     }
-    private static void open(ServerPlayer p,AssemblyDraft draft) throws IOException {var s=new Session(draft);reserve(p,s,draft);sessions(p.level().getServer()).put(p.getUUID(),s);show(p,null);}
-    private static void change(CommandContext<CommandSourceStack> c,AssemblyDraft draft,int selected) throws IOException,CommandSyntaxException {
-        var s=session(c);var player=c.getSource().getPlayerOrException();reserve(player,s,draft);s.draft=draft;s.serial++;s.selected=selected;show(player,null);
+    private static void open(ServerPlayer p,AssemblyDraft draft) throws IOException {
+        var server=p.level().getServer();var previous=sessions(server).get(p.getUUID());
+        var s=new Session(draft);s.base=DraftRecovery.fingerprint(document(server,draft));
+        try{var saved=previous==null?DraftRecovery.read(recoveryDirectory(server),recoveryKey(p,s),s.base):Optional.<JsonElement>empty();s.recoveryPending=saved.isPresent();s.recoveryAvailable=saved.isPresent();}
+        catch(IOException|RuntimeException e){s.recoveryPending=true;s.recoveryProblem=e.getMessage();}
+        reserve(p,s,draft);if(previous!=null){discardRecovery(p,previous);if(previous.previewJob!=null)previous.previewJob.cancel(true);}sessions(server).put(p.getUUID(),s);show(p,null);
     }
-    public static void logout(ServerPlayer player) {var all=SESSIONS.get(player.level().getServer());if(all!=null)all.remove(player.getUUID());}
+    private static void change(CommandContext<CommandSourceStack> c,AssemblyDraft draft,int selected) throws IOException,CommandSyntaxException {
+        var s=session(c);resolved(s);var next=s.history.fork();next.checkpoint(draft.atRevision(0));changeHistory(c,draft,selected,next);
+    }
+    private static void changeHistory(CommandContext<CommandSourceStack> c,AssemblyDraft draft,int selected,DraftHistory<AssemblyDraft> history)throws IOException,CommandSyntaxException{
+        changeHistory(c,draft,selected,history,false);
+    }
+    private static void changeHistory(CommandContext<CommandSourceStack> c,AssemblyDraft draft,int selected,DraftHistory<AssemblyDraft> history,boolean consumeRecovery)throws IOException,CommandSyntaxException{
+        var s=session(c);var player=c.getSource().getPlayerOrException();
+        if(AssemblyDraft.load(c.getSource().getServer(),s.draft.id()).revision()!=s.draft.revision())throw new IOException("The saved draft changed. Reopen it before restoring history.");
+        var budget=new Session(draft);budget.history=history;reserve(player,budget,draft);
+        if(consumeRecovery){s.recoveryAvailable=false;s.recoveryPending=false;s.recoveryProblem="";}
+        if(s.previewJob!=null)s.previewJob.cancel(true);s.previewToken=null;s.previewReport=List.of();
+        s.history=history;s.bytes=budget.bytes;s.expires=budget.expires;s.draft=draft;s.serial++;s.selected=selected;
+        String status=null;try{writeRecovery(player,s);}catch(IOException e){status="Draft edited; recovery unavailable: "+e.getMessage();}show(player,status);
+    }
+    public static void logout(ServerPlayer player) {var all=SESSIONS.get(player.level().getServer());if(all!=null){var s=all.remove(player.getUUID());if(s!=null&&s.previewJob!=null)s.previewJob.cancel(true);}}
     private static void show(ServerPlayer player,String status) throws IOException {
         var server=player.level().getServer();var s=sessions(server).get(player.getUUID());var data=new CompoundTag();
         data.putString("kind","assembly");data.putBoolean("active",s!=null);data.putBoolean("can_bundle",hasPermission(LEVEL_ADMINS).test(player.createCommandSourceStack())&&ModpackRuntime.developerMode());
         var library=new ListTag();StructureLibrary.list(server).stream().limit(128).forEach(id->library.add(StringTag.valueOf(id.toString())));data.put("library",library);
         var drafts=new ListTag();AssemblyDraft.list(server).forEach(id->drafts.add(StringTag.valueOf(id.toString())));data.put("drafts",drafts);
         if(s!=null){
+            data.putBoolean("can_undo",s.history.canUndo());data.putBoolean("can_redo",s.history.canRedo());data.putBoolean("recovery_pending",s.recoveryPending);data.putBoolean("can_recover",s.recoveryAvailable);data.putString("recovery_problem",clip(s.recoveryProblem,256));
             var d=s.draft;data.putBoolean("pool_editor",s.poolEditor);data.putLong("preview_seed",s.previewSeed);d.pool().ifPresent(pool->data.put("pool",ProceduralPool.CODEC.encodeStart(NbtOps.INSTANCE,pool).getOrThrow()));data.putString("id",d.id().toString());data.putString("token",s.token.toString());data.putInt("serial",s.serial);data.putInt("revision",d.revision());data.putInt("selected",s.selected);data.putBoolean("dirty",s.serial!=s.savedSerial);
             data.putString("biome",d.biome().toString());data.putInt("y_offset",d.yOffset());data.putInt("slope",d.maxSlope());data.putBoolean("random",d.randomRotation());
             String problem="Assembly valid · templates and markers are embedded snapshots.";boolean valid=true;
@@ -143,7 +212,7 @@ public final class AssemblyStudio {
                 var module=new CompoundTag();module.putString("name",part.name());module.putString("source",part.source().toString());module.putString("rotation",rotationKey(part.rotation()));module.putString("mirror",mirrorKey(part.mirror()));module.putIntArray("offset",new int[]{offset.getX(),offset.getY(),offset.getZ()});module.putIntArray("size",new int[]{size.getX(),size.getY(),size.getZ()});module.putString("rules",describe(entry.rules()));module.putInt("snapshot_revision",part.original().revision());modules.add(module);
             }
             List<ModularStructure.Module> displayed=List.of();
-            try { displayed=d.structure(server).previewLayout(s.previewSeed).orElse(List.of()); } catch(IOException|RuntimeException e) {
+            try { var report=d.structure(server).previewReport(s.previewSeed);displayed=report.modules().orElse(List.of());var lines=new ListTag();report.lines().forEach(line->lines.add(StringTag.valueOf(line)));s.previewReport.forEach(line->lines.add(StringTag.valueOf(line)));data.put("pool_report",lines); } catch(IOException|RuntimeException e) {
                 if(d.pool().isEmpty()) { var preview=new ArrayList<ModularStructure.Module>();for(var part:d.parts())preview.add(new ModularStructure.Module(part.name(),part.offset(),part.transformed()));displayed=preview; }
             }
             sx=1;sy=1;sz=1;

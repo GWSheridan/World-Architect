@@ -2,6 +2,7 @@ package com.gwsheridan.worldarchitect.rules;
 
 import com.gwsheridan.worldarchitect.config.ContentProfile;
 import com.gwsheridan.worldarchitect.config.TerrainMaterial;
+import com.gwsheridan.worldarchitect.config.RegionalTerrain;
 import com.gwsheridan.worldarchitect.spawn.SpawnPolicy;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -29,17 +30,22 @@ public final class RuleSet {
     public static final Identifier UNBOUND = Identifier.fromNamespaceAndPath("worldarchitect", "unbound");
     public static final RuleSet EMPTY = new RuleSet(UNBOUND, List.of());
     public static final Codec<RuleSet> CODEC = RecordCodecBuilder.<RuleSet>create(b -> b.group(
-            Codec.intRange(1, 1).fieldOf("version").forGetter(r -> 1),
+            Codec.intRange(1, 2).fieldOf("version").forGetter(RuleSet::version),
             Identifier.CODEC.fieldOf("dimension").forGetter(RuleSet::dimension),
             Rule.CODEC.listOf(0, MAX_RULES).fieldOf("rules").forGetter(RuleSet::rules)
-    ).apply(b, (version, dimension, rules) -> new RuleSet(dimension, rules))).validate(RuleSet::validate);
+    ).apply(b, (version, dimension, rules) -> new RuleSet(version, dimension, rules))).validate(RuleSet::validate);
 
     private final Identifier dimension;
     private final List<Rule> rules;
     private final List<Rule> ordered;
     private final long[] dependencies;
+    private final int version;
 
     public RuleSet(Identifier dimension, List<Rule> rules) {
+        this(rules.stream().anyMatch(r->r.when().namedRegion().isPresent())?2:1,dimension,rules);
+    }
+    public RuleSet(int version, Identifier dimension, List<Rule> rules) {
+        this.version=version;
         this.dimension = rules.isEmpty() ? UNBOUND : dimension;
         this.rules = List.copyOf(rules);
         var sorted = new ArrayList<>(rules);
@@ -57,11 +63,13 @@ public final class RuleSet {
     }
 
     public Identifier dimension() { return dimension; }
+    public int version() { return version; }
     public List<Rule> rules() { return rules; }
     public List<Rule> ordered() { return ordered; }
     public boolean isEmpty() { return rules.isEmpty(); }
 
     public DataResult<RuleSet> validate() {
+        if(version<1||version>2||version==1&&rules.stream().anyMatch(r->r.when().namedRegion().isPresent()))return DataResult.error(()->"Named terrain regions require rule engine version 2.");
         if (rules.size() > MAX_RULES || !rules.isEmpty() && dimension.equals(UNBOUND)) return DataResult.error(() -> "Bind non-empty rule sets to a dimension; at most 32 rules are allowed.");
         var seen = new HashSet<String>();
         int featureWork = 0;
@@ -86,7 +94,7 @@ public final class RuleSet {
     public long matches(Context context) {
         long matched = 0;
         for (int i = 0; i < ordered.size(); i++) {
-            if ((matched & dependencies[i]) == dependencies[i] && ordered.get(i).when().matches(context)) matched |= 1L << i;
+            if ((matched & dependencies[i]) == dependencies[i] && localRegion(ordered.get(i),context) && ordered.get(i).when().matches(context)) matched |= 1L << i;
         }
         return matched;
     }
@@ -100,10 +108,19 @@ public final class RuleSet {
         int count = 0;
         long eligible = 0;
         while (count < ordered.size() && ordered.get(count).action().type() == Kind.MATERIAL) {
-            if (ordered.get(count).when().matchesExceptHeight(context)) eligible |= 1L << count;
+            if (localRegion(ordered.get(count),context) && ordered.get(count).when().matchesExceptHeight(context)) eligible |= 1L << count;
             count++;
         }
         return new MaterialColumn(count, eligible);
+    }
+    private boolean localRegion(Rule rule,Context context){return rule.when().namedRegion().isEmpty()||dimension.equals(context.dimension());}
+    public Optional<String> regionProblem(Optional<RegionalTerrain> regions){
+        for(var rule:rules)if(rule.when().namedRegion().isPresent()){
+            String name=rule.when().namedRegion().orElseThrow().name();
+            if(regions.isEmpty()||regions.orElseThrow().zones().stream().noneMatch(z->z.name().equals(name)))return Optional.of("Rule "+rule.id()+" references missing terrain region "+name+" in "+dimension+".");
+            if(rule.action().spawn().filter(spawn->!spawn.dimension().equals(dimension)).isPresent())return Optional.of("Named-region spawn rules must target their own dimension.");
+        }
+        return Optional.empty();
     }
 
     public final class MaterialColumn {
@@ -196,8 +213,22 @@ public final class RuleSet {
         ).apply(b, Distance::new)).validate(d -> d.min <= d.max ? DataResult.success(d) : DataResult.error(() -> "Distance minimum exceeds maximum."));
     }
 
+    public enum RegionMode implements StringRepresentable { MASK, WINNER; public String getSerializedName(){return name().toLowerCase(Locale.ROOT);} }
+    public record NamedRegion(String name,RegionMode mode,boolean exclude){
+        public static final Codec<NamedRegion> CODEC=RecordCodecBuilder.<NamedRegion>create(b->b.group(
+            Codec.STRING.fieldOf("name").forGetter(NamedRegion::name),StringRepresentable.fromEnum(RegionMode::values).optionalFieldOf("mode",RegionMode.MASK).forGetter(NamedRegion::mode),Codec.BOOL.optionalFieldOf("exclude",false).forGetter(NamedRegion::exclude)
+        ).apply(b,NamedRegion::new)).validate(r->r.name.matches("[a-z0-9_-]{1,32}")?DataResult.success(r):DataResult.error(()->"Choose a valid named terrain region."));
+        public boolean matches(Context context){
+            if(context.regions.isEmpty())return false;
+            var regions=context.regions.orElseThrow();var selected=regions.zones().stream().filter(z->z.name().equals(name)).findFirst();
+            if(selected.isEmpty())return false;
+            boolean inside=mode==RegionMode.MASK?selected.orElseThrow().edgeDistance(context.x,context.z)>=0:regions.ordered().stream().filter(z->z.edgeDistance(context.x,context.z)>=0).findFirst().map(z->z.name().equals(name)).orElse(false);
+            return exclude?!inside:inside;
+        }
+    }
     public record Condition(List<Identifier> dimensions, List<Identifier> biomes, int minY, int maxY, Optional<Region> region,
-            Optional<Distance> distance, Optional<Long> seed, int seedModulus, int seedRemainder, long seedSalt, List<String> mods) {
+            Optional<Distance> distance, Optional<Long> seed, int seedModulus, int seedRemainder, long seedSalt, List<String> mods, Optional<NamedRegion> namedRegion) {
+        public Condition(List<Identifier> dimensions,List<Identifier> biomes,int minY,int maxY,Optional<Region> region,Optional<Distance> distance,Optional<Long> seed,int seedModulus,int seedRemainder,long seedSalt,List<String> mods){this(dimensions,biomes,minY,maxY,region,distance,seed,seedModulus,seedRemainder,seedSalt,mods,Optional.empty());}
         public static final Condition ALL = new Condition(List.of(), List.of(), -2032, 2031, Optional.empty(), Optional.empty(), Optional.empty(), 1, 0, 0, List.of());
         public static final Codec<Condition> CODEC = RecordCodecBuilder.<Condition>create(b -> b.group(
                 Identifier.CODEC.listOf(0, 16).optionalFieldOf("dimensions", List.of()).forGetter(Condition::dimensions),
@@ -210,13 +241,15 @@ public final class RuleSet {
                 Codec.intRange(1, 1000000).optionalFieldOf("seed_modulus", 1).forGetter(Condition::seedModulus),
                 Codec.intRange(0, 999999).optionalFieldOf("seed_remainder", 0).forGetter(Condition::seedRemainder),
                 Codec.LONG.optionalFieldOf("seed_salt", 0L).forGetter(Condition::seedSalt),
-                Codec.STRING.listOf(0, 16).optionalFieldOf("mods", List.of()).forGetter(Condition::mods)
+                Codec.STRING.listOf(0, 16).optionalFieldOf("mods", List.of()).forGetter(Condition::mods),
+                NamedRegion.CODEC.optionalFieldOf("named_region").forGetter(Condition::namedRegion)
         ).apply(b, Condition::new)).validate(c -> c.minY <= c.maxY && c.seedRemainder < c.seedModulus
                 && c.mods.stream().allMatch(id -> id.matches("[a-z][a-z0-9_]{0,63}")) ? DataResult.success(c)
                 : DataResult.error(() -> "Invalid height range, seed remainder or mod dependency ID."));
         public Condition { dimensions = List.copyOf(dimensions); biomes = List.copyOf(biomes); mods = List.copyOf(mods); }
         public boolean height(int y) { return y >= minY && y <= maxY; }
         public boolean spatial(Context c) {
+            if(namedRegion.filter(r->!r.matches(c)).isPresent())return false;
             if ((!dimensions.isEmpty() && !dimensions.contains(c.dimension)) || (!biomes.isEmpty() && !biomes.contains(c.biome))) return false;
             if (region.filter(r -> c.x < r.minX || c.x > r.maxX || c.z < r.minZ || c.z > r.maxZ).isPresent()) return false;
             if (distance.isPresent()) {
@@ -233,13 +266,15 @@ public final class RuleSet {
         public boolean matches(Context c) { return height(c.y) && matchesExceptHeight(c); }
     }
 
-    public record Context(Identifier dimension, Identifier biome, int x, int y, int z, long seed, Set<String> mods) {}
+    public record Context(Identifier dimension, Identifier biome, int x, int y, int z, long seed, Set<String> mods, Optional<RegionalTerrain> regions) {
+        public Context(Identifier dimension,Identifier biome,int x,int y,int z,long seed,Set<String> mods){this(dimension,biome,x,y,z,seed,mods,Optional.empty());}
+    }
     public static long hash(long seed, int x, int z, long salt) {
         long value = seed ^ x * 0x9E3779B97F4A7C15L ^ z * 0xD1B54A32D192ED03L ^ salt * 0xC2B2AE3D27D4EB4FL;
         value = (value ^ value >>> 30) * 0xBF58476D1CE4E5B9L;
         value = (value ^ value >>> 27) * 0x94D049BB133111EBL;
         return value ^ value >>> 31;
     }
-    @Override public boolean equals(Object other) { return other instanceof RuleSet set && dimension.equals(set.dimension) && rules.equals(set.rules); }
-    @Override public int hashCode() { return Objects.hash(dimension, rules); }
+    @Override public boolean equals(Object other) { return other instanceof RuleSet set && version==set.version && dimension.equals(set.dimension) && rules.equals(set.rules); }
+    @Override public int hashCode() { return Objects.hash(version,dimension,rules); }
 }

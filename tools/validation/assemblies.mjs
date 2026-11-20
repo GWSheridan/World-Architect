@@ -11,12 +11,13 @@ for(const path of [source,output])if(!relative(root,path).startsWith('build'+(pr
 await fs.mkdir(output,{recursive:false});
 const exported=[...(await fs.readFile(join(source,'fresh.log'),'utf8')).matchAll(/^WA_ASSEMBLY_BUNDLE (\S+) (.+)$/gm)];if(exported.length<3||exported.length>4)throw Error('Missing assembly exports');
 const pooled=[...(await fs.readFile(join(source,'fresh.log'),'utf8')).matchAll(/^WA_POOL_BUNDLE (\S+) (.+)$/gm)];if(pooled.length<3||pooled.length>4)throw Error('Missing pool exports');
+const constrained=[...(await fs.readFile(join(source,'fresh.log'),'utf8')).matchAll(/^WA_CONSTRAINED_POOL_BUNDLE (\S+) (.+)$/gm)];if(constrained.length<3||constrained.length>4)throw Error('Missing constrained pool exports');
 const report={format:1,version,cases:[],status:'passed'};
-for(const [,dimension,path] of [...exported,...pooled]){
+for(const [,dimension,path] of [...exported,...pooled,...constrained]){
     if(!/^[a-z0-9_]+:[a-z0-9_]+$/.test(dimension))throw Error('Unexpected fixture dimension');
     const bundle=resolve(path.trim());if(!relative(source,bundle).startsWith('server'+(process.platform==='win32'?'\\':'/')))throw Error('Export escaped the source fixture');
-    const pool=pooled.some(match=>match[2]===path),name=dimension.replace(':','_'),destination=join(output,(pool?'pool_':'')+name);
-    const command=['tools/validation/run.mjs','--jar',args['--jar']||`build/libs/worldarchitect-${version}.jar`,'--fixture',args['--fixture']||`build/validation-tools/worldarchitect-${version}-validation.jar`,'--output',relative(root,destination),'--bundle',bundle,'--suite','compatibility',pool?'--pool':'--assembly','validation:'+(pool?'pool_':'assembly_')+name,'--dimension',dimension,'--network',args['--network']||'online'];
+    const limited=constrained.some(match=>match[2]===path),pool=limited||pooled.some(match=>match[2]===path),name=dimension.replace(':','_'),destination=join(output,(limited?'constrained_':pool?'pool_':'')+name);
+    const command=['tools/validation/run.mjs','--jar',args['--jar']||`build/libs/worldarchitect-${version}.jar`,'--fixture',args['--fixture']||`build/validation-tools/worldarchitect-${version}-validation.jar`,'--output',relative(root,destination),'--bundle',bundle,'--suite','compatibility',pool?'--pool':'--assembly','validation:'+(limited?'constrained_':pool?'pool_':'assembly_')+name,'--dimension',dimension,'--network',args['--network']||'online'];
     if(args['--mods'])command.push('--mods',args['--mods']);
     const code=await new Promise((accept,reject)=>{const child=spawn(process.execPath,command,{cwd:root,stdio:'inherit'});child.on('error',reject);child.on('close',accept);});
     const result=JSON.parse(await fs.readFile(join(destination,'results.json'),'utf8'));report.cases.push({dimension,...result});if(code!==0||result.status!=='passed')report.status='failed';

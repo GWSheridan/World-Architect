@@ -8,7 +8,7 @@ From an extracted source distribution, build the fixture with JDK 25, JDK 21 and
 
 ```powershell
 .\gradlew.bat build acceptanceJar
-node tools/workbench/run.mjs --scenario path/to/preset.scenario.json --jar build/libs/worldarchitect-1.3.0.jar --fixture build/validation-tools/worldarchitect-1.3.0-validation.jar --output build/pack-test
+node tools/workbench/run.mjs --scenario path/to/preset.scenario.json --jar build/libs/worldarchitect-1.4.0.jar --fixture build/validation-tools/worldarchitect-1.4.0-validation.jar --output build/pack-test
 ```
 
 Use `bash ./gradlew` on Linux. Add `--network online` if Gradle dependencies/assets have not been cached; the runner otherwise uses offline mode. `JAVA21_HOME` selects the asset downloader's JDK. `--mods <directory>` copies explicitly selected provider JARs and records their hashes. Use matching provider versions. Review the EULA before running: each disposable instance writes `eula=true`.
@@ -24,3 +24,11 @@ Local `results.json` records the input hashes, stage results and immutable gener
 For performance comparisons, `tools/validation/benchmark-pairs.ps1` alternates three same-host baseline/candidate pairs. Its defaults use 64 warmup chunks and five measured batches of 64 chunks per profile, with 200 ms resident-memory polling. Retain initial flags and investigate reproducible changes above 10% generation time or 15% sampled resident memory. The sampler requires Windows; workbench scenarios support Windows and Linux. See [Compatibility and Performance](Compatibility-and-Performance.md).
 
 The integration cases cover a clean install/restart, a deliberately incorrect block probe, a full-lock seed override, a missing provider and an empty void with safe-spawn checking enabled. Runtime probe and spawn failures are expected only in those deliberately failing cases.
+
+## Edit scenarios in game
+
+Open **Preset Studio → Workbench** after saving and validating the current preset version. On a dedicated server, a level-4 administrator with developer mode enabled can use `/wa_workbench studio <name> <release>`. Edit runs, exact seed strings, dimension lists, startup expectations, safe-spawn/restart policies, chunk areas, probes and budgets. Runs can be duplicated and reordered through history. Undo/Redo and explicit recovery work on the detached scenario draft.
+
+The selected saved preset and its SHA-256 remain fixed. Export revalidates the scenario and that source revision, then creates a new named scenario beside the identical bound bundle. Existing scenario files cannot be overwritten. The server checks the current actor, developer mode, session token and source fingerprint for each export; losing permission while the editor is open prevents further writes. Export status reports the server's acknowledgement. This screen only authors inputs; it never starts servers inside the game.
+
+For version/provider/seed matrices, total deadlines and combined HTML/JSON reports, see [Batch Testing](Batch-Testing.md).

@@ -9,9 +9,8 @@ const directory=join(root,'build/compatibility-inputs');await fs.mkdir(directory
 for(const entry of lock) {
     const url=new URL(entry.url);
     if(url.protocol!=='https:'||url.hostname!=='cdn.modrinth.com'||!/^[\w.+-]+\.jar$/.test(entry.filename))throw new Error('Invalid locked download');
-    const response=await fetch(url,{headers:{'User-Agent':'WorldArchitect/1.1 validation'}});
-    if(!response.ok)throw new Error(`Download failed: ${entry.project} ${response.status}`);
-    const bytes=Buffer.from(await response.arrayBuffer());
+    let bytes;try{bytes=await fs.readFile(join(directory,entry.filename));}catch(error){if(error.code!=='ENOENT')throw error;}
+    if(!bytes){const response=await fetch(url,{headers:{'User-Agent':'WorldArchitect validation'}});if(!response.ok)throw new Error(`Download failed: ${entry.project} ${response.status}`);bytes=Buffer.from(await response.arrayBuffer());}
     for(const algorithm of ['sha256','sha512'])if(createHash(algorithm).update(bytes).digest('hex')!==entry[algorithm])throw new Error(`Checksum mismatch: ${entry.project}`);
     await fs.writeFile(join(directory,entry.filename),bytes);console.log(`Verified ${entry.filename}`);
 }

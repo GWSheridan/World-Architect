@@ -7,6 +7,7 @@
 **World design**
 
 - [Creator Tools](Creator-Tools.md)
+- [Draft History](Draft-History.md)
 - [Terrain and Dimensions](Terrain-and-Dimensions.md)
 - [Regional Terrain](Regional-Terrain.md)
 - [Biomes and Features](Biomes-and-Features.md)
@@ -35,6 +36,7 @@
 - [Modpack Quick Start](Modpack-Quick-Start.md)
 - [Preset Studio](Preset-Studio.md)
 - [Test Workbench](Test-Workbench.md)
+- [Batch Testing](Batch-Testing.md)
 - [Preset Reference](Preset-Reference.md)
 - [Locks and Server Enforcement](Locks-and-Server-Enforcement.md)
 - [Templates and Bundling](Templates-and-Bundling.md)

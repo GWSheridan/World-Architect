@@ -11,6 +11,8 @@ final class ClientStudioViews {
         var mc=Minecraft.getInstance();try{
             switch(payload.view().getStringOr("kind","")) {
                 case "inspection" -> mc.gui.setScreen(new WorldInspectorScreen(payload.view()));
+                case "workbench" -> mc.gui.setScreen(new WorkbenchScenarioScreen(payload.view()));
+                case "workbench_export" -> WorkbenchScenarioScreen.acknowledge(payload.view());
                 case "assembly" -> mc.gui.setScreen(payload.view().getBooleanOr("pool_editor",false)?new AssemblyPoolScreen(payload.view()):new AssemblyStudioScreen(payload.view()));
                 case "administration" -> mc.gui.setScreen(new AdministrationPanelScreen(payload.view()));
                 case "administration_confirmation" -> mc.gui.setScreen(new StudioConfirmScreen(answer -> {

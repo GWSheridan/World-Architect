@@ -9,6 +9,8 @@ const cases=['single-block','layered','skyblock','custom-end'].map(name=>({name,
 cases.push({name:'assembly-demo',bundle:`examples/assembly-studio/bundles/assembly-demo-${version}.zip`});
 cases.push({name:'regional-demo',bundle:`examples/regional-terrain/bundles/regional-demo-${version}.zip`});
 cases.push({name:'pool-demo',bundle:`examples/procedural-pools/bundles/pool-demo-${version}.zip`});
+cases.push({name:'shared-regions',bundle:`examples/shared-regions/bundles/shared-regions-${version}.zip`});
+cases.push({name:'constrained-pool',bundle:`examples/constrained-pools/bundles/constrained-pool-${version}.zip`});
 const report={format:1,version,cases:[],status:'passed'};
 for(const entry of cases) {
     const output=`build/ci-bundle-${entry.name}`;
@@ -16,6 +18,8 @@ for(const entry of cases) {
     if(entry.name==='assembly-demo')args.push('--assembly','worldarchitect_examples:assembly_demo','--dimension','minecraft:overworld');
     if(entry.name==='regional-demo')args.push('--regional','true');
     if(entry.name==='pool-demo')args.push('--pool','worldarchitect_examples:pool_demo','--dimension','minecraft:overworld');
+    if(entry.name==='shared-regions')args.push('--named-regions','true');
+    if(entry.name==='constrained-pool')args.push('--pool','worldarchitect_examples:constrained_pool','--dimension','minecraft:overworld');
     const code=await new Promise((accept,reject)=>{const child=spawn(process.execPath,args,{cwd:root,stdio:'inherit'});child.on('error',reject);child.on('close',accept);});
     const result=JSON.parse(await fs.readFile(join(root,output,'results.json'),'utf8'));
     report.cases.push({name:entry.name,...result});if(code!==0||result.status!=='passed')report.status='failed';

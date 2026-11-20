@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "preset": "worldarchitect_examples:shared_regions",
+  "title": "Shared regions example",
+  "description": "Named circle and meadow masks shared by materials, ores, decorations, structures and spawn conditions.",
+  "author": "GWSHERIDAN",
+  "release": "1.4.0",
+  "lock": "unlocked",
+  "options": {
+    "seed": 194723,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "minecraft",
+    "worldarchitect"
+  ]
+}

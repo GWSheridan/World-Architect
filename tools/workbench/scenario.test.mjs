@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {validateScenario} from './scenario.mjs';
+import {readFileSync} from 'node:fs';
+const corpus=JSON.parse(readFileSync(new URL('../../src/test/resources/workbench/scenario-contract.json',import.meta.url),'utf8'));
+for(const row of corpus.cases)test(`shared contract: ${row.name}`,()=>{const candidate=structuredClone(corpus.base);if(row.path){let parent=candidate;for(const key of row.path.slice(0,-1))parent=parent[key];const key=row.path.at(-1);if(row.remove)delete parent[key];else parent[key]=structuredClone(row.value);}if(row.valid)assert.doesNotThrow(()=>validateScenario(candidate));else assert.throws(()=>validateScenario(candidate));});
 const fixture=()=>({format:1,bundle:{file:'regional-demo.zip',sha256:'a'.repeat(64)},budgets:{timeout_seconds:300,heap_mib:1400},runs:[{name:'clean-install',seed:'9223372036854775807',expect_startup:'accept',safe_spawn:true,restart:true,dimensions:['minecraft:overworld'],regions:[{dimension:'minecraft:overworld',chunk_x:-32,chunk_z:32,width:2,depth:2}],probes:[{dimension:'minecraft:overworld',x:-512,y:64,z:512,block:'minecraft:stone',biome:'minecraft:plains'}]}]});
 test('64-bit seeds and negative-coordinate probes survive without number conversion',()=>{assert.equal(validateScenario(fixture()).runs[0].seed,'9223372036854775807');});
 test('bundle traversal and unrecognized world paths are refused',()=>{for(const file of ['../pack.zip','C:/pack.zip','pack.zip/other.zip']){const s=fixture();s.bundle.file=file;assert.throws(()=>validateScenario(s));}const s=fixture();s.world='production';assert.throws(()=>validateScenario(s));});

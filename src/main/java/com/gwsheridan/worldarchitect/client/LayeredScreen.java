@@ -30,7 +30,8 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
-final class LayeredScreen extends Screen {
+final class LayeredScreen extends Screen implements AuthoringContext {
+    @Override public String authoringKey() { return parent instanceof AuthoringContext context ? context.authoringKey() : "layered:" + seed.getAsLong(); }
     private static final Component MATERIAL = Component.translatable("worldarchitect.editor.material");
     private static final Component THICKNESS = Component.translatable("worldarchitect.layers.thickness");
     private final Screen parent;

@@ -38,7 +38,7 @@ Bundles retain manifest format 1 and the existing saved-world archive contract. 
 Copy an exported ZIP into a clean client and dedicated server's `config/worldarchitect/bundles` directory. Set the selected filename in each instance and restart:
 
 ```json
-{"format":1,"bundle":"studio-skyblock-1.3.0.zip"}
+{"format":1,"bundle":"studio-skyblock-1.4.0.zip"}
 ```
 
 Use the same World Architect version and required mods. A new client world selects the bundle automatically. A dedicated server obtains omitted preset, seed and structure-generation properties from the manifest. Editable server dimension selections go in `config/worldarchitect/world-selection.json` before creating the world. See [the bundle guide](Templates-and-Bundling.md) for lock semantics and installation.
@@ -63,4 +63,4 @@ Administrators can use these local-file workflows:
 
 `capture` snapshots the authoring world's generation settings into a new library version. `validate` prints its dependency report. Authoring operations do not alter the running world's generation. Existing JSON drafts and `/wa_modpack export` remain supported and now share Studio validation and modular-template packaging.
 
-The [ready-to-install examples](https://github.com/GWSheridan/World-Architect/tree/v1.3.0/examples/preset-studio) include a partial preset with a bundled modular build and a fully locked multiplayer Skyblock preset.
+The [ready-to-install examples](https://github.com/GWSheridan/World-Architect/tree/v1.4.0/examples/preset-studio) include a partial preset with a bundled modular build and a fully locked multiplayer Skyblock preset.

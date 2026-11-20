@@ -108,15 +108,17 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     public abstract SolidColumnGenerator withDimensionProfile(DimensionProfile profile);
 
     public final RuleSet rules() { return rules; }
+    public final Optional<com.gwsheridan.worldarchitect.config.RegionalTerrain> terrainRegions(){return shape.regions();}
     public final List<ContentProfile.StructureRule> structureRules() { return structureRules; }
 
     public final RuleSet.Context ruleContext(long seed, int x, int y, int z) {
         Holder<Biome> selected = biomeSource instanceof EndArenaBiomeSource arena ? arena.sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biomeSource instanceof RegionBiomeSource regions ? regions.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biomeSource instanceof ZoneBiomeSource zones ? zones.sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biome;
-        return new RuleSet.Context(rules.dimension(), selected.unwrapKey().orElseThrow().identifier(), x, y, z, seed, RuleDependencies.loaded());
+        return new RuleSet.Context(rules.dimension(), selected.unwrapKey().orElseThrow().identifier(), x, y, z, seed, RuleDependencies.loaded(),shape.regions());
     }
 
     public Optional<String> contentProblem() {
         if (shape.validate().error().isPresent()) return Optional.of(shape.validate().error().orElseThrow().message());
+        var regionProblem=rules.regionProblem(shape.regions());if(regionProblem.isPresent())return regionProblem;
         int min = getMinY();
         int max = min + getGenDepth() - 1;
         boolean floating = shape.advanced().filter(settings -> settings.landform() == Landform.FLOATING_ISLANDS).isPresent();

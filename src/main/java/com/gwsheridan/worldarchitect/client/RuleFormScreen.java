@@ -17,7 +17,7 @@ import net.minecraft.resources.RegistryOps;
 
 /** Small pages keep every condition and action editable without a serialized JSON text box. */
 final class RuleFormScreen extends Screen {
-    enum Kind { TEXT, INTEGER, LONG, LIST, POSITION }
+    enum Kind { TEXT, INTEGER, LONG, BOOLEAN, LIST, POSITION }
     record Field(String path, String label, Kind kind, boolean optional) {}
     private final Screen parent;
     private final String guidance;
@@ -78,6 +78,7 @@ final class RuleFormScreen extends Screen {
                     case TEXT -> object.addProperty(key, text);
                     case INTEGER -> object.addProperty(key, Integer.parseInt(text));
                     case LONG -> object.addProperty(key, Long.parseLong(text));
+                    case BOOLEAN -> {if(!text.equals("true")&&!text.equals("false"))throw new IllegalArgumentException("Use true or false.");object.addProperty(key,Boolean.parseBoolean(text));}
                     case LIST, POSITION -> {
                         var array = new JsonArray();
                         for (String part : text.split(field.kind() == Kind.POSITION ? "\\s+" : ",")) {

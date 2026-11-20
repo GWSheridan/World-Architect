@@ -12,7 +12,8 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.*;
 import org.jspecify.annotations.Nullable;
 
-final class TerrainShapeScreen extends Screen {
+final class TerrainShapeScreen extends Screen implements AuthoringContext {
+    @Override public String authoringKey() { return parent instanceof AuthoringContext context ? context.authoringKey() : "terrain"; }
     private static final List<Optional<Landform>> LANDFORMS=Stream.concat(Stream.of(Optional.<Landform>empty()),Arrays.stream(Landform.values()).map(Optional::of)).toList();
     private final Screen parent;private final Consumer<TerrainShape> save;private final RegistryAccess registries;private final int minimum,maximum;
     private String elevation,relief,scale,seedSalt;private Optional<Landform> landform;private Optional<RegionalTerrain> regions;

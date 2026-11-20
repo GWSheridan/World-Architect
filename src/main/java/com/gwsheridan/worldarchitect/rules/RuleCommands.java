@@ -37,9 +37,9 @@ public final class RuleCommands {
         if (explain) {
             var pos = getBlockPos(c, "position");
             var biome = level.uncachedBiomeResolver().getNoiseBiome(QuartPos.fromBlock(pos.getX()), QuartPos.fromBlock(pos.getY()), QuartPos.fromBlock(pos.getZ()));
-            matched = rules.matches(new RuleSet.Context(level.dimension().identifier(), biome.unwrapKey().orElseThrow().identifier(), pos.getX(), pos.getY(), pos.getZ(), level.getChunkSource().randomState().seed(), RuleDependencies.loaded()));
+            matched = rules.matches(new RuleSet.Context(level.dimension().identifier(), biome.unwrapKey().orElseThrow().identifier(), pos.getX(), pos.getY(), pos.getZ(), level.getChunkSource().randomState().seed(), RuleDependencies.loaded(),generator instanceof com.gwsheridan.worldarchitect.worldgen.SolidColumnGenerator solid?solid.terrainRegions():java.util.Optional.empty()));
         }
-        c.getSource().sendSuccess(() -> Component.literal("Rule engine v1 · " + level.dimension().identifier() + " · " + rules.rules().size() + "/32 rules · material → feature → template → spawn"), false);
+        c.getSource().sendSuccess(() -> Component.literal("Rule engine v"+rules.version()+" · " + level.dimension().identifier() + " · " + rules.rules().size() + "/32 rules · material → feature → template → spawn"), false);
         for (int i = 0; i < rules.ordered().size(); i++) {
             var rule = rules.ordered().get(i);
             String result = explain ? ((matched & 1L << i) == 0 ? " · conditions fail" : " · conditions match") : "";

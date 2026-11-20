@@ -15,7 +15,8 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
-final class SingleBlockScreen extends Screen {
+final class SingleBlockScreen extends Screen implements AuthoringContext {
+    @Override public String authoringKey() { return parent instanceof AuthoringContext context ? context.authoringKey() : dimension.getString(); }
     private static final Component MATERIAL_LABEL = Component.translatable("worldarchitect.editor.material");
     private final Screen parent;
     private final SingleBlockGenerator original;

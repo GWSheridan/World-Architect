@@ -36,7 +36,7 @@ final class RuleInspectorScreen extends Screen {
     private Button add(String title,int x,int y,int width,Runnable action){return addRenderableWidget(Button.builder(Component.literal(title),b->action.run()).bounds(x,y,width,20).build());}
     private void select(int direction){selected=Math.clamp(selected+direction,0,Math.max(0,rules.ordered().size()-1));rebuildWidgets();}
     private void resample(){Arrays.fill(contexts,null);next=0;}
-    private RuleSet.Context context(int x,int z,GenerationPreview.Sample sample){int y=surface&&sample.occupied()?Math.clamp(sample.surfaceY()+1,preview.minY(),preview.maxY()):planeY;var biome=preview.biomeAt(x,y,z).orElseThrow(()->new IllegalStateException("A sampled biome has no registry ID."));return new RuleSet.Context(dimension,biome,x,y,z,seed,mods);}
+    private RuleSet.Context context(int x,int z,GenerationPreview.Sample sample){int y=surface&&sample.occupied()?Math.clamp(sample.surfaceY()+1,preview.minY(),preview.maxY()):planeY;var biome=preview.biomeAt(x,y,z).orElseThrow(()->new IllegalStateException("A sampled biome has no registry ID."));return new RuleSet.Context(dimension,biome,x,y,z,seed,mods,preview.regions());}
     @Override public void tick(){
         super.tick();if(problem!=null||rules.isEmpty())return;long until=System.nanoTime()+3_000_000L;
         try{for(int count=0;next<contexts.length&&count<64&&System.nanoTime()<until;count++,next++){

@@ -13,6 +13,7 @@ Omitted conditions match every candidate. All supplied conditions must pass.
 | `dimensions`, `biomes` | Up to 16 registry IDs each. The candidate must match an ID in each supplied list. |
 | `min_y`, `max_y` | Inclusive absolute block heights. |
 | `region` | Inclusive `min_x`, `max_x`, `min_z`, `max_z`; supply all four. |
+| `named_region` | Version 2: existing terrain-region `name`, optional `mode` (`mask` or `winner`) and `exclude` boolean. |
 | `distance` | Inclusive horizontal radius from `center_x`, `center_z` (default 0). Requires `max`; `min` defaults to 0. |
 | `seed` | Exact world seed. |
 | `seed_modulus`, `seed_remainder`, `seed_salt` | A deterministic hash of seed and candidate X/Z must have the specified remainder. Defaults: 1, 0, 0. |
@@ -65,7 +66,7 @@ Put `rule_engine` inside the managed generator's `dimension_profile`. Bind its `
 }
 ```
 
-The [floating Sky City example](https://github.com/GWSheridan/World-Architect/tree/v1.3.0/examples/worldgen-rules) includes every action type, competing templates, rejected filters and generated-marker join/respawn policies.
+The [floating Sky City example](https://github.com/GWSheridan/World-Architect/tree/v1.4.0/examples/worldgen-rules) includes every action type, competing templates, rejected filters and generated-marker join/respawn policies.
 
 ## Inspection and protection
 
@@ -76,3 +77,9 @@ Rules, engine version, template definitions and declared mod dependencies are co
 Profiles without `rule_engine` keep the original generation path and serialize without an added engine field, preserving older snapshots. Back up the complete world, including generation files, template archives, administration settings and island ledger, before upgrading.
 
 The [Rule Inspector](Rule-Inspector.md) visualizes condition coverage, explains coordinates and reports order and conservative conflicts without creating chunks.
+
+## Shared terrain regions
+
+Choose **Named terrain region** in the rule editor to reuse a region from that dimension's terrain profile. `mask` tests its inclusive geometric bounds. `winner` also requires that it wins over other containing regions by priority and then list order. Height feathering and biome transition weights do not shrink these masks. `exclude: true` inverts a known region's result; unknown or missing regions still fail closed. A named spawn condition must target its own dimension. Void has no regional terrain and refuses named references.
+
+For example, `"when": {"named_region": {"name": "forest", "mode": "winner", "exclude": false}}` requires a root engine `"version": 2`. Version 1 keeps its previous encoding and evaluator. Material, ore and decoration writes use the same condition; every template cell must satisfy its spatial filters. [Rule Inspector](Rule-Inspector.md) uses that evaluator for region overlays and coordinate explanations. See the complete [shared-regions example](https://github.com/GWSheridan/World-Architect/tree/v1.4.0/examples/shared-regions).

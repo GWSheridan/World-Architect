@@ -9,7 +9,7 @@ The map samples a fixed 48 × 48 grid. Choose a rule, pan or zoom, and use **Coo
 | All conditions | The existing evaluator's combined dimension, biome, height, region, distance, seed, mod and dependency decision |
 | Biome filter | Only the selected rule's biome condition |
 | Height filter | Only its inclusive Y range |
-| Region filter | Only its inclusive rectangular region |
+| Region filter | Its inclusive rectangle and named terrain-region mask/winner condition |
 | Distance filter | Only its inclusive radial distance range |
 
 Green means the displayed condition passes; red means it fails. Cyan marks the native End arena, where custom generation actions are excluded. Separate-filter views intentionally omit the other conditions. Biomes are sampled at the inspected Y.

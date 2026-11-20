@@ -1,0 +1,27 @@
+import {validateScenario} from './scenario.mjs';
+const object=(v,keys)=>{if(!v||typeof v!=='object'||Array.isArray(v)||Object.keys(v).some(k=>!keys.includes(k)))throw Error('Unknown or malformed batch field');};
+const list=(v,min,max)=>{if(!Array.isArray(v)||v.length<min||v.length>max)throw Error('Batch list exceeds its bounds');};
+const name=s=>typeof s==='string'&&/^[a-z0-9_-]{1,40}$/.test(s);
+const hash=s=>typeof s==='string'&&/^[a-f0-9]{64}$/.test(s);
+const path=s=>typeof s==='string'&&s.length<=512&&s.length>0&&!/^[\\/]|^[A-Za-z]:|[\x00\r\n:]/.test(s);
+function unique(values){if(new Set(values).size!==values.length)throw Error('Duplicate batch identity');}
+export function validateBatch(b){
+    object(b,['format','budgets','scenarios','versions','providers','seeds']);if(b.format!==1)throw Error('Unsupported batch format');
+    object(b.budgets,['max_jobs','timeout_seconds']);if(!Number.isInteger(b.budgets.max_jobs)||b.budgets.max_jobs<1||b.budgets.max_jobs>32||!Number.isInteger(b.budgets.timeout_seconds)||b.budgets.timeout_seconds<30||b.budgets.timeout_seconds>14400)throw Error('Invalid batch budgets');
+    list(b.versions,1,4);for(const v of b.versions){object(v,['name','jar','sha256','fixture','fixture_sha256']);if(!name(v.name)||!path(v.jar)||!path(v.fixture)||!hash(v.sha256)||!hash(v.fixture_sha256))throw Error('Invalid version input');}unique(b.versions.map(v=>v.name));
+    list(b.scenarios,1,8);for(const s of b.scenarios){object(s,['name','file','sha256','versions','expected_status','expected_error']);if(!name(s.name)||!path(s.file)||!hash(s.sha256))throw Error('Invalid scenario input');if(s.versions!==undefined){list(s.versions,1,4);unique(s.versions);if(s.versions.some(n=>!b.versions.some(v=>v.name===n)))throw Error('Unknown selected version');}if(!['passed','failed'].includes(s.expected_status||'passed'))throw Error('Invalid expected status');if((s.expected_status==='failed'||s.expected_error!==undefined)&&(typeof s.expected_error!=='string'||s.expected_error.length<8||s.expected_error.length>200||/[\r\n]/.test(s.expected_error)))throw Error('An expected failure requires a specific error substring');}unique(b.scenarios.map(s=>s.name));
+    if(b.seeds!==undefined){list(b.seeds,1,8);for(const seed of b.seeds)if(typeof seed!=='string'||! /^-?\d{1,20}$/.test(seed)||BigInt(seed)<-9223372036854775808n||BigInt(seed)>9223372036854775807n)throw Error('Batch seeds must be signed 64-bit strings');unique(b.seeds);}
+    if(b.providers!==undefined){list(b.providers,1,4);for(const p of b.providers){object(p,['name','mods','files']);if(!name(p.name)||!path(p.mods))throw Error('Invalid provider path');object(p.files,Object.keys(p.files||{}));if(Object.keys(p.files).length>32||Object.entries(p.files).some(([file,sha])=>!/^[a-zA-Z0-9+_.-]{1,160}\.jar$/.test(file)||['worldarchitect.jar','validation.jar'].includes(file)||!hash(sha)))throw Error('Invalid provider fingerprints');}unique(b.providers.map(p=>p.name));}
+    const jobs=b.scenarios.reduce((n,s)=>n+(s.versions||b.versions).length,0)*(b.providers?.length||1)*(b.seeds?.length||1);if(jobs>b.budgets.max_jobs)throw Error('Expanded batch exceeds max_jobs');return b;
+}
+export function expandBatch(b,scenarios){
+    validateBatch(b);let chunks=0;const jobs=[];
+    for(const s of b.scenarios){const original=validateScenario(scenarios.get(s.name));for(const v of b.versions.filter(v=>!s.versions||s.versions.includes(v.name)))for(const p of b.providers||[{name:'default'}])for(const seed of b.seeds||[null]){
+        const scenario=structuredClone(original);if(seed!==null)for(const run of scenario.runs)run.seed=seed;validateScenario(scenario);
+        chunks+=scenario.runs.reduce((n,r)=>n+r.regions.reduce((a,r)=>a+r.width*r.depth,0),0);
+        jobs.push({name:`job_${String(jobs.length+1).padStart(2,'0')}`,scenario:s.name,version:v.name,provider:p.name,seed,document:scenario,expected:s.expected_status||'passed',expected_error:s.expected_error});
+    }}
+    if(chunks>8192)throw Error('Expanded batch requests more than 8192 chunks');return {jobs,chunks};
+}
+const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export function batchHtml(report){return `<!doctype html><html lang="en"><meta charset="utf-8"><title>World Architect test batch</title><style>body{font:16px system-ui;margin:2rem;color:#19222c}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccd3db;padding:.5rem;text-align:left}code{overflow-wrap:anywhere}.passed{color:#176534}.failed{color:#a21d24}</style><h1>World Architect test batch</h1><p class="${report.status==='passed'?'passed':'failed'}">${escape(report.status)}</p><p>Local reports. Durations include startup and checks; they are not generation benchmarks.</p><table><thead><tr><th>Scenario</th><th>Version</th><th>Providers</th><th>Seed override</th><th>Expected</th><th>Actual</th><th>Seconds</th><th>Result</th></tr></thead><tbody>${report.jobs.map(j=>`<tr><td>${escape(j.scenario)}</td><td>${escape(j.version)}</td><td>${escape(j.provider)}</td><td>${escape(j.seed??'original')}</td><td>${escape(j.expected)}</td><td>${escape(j.actual??'not run')}</td><td>${j.elapsed_ms===undefined?'':(j.elapsed_ms/1000).toFixed(2)}</td><td>${escape(j.status)}</td></tr>`).join('')}</tbody></table><p>${escape(report.error||'')}</p><p>Input fingerprints and per-run generation hashes are in results.json and the individual job reports.</p></html>`;}

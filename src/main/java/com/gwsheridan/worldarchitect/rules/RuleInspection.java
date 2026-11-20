@@ -13,7 +13,7 @@ public final class RuleInspection {
     public static boolean distance(RuleSet.Condition condition,RuleSet.Context context){return condition.distance().map(d->{long x=(long)context.x()-d.centerX(),z=(long)context.z()-d.centerZ(),s=x*x+z*z;return s>=(long)d.min()*d.min()&&s<=(long)d.max()*d.max();}).orElse(true);}
     public static boolean overlay(Overlay overlay,RuleSet rules,int index,RuleSet.Context context){
         var when=rules.ordered().get(index).when();
-        return switch(overlay){case ALL->(rules.matches(context)&1L<<index)!=0;case BIOME->when.biomes().isEmpty()||when.biomes().contains(context.biome());case HEIGHT->when.height(context.y());case REGION->region(when,context);case DISTANCE->distance(when,context);};
+        return switch(overlay){case ALL->(rules.matches(context)&1L<<index)!=0;case BIOME->when.biomes().isEmpty()||when.biomes().contains(context.biome());case HEIGHT->when.height(context.y());case REGION->region(when,context)&&when.namedRegion().map(r->r.matches(context)).orElse(true);case DISTANCE->distance(when,context);};
     }
     public static List<Trace> trace(RuleSet rules,RuleSet.Context context){
         rules.validate().getOrThrow(IllegalArgumentException::new);var result=new ArrayList<Trace>();var matched=new HashSet<String>();long bits=rules.matches(context);
@@ -22,6 +22,7 @@ public final class RuleInspection {
             checks.put("dimension",c.dimensions().isEmpty()||c.dimensions().contains(context.dimension()));
             checks.put("biome",c.biomes().isEmpty()||c.biomes().contains(context.biome()));checks.put("height",c.height(context.y()));
             checks.put("region",region(c,context));checks.put("distance",distance(c,context));
+            c.namedRegion().ifPresent(r->checks.put("named region "+r.name()+" ("+r.mode().getSerializedName()+(r.exclude()?", excluded":"")+")",r.matches(context)));
             checks.put("exact seed",c.seed().map(s->s==context.seed()).orElse(true));checks.put("required mods",context.mods().containsAll(c.mods()));
             checks.put("seeded coordinate",Math.floorMod(RuleSet.hash(context.seed(),context.x(),context.z(),c.seedSalt()),c.seedModulus())==c.seedRemainder());
             checks.put("dependencies",matched.containsAll(rule.requires()));

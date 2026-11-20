@@ -35,7 +35,8 @@ final class AssemblyStudioScreen extends Screen {
         add("Remove",left+2*(third+4),height-102,third,()->send("remove",""+selected)).active=!modules.isEmpty();
         add("Export datapack",left,height-78,half,()->export(false)).active=data.getBooleanOr("valid",false);
         add("Export preset",left+half+4,height-78,half,()->export(true)).active=data.getBooleanOr("valid",false)&&data.getBooleanOr("can_bundle",false);
-        add("Close",left,height-26,span,this::onClose);
+        add(data.getBooleanOr("recovery_pending",false)?"Recovery available":"History / organize",left,height-26,half,()->{var view=data.copy();view.putInt("selected",selected);minecraft.gui.setScreen(new AssemblyHistoryScreen(view));}).active=active();
+        add("Close",left+half+4,height-26,half,this::onClose);
     }
     private boolean active(){return data.getBooleanOr("active",false);}
     private void details(){var module=modules.get(selected);var lines=new ArrayList<String>();lines.add("Assembly: "+data.getStringOr("id",""));lines.add("Module: "+module.getStringOr("name",""));lines.add("Source: "+module.getStringOr("source","")+" · captured revision "+module.getIntOr("snapshot_revision",0));lines.add("Offset: "+Arrays.toString(module.getIntArray("offset").orElse(new int[3])));lines.add("Size: "+Arrays.toString(module.getIntArray("size").orElse(new int[3])));lines.add("Rotation: "+module.getStringOr("rotation","")+" · mirror: "+module.getStringOr("mirror",""));lines.add("Placement rules: "+module.getStringOr("rules",""));lines.add("Dependencies: "+data.getStringOr("dependencies","").replaceFirst("^$","Minecraft only"));lines.add("Editing a source template later does not replace this module's saved snapshot.");minecraft.gui.setScreen(new StudioReportScreen(this,"Module details",lines));}
@@ -71,8 +72,8 @@ final class AssemblyStudioScreen extends Screen {
         form(bundle?"Export assembly preset":"Export assembly datapack",bundle?"Exports create a new flat-stone dimension. Other profiles are retained; the End keeps its native arena.":"The ZIP is written under generated/worldarchitect/assembly-exports. Install it in a new world or pack.",fields,v->{Identifier.parse(v.get(0));if(bundle){Identifier.parse(v.get(1));Long.parseLong(v.get(3));if(!v.get(2).matches("[a-zA-Z0-9][a-zA-Z0-9._-]{0,39}"))return "Choose a simple preset release.";}return "";},v->send(bundle?"bundle":"datapack",String.join(" ",v)));
     }
     private void discard(Runnable next){
-        if(!data.getBooleanOr("dirty",false)){next.run();return;}
-        minecraft.gui.setScreen(new StudioConfirmScreen(answer->{if(answer)next.run();else minecraft.gui.setScreen(this);},Component.literal("Discard assembly changes?"),Component.literal("Unsaved module edits will be discarded. Saved drafts and exports remain available."),Component.literal("Discard changes"),Component.literal("Keep editing")));
+        if(!data.getBooleanOr("dirty",false)&&!data.getBooleanOr("recovery_pending",false)){next.run();return;}
+        minecraft.gui.setScreen(new StudioConfirmScreen(answer->{if(answer)next.run();else minecraft.gui.setScreen(this);},Component.literal("Discard assembly changes?"),Component.literal("Unsaved module edits and pending recovery will be discarded. Saved drafts and exports remain available."),Component.literal("Discard changes"),Component.literal("Keep editing")));
     }
     @Override public void onClose(){discard(()->{if(active())send("close","");minecraft.gui.setScreen(null);});}
     @Override public boolean isPauseScreen(){return false;}
