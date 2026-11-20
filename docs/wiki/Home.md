@@ -10,8 +10,4 @@ Start with [Installation](Installation.md) and [Getting Started](Getting-Started
 
 Existing worlds keep the generation settings they were created with. Changes to a preset affect future worlds. Read [Backups and Upgrades](Backups-and-Upgrades.md) before updating a server.
 
-New in 1.4: [draft history and recovery](Draft-History.md), shared [terrain-region rules](World-Generation-Rules.md), constrained [procedural pools](Procedural-Pools.md), in-game [scenario authoring](Test-Workbench.md) and [batch comparisons](Batch-Testing.md). These guides cover 1.6.0; earlier releases remain available.
-
-New in 1.5: polygon [region outlines](Regional-Terrain.md), surface/seabed/fixed [assembly anchors](Assembly-Studio.md), [vertical pools](Procedural-Pools.md) and the read-only [structure site inspector](Structure-Site-Inspector.md).
-
-The 1.6 candidate adds composite regions, structure foundations, captured themes and variants, and batch site finding. The live wiki and latest public release remain on 1.5 until publication.
+New in 1.6: combine named [terrain regions](Regional-Terrain.md), add [foundations and weighted themes](Assembly-Studio.md) to generated structures, and [search native structure sites](Structure-Site-Inspector.md). Earlier releases remain available on the releases page.

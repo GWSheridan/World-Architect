@@ -7,7 +7,7 @@ Created and maintained by **GWSHERIDAN**.
 
 See the [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
-This branch prepares World Architect 1.6.0: composite terrain regions, bounded foundations, weighted structure themes and batch site searches. The current public release remains [1.5.0](https://github.com/GWSheridan/World-Architect/releases/tag/v1.5.0). See the [changelog](CHANGELOG.md) for details.
+World Architect 1.6.0 adds composite terrain regions, bounded foundations, weighted structure themes and batch site searches. [Download 1.6.0](https://github.com/GWSheridan/World-Architect/releases/tag/v1.6.0) or read the [changelog](CHANGELOG.md).
 
 ## Get started
 

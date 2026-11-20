@@ -1,6 +1,6 @@
 # Installation
 
-Install NeoForge **26.3.0.103** for Minecraft Java **26.3** and use a 64-bit **Java 25** runtime. Download `worldarchitect-1.6.0.jar` from the candidate distribution and place it in the instance's `mods/` directory. Install matching mod and provider versions on clients and servers, then restart.
+Install NeoForge **26.3.0.103** for Minecraft Java **26.3** and use a 64-bit **Java 25** runtime. Download `worldarchitect-1.6.0.jar` from the [1.6.0 release](https://github.com/GWSheridan/World-Architect/releases/tag/v1.6.0) and place it in the instance's `mods/` directory. Install matching mod and provider versions on clients and servers, then restart.
 
 In **Create New World → World**, choose **World Architect · Dimensions** and open **Customize**. [Getting Started](Getting-Started.md) walks through a first world.
 
@@ -17,6 +17,10 @@ In **Create New World → World**, choose **World Architect · Dimensions** and 
 | `pool-demo-1.6.0.zip` | Unlocked procedural assembly pool example |
 | `shared-regions-1.6.0.zip` | Shared region conditions and strictly filtered writes |
 | `constrained-pool-1.6.0.zip` | Required rooms and count/depth limits |
+| `polygon-regions-1.6.0.zip` | Convex and concave region outlines |
+| `coastal-ruins-1.6.0.zip` | Surface, seabed and fixed-height structure anchors |
+| `vertical-tower-1.6.0.zip` | Vertical pool connections and shaft clearance |
+| `locked-archipelago-1.6.0.zip` | Fully locked islands, polygon highlands and native End progression |
 | `composite-regions-1.6.0.zip` | Union, intersection and subtraction example |
 | `foundation-platform-1.6.0.zip`, `themed-platform-1.6.0.zip` | Bounded supports, palettes and captured variants |
 | `SHA256SUMS-1.6.0.txt` | SHA-256 checksums for all twenty-one other downloads |
