@@ -57,7 +57,7 @@ In 1.6, **Settings → Foundation and clearance** enables preparation for genera
 
 Supports must reach stable base terrain within the chosen depth. Clearance can remove ordinary breakable terrain. Water requires explicit opt-in; containers, protected blocks, lava and waterlogged solids are refused. A complete plan supports at most 4,096 preparation cells and 32 preparation pieces, within the overall 65,536-cell assembly budget. Height, world bounds, biome restrictions, generation-rule write filtering and native End reservations apply to preparation too. A failed base-terrain plan rejects the whole start. If later world generation introduces protected live blocks, the affected piece skips that chunk's writes and preserves them.
 
-Definitions add `"foundation": {"version": 1, "mode": "footprint", "material": {"Name": "minecraft:cobblestone"}, "max_depth": 8, "clear_height": 2, "replace_water": false}`. Saved native pieces carry their preparation and embedded snapshots across restarts. Existing definitions omit the field and keep their previous behavior. Preview the result and test actual generated chunks before shipping a pack; manual structure-library placement does not run this preparation.
+Definitions add `"foundation": {"version": 1, "mode": "footprint", "material": "minecraft:cobblestone", "max_depth": 8, "clear_height": 2, "replace_water": false}`. Saved native pieces carry their preparation and embedded snapshots across restarts. Existing definitions omit the field and keep their previous behavior. Preview the result and test actual generated chunks before shipping a pack; manual structure-library placement does not run this preparation.
 
 ## Themes and captured variants
 
