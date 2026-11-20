@@ -32,7 +32,7 @@ try {
             if(-not $?){throw "Benchmark failed: $pair/$version"}
         }
         $toolchain=@();if($Jdk21){$toolchain+="-Porg.gradle.java.installations.paths=$Jdk21"}
-        & ./gradlew.bat auditBenchmarkWorlds --offline --console=plain "-PbenchmarkBaseline=$directory/bench-baseline" "-PbenchmarkCandidate=$directory/bench-candidate" @toolchain
+        & ./gradlew.bat auditBenchmarkWorlds --offline --console=plain "-PbenchmarkBaseline=$directory/bench-baseline" "-PbenchmarkCandidate=$directory/bench-candidate" "-PbenchmarkSize=$MeasuredSize" "-PbenchmarkSamples=$Samples" @toolchain
         if($LASTEXITCODE -ne 0){throw "Saved-region comparison failed: $pair"}
     }
     & node ./tools/validation/compare-performance.mjs $destination

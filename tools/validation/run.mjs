@@ -124,7 +124,8 @@ try {
             running.send('wa_validate regional_generation '+(stage==='fresh'?1:2));await running.wait('WA_REGIONAL_GENERATION_PASS');
         } else if(options['--assembly']||options['--pool']) {
             if(!options['--dimension'])throw Error('Assembly validation requires a dimension');
-            running.send(`wa_validate ${options['--pool']?'pool_generation':'assembly_generation'} ${options['--pool']||options['--assembly']} ${options['--dimension']} ${stage==='fresh'?64:65}`);await running.wait(options['--pool']?'WA_POOL_GENERATION_PASS':'WA_ASSEMBLY_GENERATION_PASS');
+            if(options['--pool']&&stage==='restart'){running.send(`wa_validate pool_generation ${options['--pool']} ${options['--dimension']} 64`);await running.wait(`WA_POOL_GENERATION_PASS dimension=${options['--dimension']} region=64`);}
+            running.send(`wa_validate ${options['--pool']?'pool_generation':'assembly_generation'} ${options['--pool']||options['--assembly']} ${options['--dimension']} ${stage==='fresh'?64:65}`);await running.wait(options['--pool']?`WA_POOL_GENERATION_PASS dimension=${options['--dimension']} region=${stage==='fresh'?64:65}`:'WA_ASSEMBLY_GENERATION_PASS');
         } else {
             const base = stage === 'fresh' ? 16000 : 32000, end = base + 48;
             const dimension=options['--dimension']||'minecraft:overworld';

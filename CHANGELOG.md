@@ -6,6 +6,7 @@
 - Added coordinate-based rectangle and circle regions, priority, biome selection and smooth height transitions in opt-in generator version 3.
 - Added procedural assembly pools with named connections, weighted modules, branches, end caps and seeded layout previews.
 - Added a modpack test workbench with fingerprinted scenarios, disposable dedicated servers, explicit probes and bounded jobs.
+- Fixed assembly preset exports for mod-added dimensions outside the selected starting preset.
 - Extended same-host benchmark sampling to 64 warmup chunks and five measured batches per profile.
 - Retained API 1 constructors and existing version 1/2 terrain, static assemblies, saved generation resources and native End policies. Authoring networking requires matching 1.3 clients and servers.
 

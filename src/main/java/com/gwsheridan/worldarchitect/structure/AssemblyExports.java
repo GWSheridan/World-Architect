@@ -59,7 +59,7 @@ final class AssemblyExports {
     }
     static Path bundle(MinecraftServer server, AssemblyDraft draft, Identifier id, Identifier dimension, String release, long seed, String author) throws IOException {
         target(server, id);
-        var dimensions = server.getWorldGenSettings().dimensions();
+        var dimensions = new net.minecraft.world.level.levelgen.WorldDimensions(server.registryAccess().lookupOrThrow(Registries.LEVEL_STEM));
         var key = ResourceKey.create(Registries.LEVEL_STEM, dimension);
         var stem = dimensions.dimensions().get(key);
         if (stem == null) throw new IOException("Unknown dimension " + dimension);

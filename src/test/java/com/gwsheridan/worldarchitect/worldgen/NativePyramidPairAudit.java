@@ -13,9 +13,12 @@ public final class NativePyramidPairAudit {
 
     public static void main(String[] args) throws Exception {
         Path left = Path.of(args[0]), right = Path.of(args[1]);
+        int size=args.length>2?Integer.parseInt(args[2]):6,samples=args.length>3?Integer.parseInt(args[3]):2;
+        require(size>=6&&size<=8&&samples>=2&&samples<=5,"Invalid benchmark sampling plan");
+        int[] origins=Arrays.copyOf(new int[]{1000,-1000,2000,-2000,3000},samples);
         var a = new HashMap<String, CompoundTag>(); var b = new HashMap<String, CompoundTag>();
         var footprints = new HashSet<Footprint>(); var starts = new HashSet<Long>();
-        for (int origin : new int[]{1000, -1000}) for (int x = origin; x < origin + 6; x++) for (int z = origin; z < origin + 6; z++) {
+        for (int origin : origins) for (int x = origin; x < origin + size; x++) for (int z = origin; z < origin + size; z++) {
             var old = chunk(left, x, z, a); var current = chunk(right, x, z, b);
             require(Objects.equals(old.getCompoundOrEmpty("structures").get("References"), current.getCompoundOrEmpty("structures").get("References")), "Structure references changed");
             for (var value : old.getCompoundOrEmpty("structures").getCompoundOrEmpty("References").entrySet()) {
@@ -34,7 +37,7 @@ public final class NativePyramidPairAudit {
         }
         require(!footprints.isEmpty(), "No pyramid footprint in this fixture");
         long changedInside = 0, checkedOutside = 0; int changedHeightmapColumns = 0;
-        for (int origin : new int[]{1000, -1000}) for (int x = origin; x < origin + 6; x++) for (int z = origin; z < origin + 6; z++) {
+        for (int origin : origins) for (int x = origin; x < origin + size; x++) for (int z = origin; z < origin + size; z++) {
             var old = chunk(left, x, z, a); var current = chunk(right, x, z, b);
             require(old.getStringOr("Status", "").equals("minecraft:full") && current.getStringOr("Status", "").equals("minecraft:full"), "Incomplete measured chunk");
             var sections = new HashMap<Integer, CompoundTag>();
@@ -61,7 +64,7 @@ public final class NativePyramidPairAudit {
                 }
             }
         }
-        System.out.println("WA_NATIVE_PYRAMID_DIAGNOSTIC_PASS chunks=72 footprints=" + footprints.size() + " changed_start_records=" + shifted
+        System.out.println("WA_NATIVE_PYRAMID_DIAGNOSTIC_PASS chunks="+(size*size*samples)+" footprints=" + footprints.size() + " changed_start_records=" + shifted
             + " changed_native_blocks=" + changedInside + " changed_native_heightmap_entries=" + changedHeightmapColumns + " strict_outside_block_positions=" + checkedOutside + " biomes=identical");
     }
 

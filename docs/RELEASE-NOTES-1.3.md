@@ -7,6 +7,8 @@ World Architect 1.3 adds saved-world inspection, regional terrain, procedural as
 - **Procedural pools:** connect weighted rooms, halls, branches and end caps with seeded previews and bounded generation.
 - **Test workbench:** export fingerprinted scenarios and run isolated dedicated servers with explicit probes, startup expectations, restart checks and local reports.
 
+Assembly exports now include live mod-added dimensions that are absent from the selected starting preset.
+
 API 1 remains supported. Existing version 1/2 terrain, static assemblies, saved templates, island assignments and native End policies retain their formats and behaviour. New regional profiles and pool definitions require 1.3. Use matching 1.3 clients and servers for authoring networking. Changed defaults affect new worlds; they do not migrate existing saves.
 
 Back up the complete world and keep its original snapshot, settings, archived bundle and provider mods. Restore missing dependencies instead of replacing saved generation files. Reports and test results stay local unless deliberately shared.

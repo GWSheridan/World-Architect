@@ -151,7 +151,7 @@ tasks.register('auditBenchmarkWorlds', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     javaLauncher = javaToolchains.launcherFor(java.toolchain)
     mainClass = 'com.gwsheridan.worldarchitect.worldgen.BenchmarkWorldAudit'
-    argumentProviders.add({ [file(providers.gradleProperty('benchmarkBaseline').get()).absolutePath, file(providers.gradleProperty('benchmarkCandidate').get()).absolutePath, providers.gradleProperty('benchmarkNativeControl').map { file(it).absolutePath }.orElse('').get()] } as CommandLineArgumentProvider)
+    argumentProviders.add({ [file(providers.gradleProperty('benchmarkBaseline').get()).absolutePath, file(providers.gradleProperty('benchmarkCandidate').get()).absolutePath, providers.gradleProperty('benchmarkNativeControl').map { file(it).absolutePath }.orElse('').get(), providers.gradleProperty('benchmarkSize').orElse('6').get(), providers.gradleProperty('benchmarkSamples').orElse('2').get()] } as CommandLineArgumentProvider)
 }
 tasks.register('auditStudioWorld', JavaExec) {
     group = 'verification'
@@ -304,5 +304,6 @@ tasks.register('auditNativePyramidPair', JavaExec) {
     javaLauncher = javaToolchains.launcherFor(java.toolchain)
     mainClass = 'com.gwsheridan.worldarchitect.worldgen.NativePyramidPairAudit'
     argumentProviders.add({ [file(providers.gradleProperty('baselineWorld').get()).absolutePath,
-        file(providers.gradleProperty('candidateWorld').get()).absolutePath] } as CommandLineArgumentProvider)
+        file(providers.gradleProperty('candidateWorld').get()).absolutePath,
+        providers.gradleProperty('benchmarkSize').orElse('6').get(), providers.gradleProperty('benchmarkSamples').orElse('2').get()] } as CommandLineArgumentProvider)
 }

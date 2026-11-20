@@ -106,13 +106,19 @@ final class Cycle13Acceptance {
     }
     static void generated(MinecraftServer server,Identifier id,Identifier dimension,int region)throws Exception {
         var level=server.getLevel(ResourceKey.create(Registries.DIMENSION,dimension));require(level!=null,"Missing pool dimension");var holder=server.registryAccess().lookupOrThrow(Registries.STRUCTURE).getOrThrow(ResourceKey.create(Registries.STRUCTURE,id));var state=level.getChunkSource().getGeneratorState();
+        var receipt=ModpackRuntime.directory().resolve("validation-pool-"+UUID.nameUUIDFromBytes((id+"/"+dimension+"/"+region).getBytes(java.nio.charset.StandardCharsets.UTF_8))+".json");
+        var previous=Files.exists(receipt)?com.google.gson.JsonParser.parseString(Files.readString(receipt)).getAsJsonObject():null;
         for(var placement:state.getPlacementsForStructure(holder))if(placement instanceof net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement spread){
-            for(int attempt=0;attempt<8;attempt++){var candidate=spread.getPotentialStructureChunk(state.getLevelSeed(),(region+attempt)*spread.spacing(),region*spread.spacing());var start=level.getChunk(candidate.x(),candidate.z()).getStartForStructure(holder.value());if(start==null||!start.isValid())continue;
+            for(int attempt=0;attempt<(previous==null?8:1);attempt++){var candidate=previous==null?spread.getPotentialStructureChunk(state.getLevelSeed(),(region+attempt)*spread.spacing(),region*spread.spacing()):new ChunkPos(previous.get("x").getAsInt(),previous.get("z").getAsInt());var start=level.getChunk(candidate.x(),candidate.z()).getStartForStructure(holder.value());if(start==null||!start.isValid()){require(previous==null,"Saved pool start was lost");continue;}
                 var bounds=start.getBoundingBox();for(int x=bounds.minX()>>4;x<=bounds.maxX()>>4;x++)for(int z=bounds.minZ()>>4;z<=bounds.maxZ()>>4;z++)level.getChunk(x,z);
                 require(start.getPieces().size()>=5&&start.getPieces().size()<=8,"Saved pool module count differs");int cells=0,markers=0;
                 for(var piece:start.getPieces()){var entry=call(piece,"entry");var origin=(BlockPos)call(piece,"origin");var template=(NativeTemplate)call(entry,"template");for(var cell:template.blocks()){var pos=origin.offset(cell.pos());require(level.getBlockState(pos)==cell.state(),"Generated pool state differs");if(cell.metadata()!=null&&cell.metadata().contains("CustomName")){var chest=(net.minecraft.world.level.block.entity.ChestBlockEntity)level.getBlockEntity(pos);require(chest.getName().getString().equals("Pool supplies")&&chest.isEmpty(),"Pool chest metadata differs");}cells++;}
                     for(var marker:((Map<?,?>)call(entry,"markers")).values()){var pos=origin.offset((BlockPos)call(marker,"pos"));require(level.getBlockState(pos).isAir()&&level.getBlockState(pos.above()).isAir()&&!level.getBlockState(pos.below()).isAir(),"Pool marker unsafe");markers++;}}
-                require(markers==start.getPieces().size(),"Pool marker missing");System.out.println("WA_POOL_GENERATION_PASS dimension="+dimension+" region="+region+" cells="+cells+" markers="+markers);return;
+                var signature=new StringBuilder();for(var piece:start.getPieces())signature.append(call(piece,"name")).append(call(piece,"origin")).append(call(call(piece,"entry"),"toTag"));
+                String sha=HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(signature.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+                if(previous!=null)require(previous.get("pieces_sha256").getAsString().equals(sha),"Saved pool templates, transforms or markers changed");
+                else{var saved=new com.google.gson.JsonObject();saved.addProperty("x",candidate.x());saved.addProperty("z",candidate.z());saved.addProperty("pieces_sha256",sha);Files.writeString(receipt,saved+"\n",StandardOpenOption.CREATE_NEW);}
+                require(markers==start.getPieces().size(),"Pool marker missing");System.out.println("WA_POOL_GENERATION_PASS dimension="+dimension+" region="+region+" cells="+cells+" markers="+markers+" persisted="+(previous!=null));return;
             }
         }throw new AssertionError("No complete procedural structure generated");
     }
