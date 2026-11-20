@@ -13,7 +13,9 @@ In **Create New World → World**, choose **World Architect · Dimensions** and 
 | `studio-skyblock-1.3.0.zip` | Fully locked multiplayer Skyblock preset |
 | `single-block-1.3.0.zip`, `layered-1.3.0.zip`, `skyblock-1.3.0.zip`, `custom-end-1.3.0.zip` | Unlocked creator starters |
 | `assembly-demo-1.3.0.zip` | Unlocked two-module Assembly Studio example |
-| `SHA256SUMS-1.3.0.txt` | SHA-256 checksums for the ten downloads above |
+| `regional-demo-1.3.0.zip` | Unlocked regional terrain example |
+| `pool-demo-1.3.0.zip` | Unlocked procedural assembly pool example |
+| `SHA256SUMS-1.3.0.txt` | SHA-256 checksums for all twelve downloads |
 
 Keep preset bundles zipped. They belong in `config/worldarchitect/bundles/`, not `mods/`. See [Locks and Server Enforcement](Locks-and-Server-Enforcement.md).
 
