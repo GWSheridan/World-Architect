@@ -9,3 +9,5 @@ Use `/wa_inspect` with permission level 3 to inspect the original generation sna
 The Inspector verifies snapshot/settings consistency and the archived ZIP's size and SHA-256. A healthy result does not certify another modpack's providers. Dependency lists show at most 24 IDs per section and 64 saved dimensions. Comparisons stop after 65,536 visited nodes, 256 changes or 48 nested levels and report truncation.
 
 If a snapshot, settings file or archived bundle is missing or inconsistent, restore the matching files from a complete backup. Loading may remain blocked before commands become available. Never replace an original snapshot with current defaults. See [Backups and Upgrades](Backups-and-Upgrades.md).
+
+The displayed version number comes from the stored solid-terrain profile. A native or void generator can show `0` when it has no explicit terrain-profile version; its own codec and pinned resources still govern loading.

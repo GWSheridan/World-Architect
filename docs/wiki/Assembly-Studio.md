@@ -34,3 +34,5 @@ Editing sessions expire after 30 minutes without an action. Save before leaving.
 Back up drafts with the complete world. Exporting a revised assembly affects new worlds; existing saves continue using their pinned definitions and templates.
 
 Version 1.3 adds [Procedural Pools](Procedural-Pools.md) for seeded branching layouts. Static assemblies retain their existing definition and placement path.
+
+Preset exports read the live dimension registry, including mod-added dimensions outside the selected starting preset. Replacing a modded dimension still requires its registered adapter to support Single Block terrain.

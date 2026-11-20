@@ -67,3 +67,25 @@ The [1.2 verification report](maintainers/verification/release-1.2/README.md) re
 ## 1.3 validation
 
 The 1.3 fixture adds immutable Inspector comparisons, region preview/generation checks, pool determinism and bounded failures, and workbench probes. Run `node --test tools/workbench/scenario.test.mjs` for scenario validation. See [Test Workbench](wiki/Test-Workbench.md) for disposable jobs and longer benchmark settings. The published 1.2.0 JAR is the new same-host baseline; earlier verification records remain historical.
+
+The corrected 1.3 gameplay JAR passed [Windows and Linux CI](https://github.com/GWSheridan/World-Architect/actions/runs/44660328512): 70 JUnit tests, six exported assembly cases, six pinned public-mod comparisons against 1.2.0, nine clean example installations and four workbench integration cases on each platform. The additional empty-void safe-spawn rejection passed locally, bringing the workbench integration set to five cases.
+
+Seven copied older saves produced 224 unexplored chunks identical to the published 1.2.0 baseline; all 732 original source files remained unchanged. The later export fix changed only `AssemblyExports.class`; generation and save-protection classes remained byte-identical. A separate 31-case matrix and three corrupted/unknown/tampered-save cases checked adapter/API versions, locks, native arenas and refusal without overwriting protected data.
+
+Pool starts were reloaded at the same recorded coordinates in the Overworld, Nether, End and the separate API fixture's laboratory dimension. Piece names, templates, transforms and marker fingerprints matched across restart; generated block states, empty named chests and safe marker floors were checked again. The API fixture was also built independently against the shipped API 1 JAR.
+
+Four real clients completed 3,764.968 seconds (62.7 minutes) of exploration and 1,280 requested chunks. Native End entry, first kill/rewards, gateway travel, crystal respawning across restart, the second kill, final player positions, island homes, assignments and generation hashes passed.
+
+Three alternating same-host performance pairs used 64 warmup chunks and five measured batches of 64 chunks per profile. Initial timing flags in Original, Void and structure-heavy, plus Original resident memory, did not reproduce in three fresh pairs of those profiles. The table preserves both sets. Percentages compare medians of complete per-pair generation times and sampled peak resident memory against the published 1.2.0 JAR.
+
+| Profile | Initial time | Initial memory | Repeat time | Repeat memory |
+| --- | ---: | ---: | ---: | ---: |
+| Original | +12.31% | +15.84% | −3.23% | +4.39% |
+| Void | +12.88% | −2.84% | +5.40% | +0.49% |
+| Single Block | −9.16% | +6.98% | — | — |
+| Layered | +9.79% | −10.94% | — | — |
+| Structure-heavy | +11.78% | −3.37% | +5.15% | −9.69% |
+
+The original three-pair managed-terrain checks matched 320 measured chunks per profile and pair. Native pyramid burial offsets of 0–2 blocks varied in two candidate comparisons and in unchanged-1.2.0 controls. Structure references, terrain outside the pyramid footprints and all biomes matched; the repeat pyramid comparisons were identical. Strict old-save comparisons were not relaxed. This benchmark covers the fixed legacy fixtures, not every regional/pool configuration or other modpack.
+
+Raw logs, failed setup attempts, superseded candidates and all timing samples remain in local verification output and CI artifacts; they are not additional release assets. The 1.3 release remains a draft until publication is requested.

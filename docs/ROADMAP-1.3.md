@@ -11,3 +11,5 @@ Milestones 33–37 extend world inspection, regional terrain authoring and bound
 | 37 · Release integration | Compatibility, older saves, End progression, performance, docs and reproducible distribution | Four players, native fight/ritual across restart, 1.2 comparisons, clean source rebuild and prepared GitHub draft |
 
 API 1 signatures, existing saved algorithms, static assemblies and native End policies remain supported. New settings affect new worlds. Assembly budgets remain sixteen modules, 96 blocks per axis and 65,536 occupied cells. Original saves are copied before testing. Verification output remains local by default. Publication of the prepared release requires a separate request.
+
+Milestones 33–36 are implemented and verified. Milestone 37 acceptance passed on Windows/Linux, with four real clients, seven older-save comparisons, persisted custom-dimension pools and the longer benchmark/repeats. Distribution and wiki updates are staged for the 1.3 draft; main, latest and the live wiki remain on 1.2.0 until publication. See [Testing](TESTING.md) for results and limits.

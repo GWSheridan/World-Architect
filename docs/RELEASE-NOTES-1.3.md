@@ -15,4 +15,6 @@ Back up the complete world and keep its original snapshot, settings, archived bu
 
 The distribution includes the JAR, complete ZIP, buildable source ZIP, nine versioned example bundles and SHA-256 checksums. See [World Inspector](wiki/World-Inspector.md), [Regional Terrain](wiki/Regional-Terrain.md), [Procedural Pools](wiki/Procedural-Pools.md) and [Test Workbench](wiki/Test-Workbench.md) for usage.
 
-Release preparation is in progress. This branch and its wiki changes are staged; 1.2.0 remains the public latest release until the 1.3 draft is published. Earlier release files are retained.
+Release checks passed on Windows and Linux with the exact gameplay JAR, including 70 unit tests, public-mod compatibility and nine clean example installs. Seven older-save comparisons matched 224 unexplored chunks and left 732 original files intact. Four real clients completed 62.7 minutes of exploration, native End progression and restart checks. Initial performance flags did not reproduce in three fresh alternating pairs; the original values and repeat results are documented in [Testing](TESTING.md).
+
+The release and wiki changes are prepared for review. 1.2.0 remains the public latest release until the 1.3 draft is published. Earlier release files are retained.
