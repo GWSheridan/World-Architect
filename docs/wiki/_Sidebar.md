@@ -43,4 +43,3 @@
 - [Templates and Bundling](Templates-and-Bundling.md)
 - [Example Presets](Example-Presets.md)
 - [Public API](Public-API.md)
-- [Compatibility and Performance](Compatibility-and-Performance.md)

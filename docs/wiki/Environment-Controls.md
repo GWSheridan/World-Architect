@@ -61,4 +61,4 @@ The server synchronizes settings after edits, joining, respawning and changing d
 
 The server reads earlier administration files without changing them until an administrator saves an edit. Environment edits preserve spawn policies and island protection settings. Generation snapshots, embedded templates and allocation files remain separate. Existing bundle dimension locks also govern environment changes; a full lock rejects them.
 
-Keep the original world files when testing an update. Versions without environment support cannot open an environment-enabled world. See [Compatibility and Performance](Compatibility-and-Performance.md).
+Keep the original world files when testing an update. Versions without environment support cannot open an environment-enabled world. See [Compatibility and Performance](Installation.md#compatibility).

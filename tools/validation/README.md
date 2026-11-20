@@ -26,7 +26,7 @@ This starts two real clients and a dedicated server for staged placement, ordina
 
 The GitHub workflow repeats the dedicated fixture and pinned public-mod matrix on Windows and Linux. `node tools/validation/compatibility.mjs` compares original and managed terrain with the frozen 1.4.0 baseline. Candidate-only failures fail the job; matching identified upstream failures are recorded as blocked. The workflow uploads diagnostics, structured results, JUnit XML and CI server logs. A scheduled workflow is not created; runs follow source changes or a manual dispatch.
 
-The release additionally requires the pack, End progression, dependency rejection, older-save audit, one-hour multiplayer soak and alternating same-host performance suites described in [the roadmap](../../docs/ROADMAP-1.5.md). A passing smoke test does not substitute for those checks.
+The release additionally requires the pack, End progression, dependency rejection, older-save audit, one-hour multiplayer soak and alternating same-host performance suites described by the runners below. A passing smoke test does not substitute for those checks.
 
 `node tools/validation/bundles.mjs` checks all fifteen versioned examples in clean dedicated-server instances. Each successful case compares pinned generation files across restart. For Windows resident-memory comparisons, use `benchmark-pairs.ps1 -BaselineJar <1.1.0.jar> -CandidateJar <candidate.jar> -OutputRoot build/<new-directory>` with other game/build workloads stopped. It runs three alternating pairs and writes a threshold report. A threshold flag requires investigation and a fresh repeat before being classified as a reproducible regression.
 

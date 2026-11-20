@@ -5,9 +5,9 @@ Design each Minecraft dimension before creating a world. Choose terrain and laye
 **Minecraft Java 26.3 · NeoForge 26.3.0.103 · Java 25**
 Created and maintained by **GWSHERIDAN**.
 
-See the [1.5 milestones](docs/ROADMAP-1.5.md) and [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
+See the [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
-World Architect 1.5.0 adds polygon terrain regions, explicit placement anchors, vertical procedural pools and a read-only structure site inspector. See the [release notes](docs/RELEASE-NOTES-1.5.md) for details.
+World Architect 1.5.0 adds polygon terrain regions, explicit placement anchors, vertical procedural pools and a read-only structure site inspector. See the [changelog](CHANGELOG.md) for details.
 
 ## Get started
 
@@ -60,4 +60,4 @@ Use a 64-bit JDK 25:
 
 On Linux or macOS, use `bash ./gradlew` instead. The build uses the pinned Gradle wrapper and NeoForge dependency. The asset downloader also needs JDK 21; select an installed runtime with `-Porg.gradle.java.installations.paths=<JDK21 path>` when needed.
 
-`assembleRelease` writes the mod, source and complete ZIPs, example bundles and checksums to `build/release/`. See [Testing](docs/TESTING.md) and [Public API](docs/wiki/Public-API.md) for development instructions.
+`assembleRelease` writes the mod, source and complete ZIPs, example bundles and checksums to `build/release/`. See [validation runners](tools/validation/README.md) and [Public API](docs/wiki/Public-API.md) for development instructions.

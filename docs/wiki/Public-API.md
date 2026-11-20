@@ -80,7 +80,7 @@ New native extension worlds pin selected adapter IDs/versions/work costs, featur
 
 ## External consumer and verification
 
-[The separate fixture project](https://github.com/GWSheridan/World-Architect/tree/v1.5.0/examples/api-fixture) compiles against the shipped JAR and supplies a dimension adapter, custom block, native feature and structure codec. It exercises template/marker decoding, preset validation, environment/spawn persistence, permissions and thread guards. No fixture classes or resources are included in the production JAR. See [Compatibility and performance](Compatibility-and-Performance.md) for adapter rejection, upgrade and benchmark results.
+[The separate fixture project](https://github.com/GWSheridan/World-Architect/tree/v1.5.0/examples/api-fixture) compiles against the shipped JAR and supplies a dimension adapter, custom block, native feature and structure codec. It exercises template/marker decoding, preset validation, environment/spawn persistence, permissions and thread guards. No fixture classes or resources are included in the production JAR. Use matching providers and retain their declared adapter versions. See [Installation](Installation.md#compatibility) for compatibility requirements.
 
 ## Dimension adapters
 

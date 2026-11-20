@@ -11,7 +11,7 @@ Install one ZIP in `config/worldarchitect/bundles` and create `config/worldarchi
 
 For authoring, enable developer mode, put a bundle in `config/worldarchitect/imports`, then use **Import ZIP** in Studio. Choose a new release or **Duplicate** before saving changed versions. The source directories beside the bundles contain their manifest, preset and embedded template resources for inspection.
 
-See the [Studio guide](../../docs/PRESET_STUDIO.md) and [verification procedure](../../docs/TESTING.md).
+See the [Studio guide](../../docs/PRESET_STUDIO.md) and [verification procedure](../../tools/validation/README.md).
 
 ## 1.1.0 bundles
 

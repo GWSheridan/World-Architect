@@ -24,3 +24,9 @@ Keep preset bundles zipped. They belong in `config/worldarchitect/bundles/`, not
 On Windows, compare `Get-FileHash <filename> -Algorithm SHA256` with the checksum file. On Linux, run `sha256sum -c SHA256SUMS-1.4.0.txt` in the download directory.
 
 For an existing world, follow [Backups and Upgrades](Backups-and-Upgrades.md). This build targets the versions listed above; Fabric, Forge and other Minecraft data versions need different builds.
+
+## Compatibility
+
+Use matching World Architect versions on clients and servers, together with the Minecraft, NeoForge and Java versions listed above. Keep every mod and datapack that supplies a saved dimension, block, biome, feature or structure. Missing or incompatible providers can stop a world load.
+
+Support for an extension API does not guarantee compatibility with every modpack. Validate a new pack in a disposable world before deployment. Existing worlds retain their saved generation and archived templates; see [Backups and Upgrades](Backups-and-Upgrades.md) before updating.
