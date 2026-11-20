@@ -36,8 +36,9 @@ final class Cycle15Acceptance {
         require(report.getIntArray("origin").orElseThrow()[1]+report.getIntArray("root").orElseThrow()[1]==100,"Lower modules moved the anchored root");
         require(report.getListOrEmpty("ports").size()==6&&report.getListOrEmpty("markers").size()==4,"Site preview lost connectors or markers");
         water(server);polygonExport(server);stressExport(server,draft);
-        for(var dimension:server.getWorldGenSettings().dimensions().dimensions().keySet()){
-            if(!com.gwsheridan.worldarchitect.dimension.DimensionCatalog.inspect(server.registryAccess(),dimension,server.getWorldGenSettings().dimensions().dimensions().get(dimension)).modes().contains(com.gwsheridan.worldarchitect.api.DimensionAdapter.TerrainMode.SINGLE_BLOCK))continue;
+        var registeredDimensions=new WorldDimensions(server.registryAccess().lookupOrThrow(Registries.LEVEL_STEM)).dimensions();
+        for(var dimension:registeredDimensions.keySet()){
+            if(!com.gwsheridan.worldarchitect.dimension.DimensionCatalog.inspect(server.registryAccess(),dimension,registeredDimensions.get(dimension)).modes().contains(com.gwsheridan.worldarchitect.api.DimensionAdapter.TerrainMode.SINGLE_BLOCK))continue;
             var target=Identifier.parse("validation:vertical_"+dimension.identifier().toString().replace(':','_'));var path=stat("AssemblyExports","bundle",server,draft,target,dimension.identifier(),"1.5.0",18L,"Validation");
             System.out.println("WA15_BUNDLE vertical "+dimension.identifier()+" "+target+" "+path);
         }
