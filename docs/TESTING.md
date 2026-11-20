@@ -89,3 +89,27 @@ Three alternating same-host performance pairs used 64 warmup chunks and five mea
 The original three-pair managed-terrain checks matched 320 measured chunks per profile and pair. Native pyramid burial offsets of 0–2 blocks varied in two candidate comparisons and in unchanged-1.2.0 controls. Structure references, terrain outside the pyramid footprints and all biomes matched; the repeat pyramid comparisons were identical. Strict old-save comparisons were not relaxed. This benchmark covers the fixed legacy fixtures, not every regional/pool configuration or other modpack.
 
 Raw logs, failed setup attempts, superseded candidates and all timing samples remain in local verification output and CI artifacts; they are not additional release assets. World Architect 1.3.0 is published with the verified gameplay JAR and updated guides.
+
+## World Architect 1.4
+
+Milestones 38–42 passed with the frozen gameplay JAR. [Windows and Linux CI](https://github.com/GWSheridan/World-Architect/actions/runs/44727155213) each checked 88 JUnit tests, 35 Node tests, nine exported assembly cases, six pinned public-mod combinations against 1.3.0, eleven clean example installs, five workbench cases and the corrected eight-job batch matrix. Batch checks cover input fingerprints, provider contents, existing outputs, redirected parents, total deadlines, interruption and released server ports. Fixture assertions are reported immediately; timeouts cannot satisfy an expected-failure case.
+
+The native creator workflow passed at GUI scales 1 and 2 and 320 × 240 bounds, including history, explicit interrupted-draft recovery, named-region editing and scenario exports. Clean partial/full locked clients kept forbidden editors disabled; permitted ore edits and tamper refusal passed. A connected level-4 author edited constraints, sampled sixteen seeds, used scenario Undo/Redo, exported the exact minimum signed 64-bit seed and received the server acknowledgement. Revoking permission blocked another export. Server session, stale revision and source-fingerprint checks passed.
+
+Dedicated generation checks kept 1,387 ore blocks, 44 decorations, 8,715 material replacements and a structure inside their named masks; spawn selection and the block/biome fingerprint matched after restart. Format-2 layouts passed required-room, count, depth, collision, marker, budget and concurrency checks. All 256 compared format-1 layouts matched the published 1.3.0 implementation. Static, legacy-pool and constrained-pool exports passed in the Overworld, Nether, End and independent API laboratory, including stored piece fingerprints, transformed states, empty named chests and safe markers. Independent consumers compiled against 1.3.0 and 1.4.0 produced identical binaries; the separate prebuilt older consumer also passed runtime checks.
+
+Eleven copied older-save cases matched 352 unexplored chunks against 1.3.0. All 1,019 original files across ten source worlds and all 80 protected-copy file checks stayed intact. Twelve rejected saves retained their complete file sets and 711 hashes; a separate omitted-provider pool copy retained another 41 files. Two new format-2 saves also kept their archived profiles and templates after installing revised same-ID defaults, terrain materials, template blocks and metadata. Their 64 additional unexplored chunks matched, stored pieces and markers stayed original, and both revised packs passed fresh-world installs. Existing-save comparisons kept exact equality throughout. Initial fixture assumptions about a vanilla End and an omitted pool provider were corrected and repeated on fresh copies; the failed evidence was retained.
+
+Four real clients completed 63.8 minutes and 1,280 requested chunks, with simultaneous exploration, separate islands, permissions, synchronized placement/undo, native End entry, first kill/rewards, gateway travel, crystal respawning across restart, the second kill and final player/home/ledger/generation persistence. The additional dedicated matrix covered native arena modes, adapter/API mismatches, locks and corrupted/unknown/tampered generation data.
+
+Performance used three alternating 1.3.0/1.4.0 pairs on the same host after other local game/build workloads stopped: 64 warmup chunks and five measured batches of 64 chunks per profile, with 200 ms resident-memory sampling. All profiles passed the initial three-pair comparison. Percentages compare medians of complete per-pair generation times and sampled peak resident memory.
+
+| Profile | Generation time | Peak resident memory |
+| --- | ---: | ---: |
+| Original | −11.64% | +0.92% |
+| Void | −3.18% | −10.01% |
+| Single Block | +1.72% | −12.78% |
+| Layered | −5.35% | +7.52% |
+| Structure-heavy | +1.02% | +4.20% |
+
+Managed terrain comparisons remained strict. The established vanilla-pyramid diagnostic is confined to its burial footprint, with strict outside terrain/biomes and same-binary controls; it is not used to relax older-save checks. Raw inputs, timing samples and audit logs are retained locally. These results cover the supplied fixtures and pinned game/provider versions.

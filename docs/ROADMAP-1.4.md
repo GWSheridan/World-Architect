@@ -12,4 +12,4 @@ Milestones 38–42 connect regional terrain, procedural assemblies and the test 
 
 API 1 and existing generation algorithms remain supported. New rule/pool behaviour uses explicit format versions. Generation snapshots and saved preset versions remain immutable. Tests use disposable instances or copies of saves. Logs and reports stay local by default; publication is a separate request.
 
-Implementation and acceptance are in progress. Published main, the live wiki and latest release remain on 1.3.0.
+Milestones 38–42 are implemented and validated, including Windows/Linux checks, four real clients, strict older-save and revised-default comparisons, same-host performance checks and reproducible packaging. See [Testing](TESTING.md) for results and limits. Publication remains a separate step.

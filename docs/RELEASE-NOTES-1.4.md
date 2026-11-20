@@ -11,4 +11,4 @@ API 1 remains supported. Existing terrain algorithms, format-1 pools, saved temp
 
 Back up the complete world before updating. Retain its snapshots, archived bundle, settings, libraries and required provider mods. See [Draft History](wiki/Draft-History.md), [shared-region rules](wiki/World-Generation-Rules.md), [Procedural Pools](wiki/Procedural-Pools.md) and [Batch Testing](wiki/Batch-Testing.md).
 
-The prepared distribution includes the gameplay JAR, complete and buildable source ZIPs, eleven versioned example bundles and SHA-256 checksums. Release validation is in progress; the public latest release remains 1.3.0 until publication.
+The distribution includes the gameplay JAR, complete and buildable source ZIPs, eleven versioned example bundles and SHA-256 checksums. Windows/Linux validation passed 88 unit tests, 35 Node checks, public-mod compatibility, clean installs and corrected batch failure handling. Four real clients completed 63.8 minutes; eleven older-save cases and two revised-default cases matched 416 unexplored chunks. See [Testing](TESTING.md) for performance results, source reproducibility and the full fixture scope.

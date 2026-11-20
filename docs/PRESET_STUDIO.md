@@ -4,4 +4,4 @@ Preset Studio is a local, versioned library for new-world generation presets. It
 
 Read the full guide: [Preset Studio](wiki/Preset-Studio.md), also available in the [GitHub wiki](https://github.com/GWSheridan/World-Architect/wiki/Preset-Studio).
 
-Draft history and immutable-bound scenario authoring are described in [Draft History](wiki/Draft-History.md) and [Test Workbench](wiki/Test-Workbench.md).
+See [Draft History](wiki/Draft-History.md) for recovery and Undo/Redo, and [Test Workbench](wiki/Test-Workbench.md) for scenarios tied to saved preset versions.

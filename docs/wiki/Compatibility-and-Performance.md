@@ -19,3 +19,12 @@ The 1.3 checks use the published 1.2.0 baseline. Both Windows and Linux pass 70 
 The longer benchmark uses 64 warmup chunks and five measured batches of 64 chunks per profile in three alternating pairs. Initial timing flags in Original, Void and structure-heavy, plus Original resident memory, did not reproduce in three fresh pairs of those profiles. Repeat generation changes were −3.23%, +5.40% and +5.15%; sampled memory stayed below the 15% threshold. Native pyramid burial variation also occurred with unchanged 1.2.0; terrain outside its footprint and all biomes matched. Strict older-save comparisons remained exact. See [Testing](https://github.com/GWSheridan/World-Architect/blob/v1.3.0/docs/TESTING.md) for the original and repeat figures and their limits.
 
 Use the [Test Workbench](Test-Workbench.md) to validate a pack in isolated instances. These results cover fixed fixtures and pinned providers; they do not certify every configuration. The 1.2 results above remain historical.
+
+
+## Version 1.4 checks
+
+Windows and Linux passed 88 unit tests, 35 Node checks, six pinned public-mod combinations against 1.3.0, eleven clean examples and the corrected workbench/batch suites. Static, legacy and constrained assemblies also passed in the separate API laboratory. Four real clients completed 63.8 minutes with native End progression and restart persistence.
+
+Eleven older-save cases matched 352 unexplored chunks and left 1,019 original files unchanged. Two new format-2 worlds retained archived settings/templates after revised defaults were installed, with another 64 exact unexplored chunks and valid fresh installs of those revised packs. Missing/mismatched dependencies and corrupt generation data stopped safely.
+
+All profiles passed the initial three-pair comparison. The comparison used three alternating pairs, 64 warmup chunks and five measured batches of 64 chunks per profile. The [testing guide](https://github.com/GWSheridan/World-Architect/blob/v1.4.0/docs/TESTING.md) records percentages, initial flags, repeats and strict/native diagnostic limits. Existing-save comparisons remain exact. API 1 is retained; authoring networking requires matching 1.4 clients and servers.
