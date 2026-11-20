@@ -319,7 +319,7 @@ final class DimensionManagerScreen extends Screen {
             var settings = stem.generator() instanceof SingleBlockGenerator current ? current.profile()
                     : new SingleBlockProfile(material, new TerrainShape(elevation, TerrainShape.HILLS.relief()));
             var generator = new SingleBlockGenerator(biome, settings, profile);
-            minecraft.gui.setScreen(new SingleBlockScreen(this, Component.literal(key.identifier().toString()), generator,
+            minecraft.gui.setScreen(new SingleBlockScreen(this, Component.literal(key.identifier().toString()), generator, context.worldgenLoadContext(),
                     edited -> draft.put(key, new LevelStem(stem.type(), edited))));
         } else {
             var settings = stem.generator() instanceof LayeredGenerator current ? current.profile()

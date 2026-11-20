@@ -10,7 +10,8 @@ final class ClientStudioViews {
     static void register(RegisterClientPayloadHandlersEvent event){event.register(StudioViewPayload.TYPE,(payload,context)->{
         var mc=Minecraft.getInstance();try{
             switch(payload.view().getStringOr("kind","")) {
-                case "assembly" -> mc.gui.setScreen(new AssemblyStudioScreen(payload.view()));
+                case "inspection" -> mc.gui.setScreen(new WorldInspectorScreen(payload.view()));
+                case "assembly" -> mc.gui.setScreen(payload.view().getBooleanOr("pool_editor",false)?new AssemblyPoolScreen(payload.view()):new AssemblyStudioScreen(payload.view()));
                 case "administration" -> mc.gui.setScreen(new AdministrationPanelScreen(payload.view()));
                 case "administration_confirmation" -> mc.gui.setScreen(new StudioConfirmScreen(answer -> {
                     if(mc.getConnection()!=null)mc.getConnection().sendCommand(answer

@@ -28,7 +28,7 @@ public final class EndArenaBiomeSource extends BiomeSource {
     }
     public Holder<Biome> sample(int x, int y, int z) {
         if (EndProgression.contains(x * 4, z * 4)) return arena;
-        return outer instanceof RegionBiomeSource regions ? regions.getNoiseBiome(x, y, z)
+        return outer instanceof ZoneBiomeSource zones ? zones.sample(x, y, z) : outer instanceof RegionBiomeSource regions ? regions.getNoiseBiome(x, y, z)
                 : ((net.minecraft.world.level.biome.FixedBiomeSource) outer).getNoiseBiome(x, y, z);
     }
 }

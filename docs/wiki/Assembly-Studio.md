@@ -32,3 +32,5 @@ Drafts live in `world/data/worldarchitect/assemblies/<namespace>/<path>.json`, s
 Editing sessions expire after 30 minutes without an action. Save before leaving. A server retains at most 16 sessions and an estimated 64 MiB working set; it refuses new work when that budget is full. Closing an editor releases its session. Save/export actions recheck permissions and the server's current editor token.
 
 Back up drafts with the complete world. Exporting a revised assembly affects new worlds; existing saves continue using their pinned definitions and templates.
+
+Version 1.3 adds [Procedural Pools](Procedural-Pools.md) for seeded branching layouts. Static assemblies retain their existing definition and placement path.

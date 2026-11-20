@@ -7,7 +7,7 @@ import { createHash } from 'node:crypto';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const options = Object.fromEntries(Array.from({length: (process.argv.length - 2) / 2}, (_, i) => process.argv.slice(2 + i * 2, 4 + i * 2)));
-for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset','--check-end'].includes(key)) throw new Error(`Unknown option ${key}`);
+for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset','--check-end','--pool','--regional'].includes(key)) throw new Error(`Unknown option ${key}`);
 if (!['online','offline'].includes(options['--network'] || 'offline')) throw new Error('Network must be online or offline');
 if (!options['--jar'] || !options['--fixture'] || !options['--output']) throw new Error('Use --jar JAR --fixture VALIDATION_JAR --output NEW_DIRECTORY [--world COPIED_SAVE] [--profile single-block] [--port 25945]');
 if(options['--dimension']&&!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--dimension']))throw Error('Invalid dimension ID');
@@ -120,9 +120,11 @@ try {
             running.send(stage === 'fresh' ? 'wa_validate structures' : 'wa_validate restart');
             await running.wait(stage === 'fresh' ? 'WA_VALIDATION_STRUCTURES_PASS' : 'WA_VALIDATION_RESTART_PASS');
             running.send('wa_diagnose report'); await running.wait('Saved local diagnostics');
-        } else if(options['--assembly']) {
+        } else if(options['--regional']==='true') {
+            running.send('wa_validate regional_generation '+(stage==='fresh'?1:2));await running.wait('WA_REGIONAL_GENERATION_PASS');
+        } else if(options['--assembly']||options['--pool']) {
             if(!options['--dimension'])throw Error('Assembly validation requires a dimension');
-            running.send(`wa_validate assembly_generation ${options['--assembly']} ${options['--dimension']} ${stage==='fresh'?64:65}`);await running.wait('WA_ASSEMBLY_GENERATION_PASS');
+            running.send(`wa_validate ${options['--pool']?'pool_generation':'assembly_generation'} ${options['--pool']||options['--assembly']} ${options['--dimension']} ${stage==='fresh'?64:65}`);await running.wait(options['--pool']?'WA_POOL_GENERATION_PASS':'WA_ASSEMBLY_GENERATION_PASS');
         } else {
             const base = stage === 'fresh' ? 16000 : 32000, end = base + 48;
             const dimension=options['--dimension']||'minecraft:overworld';

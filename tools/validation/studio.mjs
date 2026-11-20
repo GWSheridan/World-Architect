@@ -36,6 +36,7 @@ try{
  pins={};for(const name of ['worldarchitect-generation-v1.dat','minecraft/world_gen_settings.dat'])pins[name]=sha(await fs.readFile(join(output,'server/world/data',name)));
  await act('Bob',['COMMAND wa_admin']);require(!(await view('Bob')).includes('players:'),'Ordinary view disclosed player ledger');await act('Bob',['BOUNDS']);
  require((await act('Bob',['COMMAND wa_assembly'])).includes('Unknown or incomplete command'),'Ordinary authoring was allowed');
+ require((await act('Bob',['COMMAND wa_inspect'])).includes('Unknown or incomplete command'),'Ordinary inspection was allowed');require((await act('Bob',['COMMAND wa_workbench export private one'])).includes('Unknown or incomplete command'),'Ordinary workbench export was allowed');
  await command('op WA12Alice');await command('op WA12Bob');await command('gamemode creative @a');
  await command('forceload add 4096 4096 4112 4112');await command('setblock 4096 200 4096 stone');await command('setblock 4097 200 4096 oak_stairs[facing=east]');await command('setblock 4098 200 4096 chest');await command('wa_structure capture validation:gui_module 4096 200 4096 4098 203 4098');await command('wa_structure marker set validation:gui_module entry 0 1 0 north');
  await act('Alice',['COMMAND wa_assembly']);await press('Alice','New draft');await form('Alice',['validation:gui','minecraft:plains']);
@@ -44,7 +45,12 @@ try{
  await press('Alice','Save draft');await press('Alice','Edit module');await form('Alice',['validation:gui_module','original','0','0','0','cw90','left_right']);require((await view('Alice')).includes('valid:0b'),'Overlapping assembly was accepted');
  await press('Alice','Edit module');await form('Alice',['validation:gui_module','original','8','0','0','none','none']);await press('Alice','Settings');await form('Alice',['minecraft:plains','0','4','false']);await press('Alice','Save draft');
  await press('Alice','Export datapack');await form('Alice',['validation:gui_export']);await press('Alice','Export preset');await form('Alice',['validation:gui_pack','minecraft:overworld','1.2-test','18']);
- require((await view('Alice')).includes('Preset exported:'),'Assembly bundle export failed');await press('Alice','Close');
+ require((await view('Alice')).includes('Preset exported:'),'Assembly bundle export failed');
+ await press('Alice','Pools');await act('Alice',['BOUNDS']);await press('Alice','Enable pool');await act('Alice',['BOUNDS']);await form('Alice',['original','2','128','37']);
+ await press('Alice','Add connection');await act('Alice',['BOUNDS']);await form('Alice',['original','door','0','1','0','north','rooms','default']);await press('Alice','Add choice');await act('Alice',['BOUNDS']);await form('Alice',['rooms','original','1','true']);
+ await press('Alice','Sample layout seed');await form('Alice',['18']);for(const scale of [1,2])await act('Alice',['SCALE '+scale,'BOUNDS','SHOT']);await press('Alice','Back to assembly');require((await view('Alice')).includes('valid:1b'),'Pool GUI definition invalid');await press('Alice','Save draft');await press('Alice','Export datapack');await form('Alice',['validation:gui_pool']);await press('Alice','Export preset');await form('Alice',['validation:gui_pool_pack','minecraft:overworld','1.3-test','18']);await press('Alice','Close');
+ await command('wa_preset capture gui_inspector one');await act('Alice',['COMMAND wa_inspect']);await act('Alice',['BOUNDS']);require((await view('Alice')).includes('healthy:1b'),'Inspector GUI did not show healthy snapshot');await press('Alice','Compare preset');await choose('Alice',2);require((await view('Alice')).includes('No dimension-generation differences.'),'Inspector GUI comparison differs');await press('Alice','Export report');await press('Alice','Close');
+ results.tests.push({case:'pool-native-gui-settings-connections-caps-seeded-preview-save-export-inspector-permissions-comparison',status:'passed'});
  results.tests.push({case:'assembly-native-gui-two-modules-transforms-overlap-save-export-scales',status:'passed'});
  for(const p of ['Alice','Bob'])await act(p,['COMMAND wa_admin']);
  await stageReassign('Alice','WA12Alice',10);await stageReassign('Bob','WA12Alice',10);await confirm('Alice');await confirm('Bob');require((await view('Bob')).includes('Confirmation refused:'),'Stale administrator overwrote new state');

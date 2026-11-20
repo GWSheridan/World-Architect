@@ -21,3 +21,5 @@ See the [wiki example guide](../docs/wiki/Example-Presets.md) and [modpack quick
 The [1.1 creator starters](creator-starters/README.md) provide unlocked Single Block, Layered, Skyblock and native-End starting points.
 
 The [Assembly Studio example](assembly-studio/) demonstrates two modules, individual transforms, empty chests and safe markers. Its versioned bundle comes from the verified in-game export.
+
+The 1.3 examples add [regional terrain](regional-terrain/README.md) and [procedural pools](procedural-pools/README.md), with embedded definitions and versioned bundles.

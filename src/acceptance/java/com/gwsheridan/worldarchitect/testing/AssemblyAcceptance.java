@@ -100,13 +100,13 @@ final class AssemblyAcceptance {
         require(call(marker,"pos").equals(new BlockPos(0,1,0))&&call(marker,"facing")==Direction.WEST,"Marker transform lost");
     }
     private static Object draft(List<?> parts)throws Exception{return make("AssemblyDraft",ID,0,Identifier.withDefaultNamespace("plains"),0,4,true,parts);}
-    private static Object part(String name,BlockPos offset,Rotation rotation,Mirror mirror,Object entry)throws Exception{return make("AssemblyDraft$Part",name,Identifier.parse("validation:module"),offset,rotation,mirror,entry);}
+    static Object part(String name,BlockPos offset,Rotation rotation,Mirror mirror,Object entry)throws Exception{return make("AssemblyDraft$Part",name,Identifier.parse("validation:module"),offset,rotation,mirror,entry);}
     @FunctionalInterface private interface Op{void run()throws Exception;}
     private static void denied(Op op)throws Exception{try{op.run();throw new AssertionError("Expected refusal");}catch(IOException expected){}}
     private static Class<?> type(String name)throws Exception{return Class.forName("com.gwsheridan.worldarchitect.structure."+name);}
-    private static Object make(String name,Object...args)throws Exception{var c=Arrays.stream(type(name).getDeclaredConstructors()).filter(m->m.getParameterCount()==args.length).findFirst().orElseThrow();c.setAccessible(true);return c.newInstance(args);}
-    private static Object stat(String name,String method,Object...args)throws Exception{return invoke(type(name),null,method,args);}
-    private static Object call(Object target,String method,Object...args)throws Exception{return invoke(target.getClass(),target,method,args);}
+    static Object make(String name,Object...args)throws Exception{var c=Arrays.stream(type(name).getDeclaredConstructors()).filter(m->m.getParameterCount()==args.length).findFirst().orElseThrow();c.setAccessible(true);return c.newInstance(args);}
+    static Object stat(String name,String method,Object...args)throws Exception{return invoke(type(name),null,method,args);}
+    static Object call(Object target,String method,Object...args)throws Exception{return invoke(target.getClass(),target,method,args);}
     private static Object invoke(Class<?> type,Object target,String name,Object[] args)throws Exception{var m=Arrays.stream(type.getDeclaredMethods()).filter(v->v.getName().equals(name)&&v.getParameterCount()==args.length).findFirst().orElseThrow();m.setAccessible(true);try{return m.invoke(target,args);}catch(java.lang.reflect.InvocationTargetException e){if(e.getCause() instanceof Exception cause)throw cause;throw e;}}
     private static void require(boolean value,String message){if(!value)throw new AssertionError(message);}
 }

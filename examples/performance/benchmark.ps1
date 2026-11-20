@@ -1,4 +1,4 @@
-param([ValidateSet('baseline','candidate')][string]$Version='baseline', [string]$OutputRoot='build/performance', [string]$JavaHome=$env:JAVA_HOME, [string]$Jdk21=$env:JAVA21_HOME, [ValidateSet('normal','void','single-block','layered','structure-heavy')][string[]]$Profiles=@('normal','void','single-block','layered','structure-heavy'))
+param([ValidateSet('baseline','candidate')][string]$Version='baseline', [string]$OutputRoot='build/performance', [string]$JavaHome=$env:JAVA_HOME, [string]$Jdk21=$env:JAVA21_HOME, [ValidateSet('normal','void','single-block','layered','structure-heavy')][string[]]$Profiles=@('normal','void','single-block','layered','structure-heavy'), [ValidateRange(4,8)][int]$WarmupSize=4, [ValidateRange(6,8)][int]$MeasuredSize=6, [ValidateRange(2,5)][int]$Samples=2)
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path ($OutputRoot+'/bench-'+$Version)).Path
 if (!$JavaHome) { throw 'Set JAVA_HOME to a Java 25 JDK' }; $env:JAVA_HOME=$JavaHome
@@ -73,16 +73,16 @@ foreach ($fixture in $Profiles) {
     try {
         Wait-ForBoot
         $javaId=Find-ServerJava $fixture
-        Measure-Batch 8000 4 'WA_BENCH_WARMUP' | Out-Null
+        Measure-Batch 8000 $WarmupSize 'WA_BENCH_WARMUP' | Out-Null
         Start-Sleep -Milliseconds 500
         $idle=(Get-Process -Id $javaId).WorkingSet64
-        foreach ($sample in 1,2) {
-            $offset=if ($sample -eq 1) { 16000 } else { -16000 }
-            $measurement=Measure-Batch $offset 6 "WA_BENCH_SAMPLE_$sample"
+        foreach ($sample in 1..$Samples) {
+            $offset=@(16000,-16000,32000,-32000,48000)[$sample-1]
+            $measurement=Measure-Batch $offset $MeasuredSize "WA_BENCH_SAMPLE_$sample"
             $result=[PSCustomObject]@{
                 Profile=$fixture
                 Sample=$sample
-                Chunks=36
+                Chunks=$MeasuredSize*$MeasuredSize
                 Seconds=[math]::Round($measurement.Elapsed,2)
                 WarmWorkingSetMiB=[math]::Round($idle/1MB)
                 PeakSampledWorkingSetMiB=[math]::Round($measurement.Resident/1MB)

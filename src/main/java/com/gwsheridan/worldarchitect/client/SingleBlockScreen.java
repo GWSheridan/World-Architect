@@ -19,6 +19,7 @@ final class SingleBlockScreen extends Screen {
     private static final Component MATERIAL_LABEL = Component.translatable("worldarchitect.editor.material");
     private final Screen parent;
     private final SingleBlockGenerator original;
+    private final net.minecraft.core.RegistryAccess registries;
     private final Component dimension;
     private final Consumer<SingleBlockGenerator> save;
     private String material;
@@ -27,10 +28,11 @@ final class SingleBlockScreen extends Screen {
     private Button done;
     private int formTop;
 
-    SingleBlockScreen(Screen parent, Component dimension, SingleBlockGenerator generator, Consumer<SingleBlockGenerator> save) {
+    SingleBlockScreen(Screen parent, Component dimension, SingleBlockGenerator generator, net.minecraft.core.RegistryAccess registries, Consumer<SingleBlockGenerator> save) {
         super(Component.translatable("worldarchitect.editor.title"));
         this.parent = parent;
         this.original = generator;
+        this.registries = registries;
         this.dimension = dimension;
         this.save = save;
         this.material = BlockStateParser.serialize(original.profile().material());
@@ -56,7 +58,7 @@ final class SingleBlockScreen extends Screen {
                 minecraft.gui.setScreen(new BlockPickerScreen(this, material, picked -> material = picked)))
                 .bounds(left + 2 * (quickWidth + 4), formTop + 74, quickWidth, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("worldarchitect.terrain.title"), button ->
-                minecraft.gui.setScreen(new TerrainShapeScreen(this, shape, original.getMinY(), original.getGenDepth(), updated -> shape = updated)))
+                minecraft.gui.setScreen(new TerrainShapeScreen(this, shape, original.getMinY(), original.getGenDepth(), registries, updated -> shape = updated)))
                 .bounds(left, formTop + 122, formWidth, 20).build());
         done = addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> apply())
                 .bounds(left, formTop + 148, half, 20).build());

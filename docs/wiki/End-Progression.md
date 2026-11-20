@@ -24,4 +24,4 @@ Add this to the End generator's dimension profile (`dimension_profile` for solid
 
 Omitting the field retains the previous disabled policy. Version 1 requires `minecraft:the_end`, a native fight and a build range of Y 0–255. Its algorithm and native dependencies are saved with the world.
 
-The option is chosen before world creation. Updating the mod does not add an arena, enable a fight or change unexplored chunks in an existing custom End save. Use **Original Generation** for an entirely native End. Try the [End example](https://github.com/GWSheridan/World-Architect/tree/v1.2.0/examples/end-progression) in a new world.
+The option is chosen before world creation. Updating the mod does not add an arena, enable a fight or change unexplored chunks in an existing custom End save. Use **Original Generation** for an entirely native End. Try the [End example](https://github.com/GWSheridan/World-Architect/tree/v1.3.0/examples/end-progression) in a new world.

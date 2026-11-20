@@ -1,6 +1,6 @@
 # Creator tools
 
-These controls are included in World Architect 1.2.0. Use matching 1.2 versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
+These controls are included in World Architect 1.3.0. Use matching 1.3 versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
 
 ## Start a world
 

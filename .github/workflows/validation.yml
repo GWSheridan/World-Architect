@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -34,6 +34,8 @@ jobs:
           $toolchain = "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64"
           if ($IsWindows) { & ./gradlew.bat -I tools/validation/server.init.gradle build acceptanceJar prepareValidationServerRun --console=plain $toolchain }
           else { & sh ./gradlew -I tools/validation/server.init.gradle build acceptanceJar prepareValidationServerRun --console=plain $toolchain }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --test tools/workbench/scenario.test.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Dedicated server and restart
         shell: pwsh
@@ -60,6 +62,12 @@ jobs:
           $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
           node tools/validation/bundles.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Workbench scenarios and rejected inputs
+        shell: pwsh
+        run: |
+          $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
+          node tools/workbench/cases.mjs --network online
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
@@ -78,5 +86,8 @@ jobs:
             build/ci-bundle-*/*.log
             build/ci-validation/server/config/worldarchitect/diagnostics/*.json
             build/test-results/test/*.xml
+            build/ci-workbench/results.json
+            build/ci-workbench/*/results.json
+            build/ci-workbench/*/clean-install/*.log
           if-no-files-found: error
           retention-days: 30

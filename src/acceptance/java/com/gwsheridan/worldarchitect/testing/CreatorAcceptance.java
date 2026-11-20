@@ -47,7 +47,14 @@ public final class CreatorAcceptance {
                     .lookupOrThrow(net.minecraft.core.registries.Registries.WORLD_PRESET).getOrThrow(WorldArchitect.DIMENSIONS_PRESET).value().createWorldDimensions());
             manager=parent.getUiState().getPresetEditor().createEditScreen(parent,parent.getUiState().getSettings());mc.gui.setScreen(manager);bounds();press("Starters");bounds();
         });
-        STEPS.add(()->{press(starter);bounds();press("Preview terrain");});
+        STEPS.add(()->{press(starter);bounds();
+            if(starter.equals("Layered")){
+                press("Layered");bounds();press("Terrain Shape");bounds();press("Regional terrain (0)");bounds();
+                press("Add rectangle");bounds();form(List.of("forest","0","-512","-512","512","512","64"));press("Terrain & biome");bounds();form(List.of("120","16","plateaus","192","7","minecraft:forest"));
+                press("Add circle");bounds();form(List.of("desert","10","-128","-128","128","128","32"));press("Terrain & biome");form(List.of("180","0","plateaus","192","0","minecraft:desert"));bounds();Screenshot.grab(mc,false);press("Done");bounds();
+                press("Regional terrain (2)");press("Add circle");press("Cancel");press("Cancel");press("Regional terrain (2)");press("Cancel");press("Done");press("Done");bounds();
+            }
+            press("Preview terrain");});
         STEPS.add(()->{bounds();Screenshot.grab(mc,false);});
         for(int i=0;i<3;i++) {
             STEPS.add(()->{var cycle=mc.gui.screen().children().stream().filter(CycleButton.class::isInstance).map(CycleButton.class::cast).findFirst().orElseThrow();cycle.onPress(ENTER);});
@@ -74,6 +81,7 @@ public final class CreatorAcceptance {
             require(parent.getUiState().getSettings().selectedDimensions().get(starter.equals("Custom End")?LevelStem.END:LevelStem.OVERWORLD).orElseThrow().generator()==gen,"Cancelled draft reached world settings");
         });
     }
+    private static void form(List<String> values){var fields=Minecraft.getInstance().gui.screen().children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast).toList();require(fields.size()==values.size(),"Unexpected region form");for(int i=0;i<values.size();i++)fields.get(i).setValue(values.get(i));press("Apply");}
     private static void pressEither(String a,String b){var screen=Minecraft.getInstance().gui.screen();press(screen.children().stream().filter(Button.class::isInstance).map(Button.class::cast).anyMatch(w->w.getMessage().getString().equals(a))?a:b);}
     private static void press(String label) {
         var screen=Minecraft.getInstance().gui.screen();

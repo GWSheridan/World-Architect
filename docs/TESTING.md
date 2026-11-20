@@ -63,3 +63,7 @@ Milestones 27–31 use the published 1.1.0 JAR as the stabilization and performa
 Use the portable commands in [validation runners](../tools/validation/README.md). Keep the gameplay JAR hash fixed across the dedicated, multiplayer, upgrade, compatibility and performance suites. Build from the final extracted source archive and compare its JAR hash before preparing the release. API 1 remains stable; authoring and placement networking requires matching 1.2 clients and servers.
 
 The [1.2 verification report](maintainers/verification/release-1.2/README.md) records the final binary, both four-client hour-long runs, native GUI workflows, four-dimension assembly exports, Windows/Linux results and complete original-save audits. Initial performance flags and their fresh repeats are preserved separately. The report also records a same-binary vanilla pyramid burial difference and its strict outside-footprint audit; existing-save comparisons retain exact equality.
+
+## 1.3 validation
+
+The 1.3 fixture adds immutable Inspector comparisons, region preview/generation checks, pool determinism and bounded failures, and workbench probes. Run `node --test tools/workbench/scenario.test.mjs` for scenario validation. See [Test Workbench](wiki/Test-Workbench.md) for disposable jobs and longer benchmark settings. The published 1.2.0 JAR is the new same-host baseline; earlier verification records remain historical.

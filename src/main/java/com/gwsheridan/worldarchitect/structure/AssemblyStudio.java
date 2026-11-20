@@ -33,7 +33,7 @@ public final class AssemblyStudio {
     private static final long SHARED_BUDGET = 64L * 1024 * 1024;
     private static final Map<MinecraftServer, Map<UUID, Session>> SESSIONS = new WeakHashMap<>();
     private static final class Session {
-        final UUID token = UUID.randomUUID(); AssemblyDraft draft; int serial, savedSerial, selected; long bytes, expires;
+        final UUID token = UUID.randomUUID(); AssemblyDraft draft; int serial, savedSerial, selected; long bytes, expires, previewSeed; boolean poolEditor;
         Session(AssemblyDraft draft) { this.draft = draft; }
     }
     private AssemblyStudio() {}
@@ -67,7 +67,28 @@ public final class AssemblyStudio {
                     var s=session(c);var path=AssemblyExports.bundle(c.getSource().getServer(),s.draft,getId(c,"target"),getId(c,"dimension"),getString(c,"release"),LongArgumentType.getLong(c,"seed"),c.getSource().getPlayerOrException().getPlainTextName());
                     c.getSource().sendSuccess(()->Component.literal("Exported assembly preset to config/worldarchitect/exports/"+path.getFileName()),false);show(c.getSource().getPlayerOrException(),"Preset exported: "+path.getFileName());return 1;
                 }))))))));
+        poolCommands(root);
         event.getDispatcher().register(root);
+    }
+    private static ProceduralPool pool(CommandContext<CommandSourceStack> c) throws IOException,CommandSyntaxException { return session(c).draft.pool().orElseThrow(()->new IOException("Enable pool settings first.")); }
+    private static void changePool(CommandContext<CommandSourceStack> c, Optional<ProceduralPool> pool) throws IOException,CommandSyntaxException { var s=session(c);s.poolEditor=true;change(c,s.draft.withPool(pool),s.selected); }
+    private static void poolCommands(LiteralArgumentBuilder<CommandSourceStack> root) {
+        root.then(command("pool_view",serial->serial.executes(run(c->{var s=session(c);s.poolEditor=true;show(c.getSource().getPlayerOrException(),null);return 1;}))));
+        root.then(command("pool_back",serial->serial.executes(run(c->{var s=session(c);s.poolEditor=false;show(c.getSource().getPlayerOrException(),null);return 1;}))));
+        root.then(command("static",serial->serial.executes(run(c->{changePool(c,Optional.empty());return 1;}))));
+        root.then(command("preview_seed",serial->serial.then(argument("seed",LongArgumentType.longArg()).executes(run(c->{var s=session(c);s.previewSeed=LongArgumentType.getLong(c,"seed");show(c.getSource().getPlayerOrException(),null);return 1;})))));
+        root.then(command("pool",serial->serial.then(argument("root",word()).then(argument("max",integer(2,16)).then(argument("attempts",integer(1,256)).then(argument("salt",LongArgumentType.longArg()).executes(run(c->{
+            var old=session(c).draft.pool();changePool(c,Optional.of(new ProceduralPool(getString(c,"root"),getInteger(c,"max"),getInteger(c,"attempts"),LongArgumentType.getLong(c,"salt"),old.map(ProceduralPool::ports).orElse(List.of()),old.map(ProceduralPool::choices).orElse(List.of()))));return 1;
+        }))))))));
+        root.then(command("connection",serial->serial.then(argument("module",word()).then(argument("name",word()).then(argument("position",blockPos()).then(argument("facing",word()).then(argument("pool",word()).then(argument("channel",word()).executes(run(c->{
+            var old=pool(c);var ports=new ArrayList<>(old.ports());var direction=net.minecraft.core.Direction.byName(getString(c,"facing"));if(direction==null)throw new IOException("Use north, south, east or west.");
+            var port=new ProceduralPool.Port(getString(c,"module"),getString(c,"name"),getBlockPos(c,"position"),direction,getString(c,"pool"),getString(c,"channel"));ports.removeIf(p->p.module().equals(port.module())&&p.name().equals(port.name()));ports.add(port);changePool(c,Optional.of(new ProceduralPool(old.root(),old.maxModules(),old.attempts(),old.salt(),ports,old.choices())));return 1;
+        }))))))))));
+        root.then(command("remove_connection",serial->serial.then(argument("module",word()).then(argument("name",word()).executes(run(c->{var old=pool(c);var ports=old.ports().stream().filter(p->!p.module().equals(getString(c,"module"))||!p.name().equals(getString(c,"name"))).toList();changePool(c,Optional.of(new ProceduralPool(old.root(),old.maxModules(),old.attempts(),old.salt(),ports,old.choices())));return 1;}))))));
+        root.then(command("choice",serial->serial.then(argument("pool",word()).then(argument("module",word()).then(argument("weight",integer(1,100)).then(argument("endcap",BoolArgumentType.bool()).executes(run(c->{
+            var old=pool(c);var choice=new ProceduralPool.Choice(getString(c,"pool"),getString(c,"module"),getInteger(c,"weight"),BoolArgumentType.getBool(c,"endcap"));var choices=new ArrayList<>(old.choices());choices.removeIf(v->v.pool().equals(choice.pool())&&v.module().equals(choice.module())&&v.endcap()==choice.endcap());choices.add(choice);changePool(c,Optional.of(new ProceduralPool(old.root(),old.maxModules(),old.attempts(),old.salt(),old.ports(),choices)));return 1;
+        }))))))));
+        root.then(command("remove_choice",serial->serial.then(argument("index",integer(0,63)).executes(run(c->{var old=pool(c);var choices=new ArrayList<>(old.choices());choices.remove(getInteger(c,"index"));changePool(c,Optional.of(new ProceduralPool(old.root(),old.maxModules(),old.attempts(),old.salt(),old.ports(),choices)));return 1;})))));
     }
     private static LiteralArgumentBuilder<CommandSourceStack> command(String name, Consumer<RequiredArgumentBuilder<CommandSourceStack,Integer>> configure) {
         var serial=argument("serial",integer(0));configure.accept(serial);return literal(name).then(argument("token",word()).then(serial));
@@ -111,7 +132,7 @@ public final class AssemblyStudio {
         var library=new ListTag();StructureLibrary.list(server).stream().limit(128).forEach(id->library.add(StringTag.valueOf(id.toString())));data.put("library",library);
         var drafts=new ListTag();AssemblyDraft.list(server).forEach(id->drafts.add(StringTag.valueOf(id.toString())));data.put("drafts",drafts);
         if(s!=null){
-            var d=s.draft;data.putString("id",d.id().toString());data.putString("token",s.token.toString());data.putInt("serial",s.serial);data.putInt("revision",d.revision());data.putInt("selected",s.selected);data.putBoolean("dirty",s.serial!=s.savedSerial);
+            var d=s.draft;data.putBoolean("pool_editor",s.poolEditor);data.putLong("preview_seed",s.previewSeed);d.pool().ifPresent(pool->data.put("pool",ProceduralPool.CODEC.encodeStart(NbtOps.INSTANCE,pool).getOrThrow()));data.putString("id",d.id().toString());data.putString("token",s.token.toString());data.putInt("serial",s.serial);data.putInt("revision",d.revision());data.putInt("selected",s.selected);data.putBoolean("dirty",s.serial!=s.savedSerial);
             data.putString("biome",d.biome().toString());data.putInt("y_offset",d.yOffset());data.putInt("slope",d.maxSlope());data.putBoolean("random",d.randomRotation());
             String problem="Assembly valid · templates and markers are embedded snapshots.";boolean valid=true;
             try{d.structure(server);}catch(IOException|RuntimeException e){problem=e.getMessage()==null?"Check assembly settings.":e.getMessage();valid=false;}
@@ -120,14 +141,17 @@ public final class AssemblyStudio {
             for(var part:d.parts()){
                 var entry=part.transformed();var offset=part.offset();var size=entry.template().size();sx=Math.max(sx,offset.getX()+size.getX());sy=Math.max(sy,offset.getY()+size.getY());sz=Math.max(sz,offset.getZ()+size.getZ());
                 var module=new CompoundTag();module.putString("name",part.name());module.putString("source",part.source().toString());module.putString("rotation",rotationKey(part.rotation()));module.putString("mirror",mirrorKey(part.mirror()));module.putIntArray("offset",new int[]{offset.getX(),offset.getY(),offset.getZ()});module.putIntArray("size",new int[]{size.getX(),size.getY(),size.getZ()});module.putString("rules",describe(entry.rules()));module.putInt("snapshot_revision",part.original().revision());modules.add(module);
-                for(var cell:entry.template().blocks()){
-                    var pos=offset.offset(cell.pos());cells.add(pos.getX()|pos.getY()<<7|pos.getZ()<<14);cells.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(cell.state().getBlock()).toString().hashCode());
-                    dependencies.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(cell.state().getBlock()).getNamespace());
-                }
-                for(var named:entry.markers().entrySet()){
-                    var marker=new CompoundTag();var p=offset.offset(named.getValue().pos());marker.putString("name",part.name()+":"+named.getKey());marker.putString("facing",named.getValue().facing().getSerializedName());marker.putIntArray("pos",new int[]{p.getX(),p.getY(),p.getZ()});markers.add(marker);
-                }
             }
+            List<ModularStructure.Module> displayed=List.of();
+            try { displayed=d.structure(server).previewLayout(s.previewSeed).orElse(List.of()); } catch(IOException|RuntimeException e) {
+                if(d.pool().isEmpty()) { var preview=new ArrayList<ModularStructure.Module>();for(var part:d.parts())preview.add(new ModularStructure.Module(part.name(),part.offset(),part.transformed()));displayed=preview; }
+            }
+            sx=1;sy=1;sz=1;
+            for(var part:displayed){var entry=part.entry();var offset=part.offset();var size=entry.template().size();sx=Math.max(sx,offset.getX()+size.getX());sy=Math.max(sy,offset.getY()+size.getY());sz=Math.max(sz,offset.getZ()+size.getZ());
+                for(var cell:entry.template().blocks()) {var pos=offset.offset(cell.pos());cells.add(pos.getX()|pos.getY()<<7|pos.getZ()<<14);cells.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(cell.state().getBlock()).toString().hashCode());dependencies.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(cell.state().getBlock()).getNamespace());}
+                for(var named:entry.markers().entrySet()){var marker=new CompoundTag();var pos=offset.offset(named.getValue().pos());marker.putString("name",part.name()+":"+named.getKey());marker.putString("facing",named.getValue().facing().getSerializedName());marker.putIntArray("pos",new int[]{pos.getX(),pos.getY(),pos.getZ()});markers.add(marker);}
+            }
+            if(d.pool().isPresent()&&displayed.isEmpty()&&valid)data.putString("status","Definition valid; no complete layout for this sample seed. Try another seed or revise connections.");
             dependencies.remove("minecraft");data.putString("dependencies",clip(String.join(", ",dependencies),1024));data.put("modules",modules);data.put("markers",markers);data.putIntArray("cells",cells.stream().mapToInt(Integer::intValue).toArray());data.putIntArray("size",new int[]{sx,sy,sz});
         }
         PacketDistributor.sendToPlayer(player,new StudioViewPayload(data));

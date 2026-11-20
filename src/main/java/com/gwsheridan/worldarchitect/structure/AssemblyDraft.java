@@ -24,7 +24,7 @@ import net.minecraft.world.level.levelgen.structure.TerrainAdjustment;
 import net.minecraft.world.level.storage.LevelResource;
 
 /** Mutable authoring documents live separately from immutable generated-world definitions. */
-record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset, int maxSlope, boolean randomRotation, List<Part> parts) {
+record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset, int maxSlope, boolean randomRotation, List<Part> parts, Optional<ProceduralPool> pool) {
     static final int MAX_JSON = 8 * 1024 * 1024;
     static final Codec<AssemblyDraft> CODEC = RecordCodecBuilder.<AssemblyDraft>create(b -> b.group(
             Codec.intRange(1, 1).fieldOf("format").forGetter(d -> 1),
@@ -34,10 +34,13 @@ record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset,
             Codec.intRange(-64, 64).fieldOf("y_offset").forGetter(AssemblyDraft::yOffset),
             Codec.intRange(0, 32).fieldOf("max_slope").forGetter(AssemblyDraft::maxSlope),
             Codec.BOOL.fieldOf("random_rotation").forGetter(AssemblyDraft::randomRotation),
-            Part.CODEC.listOf(0, ModularStructure.MAX_MODULES).fieldOf("parts").forGetter(AssemblyDraft::parts)
-    ).apply(b, (format, id, revision, biome, y, slope, random, parts) -> new AssemblyDraft(id, revision, biome, y, slope, random, parts)));
+            Part.CODEC.listOf(0, ModularStructure.MAX_MODULES).fieldOf("parts").forGetter(AssemblyDraft::parts),
+            ProceduralPool.CODEC.optionalFieldOf("assembly_pool").forGetter(AssemblyDraft::pool)
+    ).apply(b, (format, id, revision, biome, y, slope, random, parts, pool) -> new AssemblyDraft(id, revision, biome, y, slope, random, parts, pool)));
 
     AssemblyDraft { parts = List.copyOf(parts); }
+    AssemblyDraft(Identifier id,int revision,Identifier biome,int y,int slope,boolean random,List<Part> parts){this(id,revision,biome,y,slope,random,parts,Optional.empty());}
+    AssemblyDraft withPool(Optional<ProceduralPool> next){return new AssemblyDraft(id,revision,biome,yOffset,maxSlope,randomRotation,parts,next);}
     record Part(String name, Identifier source, BlockPos offset, Rotation rotation, Mirror mirror, LibraryEntry original) {
         static final Codec<Part> CODEC = RecordCodecBuilder.create(b -> b.group(
                 Codec.STRING.fieldOf("name").forGetter(Part::name), Identifier.CODEC.fieldOf("source").forGetter(Part::source),
@@ -48,10 +51,11 @@ record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset,
         ).apply(b, Part::new));
         LibraryEntry transformed() throws IOException { return original.transformed(new TemplatePlacement(BlockPos.ZERO, rotation, mirror)); }
     }
-    AssemblyDraft withParts(List<Part> next) { return new AssemblyDraft(id, revision, biome, yOffset, maxSlope, randomRotation, next); }
-    AssemblyDraft withSettings(Identifier biome, int y, int slope, boolean random) { return new AssemblyDraft(id, revision, biome, y, slope, random, parts); }
+    AssemblyDraft withParts(List<Part> next) { return new AssemblyDraft(id, revision, biome, yOffset, maxSlope, randomRotation, next, pool); }
+    AssemblyDraft withSettings(Identifier biome, int y, int slope, boolean random) { return new AssemblyDraft(id, revision, biome, y, slope, random, parts, pool); }
     AssemblyDraft check() throws IOException {
         safeId(id);
+        if(pool.isPresent())pool.orElseThrow().validate().getOrThrow(IOException::new);
         if (parts.size() > ModularStructure.MAX_MODULES || yOffset < -64 || yOffset > 64 || maxSlope < 0 || maxSlope > 32) throw new IOException("Assembly settings exceed their bounds.");
         var names = new HashSet<String>(); long cells = 0;
         for (var part : parts) {
@@ -70,7 +74,7 @@ record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset,
         var modules = new ArrayList<ModularStructure.Module>();
         for (var part : parts) modules.add(new ModularStructure.Module(part.name, part.offset, part.transformed()));
         var settings = new Structure.StructureSettings(HolderSet.direct(biomeHolder), Map.of(), GenerationStep.Decoration.SURFACE_STRUCTURES, TerrainAdjustment.NONE);
-        var structure = new ModularStructure(settings, modules, yOffset, maxSlope, randomRotation);
+        var structure = new ModularStructure(settings, modules, yOffset, maxSlope, randomRotation, pool);
         var ops = RegistryOps.create(JsonOps.INSTANCE, server.registryAccess());
         var encoded = Structure.DIRECT_CODEC.encodeStart(ops, structure).getOrThrow(IOException::new);
         var checked = (ModularStructure) Structure.DIRECT_CODEC.parse(ops, encoded).getOrThrow(IOException::new);
@@ -99,7 +103,7 @@ record AssemblyDraft(Identifier id, int revision, Identifier biome, int yOffset,
         draft.check(); var target = path(server, draft.id);
         if (expectedRevision < 0 ? Files.exists(target) : !Files.exists(target) || load(server, draft.id).revision != expectedRevision)
             throw new IOException("This assembly was saved by another author. Reopen it before saving your changes.");
-        var saved = new AssemblyDraft(draft.id, expectedRevision < 0 ? 0 : Math.incrementExact(expectedRevision), draft.biome, draft.yOffset, draft.maxSlope, draft.randomRotation, draft.parts);
+        var saved = new AssemblyDraft(draft.id, expectedRevision < 0 ? 0 : Math.incrementExact(expectedRevision), draft.biome, draft.yOffset, draft.maxSlope, draft.randomRotation, draft.parts, draft.pool);
         var ops = RegistryOps.create(JsonOps.INSTANCE, server.registryAccess());
         JsonElement encoded = CODEC.encodeStart(ops, saved).getOrThrow(IOException::new);
         byte[] bytes = (new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(encoded) + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8);

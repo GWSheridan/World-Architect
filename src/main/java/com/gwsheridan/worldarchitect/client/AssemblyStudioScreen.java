@@ -27,7 +27,8 @@ final class AssemblyStudioScreen extends Screen {
         add("<",left,51,22,()->{selected=Math.max(0,selected-1);rebuildWidgets();}).active=selected>0;
         add(">",left+26,51,22,()->{selected=Math.min(modules.size()-1,selected+1);rebuildWidgets();}).active=selected+1<modules.size();
         String moduleLabel=modules.isEmpty()?"No modules":(selected+1)+"/"+modules.size()+" · "+modules.get(selected).getStringOr("name","");
-        add(moduleLabel,left+55,51,span-110,this::details).active=!modules.isEmpty();
+        add(moduleLabel,left+55,51,span-174,this::details).active=!modules.isEmpty();
+        add("Pools",left+span-112,51,60,()->send("pool_view","")).active=active();
         add("↶",left+span-48,51,22,()->preview.orbit(-1));add("↷",left+span-22,51,22,()->preview.orbit(1));
         add("Add module",left,height-102,third,this::addModule).active=active()&&modules.size()<16;
         add("Edit module",left+third+4,height-102,third,()->editModule(null)).active=!modules.isEmpty();

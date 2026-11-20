@@ -217,7 +217,8 @@ tasks.register('releaseChecksums', JavaExec) {
         releaseSources.get().archiveFile.get().asFile.absolutePath,
         tasks.named('packageRelease').get().archiveFile.get().asFile.absolutePath,
         file('examples/preset-studio/bundles').absolutePath, project.version.toString(),
-        file('examples/creator-starters/bundles').absolutePath, file('examples/assembly-studio/bundles').absolutePath] } as CommandLineArgumentProvider)
+        file('examples/creator-starters/bundles').absolutePath, file('examples/assembly-studio/bundles').absolutePath,
+        file('examples/regional-terrain/bundles').absolutePath, file('examples/procedural-pools/bundles').absolutePath] } as CommandLineArgumentProvider)
 }
 
 tasks.register('assembleRelease') {
@@ -234,7 +235,26 @@ tasks.register('prepareExampleReleases', JavaExec) {
     mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseExamples'
     argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
         file(providers.gradleProperty('creatorExports').get()).absolutePath,
-        providers.gradleProperty('exampleVersion').orElse('1.2.0').get()] } as CommandLineArgumentProvider)
+        providers.gradleProperty('exampleVersion').orElse(project.version.toString()).get()] } as CommandLineArgumentProvider)
+}
+
+tasks.register('prepareCycle13Examples', JavaExec) {
+    group = 'distribution'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseCycle13Examples'
+    argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
+        file(providers.gradleProperty('regionalExport').get()).absolutePath,
+        file(providers.gradleProperty('poolExport').get()).absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
+}
+
+tasks.register('prepareWorkbenchInputs', JavaExec) {
+    group = 'verification'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.WorkbenchInputs'
+    argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
+        file(providers.gradleProperty('workbenchInputs').get()).absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
 }
 
 sourceSets {

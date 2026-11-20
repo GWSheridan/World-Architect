@@ -5,14 +5,20 @@ Design each Minecraft dimension before creating a world. Choose terrain and laye
 **Minecraft Java 26.3 · NeoForge 26.3.0.103 · Java 25**
 Created and maintained by **GWSHERIDAN**.
 
-See the [1.2 milestones](docs/ROADMAP-1.2.md) and [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
+See the [1.3 milestones](docs/ROADMAP-1.3.md) and [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
+
+This release branch prepares 1.3.0. The public latest release stays at 1.2.0 until the draft is published.
 
 ## Get started
 
-Install `worldarchitect-1.2.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
+Install `worldarchitect-1.3.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
 
 In **Create New World → World**, choose **World Architect · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
 
+- **World Inspector:** saved profiles, dependency pins and new-world preset comparisons.
+- **Regional terrain:** coordinate masks, priority, biome choices and feathered heights with generator version 3.
+- **Procedural pools:** seeded modules, named connections, branches and end caps.
+- **Test workbench:** isolated preset scenarios and local reports from the source tools.
 - **Single Block and Layered terrain:** block states, surface layers, landforms and biome-aware strata.
 - **Features and structures:** biomes, ores, decoration, caves, fluids, native structures and modular assemblies.
 - **Void and Skyblock:** empty terrain or template islands with persistent multiplayer assignments.

@@ -7,7 +7,7 @@ const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const version=(await fs.readFile(join(root,'gradle.properties'),'utf8')).match(/^mod_version=(.+)$/m)[1].trim();
 const args=Object.fromEntries(Array.from({length:(process.argv.length-2)/2},(_,i)=>process.argv.slice(2+i*2,4+i*2)));
 for(const key of Object.keys(args))if(!['--jar','--fixture','--output','--baseline-version','--network'].includes(key))throw Error('Unknown option '+key);
-const baselineVersion=args['--baseline-version']||'1.1.0',checksums={'1.0.0':'14fe208d2fed07e8dec98e33b1f06c519cb35a81a95412e60b1c808d94b332cd','1.1.0':'2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa'};
+const baselineVersion=args['--baseline-version']||'1.2.0',checksums={'1.2.0':'4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1','1.0.0':'14fe208d2fed07e8dec98e33b1f06c519cb35a81a95412e60b1c808d94b332cd','1.1.0':'2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa'};
 if(!checksums[baselineVersion])throw Error('Unknown verified baseline');
 const network=args['--network']||'online';if(!['online','offline'].includes(network))throw Error('Invalid network mode');
 const directory=resolve(root,args['--output']||'build/ci-compatibility');if(!relative(root,directory).startsWith('build'+(process.platform==='win32'?'\\':'/')))throw Error('Use a new build/ directory');await fs.mkdir(directory,{recursive:false});

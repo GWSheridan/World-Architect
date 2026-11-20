@@ -14,5 +14,5 @@ public record PlacementPreviewPayload(CompoundTag visual) implements CustomPacke
     public static final StreamCodec<RegistryFriendlyByteBuf, PlacementPreviewPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.COMPOUND_TAG, PlacementPreviewPayload::visual, PlacementPreviewPayload::new);
     public Type<? extends CustomPacketPayload> type() { return TYPE; }
-    public static void register(RegisterPayloadHandlersEvent event) { event.registrar("1.2").playToClient(TYPE, STREAM_CODEC); }
+    public static void register(RegisterPayloadHandlersEvent event) { event.registrar("1.3").playToClient(TYPE, STREAM_CODEC); }
 }

@@ -70,6 +70,7 @@ public final class WorldArchitect {
         generators.register(modBus);
         DeferredRegister<MapCodec<? extends BiomeSource>> biomeSources = DeferredRegister.create(Registries.BIOME_SOURCE, ID);
         biomeSources.register("regions", () -> RegionBiomeSource.CODEC);
+        biomeSources.register("terrain_regions", () -> com.gwsheridan.worldarchitect.worldgen.ZoneBiomeSource.CODEC);
         biomeSources.register("end_arena", () -> com.gwsheridan.worldarchitect.worldgen.EndArenaBiomeSource.CODEC);
         biomeSources.register(modBus);
         NeoForge.EVENT_BUS.addListener(WorldArchitect::createSpawn);
@@ -78,6 +79,8 @@ public final class WorldArchitect {
         NeoForge.EVENT_BUS.addListener(WorldEnvironment::validateSaved);
         NeoForge.EVENT_BUS.addListener(EnvironmentCommands::register);
         NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.diagnostics.DiagnosticCommands::register);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.inspection.InspectorCommands::register);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.workbench.WorkbenchCommands::register);
         NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.rules.RuleCommands::register);
         NeoForge.EVENT_BUS.addListener(WorldEnvironment::spawnPlacement);
         NeoForge.EVENT_BUS.addListener(WorldEnvironment::spawnPosition);

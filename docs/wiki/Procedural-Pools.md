@@ -1,0 +1,13 @@
+# Procedural assembly pools
+
+Open `/wa_assembly`, add saved template modules, and choose **Pools**. Enable a pool, select its root module, and set the maximum generated modules, attempt limit and seed offset. The source modules become a catalog; their static offsets are not used by the pool. Source rotations and mirrors are baked into each catalog template before connection coordinates are interpreted.
+
+Add named horizontal connections using local coordinates, facing, target pool and channel. A connection needs two clear cells on the matching module edge over a safe floor. Channels must match when pieces join. Add weighted regular choices for rooms, halls or branches, and end-cap choices with exactly one connection. Every outgoing pool/channel needs a compatible end cap. The module budget must leave room to cap the root's connections.
+
+**Sample layout seed** updates the detached preview. Generated layouts also incorporate the world seed and candidate chunk coordinates. Regular choices are tried before end caps; weights select the order within each role. The layout reserves capacity for outstanding ends, checks occupied cells and marker/door clearance, and stops at its attempt budget. If it cannot close the layout, the entire candidate is skipped before placing any piece.
+
+The existing limits apply: 16 source modules, at most 16 generated modules, 96 blocks per axis and 65,536 occupied cells. A pool has at most 128 connections, eight per module, 64 choices, 256 candidate attachment attempts and weights of 1–100. It uses right-angle horizontal rotations. Terrain adaptation must be `none`. Biome, dimension, slope, height, collision, reservation and generation-rule checks still apply to the selected layout.
+
+Save the draft and export a datapack or preset as usual. The `worldarchitect:modular` structure definition gains optional `assembly_pool` format 1 with `root`, `max_modules`, `attempts`, `seed_salt`, `connections` and `choices`. Static definitions omit it. Spawn references may use the stable `root` module; generated child names are `module_1`, `module_2` and so on. A referenced child's presence depends on the selected layout, so prefer a root marker for required spawns.
+
+Templates and pool definitions are embedded in preset archives. Generated pieces persist their chosen templates, positions, block states, metadata and markers. Later catalog edits supply future-world defaults and do not rewrite saved generation. See [Assembly Studio](Assembly-Studio.md), [Templates and Bundling](Templates-and-Bundling.md) and the [pool example](https://github.com/GWSheridan/World-Architect/tree/v1.3.0/examples/procedural-pools).

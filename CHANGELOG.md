@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.0 (draft)
+
+- Added World Inspector for saved generation profiles, archived-resource checks and preset comparisons, with explicit local reports.
+- Added coordinate-based rectangle and circle regions, priority, biome selection and smooth height transitions in opt-in generator version 3.
+- Added procedural assembly pools with named connections, weighted modules, branches, end caps and seeded layout previews.
+- Added a modpack test workbench with fingerprinted scenarios, disposable dedicated servers, explicit probes and bounded jobs.
+- Extended same-host benchmark sampling to 64 warmup chunks and five measured batches per profile.
+- Retained API 1 constructors and existing version 1/2 terrain, static assemblies, saved generation resources and native End policies. Authoring networking requires matching 1.3 clients and servers.
+
 ## 1.2.0
 
 - Added Assembly Studio for visual modular structures, transformed spawn markers, saved drafts and validated datapack or preset exports.

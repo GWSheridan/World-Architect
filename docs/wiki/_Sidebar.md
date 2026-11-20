@@ -8,10 +8,12 @@
 
 - [Creator Tools](Creator-Tools.md)
 - [Terrain and Dimensions](Terrain-and-Dimensions.md)
+- [Regional Terrain](Regional-Terrain.md)
 - [Biomes and Features](Biomes-and-Features.md)
 - [Structures](Structures.md)
 - [Structure Library](Structure-Library.md)
 - [Assembly Studio](Assembly-Studio.md)
+- [Procedural Pools](Procedural-Pools.md)
 - [Void and Skyblock](Void-and-Skyblock.md)
 - [End Progression](End-Progression.md)
 - [Environment Controls](Environment-Controls.md)
@@ -21,6 +23,7 @@
 **Servers**
 
 - [Server Setup](Server-Setup.md)
+- [World Inspector](World-Inspector.md)
 - [Administration Panel](Administration-Panel.md)
 - [Multiplayer and Islands](Multiplayer-and-Islands.md)
 - [Commands and Permissions](Commands-and-Permissions.md)
@@ -31,6 +34,7 @@
 
 - [Modpack Quick Start](Modpack-Quick-Start.md)
 - [Preset Studio](Preset-Studio.md)
+- [Test Workbench](Test-Workbench.md)
 - [Preset Reference](Preset-Reference.md)
 - [Locks and Server Enforcement](Locks-and-Server-Enforcement.md)
 - [Templates and Bundling](Templates-and-Bundling.md)

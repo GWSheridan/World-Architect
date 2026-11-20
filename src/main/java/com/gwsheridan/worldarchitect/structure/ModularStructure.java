@@ -47,17 +47,23 @@ public final class ModularStructure extends Structure {
             Module.CODEC.listOf(1, MAX_MODULES).fieldOf("modules").forGetter(structure -> structure.modules),
             Codec.intRange(-64, 64).optionalFieldOf("y_offset", 0).forGetter(structure -> structure.yOffset),
             Codec.intRange(0, 32).optionalFieldOf("max_slope", 4).forGetter(structure -> structure.maxSlope),
-            Codec.BOOL.optionalFieldOf("random_rotation", true).forGetter(structure -> structure.randomRotation)
+            Codec.BOOL.optionalFieldOf("random_rotation", true).forGetter(structure -> structure.randomRotation),
+            ProceduralPool.CODEC.optionalFieldOf("assembly_pool").forGetter(structure -> structure.pool)
     ).apply(builder, ModularStructure::new)).validate(ModularStructure::validate);
 
     private final List<Module> modules;
+    private final Optional<ProceduralPool> pool;
+    private final ThreadLocal<List<Module>> selectedLayout = new ThreadLocal<>();
     private final int yOffset;
     private final int maxSlope;
     private final boolean randomRotation;
     private final BlockPos size;
 
-    ModularStructure(StructureSettings settings, List<Module> modules, int yOffset, int maxSlope, boolean randomRotation) {
+    ModularStructure(StructureSettings settings, List<Module> modules, int yOffset, int maxSlope, boolean randomRotation) { this(settings,modules,yOffset,maxSlope,randomRotation,Optional.empty()); }
+
+    ModularStructure(StructureSettings settings, List<Module> modules, int yOffset, int maxSlope, boolean randomRotation, Optional<ProceduralPool> pool) {
         super(settings);
+        this.pool = pool;
         this.modules = List.copyOf(modules);
         this.yOffset = yOffset;
         this.maxSlope = maxSlope;
@@ -75,12 +81,16 @@ public final class ModularStructure extends Structure {
     }
 
     private DataResult<ModularStructure> validate() {
-        if (size.getX() > MAX_SPAN || size.getY() > MAX_SPAN || size.getZ() > MAX_SPAN
+        if (pool.isEmpty() && (size.getX() > MAX_SPAN || size.getY() > MAX_SPAN || size.getZ() > MAX_SPAN)
                 || modules.stream().mapToInt(module -> module.entry().template().blocks().size()).sum() > MAX_BLOCKS) {
             return DataResult.error(() -> "A modular structure may span at most 96 blocks per axis and contain 65,536 blocks.");
         }
         if (modules.stream().map(Module::name).distinct().count() != modules.size()) {
             return DataResult.error(() -> "Module names must be unique.");
+        }
+        if (pool.isPresent()) {
+            if (terrainAdaptation() != net.minecraft.world.level.levelgen.structure.TerrainAdjustment.NONE) return DataResult.error(() -> "Pool structures require terrain_adaptation none.");
+            return pool.orElseThrow().validateCatalog(modules).map(ignored -> this);
         }
         var occupied = new HashSet<BlockPos>();
         for (var module : modules) {
@@ -105,6 +115,7 @@ public final class ModularStructure extends Structure {
     }
 
     public void validateTemplates(net.minecraft.core.HolderLookup.Provider registries) throws IOException {
+        if (pool.isPresent()) pool.orElseThrow().validateCatalog(modules).getOrThrow(IOException::new);
         for (var module : modules) {
             for (var cell : module.entry().template().blocks()) {
                 TemplateMetadata.sanitize(cell.state(), cell.metadata(), registries);
@@ -113,11 +124,16 @@ public final class ModularStructure extends Structure {
     }
 
     public int horizontalSpan() {
-        return Math.max(size.getX(), size.getZ());
+        return pool.isPresent() ? MAX_SPAN : Math.max(size.getX(), size.getZ());
     }
 
-    public int blockCount() { return modules.stream().mapToInt(module -> module.entry().template().blocks().size()).sum(); }
-    public boolean hasMarker(String module, String marker) { return modules.stream().anyMatch(part -> part.name().equals(module) && part.entry().markers().containsKey(marker)); }
+    public int blockCount() { return pool.isPresent() ? Math.min(MAX_BLOCKS, modules.stream().mapToInt(m -> m.entry().template().blocks().size()).max().orElse(0) * pool.orElseThrow().maxModules()) : modules.stream().mapToInt(module -> module.entry().template().blocks().size()).sum(); }
+    public boolean hasMarker(String module, String marker) {
+        if (pool.isEmpty()) return modules.stream().anyMatch(part -> part.name().equals(module) && part.entry().markers().containsKey(marker));
+        if (module.equals("root")) return modules.stream().anyMatch(part -> part.name().equals(pool.orElseThrow().root()) && part.entry().markers().containsKey(marker));
+        return module.matches("module_([1-9]|1[0-5])") && Integer.parseInt(module.substring(7)) < pool.orElseThrow().maxModules() && modules.stream().anyMatch(part -> part.entry().markers().containsKey(marker));
+    }
+    Optional<List<Module>> previewLayout(long seed) throws IOException { return pool.isPresent() ? pool.orElseThrow().layout(modules, seed) : Optional.of(modules); }
 
     @Override
     public StructureStart generate(Holder<Structure> selected, ResourceKey<Level> dimension, RegistryAccess registries,
@@ -127,10 +143,17 @@ public final class ModularStructure extends Structure {
         if (generator instanceof SolidColumnGenerator solid && !com.gwsheridan.worldarchitect.worldgen.RuleExecution.allowsTemplate(solid, selected, seed, chunk, height, random)) {
             return StructureStart.INVALID_START;
         }
-        if (modules.stream().anyMatch(module -> module.entry().rules().dimension().filter(id -> !id.equals(dimension.identifier())).isPresent())) {
+        List<Module> layout;
+        try { layout = pool.isPresent() ? pool.orElseThrow().layout(modules, ProceduralPool.seed(seed,chunk.x(),chunk.z())).orElse(null) : modules; }
+        catch(IOException e) { throw new IllegalStateException("Invalid pool template",e); }
+        if (layout == null) return StructureStart.INVALID_START;
+        if (layout.stream().anyMatch(module -> module.entry().rules().dimension().filter(id -> !id.equals(dimension.identifier())).isPresent())) {
             return StructureStart.INVALID_START;
         }
-        return super.generate(selected, dimension, registries, generator, biomes, sampler, random, templates, seed, chunk, references, height, validBiome);
+        if (pool.isEmpty()) return super.generate(selected, dimension, registries, generator, biomes, sampler, random, templates, seed, chunk, references, height, validBiome);
+        var previous = selectedLayout.get(); selectedLayout.set(layout);
+        try { return super.generate(selected, dimension, registries, generator, biomes, sampler, random, templates, seed, chunk, references, height, validBiome); }
+        finally { if(previous==null)selectedLayout.remove();else selectedLayout.set(previous); }
     }
 
     @Override
@@ -138,18 +161,22 @@ public final class ModularStructure extends Structure {
         if (!(context.chunkGenerator() instanceof SolidColumnGenerator generator)) {
             return Optional.empty();
         }
+        List<Module> layout = pool.isPresent() ? selectedLayout.get() : modules;
+        if (layout == null) { try { layout = previewLayout(ProceduralPool.seed(context.seed(),context.chunkPos().x(),context.chunkPos().z())).orElse(null); } catch(IOException e) { throw new IllegalStateException(e); } }
+        if (layout == null) return Optional.empty();
+        BlockPos layoutSize = pool.isPresent() ? new BlockPos(layout.stream().mapToInt(m->m.offset().getX()+m.entry().template().size().getX()).max().orElse(1),layout.stream().mapToInt(m->m.offset().getY()+m.entry().template().size().getY()).max().orElse(1),layout.stream().mapToInt(m->m.offset().getZ()+m.entry().template().size().getZ()).max().orElse(1)) : size;
         int x = context.chunkPos().getMinBlockX();
         int z = context.chunkPos().getMinBlockZ();
         Rotation rotation = randomRotation ? Rotation.getRandom(context.random()) : Rotation.NONE;
         var transform = new TemplatePlacement(BlockPos.ZERO, rotation, Mirror.NONE);
         int y = generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, context.heightAccessor(), context.randomState()) + yOffset;
         BlockPos origin = new BlockPos(x, y, z);
-        var pieces = new ArrayList<ModularPiece>(modules.size());
+        var pieces = new ArrayList<ModularPiece>(layout.size());
         try {
-            for (var module : modules) {
+            for (var module : layout) {
                 LibraryEntry transformed = module.entry().transformed(transform);
-                BlockPos first = transform.position(size, module.offset());
-                BlockPos last = transform.position(size, module.offset().offset(module.entry().template().size()).offset(-1, -1, -1));
+                BlockPos first = transform.position(layoutSize, module.offset());
+                BlockPos last = transform.position(layoutSize, module.offset().offset(module.entry().template().size()).offset(-1, -1, -1));
                 BlockPos offset = new BlockPos(Math.min(first.getX(), last.getX()), first.getY(), Math.min(first.getZ(), last.getZ()));
                 pieces.add(new ModularPiece(module.name(), origin.offset(offset), transformed));
             }

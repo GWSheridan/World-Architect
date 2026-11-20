@@ -39,6 +39,7 @@ public final class GenerationPreview {
                 case FixedBiomeSource fixed -> fixed::getNoiseBiome;
                 case EndArenaBiomeSource arena -> arena::sample;
                 case RegionBiomeSource regions -> regions::getNoiseBiome;
+                case ZoneBiomeSource zones -> zones::sample;
                 default -> throw new IllegalStateException("Managed terrain has an unsupported biome source for preview");
             };
             return Optional.of(new GenerationPreview(height,

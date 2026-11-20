@@ -4,6 +4,8 @@ Commands are checked by the server. Preset locks can restrict operations that an
 
 | Command | Purpose | Access |
 | --- | --- | --- |
+| `/wa_inspect [installed] [report]` | Saved generation and preset comparison | Permission level 3 |
+| `/wa_workbench export <name> <release>` | Detached bundle and test scenario | Permission level 4 and developer mode |
 | `/wa_diagnose report` | Local versions, adapter capabilities and snapshot hashes | Permission level 3 |
 | `/wa_admin` or `/wa_island panel` | Personal island view; confirmed administration controls | Self view; changes require permission level 3 |
 | `/wa_assembly` | Visual assembly drafts and datapack exports | Permission level 2 and library access; preset export also needs level 3 and developer mode |

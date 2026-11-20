@@ -62,7 +62,7 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     }
 
     protected SolidColumnGenerator(Holder<Biome> biome, TerrainShape shape, List<Stratum> strata, Optional<DimensionProfile> dimensionProfile) {
-        super(arenaBiomes(biome, dimensionProfile),
+        super(arenaBiomes(biome, dimensionProfile, shape),
                 ignored -> BiomeGenerationSettings.EMPTY);
         this.biome = biome;
         this.shape = shape;
@@ -75,8 +75,9 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
         this.hasMaterialRules = rules.ordered().stream().anyMatch(rule -> rule.action().type() == RuleSet.Kind.MATERIAL);
     }
 
-    private static net.minecraft.world.level.biome.BiomeSource arenaBiomes(Holder<Biome> biome, Optional<DimensionProfile> profile) {
-        var outer = RegionBiomeSource.forContent(biome, profile.map(DimensionProfile::content).orElse(ContentProfile.EMPTY));
+    private static net.minecraft.world.level.biome.BiomeSource arenaBiomes(Holder<Biome> biome, Optional<DimensionProfile> profile, TerrainShape shape) {
+        var base = RegionBiomeSource.forContent(biome, profile.map(DimensionProfile::content).orElse(ContentProfile.EMPTY));
+        var outer = shape.regions().<net.minecraft.world.level.biome.BiomeSource>map(regions -> new ZoneBiomeSource(base, regions)).orElse(base);
         return profile.flatMap(DimensionProfile::endProgression).<net.minecraft.world.level.biome.BiomeSource>map(
                 arena -> new EndArenaBiomeSource(outer, arena.biome())).orElse(outer);
     }
@@ -110,11 +111,12 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     public final List<ContentProfile.StructureRule> structureRules() { return structureRules; }
 
     public final RuleSet.Context ruleContext(long seed, int x, int y, int z) {
-        Holder<Biome> selected = biomeSource instanceof EndArenaBiomeSource arena ? arena.sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biomeSource instanceof RegionBiomeSource regions ? regions.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biome;
+        Holder<Biome> selected = biomeSource instanceof EndArenaBiomeSource arena ? arena.sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biomeSource instanceof RegionBiomeSource regions ? regions.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biomeSource instanceof ZoneBiomeSource zones ? zones.sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biome;
         return new RuleSet.Context(rules.dimension(), selected.unwrapKey().orElseThrow().identifier(), x, y, z, seed, RuleDependencies.loaded());
     }
 
     public Optional<String> contentProblem() {
+        if (shape.validate().error().isPresent()) return Optional.of(shape.validate().error().orElseThrow().message());
         int min = getMinY();
         int max = min + getGenDepth() - 1;
         boolean floating = shape.advanced().filter(settings -> settings.landform() == Landform.FLOATING_ISLANDS).isPresent();
@@ -402,6 +404,7 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     }
 
     private Column sampleColumn(int x, int z, LevelHeightAccessor height, long seed) {
+        if (shape.regions().isPresent()) return com.gwsheridan.worldarchitect.worldgen.terrain.HeightfieldV3.sample(shape, seed, x, z, height);
         var advanced = shape.advanced().orElse(null);
         if (advanced != null) {
             return HeightfieldV2.sample(shape, advanced, seed, x, z, height);
@@ -416,7 +419,7 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
         }
         int quartX = QuartPos.fromBlock(x);
         int quartZ = QuartPos.fromBlock(z);
-        Holder<Biome> columnBiome = biomeSource instanceof RegionBiomeSource regions
+        Holder<Biome> columnBiome = shape.regions().isPresent() ? (biomeSource instanceof EndArenaBiomeSource arena ? arena.sample(quartX, 0, quartZ) : ((ZoneBiomeSource)biomeSource).sample(quartX,0,quartZ)) : biomeSource instanceof RegionBiomeSource regions
                 ? regions.getNoiseBiome(quartX, 0, quartZ) : biomeSource.possibleBiomes().iterator().next();
         double variation = 0.0;
         if (seededTransitions) {

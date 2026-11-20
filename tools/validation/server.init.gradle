@@ -5,7 +5,9 @@ gradle.beforeProject { project ->
             loadedMods = []
             gameDirectory = project.file(project.providers.gradleProperty('testWorldDirectory').orElse('build/validation-server').get())
             programArgument '--nogui'
-            jvmArgument '-Xmx1400m'
+            def heap = project.providers.gradleProperty('workbenchHeapMib').orElse('1400').get().toInteger()
+            if (heap < 768 || heap > 4096) throw new GradleException('Workbench heap must be 768..4096 MiB')
+            jvmArgument "-Xmx${heap}m"
             jvmArgument '-XX:ActiveProcessorCount=4'
         }
         project.tasks.withType(JavaExec).configureEach {
@@ -14,7 +16,9 @@ gradle.beforeProject { project ->
         project.neoForge.runs.configureEach {
             if (name == 'server') {
                 loadedMods = []
-                jvmArgument '-Xmx1400m'
+                def heap = project.providers.gradleProperty('workbenchHeapMib').orElse('1400').get().toInteger()
+            if (heap < 768 || heap > 4096) throw new GradleException('Workbench heap must be 768..4096 MiB')
+            jvmArgument "-Xmx${heap}m"
                 jvmArgument '-XX:ActiveProcessorCount=4'
             }
         }

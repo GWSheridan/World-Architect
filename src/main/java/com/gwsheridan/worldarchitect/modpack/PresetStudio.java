@@ -216,6 +216,11 @@ public final class PresetStudio {
         }
         return List.copyOf(revisions);
     }
+    /** Detached installed defaults for read-only inspection; does not install or save resources. */
+    public static java.util.Optional<Draft> installedDraft() throws IOException {
+        var installed=ModpackRuntime.installed();if(installed.isEmpty())return java.util.Optional.empty();var bundle=installed.orElseThrow();
+        return java.util.Optional.of(new Draft(bundle.manifest(),bundle.presetJson(),bundle.templates()));
+    }
     public static Draft load(Path directory, String name, String release) throws IOException {
         var bundle = PresetBundle.read(revisionPath(directory, name, release));
         if (!bundle.manifest().release().equals(release)) throw new IOException("Revision filename and manifest disagree.");

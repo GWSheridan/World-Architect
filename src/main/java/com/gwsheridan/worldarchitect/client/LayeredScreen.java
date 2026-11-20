@@ -93,7 +93,7 @@ final class LayeredScreen extends Screen {
 
         int terrainWidth = (formWidth - 4) / 2;
         addRenderableWidget(Button.builder(Component.translatable("worldarchitect.terrain.title"), button ->
-                minecraft.gui.setScreen(new TerrainShapeScreen(this, shape, original.getMinY(), original.getGenDepth(), updated -> shape = updated)))
+                minecraft.gui.setScreen(new TerrainShapeScreen(this, shape, original.getMinY(), original.getGenDepth(), registries, updated -> shape = updated)))
                 .bounds(left, top + 103, terrainWidth, 20).build());
         Button strataEditor = button("strata", left + terrainWidth + 4, 103, formWidth - terrainWidth - 4, this::editStrata);
         strataEditor.active = shape.advanced().isPresent() || !strata.isEmpty();
