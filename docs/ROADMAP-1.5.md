@@ -10,4 +10,4 @@ Milestones 43–47 extend terrain regions and procedural structures from the com
 | 46 · Site inspector | Saved-preset binding, production-planner explanations, geometry and terrain sections | No chunk creation, permission/fingerprint checks, cancellation and explicit incomplete results |
 | 47 · Integration | Versioned examples, locked integration pack, documentation and release artifacts | Windows/Linux, four real clients, End progression, strict save audits, benchmarks and exact source rebuild |
 
-Implementation and release acceptance are in progress. Earlier generation algorithms, archived resources and API 1 remain supported. Publishing main, the live wiki or a latest release requires a separate request.
+Milestones 43–47 are implemented and validated. See [Testing](TESTING.md) for cross-platform, native-client, dedicated-server, strict-save and performance results and limits. API 1, older generation algorithms and archived resources remain supported. Publication of main, the live wiki and latest release is a separate step.

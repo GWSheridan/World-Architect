@@ -113,3 +113,29 @@ Performance used three alternating 1.3.0/1.4.0 pairs on the same host after othe
 | Structure-heavy | +1.02% | +4.20% |
 
 Managed terrain comparisons remained strict. The established vanilla-pyramid diagnostic is confined to its burial footprint, with strict outside terrain/biomes and same-binary controls; it is not used to relax older-save checks. Raw inputs, timing samples and audit logs are retained locally. These results cover the supplied fixtures and pinned game/provider versions.
+
+## World Architect 1.5
+
+Milestones 43–47 passed with the frozen gameplay JAR. [Windows and Linux CI](https://github.com/GWSheridan/World-Architect/actions/runs/44755729256) each checked 98 JUnit tests, 35 Node tests, nine assembly exports, six native-generation site cases, six pinned public-mod combinations against frozen 1.4, fifteen clean example installs, five workbench cases and the eight-job batch matrix. Expected failures require explicit assertions or input errors; timeouts cannot count as successful rejection.
+
+Native creator checks passed GUI scales 1 and 2 and 320 × 240 bounds, including polygon coordinates, map editing, history and recovery. A partially locked polygon pack allowed its declared ore edits and rejected locked terrain changes. The fully locked Skyblock integration pack kept its editors disabled. Connected clients checked the site screen at both scales, stale/closed results and fresh permission revocation. Server-only checks covered source tampering, mismatched fingerprints, current policy, session/revision guards and cancellation without loading chunks or modifying saved generation.
+
+Native site generation and restart passed coastal water placement, strict polygon filtering and vertical pools in the Overworld, Nether, End and independent adapter laboratory. Block states, named empty chests, root height, markers and stored piece fingerprints stayed intact. Water opt-in refused lava, waterlogged solids and containers; air-only seabed placement was rejected. A stress fixture reached 512 polygon vertices and sixteen vertical modules, including actual native generation and the bounded read-only preview. This fixture is a limit check, not a whole-modpack performance guarantee.
+
+All 256 compared format-1 layouts matched 1.3, and all 256 format-2 layouts matched frozen 1.4. Static, format-1 and format-2 assemblies also passed twelve generation/restart cases across four dimensions. Independent API consumers compiled against 1.4 and 1.5 produced identical binaries; the older prebuilt provider passed runtime and saved-world checks. API 1 remains supported.
+
+Thirteen copied older-save cases matched 416 unexplored chunks against frozen 1.4, covering older releases, shared terrain regions, constrained pools, the adapter laboratory, Skyblock and both managed and native End progression. All 1095 original files stayed intact. Twelve rejected saves retained their complete file sets and 711 hashes. Polygon, vertical and coastal worlds retained original snapshots, settings, archives, template states, metadata and markers after changed same-ID future defaults were installed. Their 96 additional unexplored chunks matched exactly; the three revised packs also started fresh worlds and generated their new base material. Existing-save comparisons remain strict.
+
+Four real clients completed 64.3 connected minutes and 1280 requested chunks, including simultaneous custom-highlands/End exploration, persistent separate islands, ordinary-player denial, synchronized placement/undo, native End entry, first kill and rewards, gateway travel, a crystal ritual across restart, the second kill and final player/home/ledger/generation persistence. A separate real client completed the custom-terrain End arena, first kill/rewards, gateway round trip, crystal respawn across restart, second kill and interrupted-ritual recovery with generation pins intact. The dedicated matrix additionally checked native arena modes, partial/full locks, missing or mismatched providers and corrupt/unknown/tampered generation data.
+
+Performance compared three alternating 1.4/1.5 pairs on the same host after other local game/build workloads stopped, with 64 warmup chunks, five measured batches of 64 chunks per profile and 200 ms resident-memory sampling. All profiles passed the initial three-pair comparison. Percentages compare medians of complete per-pair generation times and sampled peak resident memory.
+
+| Profile | Generation time | Peak resident memory |
+| --- | ---: | ---: |
+| Original | +6.20% | +5.59% |
+| Void | −18.04% | +2.85% |
+| Single Block | −9.92% | −3.92% |
+| Layered | −1.68% | +2.69% |
+| Structure-heavy | −22.35% | +3.46% |
+
+Managed terrain audits remain exact. The established vanilla-pyramid diagnostic is confined to its burial footprint, retaining strict outside terrain/biomes and same-binary controls. It does not relax existing-save checks. Initial fixture failures, raw results and audit logs remain local. These checks cover the supplied fixtures and pinned game/provider versions; they do not establish compatibility with every modpack. Source packaging is rebuilt independently and checked against the accepted JAR before the draft release is prepared.

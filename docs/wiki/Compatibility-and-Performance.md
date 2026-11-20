@@ -28,3 +28,11 @@ Windows and Linux passed 88 unit tests, 35 Node checks, six pinned public-mod co
 Eleven older-save cases matched 352 unexplored chunks and left 1,019 original files unchanged. Two new format-2 worlds retained archived settings/templates after revised defaults were installed, with another 64 exact unexplored chunks and valid fresh installs of those revised packs. Missing/mismatched dependencies and corrupt generation data stopped safely.
 
 All profiles passed the initial three-pair comparison. The comparison used three alternating pairs, 64 warmup chunks and five measured batches of 64 chunks per profile. The [testing guide](https://github.com/GWSheridan/World-Architect/blob/v1.4.0/docs/TESTING.md) records percentages, initial flags, repeats and strict/native diagnostic limits. Existing-save comparisons remain exact. API 1 is retained; authoring networking requires matching 1.4 clients and servers.
+
+## Version 1.5 checks
+
+[Windows/Linux validation](https://github.com/GWSheridan/World-Architect/actions/runs/44755729256) passed 98 unit tests, 35 Node checks, six pinned public-mod combinations against frozen 1.4, fifteen clean examples and the workbench/batch suites. Native polygon, coastal and vertical generation/restart checks also passed in the independent adapter laboratory. API consumers compiled against 1.4 and 1.5 produced identical binaries.
+
+Four real clients completed 64.3 minutes with custom-dimension exploration, island persistence and full native End progression across restarts. Thirteen older-save cases and three changed-default cases matched 512 unexplored chunks exactly; original files and saved generation resources stayed intact. Missing/mismatched providers and corrupt generation data were rejected without changing monitored saves.
+
+All profiles passed the initial three-pair comparison. See [Testing](https://github.com/GWSheridan/World-Architect/blob/v1.5.0/docs/TESTING.md) for percentages, sampling, retained failures and the limited native-pyramid diagnostic. API 1 is retained; authoring networking requires matching 1.5 clients and servers.
