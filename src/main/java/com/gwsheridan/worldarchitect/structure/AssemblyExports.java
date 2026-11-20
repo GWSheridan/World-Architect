@@ -81,7 +81,7 @@ final class AssemblyExports {
         encodedGenerator.getAsJsonObject("dimension_profile").add("content", content);
         var mods = new TreeSet<String>();
         for (var part : draft.parts()) for (var cell : part.original().template().blocks()) mods.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(cell.state().getBlock()).getNamespace());
-        mods.addAll(draft.structure(server).themeNamespaces());
+        mods.addAll(draft.structure(server).dependencyNamespaces());
         mods.add("worldarchitect"); mods.add(draft.biome().getNamespace()); mods.add(dimension.getNamespace());
         mods.retainAll(com.gwsheridan.worldarchitect.rules.RuleDependencies.loaded()); mods.remove("minecraft");
         var manifest = new BundleManifest(id, "Assembly " + id.getPath().substring(0, Math.min(70, id.getPath().length())),

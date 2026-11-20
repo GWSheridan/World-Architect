@@ -150,7 +150,7 @@ public final class ModularStructure extends Structure {
     String placementDescription(){return anchor.map(a->a.mode().getSerializedName()+(a.mode()==PlacementAnchor.Mode.FIXED?" Y "+a.fixedY():"")).orElse("legacy seabed")+"; height offset "+yOffset;}
     boolean rootAnchored(){return pool.filter(p->p.format()==3).isPresent();}
     String preparationDescription(){return foundation.map(f->f.mode().getSerializedName()+" · depth "+f.maxDepth()+" · clearance "+f.clearHeight()+" · replace water "+f.replaceWater()).orElse("none");}
-    Set<String> themeNamespaces(){return themes.map(StructureThemes::namespaces).orElse(Set.of());}
+    Set<String> dependencyNamespaces(){var names=new java.util.TreeSet<>(themes.map(StructureThemes::namespaces).orElse(Set.of()));foundation.ifPresent(f->names.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(f.material().getBlock()).getNamespace()));return Set.copyOf(names);}
     public boolean hasMarker(String module, String marker) {
         if (pool.isEmpty()) return modules.stream().anyMatch(part -> part.name().equals(module) && part.entry().markers().containsKey(marker));
         if (module.equals("root")) return modules.stream().anyMatch(part -> part.name().equals(pool.orElseThrow().root()) && part.entry().markers().containsKey(marker));

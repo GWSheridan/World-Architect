@@ -9,7 +9,7 @@ import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStruct
 public final class SiteSearch {
     public static final int MAX_CANDIDATES=256,MAX_RESULTS=32,MAX_RADIUS=128;
     public record Bounds(int minX,int minZ,int maxX,int maxZ,int candidates,int results){
-        public Bounds{if(minX>maxX||minZ>maxZ||(long)maxX-minX>256||(long)maxZ-minZ>256||candidates<1||candidates>MAX_CANDIDATES||results<1||results>MAX_RESULTS)throw new IllegalArgumentException("Search at most 256 × 256 chunks, 256 native regions and 32 results.");for(int c:new int[]{minX,minZ,maxX,maxZ})if(Math.abs((long)c)*16>29_999_792)throw new IllegalArgumentException("Keep the search inside world bounds.");}
+        public Bounds{if(minX>maxX||minZ>maxZ||(long)maxX-minX>256||(long)maxZ-minZ>256||candidates<1||candidates>MAX_CANDIDATES||results<1||results>MAX_RESULTS)throw new IllegalArgumentException("Use coordinate spans up to 256 chunks, 256 native regions and 32 results.");for(int c:new int[]{minX,minZ,maxX,maxZ})if(Math.abs((long)c)*16>29_999_792)throw new IllegalArgumentException("Keep the search inside world bounds.");}
         boolean contains(ChunkPos p){return p.x()>=minX&&p.x()<=maxX&&p.z()>=minZ&&p.z()<=maxZ;}
     }
     private record Region(int binding,int x,int z,ChunkPos chunk,long distance){}
