@@ -36,7 +36,12 @@ record TemplateRules(Optional<Identifier> dimension, Optional<Identifier> biome,
     }
 
     enum Collision {
-        AIR, MATCHING;
+        AIR, MATCHING, AIR_OR_WATER;
+
+        boolean allows(net.minecraft.world.level.block.state.BlockState existing,net.minecraft.world.level.block.state.BlockState proposed) {
+            return existing.isAir() || this==MATCHING&&existing==proposed&&!existing.hasBlockEntity()
+                    || this==AIR_OR_WATER&&existing.is(net.minecraft.world.level.block.Blocks.WATER);
+        }
 
         static Collision parse(String key) {
             return valueOf(key.toUpperCase(Locale.ROOT));

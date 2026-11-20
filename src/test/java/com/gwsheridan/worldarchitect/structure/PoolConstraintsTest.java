@@ -7,6 +7,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PoolConstraintsTest {
+    @Test void verticalPortsSelectFormatThreeAndCannotBeReadAsAnOlderFormat(){
+        var port=new ProceduralPool.Port("root","shaft",new net.minecraft.core.BlockPos(1,3,1),net.minecraft.core.Direction.UP,"rooms","shaft");
+        var p=original().withPorts(List.of(port)).withConstraints(new ProceduralPool.Constraints(2,List.of()));assertEquals(3,p.format());
+        var json=ProceduralPool.CODEC.encodeStart(JsonOps.INSTANCE,p).getOrThrow().getAsJsonObject();assertEquals(p,ProceduralPool.CODEC.parse(JsonOps.INSTANCE,json).getOrThrow());
+        for(int format:new int[]{1,2}){json.addProperty("format",format);assertTrue(ProceduralPool.CODEC.parse(JsonOps.INSTANCE,json).error().isPresent());}
+    }
     private ProceduralPool original(){return new ProceduralPool("root",8,128,42,List.of(),List.of());}
     @Test void originalFormatKeepsItsEncodingAndRejectsNewConstraints(){
         var p=original();var json=ProceduralPool.CODEC.encodeStart(JsonOps.INSTANCE,p).getOrThrow().getAsJsonObject();

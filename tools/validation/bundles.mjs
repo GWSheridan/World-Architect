@@ -11,6 +11,7 @@ cases.push({name:'regional-demo',bundle:`examples/regional-terrain/bundles/regio
 cases.push({name:'pool-demo',bundle:`examples/procedural-pools/bundles/pool-demo-${version}.zip`});
 cases.push({name:'shared-regions',bundle:`examples/shared-regions/bundles/shared-regions-${version}.zip`});
 cases.push({name:'constrained-pool',bundle:`examples/constrained-pools/bundles/constrained-pool-${version}.zip`});
+for(const [directory,name,site,id] of [['polygon-regions','polygon-regions','polygon','polygon_marker'],['terrain-anchors','coastal-ruins','coastal','coastal_ruin'],['vertical-pools','vertical-tower','vertical','vertical_tower'],['locked-archipelago','locked-archipelago',null,null]])cases.push({name,bundle:`examples/${directory}/bundles/${name}-${version}.zip`,site,id});
 const report={format:1,version,cases:[],status:'passed'};
 for(const entry of cases) {
     const output=`build/ci-bundle-${entry.name}`;
@@ -20,6 +21,7 @@ for(const entry of cases) {
     if(entry.name==='pool-demo')args.push('--pool','worldarchitect_examples:pool_demo','--dimension','minecraft:overworld');
     if(entry.name==='shared-regions')args.push('--named-regions','true');
     if(entry.name==='constrained-pool')args.push('--pool','worldarchitect_examples:constrained_pool','--dimension','minecraft:overworld');
+    if(entry.site)args.push('--site',entry.site,'--site-structure','worldarchitect_examples:'+entry.id,'--dimension','minecraft:overworld');
     const code=await new Promise((accept,reject)=>{const child=spawn(process.execPath,args,{cwd:root,stdio:'inherit'});child.on('error',reject);child.on('close',accept);});
     const result=JSON.parse(await fs.readFile(join(root,output,'results.json'),'utf8'));
     report.cases.push({name:entry.name,...result});if(code!==0||result.status!=='passed')report.status='failed';

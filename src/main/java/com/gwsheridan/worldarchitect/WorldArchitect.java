@@ -83,6 +83,8 @@ public final class WorldArchitect {
         NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.diagnostics.DiagnosticCommands::register);
         NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.inspection.InspectorCommands::register);
         NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.workbench.WorkbenchCommands::register);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.structure.SiteStudio::register);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.structure.SiteStudio::logout);
         NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.rules.RuleCommands::register);
         NeoForge.EVENT_BUS.addListener(WorldEnvironment::spawnPlacement);
         NeoForge.EVENT_BUS.addListener(WorldEnvironment::spawnPosition);

@@ -40,3 +40,13 @@ Preset exports read the live dimension registry, including mod-added dimensions 
 ## History and interrupted sessions
 
 Use **History / organize** for Undo/Redo, module duplication and module ordering. Pool choices can also be reordered from their diagnostics menu. Completed edits write a separate recovery document. Reopening after a disconnect requires an explicit Restore/Discard choice; a newer saved revision is never overwritten by old recovery. Histories share the existing server memory budget, and edits keep current permission/token/serial/revision checks. See [Draft History](Draft-History.md) and [constrained pools](Procedural-Pools.md).
+
+## Placement anchors and water
+
+In 1.5, **Settings → Placement anchor** offers `legacy`, `surface`, `seabed` and `fixed`. Legacy omits the new setting and preserves the original ocean-floor anchor. Surface uses the first free base world-surface height, including fluids; seabed uses the base ocean-floor height. Fixed uses its exact Y value. The existing height offset is added once. Every occupied cell must still fit its dimension and template rules.
+
+An explicit definition uses, for example, `"placement": {"version": 1, "mode": "fixed", "fixed_y": 100}`. Surface/seabed anchors omit `fixed_y` or set it to zero. Static assemblies anchor their existing origin; format-3 pools anchor their root module.
+
+**Settings → Selected module collision** changes that module's captured rule without editing the library source. `air` remains the default. `matching` additionally accepts identical existing states without block entities. `air_or_water` accepts air and actual source/flowing water blocks; it never permits lava, waterlogged solid blocks or containers. Empty template spaces remain wet. A submerged spawn marker is still unsafe and rejects placement.
+
+Anchors do not fill foundations, excavate rooms or reshape the landscape. Use the [site inspector](Structure-Site-Inspector.md) to understand rejected sites and the [coastal example](https://github.com/GWSheridan/World-Architect/tree/v1.5.0/examples/terrain-anchors) for water placement.

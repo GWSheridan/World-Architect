@@ -1,12 +1,12 @@
 # Installation
 
-Install NeoForge **26.3.0.103** for Minecraft Java **26.3** and use a 64-bit **Java 25** runtime. Download `worldarchitect-1.4.0.jar` from the official release and place it in the instance's `mods/` directory. Install matching mod and provider versions on clients and servers, then restart.
+Install NeoForge **26.3.0.103** for Minecraft Java **26.3** and use a 64-bit **Java 25** runtime. Download `worldarchitect-1.5.0.jar` from the official release and place it in the instance's `mods/` directory. Install matching mod and provider versions on clients and servers, then restart.
 
 In **Create New World → World**, choose **World Architect · Dimensions** and open **Customize**. [Getting Started](Getting-Started.md) walks through a first world.
 
 | Download | Contents |
 | --- | --- |
-| `worldarchitect-1.4.0.jar` | The mod for clients and servers |
+| `worldarchitect-1.5.0.jar` | The mod for clients and servers |
 | `worldarchitect-1.4.0-release.zip` | Mod, buildable source, wiki and examples |
 | `worldarchitect-1.4.0-source.zip` | Gradle project, tests, docs and example sources |
 | `studio-partial-1.4.0.zip` | Partially locked example preset |

@@ -406,6 +406,7 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     }
 
     private Column sampleColumn(int x, int z, LevelHeightAccessor height, long seed) {
+        if (shape.version() == com.gwsheridan.worldarchitect.config.RegionalTerrain.POLYGON_VERSION) return com.gwsheridan.worldarchitect.worldgen.terrain.HeightfieldV4.sample(shape, seed, x, z, height);
         if (shape.regions().isPresent()) return com.gwsheridan.worldarchitect.worldgen.terrain.HeightfieldV3.sample(shape, seed, x, z, height);
         var advanced = shape.advanced().orElse(null);
         if (advanced != null) {

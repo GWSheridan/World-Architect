@@ -48,11 +48,13 @@ public final class ModularStructure extends Structure {
             Codec.intRange(-64, 64).optionalFieldOf("y_offset", 0).forGetter(structure -> structure.yOffset),
             Codec.intRange(0, 32).optionalFieldOf("max_slope", 4).forGetter(structure -> structure.maxSlope),
             Codec.BOOL.optionalFieldOf("random_rotation", true).forGetter(structure -> structure.randomRotation),
-            ProceduralPool.CODEC.optionalFieldOf("assembly_pool").forGetter(structure -> structure.pool)
+            ProceduralPool.CODEC.optionalFieldOf("assembly_pool").forGetter(structure -> structure.pool),
+            PlacementAnchor.CODEC.optionalFieldOf("placement").forGetter(structure -> structure.anchor)
     ).apply(builder, ModularStructure::new)).validate(ModularStructure::validate);
 
     private final List<Module> modules;
     private final Optional<ProceduralPool> pool;
+    private final Optional<PlacementAnchor> anchor;
     private final ThreadLocal<List<Module>> selectedLayout = new ThreadLocal<>();
     private final int yOffset;
     private final int maxSlope;
@@ -62,7 +64,11 @@ public final class ModularStructure extends Structure {
     ModularStructure(StructureSettings settings, List<Module> modules, int yOffset, int maxSlope, boolean randomRotation) { this(settings,modules,yOffset,maxSlope,randomRotation,Optional.empty()); }
 
     ModularStructure(StructureSettings settings, List<Module> modules, int yOffset, int maxSlope, boolean randomRotation, Optional<ProceduralPool> pool) {
+        this(settings,modules,yOffset,maxSlope,randomRotation,pool,Optional.empty());
+    }
+    ModularStructure(StructureSettings settings, List<Module> modules, int yOffset, int maxSlope, boolean randomRotation, Optional<ProceduralPool> pool,Optional<PlacementAnchor> anchor) {
         super(settings);
+        this.anchor=anchor;
         this.pool = pool;
         this.modules = List.copyOf(modules);
         this.yOffset = yOffset;
@@ -81,6 +87,7 @@ public final class ModularStructure extends Structure {
     }
 
     private DataResult<ModularStructure> validate() {
+        if(anchor.isPresent()&&anchor.orElseThrow().validate().error().isPresent())return DataResult.error(()->"Invalid placement anchor.");
         if (pool.isEmpty() && (size.getX() > MAX_SPAN || size.getY() > MAX_SPAN || size.getZ() > MAX_SPAN)
                 || modules.stream().mapToInt(module -> module.entry().template().blocks().size()).sum() > MAX_BLOCKS) {
             return DataResult.error(() -> "A modular structure may span at most 96 blocks per axis and contain 65,536 blocks.");
@@ -128,6 +135,8 @@ public final class ModularStructure extends Structure {
     }
 
     public int blockCount() { return pool.isPresent() ? Math.min(MAX_BLOCKS, modules.stream().mapToInt(m -> m.entry().template().blocks().size()).max().orElse(0) * pool.orElseThrow().maxModules()) : modules.stream().mapToInt(module -> module.entry().template().blocks().size()).sum(); }
+    String placementDescription(){return anchor.map(a->a.mode().getSerializedName()+(a.mode()==PlacementAnchor.Mode.FIXED?" Y "+a.fixedY():"")).orElse("legacy seabed")+"; height offset "+yOffset;}
+    boolean rootAnchored(){return pool.filter(p->p.format()==3).isPresent();}
     public boolean hasMarker(String module, String marker) {
         if (pool.isEmpty()) return modules.stream().anyMatch(part -> part.name().equals(module) && part.entry().markers().containsKey(marker));
         if (module.equals("root")) return modules.stream().anyMatch(part -> part.name().equals(pool.orElseThrow().root()) && part.entry().markers().containsKey(marker));
@@ -142,13 +151,15 @@ public final class ModularStructure extends Structure {
             StructureTemplateManager templates, long seed, ChunkPos chunk, int references,
             LevelHeightAccessor height, java.util.function.Predicate<Holder<Biome>> validBiome) {
         if (generator instanceof SolidColumnGenerator solid && !com.gwsheridan.worldarchitect.worldgen.RuleExecution.allowsTemplate(solid, selected, seed, chunk, height, random)) {
+            SiteProbe.reject("Rule-engine selection or candidate spacing rejected this chunk.");
             return StructureStart.INVALID_START;
         }
         List<Module> layout;
         try { layout = pool.isPresent() ? pool.orElseThrow().layout(modules, ProceduralPool.seed(seed,chunk.x(),chunk.z())).orElse(null) : modules; }
         catch(IOException e) { throw new IllegalStateException("Invalid pool template",e); }
-        if (layout == null) return StructureStart.INVALID_START;
+        if (layout == null) {SiteProbe.reject("Pool requirements, connections or bounded layout search rejected this seed.");return StructureStart.INVALID_START;}
         if (layout.stream().anyMatch(module -> module.entry().rules().dimension().filter(id -> !id.equals(dimension.identifier())).isPresent())) {
+            SiteProbe.reject("A module requires a different dimension.");
             return StructureStart.INVALID_START;
         }
         if (pool.isEmpty()) return super.generate(selected, dimension, registries, generator, biomes, sampler, random, templates, seed, chunk, references, height, validBiome);
@@ -170,17 +181,19 @@ public final class ModularStructure extends Structure {
         int z = context.chunkPos().getMinBlockZ();
         Rotation rotation = randomRotation ? Rotation.getRandom(context.random()) : Rotation.NONE;
         var transform = new TemplatePlacement(BlockPos.ZERO, rotation, Mirror.NONE);
-        int y = generator.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, context.heightAccessor(), context.randomState()) + yOffset;
+        int seabed=generator.getBaseHeight(x,z,Heightmap.Types.OCEAN_FLOOR_WG,context.heightAccessor(),context.randomState());
+        int y=anchor.map(a->a.resolve(generator.getBaseHeight(x,z,Heightmap.Types.WORLD_SURFACE_WG,context.heightAccessor(),context.randomState()),seabed,yOffset)).orElse(seabed+yOffset);
         BlockPos origin = new BlockPos(x, y, z);
+        if(pool.filter(p->p.format()==3).isPresent())origin=origin.subtract(transformedOffset(layout.stream().filter(m->m.name().equals("root")).findFirst().orElseThrow(),layoutSize,transform));
         var pieces = new ArrayList<ModularPiece>(layout.size());
         try {
             for (var module : layout) {
+                SiteProbe.check();
                 LibraryEntry transformed = module.entry().transformed(transform);
-                BlockPos first = transform.position(layoutSize, module.offset());
-                BlockPos last = transform.position(layoutSize, module.offset().offset(module.entry().template().size()).offset(-1, -1, -1));
-                BlockPos offset = new BlockPos(Math.min(first.getX(), last.getX()), first.getY(), Math.min(first.getZ(), last.getZ()));
+                BlockPos offset = transformedOffset(module,layoutSize,transform);
                 pieces.add(new ModularPiece(module.name(), origin.offset(offset), transformed));
             }
+            SiteProbe.geometry(origin,pieces,layoutSize,transform);
             if (!accepts(context, generator, pieces)) {
                 return Optional.empty();
             }
@@ -193,6 +206,8 @@ public final class ModularStructure extends Structure {
     private boolean accepts(GenerationContext context, SolidColumnGenerator generator, List<ModularPiece> pieces) throws IOException {
         var columns = new HashMap<Long, NoiseColumn>();
         var occupied = new HashMap<BlockPos, BlockState>();
+        var planned=new HashMap<BlockPos,BlockState>();
+        if(pool.filter(p->p.format()==3).isPresent())for(var piece:pieces)for(var cell:piece.entry().template().blocks())planned.put(piece.origin().offset(cell.pos()),cell.state());
         int minSurface = Integer.MAX_VALUE;
         int maxSurface = Integer.MIN_VALUE;
         for (var piece : pieces) {
@@ -200,25 +215,28 @@ public final class ModularStructure extends Structure {
             var rules = entry.rules();
             var bottom = new HashMap<Long, BlockPos>();
             for (var cell : entry.template().blocks()) {
+                SiteProbe.check();
                 BlockPos pos = piece.origin().offset(cell.pos());
-                if (!com.gwsheridan.worldarchitect.worldgen.RuleExecution.templateCell(generator, this, context.seed(), pos)) return false;
+                if((anchor.isPresent()||pool.filter(p->p.format()==3).isPresent())&&generator.endProgression().isPresent()
+                        &&!com.gwsheridan.worldarchitect.config.EndProgression.allowsGenerationWrite(context.chunkPos().getMinBlockX(),context.chunkPos().getMinBlockZ(),pos.getX(),pos.getZ()))return SiteProbe.reject("A template cell crosses the native End arena reservation.");
+                if (!com.gwsheridan.worldarchitect.worldgen.RuleExecution.templateCell(generator, this, context.seed(), pos)) return SiteProbe.reject("A template cell falls outside its height, biome or region rule at "+pos.toShortString());
                 if (!context.heightAccessor().isInsideBuildHeight(pos) || pos.getY() < rules.minY() || pos.getY() > rules.maxY()
                         || Math.abs((long) pos.getX()) >= 29_999_984 || Math.abs((long) pos.getZ()) >= 29_999_984) {
-                    return false;
+                    return SiteProbe.reject("A template cell exceeds its allowed height or world bounds at "+pos.toShortString());
                 }
                 Holder<Biome> biome = context.biomeResolver().getNoiseBiome(QuartPos.fromBlock(pos.getX()),
                         QuartPos.fromBlock(pos.getY()), QuartPos.fromBlock(pos.getZ()));
                 if (!context.validBiome().test(biome) || rules.biome().filter(id -> !biome.is(id)).isPresent()) {
-                    return false;
+                    return SiteProbe.reject("A template cell fails its biome restrictions at "+pos.toShortString());
                 }
                 NoiseColumn column = column(context, generator, columns, pos);
                 BlockState existing = column.getBlock(pos.getY());
-                if (!existing.isAir() && (rules.collision() != TemplateRules.Collision.MATCHING || existing != cell.state() || existing.hasBlockEntity())) {
-                    return false;
+                if (!rules.collision().allows(existing,cell.state())) {
+                    return SiteProbe.reject("Collision with "+existing.getBlock().getName().getString()+" at "+pos.toShortString());
                 }
                 if (rules.terrain() == TemplateRules.Terrain.BURIED && pos.getY() >= generator.getBaseHeight(pos.getX(), pos.getZ(),
                         Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState()) - 1) {
-                    return false;
+                    return SiteProbe.reject("Buried placement requires terrain above "+pos.toShortString());
                 }
                 if (rules.terrain() == TemplateRules.Terrain.SUPPORTED) {
                     bottom.merge(columnKey(pos), pos, (a, b) -> a.getY() < b.getY() ? a : b);
@@ -228,8 +246,8 @@ public final class ModularStructure extends Structure {
             }
             for (var pos : bottom.values()) {
                 NoiseColumn column = column(context, generator, columns, pos);
-                if (!IslandTemplate.safeFloor(column.getBlock(pos.getY() - 1), net.minecraft.world.level.EmptyBlockGetter.INSTANCE, pos.below())) {
-                    return false;
+                if (!IslandTemplate.safeFloor(planned.getOrDefault(pos.below(),column.getBlock(pos.getY() - 1)), net.minecraft.world.level.EmptyBlockGetter.INSTANCE, pos.below())) {
+                    return SiteProbe.reject("Supported placement needs a safe floor below "+pos.toShortString());
                 }
                 int surface = generator.getBaseHeight(pos.getX(), pos.getZ(), Heightmap.Types.OCEAN_FLOOR_WG,
                         context.heightAccessor(), context.randomState());
@@ -238,17 +256,17 @@ public final class ModularStructure extends Structure {
             }
         }
         if (maxSurface != Integer.MIN_VALUE && maxSurface - minSurface > maxSlope) {
-            return false;
+            return SiteProbe.reject("Supported terrain exceeds the maximum slope.");
         }
         for (var piece : pieces) {
             for (var marker : piece.entry().markers().values()) {
                 BlockPos pos = piece.origin().offset(marker.pos());
                 if (!context.heightAccessor().isInsideBuildHeight(pos.above()) || occupied.containsKey(pos) || occupied.containsKey(pos.above())) {
-                    return false;
+                    return SiteProbe.reject("A spawn marker exceeds build height or is blocked by an assembly cell at "+pos.toShortString());
                 }
                 NoiseColumn column = column(context, generator, columns, pos);
                 if (!column.getBlock(pos.getY()).isAir() || !column.getBlock(pos.getY() + 1).isAir()) {
-                    return false;
+                    return SiteProbe.reject("A spawn marker requires two air cells at "+pos.toShortString());
                 }
             }
         }
@@ -261,6 +279,10 @@ public final class ModularStructure extends Structure {
 
     private static long columnKey(BlockPos pos) {
         return BlockPos.asLong(pos.getX(), 0, pos.getZ());
+    }
+    private static BlockPos transformedOffset(Module module,BlockPos layoutSize,TemplatePlacement transform){
+        BlockPos first=transform.position(layoutSize,module.offset()),last=transform.position(layoutSize,module.offset().offset(module.entry().template().size()).offset(-1,-1,-1));
+        return new BlockPos(Math.min(first.getX(),last.getX()),first.getY(),Math.min(first.getZ(),last.getZ()));
     }
 
     @Override

@@ -5,18 +5,18 @@ Design each Minecraft dimension before creating a world. Choose terrain and laye
 **Minecraft Java 26.3 · NeoForge 26.3.0.103 · Java 25**
 Created and maintained by **GWSHERIDAN**.
 
-See the [1.4 milestones](docs/ROADMAP-1.4.md) and [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
+See the [1.5 milestones](docs/ROADMAP-1.5.md) and [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
-World Architect 1.4.0 adds draft recovery, shared terrain-region rules, constrained pools and scenario authoring. See the [release notes](docs/RELEASE-NOTES-1.4.md) for details.
+World Architect 1.5.0 adds polygon terrain regions, explicit placement anchors, vertical procedural pools and a read-only structure site inspector. See the [release notes](docs/RELEASE-NOTES-1.5.md) for details.
 
 ## Get started
 
-Install `worldarchitect-1.4.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
+Install `worldarchitect-1.5.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
 
 In **Create New World → World**, choose **World Architect · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
 
 - **World Inspector:** saved profiles, dependency pins and new-world preset comparisons.
-- **Regional terrain:** coordinate masks, priority, biome choices and feathered heights with generator version 3.
+- **Regional terrain:** rectangles, circles and polygon outlines, with priority, biome choices and feathered heights.
 - **Procedural pools:** seeded modules, named connections, branches and end caps.
 - **Test workbench:** isolated preset scenarios and local reports from the source tools.
 - **Draft history:** bounded Undo/Redo, duplication, ordering and explicit interrupted-draft recovery.

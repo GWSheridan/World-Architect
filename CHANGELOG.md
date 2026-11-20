@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.0
+
+- Added convex and concave polygon regions with vertex editing, shared rule masks, draft history and explicit terrain version 4.
+- Added surface, seabed and fixed-height assembly anchors, plus opt-in replacement of water blocks without excavation or draining interiors.
+- Added format-3 vertical pool connections, root anchoring, shaft clearance and support from the complete planned assembly.
+- Added a read-only structure site inspector bound to a saved preset, with production-planner explanations, terrain sections, permissions and bounded cancellable sampling.
+- Added polygon, coastal, ladder-connected tower and locked Skyblock integration examples while retaining earlier bundles.
+- Kept API 1, existing terrain/pool algorithms, archived resources, island assignments and End policies. Matching 1.5 clients and servers are required.
+
 ## 1.4.0
 
 - Added bounded draft history, duplication/reordering and explicit recovery for interrupted authoring sessions.

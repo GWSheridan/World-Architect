@@ -14,7 +14,7 @@ public record TerrainShape(int elevation, int relief, Optional<AdvancedTerrain> 
     public static final TerrainShape HILLS = new TerrainShape(68, 44);
     public static final TerrainShape HIGHLANDS = new TerrainShape(108, 72);
     public static final MapCodec<TerrainShape> CODEC = RecordCodecBuilder.<EncodedShape>mapCodec(builder -> builder.group(
-            Codec.intRange(SingleBlockProfile.VERSION, RegionalTerrain.VERSION).fieldOf("generator_version").forGetter(EncodedShape::version),
+            Codec.intRange(SingleBlockProfile.VERSION, RegionalTerrain.POLYGON_VERSION).fieldOf("generator_version").forGetter(EncodedShape::version),
             Codec.intRange(MIN_ELEVATION, MAX_ELEVATION).fieldOf("elevation").forGetter(encoded -> encoded.shape().elevation()),
             Codec.intRange(0, MAX_RELIEF).fieldOf("relief").forGetter(encoded -> encoded.shape().relief()),
             AdvancedTerrain.CODEC.optionalFieldOf("terrain").forGetter(encoded -> encoded.shape().advanced()),
@@ -22,7 +22,7 @@ public record TerrainShape(int elevation, int relief, Optional<AdvancedTerrain> 
     ).apply(builder, (version, elevation, relief, advanced, regions) -> new EncodedShape(version, new TerrainShape(elevation, relief, advanced, regions))))
             .flatXmap(encoded -> encoded.version() == encoded.shape().version()
                     ? encoded.shape().validate()
-                    : DataResult.error(() -> "Version 1 forbids terrain; version 2 requires terrain; version 3 additionally requires regions."),
+                    : DataResult.error(() -> "Versions 1/2 retain legacy terrain; version 3 requires regions and version 4 requires a polygon."),
                     shape -> shape.validate().map(checked -> new EncodedShape(checked.version(), checked)));
     public TerrainShape(int elevation, int relief) { this(elevation, relief, Optional.empty(), Optional.empty()); }
     /** Retained API 1 constructor. */
@@ -39,6 +39,6 @@ public record TerrainShape(int elevation, int relief, Optional<AdvancedTerrain> 
         if (version != SingleBlockProfile.VERSION) throw new IllegalArgumentException("This constructor only accepts generator version 1.");
         return new TerrainShape(elevation, relief);
     }
-    public int version() { return regions.isPresent() ? RegionalTerrain.VERSION : advanced.isPresent() ? AdvancedTerrain.VERSION : SingleBlockProfile.VERSION; }
+    public int version() { return regions.isPresent() ? regions.orElseThrow().version() : advanced.isPresent() ? AdvancedTerrain.VERSION : SingleBlockProfile.VERSION; }
     private record EncodedShape(int version, TerrainShape shape) {}
 }

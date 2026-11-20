@@ -14,6 +14,7 @@
 - [Structures](Structures.md)
 - [Structure Library](Structure-Library.md)
 - [Assembly Studio](Assembly-Studio.md)
+- [Structure Site Inspector](Structure-Site-Inspector.md)
 - [Procedural Pools](Procedural-Pools.md)
 - [Void and Skyblock](Void-and-Skyblock.md)
 - [End Progression](End-Progression.md)

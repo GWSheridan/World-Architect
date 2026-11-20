@@ -1,6 +1,6 @@
 # Public extension API 1
 
-World Architect 1.4.0 supports Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Compile against the distributed JAR; declare a required NeoForge dependency on World Architect. Call `WorldArchitectApi.requireVersion(1)` in your mod constructor. A different API contract fails during mod construction, before a world opens.
+World Architect 1.5.0 supports Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Compile against the distributed JAR; declare a required NeoForge dependency on World Architect. Call `WorldArchitectApi.requireVersion(1)` in your mod constructor. A different API contract fails during mod construction, before a world opens.
 
 The supported surface is `com.gwsheridan.worldarchitect.api` plus the data types listed below. Other implementation packages, mixins, generator implementation classes, client screens and low-level file writers are internal even when Java visibility is public. API 1 additions retain existing method signatures and codec defaults. Breaking changes require a new API version. Minecraft/NeoForge upgrades may require recompilation; API 1 is not a promise of binary compatibility across game versions.
 
@@ -36,7 +36,7 @@ A `StructureAdapter` declares a positive `version()` and pure `supports(Structur
 
 `StructureTemplates.modular(JsonObject, HolderLookup.Provider)` decodes a detached `worldarchitect:modular` definition, checks size/overlap/rules/markers and validates metadata. It never inserts entries into a live registry. `StructureTemplates.read(CompoundTag, registries)` reads and sanitizes a detached native template: decorative supported metadata survives; inventories, commands and unsupported data are removed or rejected. Neither method places blocks.
 
-Supported template data: `NativeTemplate`/`Cell`, `TemplateRules`, `TemplatePlacement`; `ModularStructure` supports `CODEC`, `validateTemplates`, `horizontalSpan`, `blockCount` and `hasMarker`. Constructors/native override methods on the generator implementation are not extension points. Register a decoded modular definition via a datapack before selecting its holder. See [template rules and markers](Structure-Library.md) and [cross-dimension examples](https://github.com/GWSheridan/World-Architect/tree/v1.4.0/examples/cross-dimension-structures).
+Supported template data: `NativeTemplate`/`Cell`, `TemplateRules`, `TemplatePlacement`; `ModularStructure` supports `CODEC`, `validateTemplates`, `horizontalSpan`, `blockCount` and `hasMarker`. Constructors/native override methods on the generator implementation are not extension points. Register a decoded modular definition via a datapack before selecting its holder. See [template rules and markers](Structure-Library.md) and [cross-dimension examples](https://github.com/GWSheridan/World-Architect/tree/v1.5.0/examples/cross-dimension-structures).
 
 ## Features and blocks
 
@@ -80,7 +80,7 @@ New native extension worlds pin selected adapter IDs/versions/work costs, featur
 
 ## External consumer and verification
 
-[The separate fixture project](https://github.com/GWSheridan/World-Architect/tree/v1.4.0/examples/api-fixture) compiles against the shipped JAR and supplies a dimension adapter, custom block, native feature and structure codec. It exercises template/marker decoding, preset validation, environment/spawn persistence, permissions and thread guards. No fixture classes or resources are included in the production JAR. See [Compatibility and performance](Compatibility-and-Performance.md) for adapter rejection, upgrade and benchmark results.
+[The separate fixture project](https://github.com/GWSheridan/World-Architect/tree/v1.5.0/examples/api-fixture) compiles against the shipped JAR and supplies a dimension adapter, custom block, native feature and structure codec. It exercises template/marker decoding, preset validation, environment/spawn persistence, permissions and thread guards. No fixture classes or resources are included in the production JAR. See [Compatibility and performance](Compatibility-and-Performance.md) for adapter rejection, upgrade and benchmark results.
 
 ## Dimension adapters
 
@@ -88,7 +88,7 @@ World Architect reads dimensions from the active world preset and Minecraft's `L
 
 ## Register an adapter
 
-Compile against World Architect 1.4.0 and call `WorldArchitectApi.requireVersion(1)`. Existing adapters continue to offer the modes they declare. On both physical sides, register a `DimensionAdapter` with NeoForge `DeferredRegister` during your mod's constructor. Use the exact dimension registry ID. The [public API contract](Public-API.md) also covers structures, features, blocks, spawning, environments and presets.
+Compile against World Architect 1.5.0 and call `WorldArchitectApi.requireVersion(1)`. Existing adapters continue to offer the modes they declare. On both physical sides, register a `DimensionAdapter` with NeoForge `DeferredRegister` during your mod's constructor. Use the exact dimension registry ID. The [public API contract](Public-API.md) also covers structures, features, blocks, spawning, environments and presets.
 
 ```java
 var adapters = DeferredRegister.create(DimensionAdapterRegistry.KEY, "examplemod");
@@ -138,3 +138,11 @@ The native arena is restricted to the End in this release. It does not add fight
 ## Version 1.4 data formats
 
 API contract 1 retains its supported signatures. Named terrain-region rule conditions and constrained assembly pools use explicit format 2 and need World Architect 1.4. Existing format-1 definitions retain their encodings and algorithms. Authoring protocol 1.4 requires matching client/server versions. Draft recovery, editor sessions, planner diagnostics and workbench internals are implementation details rather than new public extension contracts.
+
+## Version 1.5 data additions
+
+API 1 retains existing constructors and method signatures. `RegionalTerrain.Zone` adds an immutable vertex list and retains its original constructor. `RegionalTerrain.Vertex` and the existing codecs support bounded polygon masks; only polygon profiles select terrain generator version 4. Earlier profile encodings remain unchanged.
+
+`PlacementAnchor.CODEC` describes explicit version-1 surface, seabed or fixed-height placement. Modular definitions may include optional `placement`; omission retains the legacy seabed behavior. `air_or_water` collision is explicit and does not permit lava, waterlogged solids or containers. `ProceduralPool.withPorts` selects pool format 3 when vertical ports are added; formats 1 and 2 keep their algorithms and constructor contracts. New inputs must be validated before export.
+
+Site-inspector classes, worker/session helpers and rendering code remain internal implementation details. They are not extension APIs. Use registered modular definitions and the documented authoring commands. Matching 1.5 clients and servers are required for authoring networking.

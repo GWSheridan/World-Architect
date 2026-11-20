@@ -5,9 +5,11 @@ import {createHash} from 'node:crypto';
 import {gradle} from './process.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const args=Object.fromEntries(Array.from({length:(process.argv.length-2)/2},(_,i)=>process.argv.slice(2+i*2,4+i*2)));
-for(const key of Object.keys(args))if(!['--jar','--fixture','--bundle','--output','--options','--port','--rounds','--round-seconds'].includes(key))throw Error('Unknown option '+key);
+for(const key of Object.keys(args))if(!['--jar','--fixture','--bundle','--output','--options','--port','--rounds','--round-seconds','--explore-dimension','--site-structure'].includes(key))throw Error('Unknown option '+key);
 for(const key of ['--jar','--fixture','--bundle','--output','--options'])if(!args[key])throw Error('Missing '+key);
 const output=resolve(root,args['--output']),port=Number(args['--port']||25960),rounds=Number(args['--rounds']||20),seconds=Number(args['--round-seconds']||180);
+const exploreDimension=args['--explore-dimension']||'minecraft:overworld';
+for(const id of [exploreDimension,args['--site-structure']].filter(Boolean))if(!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(id))throw Error('Invalid fixture resource ID');
 if(!relative(root,output).startsWith('build'+(process.platform==='win32'?'\\':'/')))throw Error('Use a new build/ directory');
 if(!Number.isInteger(port)||port<1024||port>65535||!Number.isInteger(rounds)||rounds<1||rounds>40||!Number.isInteger(seconds)||seconds<1||seconds>180)throw Error('Invalid workload bounds');
 await fs.mkdir(output,{recursive:false});
@@ -29,7 +31,7 @@ await fs.writeFile(join(output,'server/server.properties'),`server-ip=127.0.0.1\
 await fs.writeFile(join(output,'server/whitelist.json'),JSON.stringify(players.map(player=>{
  const name='WA12'+player,b=createHash('md5').update('OfflinePlayer:'+name).digest();b[6]=(b[6]&15)|48;b[8]=(b[8]&63)|128;const s=b.toString('hex');return{name,uuid:[s.slice(0,8),s.slice(8,12),s.slice(12,16),s.slice(16,20),s.slice(20)].join('-')};
 }),null,2));
-const results={format:1,jar_sha256:sha(jar),bundle_sha256:sha(bundle),players:4,tests:[],rounds:[],status:'running'};
+const results={format:1,jar_sha256:sha(jar),bundle_sha256:sha(bundle),players:4,exploration_dimension:exploreDimension,tests:[],rounds:[],status:'running'};
 const running=[];let server,stage,counters,pins,ledger,homes;
 const read=async path=>{try{return await fs.readFile(path,'utf8');}catch(e){if(e.code==='ENOENT')return '';throw e;}};
 const pause=ms=>new Promise(done=>setTimeout(done,ms));
@@ -60,7 +62,7 @@ try{
  await act('Alice',['COMMAND wa_structure undo']);await wait(observed('Alice'),'Undid 3 blocks');
  for(const p of players){await act(p,['BLOCK 5120 200 5120']);await wait(observed(p),'BLOCK 5120, 200, 5120 minecraft:air');}
  // Exercise server-owned authoring through the same screens and payloads used by players.
- await act('Bob',['COMMAND wa_workbench studio cycle14_soak one']);await wait(observed('Bob'),'Unknown or incomplete command');
+ await act('Bob',['COMMAND wa_workbench studio multiplayer_fixture one']);await wait(observed('Bob'),'Unknown or incomplete command');
  await act('Alice',['COMMAND wa_assembly new validation:connected minecraft:plains']);await wait(observed('Alice'),'SCREEN Assembly Studio');
  await act('Alice',['PRESS Add module']);await act('Alice',['ROW 0','PRESS Select']);await act('Alice',['PRESS Apply']);
  await act('Alice',['PRESS History / organize']);await act('Alice',['BOUNDS','PRESS Duplicate selected module']);await act('Alice',['PRESS History / organize']);await act('Alice',['PRESS Undo']);
@@ -73,8 +75,8 @@ try{
  await act('Alice',['PRESS Room constraints']);await act('Alice',['ROW 0','PRESS Select']);await act('Alice',['EDIT 0 1','EDIT 1 1','EDIT 2 2','BOUNDS','PRESS Apply']);
  await act('Alice',['BOUNDS','PRESS Preview report']);await act('Alice',['ROW 1','PRESS Select']);await pause(1000);await act('Alice',['VIEW','SHOT']);await wait(observed('Alice'),'Seed 15: 2 modules');
  await act('Alice',['PRESS Back to assembly']);await act('Alice',['PRESS Save draft']);await act('Alice',['PRESS Close']);
- await command('wa_preset capture cycle14_soak one');
- await act('Alice',['COMMAND wa_workbench studio cycle14_soak one']);await wait(observed('Alice'),'SCREEN Test workbench');
+ await command('wa_preset capture multiplayer_fixture one');
+ await act('Alice',['COMMAND wa_workbench studio multiplayer_fixture one']);await wait(observed('Alice'),'SCREEN Test workbench');
  await act('Alice',['PRESS Run settings']);await act('Alice',['EDIT 1 -9223372036854775808','BOUNDS','PRESS Apply']);
  await act('Alice',['PRESS History / recovery']);await act('Alice',['PRESS Undo']);await act('Alice',['PRESS History / recovery']);await act('Alice',['PRESS Redo']);
  await act('Alice',['FIELDS','BOUNDS','PRESS Export scenario']);await act('Alice',['EDIT 0 connected-author','PRESS Apply']);await pause(1000);await act('Alice',['FIELDS','SHOT']);await wait(observed('Alice'),'Exported connected-author.scenario.json');
@@ -82,6 +84,17 @@ try{
  await command('deop WA12Alice');await act('Alice',['PRESS Export scenario']);await act('Alice',['EDIT 0 refused-author','PRESS Apply']);await pause(1000);await act('Alice',['FIELDS']);await wait(observed('Alice'),'permission level 4');
  try{await fs.stat(join(config,'exports/refused-author.scenario.json'));throw Error('Revoked author exported a scenario');}catch(e){if(e.code!=='ENOENT')throw e;}
  await act('Alice',['PRESS Cancel']);results.tests.push({case:'connected-history-pool-constraints-preview-workbench-ack-revoked-permission',status:'passed'});
+ if(args['--site-structure']){
+  await command('op WA12Alice');await act('Alice',['COMMAND wa_site studio multiplayer_fixture one']);await wait(observed('Alice'),'SCREEN Structure site inspector');
+  await act('Alice',['PRESS Coordinates']);await act('Alice',[`EDIT 0 ${exploreDimension}`,`EDIT 1 ${args['--site-structure']}`,'EDIT 2 18','EDIT 3 0','EDIT 4 0','BOUNDS','PRESS Apply']);
+  await pause(1000);await act('Alice',['VIEW','BOUNDS','SHOT']);await wait(observed('Alice'),'status:"eligible"');
+  await act('Alice',['SCALE 2','BOUNDS','SHOT']);await act('Alice',['PRESS Coordinates']);await act('Alice',['EDIT 3 1','PRESS Apply']);await act('Alice',['PRESS Close']);await pause(1000);await act('Alice',['SCREEN_CLOSED']);
+  await act('Alice',['COMMAND wa_site studio multiplayer_fixture one']);await wait(observed('Alice'),'SCREEN Structure site inspector');await command('deop WA12Alice');
+  const deniedAt=(await read(observed('Alice'))).length;await act('Alice',['PRESS Coordinates']);await act('Alice',[`EDIT 0 ${exploreDimension}`,`EDIT 1 ${args['--site-structure']}`,'EDIT 2 18','EDIT 3 0','EDIT 4 0','PRESS Apply']);
+  const denialDeadline=Date.now()+10000;while(!(await read(observed('Alice'))).slice(deniedAt).includes('Unknown or incomplete command')){if(Date.now()>denialDeadline)throw Error('Revoked site permission did not produce a fresh denial');await pause(200);}await act('Alice',['CLOSE']);
+  await command(`wa_validate site_generation vertical ${args['--site-structure']} ${exploreDimension} 1`);await server.wait('WA15_GENERATION_PASS',180,['WA_SITE_GENERATION_FAILED']);
+  results.tests.push({case:'connected-site-preview-scales-cancel-late-result-and-revoked-permission',status:'passed'});
+ }
  await command('deop WA12Alice');await command('gamemode creative @a');await command('dragon_test entry');
  await untilFight(d=>d.entities===1&&!d.dragon_killed);await command('dragon_test kill');await untilFight(d=>d.entities===0&&d.dragon_killed);
  await command('dragon_test travel');await server.wait('DRAGON_GATEWAY_ROUNDTRIP_PASS');await command('dragon_test rewards');await server.wait('DRAGON_REWARDS_PASS');await command('dragon_test ritual');await untilFight(d=>d.respawn_stage&&d.respawn_time>0);
@@ -90,9 +103,9 @@ try{
  for(const p of players){await act(p,['COMMAND wa_island home']);const h=homes[p];await at(p,h[0],Number(h[1]),Number(h[2]),Number(h[3]));}
  await command('gamemode spectator @a');const started=Date.now();
  for(let round=0;round<rounds;round++){
-  for(const dimension of ['minecraft:overworld','minecraft:the_end'])await command(`execute in ${dimension} run forceload remove all`);
+  for(const dimension of [exploreDimension,'minecraft:the_end'])await command(`execute in ${dimension} run forceload remove all`);
   for(let i=0;i<players.length;i++){
-   const dimension=i%2?'minecraft:the_end':'minecraft:overworld',coordinate=32768+round*512+i*96,end=coordinate+48;
+   const dimension=i%2?'minecraft:the_end':exploreDimension,coordinate=round===0&&dimension===exploreDimension&&args['--site-structure']?i*96:32768+round*512+i*96,end=coordinate+48;
    await command(`execute in ${dimension} run forceload add ${coordinate} ${coordinate} ${end} ${end}`);
    await command(`execute in ${dimension} run tp WA12${players[i]} ${coordinate+.5} 140 ${coordinate+.5}`);await at(players[i],dimension,coordinate+.5,140,coordinate+.5);
    await act(players[i],['COMMAND wa_structure list']);
@@ -105,6 +118,7 @@ try{
  }
  results.connected_seconds=(Date.now()-started)/1000;results.requested_chunks=rounds*64;results.homes=homes;results.final_positions=Object.fromEntries(await Promise.all(players.map(async p=>[p,location(await read(observed(p)))])));results.tests.push({case:'native-ritual-restart-second-kill-four-player-soak',status:'passed'});await close(clients);
  clients=await open('restart');for(const p of players){const saved=results.final_positions[p];await at(p,saved[0],Number(saved[1]),Number(saved[2]),Number(saved[3]));await act(p,['COMMAND wa_island home']);const h=homes[p];await at(p,h[0],Number(h[1]),Number(h[2]),Number(h[3]));}
+ if(args['--site-structure']){await command(`wa_validate site_generation vertical ${args['--site-structure']} ${exploreDimension} 2`);await server.wait('WA15_GENERATION_PASS',180,['WA_SITE_GENERATION_FAILED']);}
  results.tests.push({case:'after-soak-positions-ledger-safe-home-and-generation-persistence',status:'passed'});await close(clients);results.status='passed';
 }catch(error){results.status='failed';results.error=error.stack;process.exitCode=1;}
 finally{

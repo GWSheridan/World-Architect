@@ -189,7 +189,7 @@ public final class StructureCommands {
                 .then(idArgument("dimension")
                         .executes(run(c -> setRules(c, restriction(c, "dimension"), Optional.empty())))
                         .then(idArgument("biome").executes(run(c -> setRules(c, restriction(c, "dimension"), restriction(c, "biome"))))));
-        var collision = choices("collision", "air", "matching")
+        var collision = choices("collision", "air", "matching", "air_or_water")
                 .then(integerArgument("min_y", DimensionType.MIN_Y, DimensionType.MAX_Y).then(height));
         var clear = saved().executes(run(c -> saveChange(c, entry(c).withRules(TemplateRules.DEFAULT))));
         var set = saved().then(choices("terrain", "free", "supported", "buried").then(collision));

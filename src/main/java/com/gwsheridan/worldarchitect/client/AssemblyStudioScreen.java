@@ -23,7 +23,7 @@ final class AssemblyStudioScreen extends Screen {
         add("New draft",left,27,fourth,()->discard(this::create));
         add("Open draft",left+fourth+4,27,fourth,()->discard(this::open));
         add("Save draft",left+2*(fourth+4),27,fourth,()->send("save","")).active=active()&&data.getBooleanOr("dirty",false);
-        add("Settings",left+3*(fourth+4),27,fourth,this::settings).active=active();
+        add("Settings",left+3*(fourth+4),27,fourth,()->minecraft.gui.setScreen(new StudioChoiceScreen(this,"Assembly settings",List.of("Terrain and rotation","Placement anchor","Selected module collision"),choice->{if(choice.startsWith("Terrain"))settings();else if(choice.startsWith("Placement"))anchor();else collision();}))).active=active();
         add("<",left,51,22,()->{selected=Math.max(0,selected-1);rebuildWidgets();}).active=selected>0;
         add(">",left+26,51,22,()->{selected=Math.min(modules.size()-1,selected+1);rebuildWidgets();}).active=selected+1<modules.size();
         String moduleLabel=modules.isEmpty()?"No modules":(selected+1)+"/"+modules.size()+" · "+modules.get(selected).getStringOr("name","");
@@ -66,6 +66,8 @@ final class AssemblyStudioScreen extends Screen {
     private void settings(){form("Assembly settings","All modules must pass their own rules. Random rotation applies to the entire assembly.",List.of(
             new StudioFormScreen.Field("Biome ID",data.getStringOr("biome","minecraft:plains")),new StudioFormScreen.Field("Height offset · -64 to 64",""+data.getIntOr("y_offset",0)),
             new StudioFormScreen.Field("Maximum slope · 0 to 32",""+data.getIntOr("slope",4)),new StudioFormScreen.Field("Random assembly rotation · true/false",""+data.getBooleanOr("random",true))),v->{Identifier.parse(v.get(0));int y=Integer.parseInt(v.get(1)),s=Integer.parseInt(v.get(2));return y< -64||y>64||s<0||s>32||!List.of("true","false").contains(v.get(3))?"Check the assembly settings.":"";},v->send("settings",String.join(" ",v)));}
+    private void anchor(){form("Placement anchor","Anchors position the assembly; they do not reshape terrain. Legacy keeps the original seabed placement.",List.of(new StudioFormScreen.Field("Mode · legacy/surface/seabed/fixed",data.getStringOr("anchor","legacy")),new StudioFormScreen.Field("Fixed Y · zero for other modes",""+data.getIntOr("fixed_y",0))),v->{if(!List.of("legacy","surface","seabed","fixed").contains(v.get(0)))return "Choose a listed anchor.";int y=Integer.parseInt(v.get(1));return y<net.minecraft.world.level.dimension.DimensionType.MIN_Y||y>net.minecraft.world.level.dimension.DimensionType.MAX_Y||!v.get(0).equals("fixed")&&y!=0?"Only fixed anchors accept a height; final blocks must fit the dimension.":"";},v->send("anchor",String.join(" ",v)));}
+    private void collision(){if(modules.isEmpty()){minecraft.gui.setScreen(new StudioReportScreen(this,"Module collision",List.of("Add a module first.")));return;}minecraft.gui.setScreen(new StudioChoiceScreen(this,"Collision · "+modules.get(selected).getStringOr("name",""),List.of("air","matching","air_or_water"),value->send("module_collision",selected+" "+value)));}
     private void export(boolean bundle){
         var fields=new ArrayList<StudioFormScreen.Field>();fields.add(new StudioFormScreen.Field("New export ID",data.getStringOr("id","builds:village")));
         if(bundle){fields.add(new StudioFormScreen.Field("Dimension ID","minecraft:overworld"));fields.add(new StudioFormScreen.Field("Preset release","1.0.0"));fields.add(new StudioFormScreen.Field("Seed for new worlds","18"));}

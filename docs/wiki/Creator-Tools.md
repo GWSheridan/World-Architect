@@ -1,6 +1,6 @@
 # Creator tools
 
-These controls are included in World Architect 1.4.0. Use matching 1.4 versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
+These controls are included in World Architect 1.5.0. Use matching 1.5 versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
 
 ## Start a world
 
@@ -66,3 +66,7 @@ Use [Assembly Studio](Assembly-Studio.md) to combine templates into complete mod
 ## Draft authoring history
 
 Preset Studio, regional terrain, rules, Assembly Studio and workbench scenarios now have bounded history and explicit interrupted-draft recovery. See [Draft History](Draft-History.md) for the difference between editor Undo/Redo and the manual placement undo described above. Neither changes immutable world generation.
+
+## Terrain and structure tools in 1.5
+
+Use the regional editor for polygon outlines and vertex history. Assembly settings now include placement anchors and per-module water collision rules; pool connections also accept up/down shafts. The [site inspector](Structure-Site-Inspector.md) explains a saved preset's base-terrain placement decisions on an authoring server without creating chunks. It does not certify later generation effects.

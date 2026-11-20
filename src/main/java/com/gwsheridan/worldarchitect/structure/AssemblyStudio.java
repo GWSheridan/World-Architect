@@ -73,6 +73,15 @@ public final class AssemblyStudio {
                     var s=session(c);var path=AssemblyExports.bundle(c.getSource().getServer(),s.draft,getId(c,"target"),getId(c,"dimension"),getString(c,"release"),LongArgumentType.getLong(c,"seed"),c.getSource().getPlayerOrException().getPlainTextName());
                     c.getSource().sendSuccess(()->Component.literal("Exported assembly preset to config/worldarchitect/exports/"+path.getFileName()),false);show(c.getSource().getPlayerOrException(),"Preset exported: "+path.getFileName());return 1;
                 }))))))));
+        root.then(command("module_collision",serial->serial.then(argument("index",integer(0,15)).then(argument("collision",word()).executes(run(c->{
+            var s=session(c);var parts=new ArrayList<>(s.draft.parts());int index=getInteger(c,"index");if(index>=parts.size())throw new IOException("That module no longer exists.");
+            var p=parts.get(index);var r=p.original().rules();var rules=new TemplateRules(r.dimension(),r.biome(),r.minY(),r.maxY(),r.terrain(),TemplateRules.Collision.parse(getString(c,"collision")));
+            parts.set(index,new AssemblyDraft.Part(p.name(),p.source(),p.offset(),p.rotation(),p.mirror(),p.original().withRules(rules)));change(c,s.draft.withParts(parts),index);return 1;
+        }))))));
+        root.then(command("anchor",serial->serial.then(argument("mode",word()).then(argument("fixed_y",integer(net.minecraft.world.level.dimension.DimensionType.MIN_Y,net.minecraft.world.level.dimension.DimensionType.MAX_Y)).executes(run(c->{
+            var s=session(c);var key=getString(c,"mode");var next=key.equals("legacy")?Optional.<PlacementAnchor>empty():Optional.of(new PlacementAnchor(PlacementAnchor.Mode.valueOf(key.toUpperCase(Locale.ROOT)),getInteger(c,"fixed_y")));
+            if(key.equals("legacy")&&getInteger(c,"fixed_y")!=0)throw new IOException("Legacy anchoring does not accept a fixed height.");change(c,s.draft.withAnchor(next),s.selected);return 1;
+        }))))));
         poolCommands(root);
         historyCommands(root);
         event.getDispatcher().register(root);
@@ -203,6 +212,7 @@ public final class AssemblyStudio {
             data.putBoolean("can_undo",s.history.canUndo());data.putBoolean("can_redo",s.history.canRedo());data.putBoolean("recovery_pending",s.recoveryPending);data.putBoolean("can_recover",s.recoveryAvailable);data.putString("recovery_problem",clip(s.recoveryProblem,256));
             var d=s.draft;data.putBoolean("pool_editor",s.poolEditor);data.putLong("preview_seed",s.previewSeed);d.pool().ifPresent(pool->data.put("pool",ProceduralPool.CODEC.encodeStart(NbtOps.INSTANCE,pool).getOrThrow()));data.putString("id",d.id().toString());data.putString("token",s.token.toString());data.putInt("serial",s.serial);data.putInt("revision",d.revision());data.putInt("selected",s.selected);data.putBoolean("dirty",s.serial!=s.savedSerial);
             data.putString("biome",d.biome().toString());data.putInt("y_offset",d.yOffset());data.putInt("slope",d.maxSlope());data.putBoolean("random",d.randomRotation());
+            data.putString("anchor",d.anchor().map(a->a.mode().getSerializedName()).orElse("legacy"));data.putInt("fixed_y",d.anchor().map(PlacementAnchor::fixedY).orElse(0));
             String problem="Assembly valid · templates and markers are embedded snapshots.";boolean valid=true;
             try{d.structure(server);}catch(IOException|RuntimeException e){problem=e.getMessage()==null?"Check assembly settings.":e.getMessage();valid=false;}
             data.putBoolean("valid",valid);data.putString("status",clip(status==null?problem:status,1536));

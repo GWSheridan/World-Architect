@@ -219,7 +219,9 @@ tasks.register('releaseChecksums', JavaExec) {
         file('examples/preset-studio/bundles').absolutePath, project.version.toString(),
         file('examples/creator-starters/bundles').absolutePath, file('examples/assembly-studio/bundles').absolutePath,
         file('examples/regional-terrain/bundles').absolutePath, file('examples/procedural-pools/bundles').absolutePath,
-        file('examples/shared-regions/bundles').absolutePath, file('examples/constrained-pools/bundles').absolutePath] } as CommandLineArgumentProvider)
+        file('examples/shared-regions/bundles').absolutePath, file('examples/constrained-pools/bundles').absolutePath,
+        file('examples/polygon-regions/bundles').absolutePath, file('examples/terrain-anchors/bundles').absolutePath,
+        file('examples/vertical-pools/bundles').absolutePath, file('examples/locked-archipelago/bundles').absolutePath] } as CommandLineArgumentProvider)
 }
 
 tasks.register('assembleRelease') {
@@ -259,6 +261,18 @@ tasks.register('prepareCycle14Examples', JavaExec) {
         file(providers.gradleProperty('sharedRegionsExport').get()).absolutePath,
         file(providers.gradleProperty('constrainedPoolExport').get()).absolutePath,
         providers.gradleProperty('previousExampleVersion').orElse('1.3.0').get(), project.version.toString()] } as CommandLineArgumentProvider)
+}
+
+tasks.register('prepareCycle15Examples', JavaExec) {
+    group = 'distribution'
+    description = 'Prepare polygon, coastal, vertical and locked integration examples from validated exports.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
+        file(providers.gradleProperty('polygonExport').get()).absolutePath,
+        file(providers.gradleProperty('coastalExport').get()).absolutePath,
+        file(providers.gradleProperty('verticalExport').get()).absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
+    mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseCycle15Examples'
 }
 
 tasks.register('prepareWorkbenchInputs', JavaExec) {

@@ -101,7 +101,7 @@ record TemplatePlacement(BlockPos origin, Rotation rotation, Mirror mirror) {
                 if (rules.collision() == TemplateRules.Collision.MATCHING && existing == state && !existing.hasBlockEntity()) {
                     continue;
                 }
-                throw new IOException("Placement collides with " + existing.getBlock().getName().getString() + " at " + pos.toShortString());
+                if(!rules.collision().allows(existing,state))throw new IOException("Placement collides with " + existing.getBlock().getName().getString() + " at " + pos.toShortString());
             }
             plan.add(new Change(pos, existing, state, cell.metadata()));
         }

@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "preset": "worldarchitect_examples:custom-end",
+  "title": "Custom End starter",
+  "description": "Custom outer End terrain with the native central arena and dragon progression.",
+  "author": "GWSHERIDAN",
+  "release": "1.5.0",
+  "lock": "unlocked",
+  "options": {
+    "seed": 18,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "minecraft",
+    "worldarchitect"
+  ]
+}

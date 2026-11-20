@@ -8,11 +8,13 @@ import { baselineBytes } from './baseline.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const options = Object.fromEntries(Array.from({length: (process.argv.length - 2) / 2}, (_, i) => process.argv.slice(2 + i * 2, 4 + i * 2)));
-for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset','--check-end','--pool','--regional','--baseline','--named-regions'].includes(key)) throw new Error(`Unknown option ${key}`);
+for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset','--check-end','--pool','--regional','--baseline','--named-regions','--baseline14','--site','--site-structure'].includes(key)) throw new Error(`Unknown option ${key}`);
 if (!['online','offline'].includes(options['--network'] || 'offline')) throw new Error('Network must be online or offline');
 if (!options['--jar'] || !options['--fixture'] || !options['--output']) throw new Error('Use --jar JAR --fixture VALIDATION_JAR --output NEW_DIRECTORY [--world COPIED_SAVE] [--profile single-block] [--port 25945]');
 if(options['--dimension']&&!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--dimension']))throw Error('Invalid dimension ID');
 if(options['--check-end']&&!['true','false'].includes(options['--check-end']))throw Error('Invalid End check flag');
+if(options['--site']&&!['vertical','coastal','polygon','stress'].includes(options['--site']))throw Error('Invalid site fixture kind');
+if(options['--site-structure']&&!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--site-structure']))throw Error('Invalid site structure ID');
 const output = resolve(root, options['--output']);
 if (!relative(root, output).startsWith('build' + (process.platform === 'win32' ? '\\' : '/'))) throw new Error('Output must be under build/');
 await fs.mkdir(output, {recursive:false});
@@ -71,6 +73,9 @@ if(suite === 'authoring') {
     const file=join(config,'developer.json');let developer={format:1};try{developer=JSON.parse(await fs.readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
     developer.developer_mode=true;await fs.writeFile(file,JSON.stringify(developer));
     await fs.writeFile(join(config,'validation-baseline-1.3.0.jar'),await baselineBytes(root,options['--network'],options['--baseline']?resolve(root,options['--baseline']):undefined),{flag:'wx'});
+    const frozen14=resolve(root,options['--baseline14']||'build/validation-inputs/worldarchitect-1.4.0.jar');const bytes14=await fs.readFile(frozen14);
+    if(bytes14.length>33554432||sha(bytes14)!=='3684963461df2331c7f0fa4968d12b972fceff6c73c3568c77a19dcc66474fe4')throw Error('Frozen 1.4 baseline fingerprint differs');
+    await fs.writeFile(join(config,'validation-baseline-1.4.0.jar'),bytes14,{flag:'wx'});
 }
 await fs.writeFile(join(server,'server.properties'),properties + `\nserver-port=${port}\nmanagement-server-enabled=false\nlog-ips=false\nmotd=World Architect validation\n`);
 await fs.writeFile(join(server,'eula.txt'),'eula=true\n');
@@ -95,6 +100,7 @@ function launch(stage) {
         while (!text.includes(marker)) {
             if (ended || Date.now()>until) throw new Error(`Missing ${marker}; inspect ${stage}.log`);
             if (text.includes('WA_VALIDATION_STRUCTURES_FAILED')) throw new Error('Dedicated structure assertions failed');
+            if (text.includes('WA_SITE_GENERATION_FAILED')) throw new Error('Dedicated site generation assertions failed');
             await new Promise(done=>setTimeout(done,200));
         }
     }
@@ -122,6 +128,9 @@ try {
             running.send(stage === 'fresh' ? 'wa_validate structures' : 'wa_validate restart');
             await running.wait(stage === 'fresh' ? 'WA_VALIDATION_STRUCTURES_PASS' : 'WA_VALIDATION_RESTART_PASS');
             running.send('wa_diagnose report'); await running.wait('Saved local diagnostics');
+        } else if(options['--site']) {
+            running.send(`wa_validate site_generation ${options['--site']} ${options['--site-structure']} ${options['--dimension']||'minecraft:overworld'} ${stage==='fresh'?1:2}`);
+            await running.wait('WA15_GENERATION_PASS');
         } else if(options['--named-regions']==='true') {
             running.send('wa_validate named_regions '+(stage==='fresh'?1:2));await running.wait('WA_NAMED_REGIONS_GENERATION_PASS');
         } else if(options['--regional']==='true') {

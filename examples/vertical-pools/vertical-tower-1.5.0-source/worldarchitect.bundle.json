@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "preset": "worldarchitect_examples:vertical_tower",
+  "title": "Vertical tower",
+  "description": "Three connected floors with ladders, safe markers and a seabed-anchored entrance.",
+  "author": "GWSHERIDAN",
+  "release": "1.5.0",
+  "lock": "unlocked",
+  "options": {
+    "seed": 18,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "minecraft",
+    "worldarchitect"
+  ]
+}

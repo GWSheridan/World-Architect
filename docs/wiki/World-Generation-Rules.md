@@ -66,7 +66,7 @@ Put `rule_engine` inside the managed generator's `dimension_profile`. Bind its `
 }
 ```
 
-The [floating Sky City example](https://github.com/GWSheridan/World-Architect/tree/v1.4.0/examples/worldgen-rules) includes every action type, competing templates, rejected filters and generated-marker join/respawn policies.
+The [floating Sky City example](https://github.com/GWSheridan/World-Architect/tree/v1.5.0/examples/worldgen-rules) includes every action type, competing templates, rejected filters and generated-marker join/respawn policies.
 
 ## Inspection and protection
 
@@ -82,4 +82,4 @@ The [Rule Inspector](Rule-Inspector.md) visualizes condition coverage, explains 
 
 Choose **Named terrain region** in the rule editor to reuse a region from that dimension's terrain profile. `mask` tests its inclusive geometric bounds. `winner` also requires that it wins over other containing regions by priority and then list order. Height feathering and biome transition weights do not shrink these masks. `exclude: true` inverts a known region's result; unknown or missing regions still fail closed. A named spawn condition must target its own dimension. Void has no regional terrain and refuses named references.
 
-For example, `"when": {"named_region": {"name": "forest", "mode": "winner", "exclude": false}}` requires a root engine `"version": 2`. Version 1 keeps its previous encoding and evaluator. Material, ore and decoration writes use the same condition; every template cell must satisfy its spatial filters. [Rule Inspector](Rule-Inspector.md) uses that evaluator for region overlays and coordinate explanations. See the complete [shared-regions example](https://github.com/GWSheridan/World-Architect/tree/v1.4.0/examples/shared-regions).
+For example, `"when": {"named_region": {"name": "forest", "mode": "winner", "exclude": false}}` requires a root engine `"version": 2`. Version 1 keeps its previous encoding and evaluator. Material, ore and decoration writes use the same condition; every template cell must satisfy its spatial filters. [Rule Inspector](Rule-Inspector.md) uses that evaluator for region overlays and coordinate explanations. See the complete [shared-regions example](https://github.com/GWSheridan/World-Architect/tree/v1.5.0/examples/shared-regions).
