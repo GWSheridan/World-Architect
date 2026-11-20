@@ -25,7 +25,7 @@ await fs.mkdir(output,{recursive:false});await fs.writeFile(join(output,'workben
 const results={format:1,jar_sha256:sha(jar),bundle_sha256:sha(bundle),mods:mods.map(m=>({file:m.name,sha256:sha(m.bytes)})),runs:[],status:'running'};
 const record=()=>fs.writeFile(join(output,'results.json'),JSON.stringify(results,null,2)+'\n');
 async function pins(server){const dir=join(server,'world/data'),p={};for(const name of ['worldarchitect-generation-v1.dat','minecraft/world_gen_settings.dat'])p[name]=sha(await fs.readFile(join(dir,name)));const archive=join(dir,'worldarchitect/generation');try{for(const n of (await fs.readdir(archive)).filter(n=>n.endsWith('.zip')).sort())p[n]=sha(await fs.readFile(join(archive,n)));}catch(e){if(e.code!=='ENOENT')throw e;}return p;}
-async function bounded(promise,seconds){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Job exceeded its time budget')),seconds*1000);})]);}finally{clearTimeout(timer);}}
+async function bounded(promise,seconds){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Object.assign(Error('Job exceeded its time budget'),{code:'WA_VALIDATION_TIMEOUT'})),seconds*1000);})]);}finally{clearTimeout(timer);}}
 try{
  for(const job of scenario.runs){
     if(interrupted)throw Error('Workbench interrupted');
@@ -41,10 +41,10 @@ try{
         if(job.expect_startup==='reject'){
             const exit=await bounded(active.exit,scenario.budgets.timeout_seconds);const text=await fs.readFile(log,'utf8');if(exit===0||text.includes('Done (')||!text.includes(job.expected_error))throw Error('Startup rejection did not match the expected failure');result.stages.push({stage,expected_rejection:true});active=undefined;break;
         }
-        await bounded((async()=>{await active.wait('Done (',scenario.budgets.timeout_seconds);active.send('wa_validate workbench');await active.wait('WA_WORKBENCH_PASS',scenario.budgets.timeout_seconds);active.send('save-all flush');await active.wait('Saved the game');active.send('stop');if(await active.exit!==0)throw Error('Server exited with an error');})(),scenario.budgets.timeout_seconds);
+        await bounded((async()=>{await active.wait('Done (',scenario.budgets.timeout_seconds);active.send('wa_validate workbench');await active.wait('WA_WORKBENCH_PASS',scenario.budgets.timeout_seconds,['WA_WORKBENCH_FAILED']);active.send('save-all flush');await active.wait('Saved the game');active.send('stop');if(await active.exit!==0)throw Error('Server exited with an error');})(),scenario.budgets.timeout_seconds);
         active=undefined;const current=await pins(server);if(original&&JSON.stringify(original)!==JSON.stringify(current))throw Error('Pinned generation changed across restart');original=current;result.stages.push({stage,status:'passed'});
     }
     result.generation_sha256=original;result.status='passed';await record();
  }
  results.status='passed';
-}catch(error){results.status='failed';results.error=interrupted?'Workbench interrupted':error.message;const job=results.runs.at(-1);if(job&&job.status==='running'){job.status='failed';job.error=results.error;}process.exitCode=1;}finally{if(active)await active.stop();await record();console.log(`Workbench ${results.status}: ${relative(root,output)}/results.json`);if(process.connected)process.disconnect();}
+}catch(error){results.status='failed';results.failure_kind=interrupted?'interrupted':error.code==='WA_VALIDATION_TIMEOUT'?'timeout':error.code==='WA_VALIDATION_ASSERTION'?'assertion':'error';results.error=interrupted?'Workbench interrupted':error.message;const job=results.runs.at(-1);if(job&&job.status==='running'){job.status='failed';job.error=results.error;}process.exitCode=1;}finally{if(active)await active.stop();await record();console.log(`Workbench ${results.status}: ${relative(root,output)}/results.json`);if(process.connected)process.disconnect();}

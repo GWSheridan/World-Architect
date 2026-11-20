@@ -25,7 +25,7 @@ const legacyBytes=await fs.readFile(join(root,'examples/creator-starters/bundles
 await fs.writeFile(join(inputs,'legacy.zip'),legacyBytes,{flag:'wx'});await fs.writeFile(join(inputs,'modern.zip'),modernBytes,{flag:'wx'});
 const legacy=scenario('legacy.zip',sha(legacyBytes),'9223372036854775807'),modern=scenario('modern.zip',sha(modernBytes),'-9223372036854775808');
 modern.runs[0].regions=[{dimension:'minecraft:overworld',chunk_x:0,chunk_z:0,width:2,depth:2}];modern.runs[0].probes=[{dimension:'minecraft:overworld',x:1,y:64,z:1,block:'minecraft:diamond_block'}];
-const bad=structuredClone(modern);bad.budgets.timeout_seconds=30;bad.runs[0].restart=false;bad.runs[0].probes[0].block='minecraft:gold_block';
+const bad=structuredClone(modern);bad.budgets.timeout_seconds=120;bad.runs[0].restart=false;bad.runs[0].probes[0].block='minecraft:gold_block';
 for(const [name,value]of [['legacy',legacy],['modern',modern],['bad-probe',bad]])await json(join(inputs,name+'.json'),value);
 const sources=[];for(const name of ['legacy','modern','bad-probe'])sources.push({name,file:name+'.json',sha256:sha(await fs.readFile(join(inputs,name+'.json'))),...(name==='legacy'?{}:{versions:['candidate']}),...(name==='bad-probe'?{expected_status:'failed',expected_error:'Block probe failed'}:{})});
 const matrix={format:1,budgets:{max_jobs:8,timeout_seconds:1800},versions:[{name:'baseline',jar:'baseline.jar',sha256:sha(baseline),fixture:'validation.jar',fixture_sha256:sha(fixture)},{name:'candidate',jar:'candidate.jar',sha256:sha(candidate),fixture:'validation.jar',fixture_sha256:sha(fixture)}],scenarios:sources,providers:[{name:'plain',mods:'plain',files:{}},{name:'api',mods:'api',files:{'provider.jar':sha(provider)}}]};

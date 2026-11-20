@@ -11,9 +11,14 @@ export function gradle(root,args,logFile) {
     for(const stream of [child.stdout,child.stderr])stream.on('data',bytes=>{log.write(bytes);text=(text+bytes).slice(-4_000_000);});
     const exit=new Promise((accept,reject)=>{child.on('error',reject);child.on('close',code=>{ended=true;log.end();accept(code);});});
     const send=command=>{if(!ended)child.stdin.write(command+'\n');};
-    async function wait(marker,seconds=180) {
+    async function wait(marker,seconds=180,failures=[]) {
         const deadline=Date.now()+seconds*1000;
-        while(!text.includes(marker)){if(ended||Date.now()>deadline)throw new Error(`Missing ${marker}; inspect ${logFile}`);await new Promise(done=>setTimeout(done,200));}
+        while(!text.includes(marker)){
+            if(ended)throw Object.assign(new Error(`Process exited before ${marker}; inspect ${logFile}`),{code:'WA_PROCESS_EXIT'});
+            if(Date.now()>deadline)throw Object.assign(new Error(`Timed out waiting for ${marker}; inspect ${logFile}`),{code:'WA_VALIDATION_TIMEOUT'});
+            const failed=failures.find(value=>text.includes(value));if(failed)throw Object.assign(new Error(`${failed}; inspect ${logFile}`),{code:'WA_VALIDATION_ASSERTION'});
+            await new Promise(done=>setTimeout(done,200));
+        }
     }
     async function stop() {
         if(ended)return;send('stop');await Promise.race([exit,new Promise(done=>setTimeout(done,20000).unref())]);

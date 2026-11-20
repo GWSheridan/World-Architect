@@ -25,7 +25,7 @@ public final class PlacementAcceptance {
     public PlacementAcceptance() { NeoForge.EVENT_BUS.addListener(PlacementAcceptance::register); NeoForge.EVENT_BUS.addListener(ProgressionAcceptance::register); }
     private static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("wa_validate").requires(Commands.hasPermission(Commands.LEVEL_OWNERS))
-                .then(Commands.literal("workbench").executes(c -> {try {WorkbenchAcceptance.check(c.getSource().getServer());return 1;}catch(Exception e){throw new IllegalStateException("WA_WORKBENCH_FAILED",e);}}))
+                .then(Commands.literal("workbench").executes(c -> {try {WorkbenchAcceptance.check(c.getSource().getServer());return 1;}catch(Exception|AssertionError e){System.err.println("WA_WORKBENCH_FAILED "+e.getMessage());throw new IllegalStateException("WA_WORKBENCH_FAILED",e);}}))
                 .then(Commands.literal("named_regions").then(Commands.argument("stage",com.mojang.brigadier.arguments.IntegerArgumentType.integer(1,2)).executes(c->{try{Cycle14Acceptance.regions(c.getSource().getServer(),com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c,"stage"));return 1;}catch(Exception e){throw new IllegalStateException("WA_NAMED_REGIONS_FAILED",e);}})))
                 .then(Commands.literal("cycle13").executes(c -> { try { Cycle13Acceptance.fresh(c.getSource().getServer()); return 1; } catch(Exception e) {throw new IllegalStateException("WA_CYCLE13_FAILED",e);} }))
                 .then(Commands.literal("cycle13_restart").executes(c -> { try { Cycle13Acceptance.restart(c.getSource().getServer()); return 1; } catch(Exception e) {throw new IllegalStateException("WA_CYCLE13_RESTART_FAILED",e);} }))

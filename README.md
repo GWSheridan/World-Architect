@@ -7,7 +7,7 @@ Created and maintained by **GWSHERIDAN**.
 
 See the [1.4 milestones](docs/ROADMAP-1.4.md) and [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
-This branch prepares World Architect 1.4.0. See the [release notes](docs/RELEASE-NOTES-1.4.md) for its changes. The public latest release remains 1.3.0 until publication.
+World Architect 1.4.0 adds draft recovery, shared terrain-region rules, constrained pools and scenario authoring. See the [release notes](docs/RELEASE-NOTES-1.4.md) for details.
 
 ## Get started
 

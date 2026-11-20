@@ -32,3 +32,5 @@ Open **Preset Studio → Workbench** after saving and validating the current pre
 The selected saved preset and its SHA-256 remain fixed. Export revalidates the scenario and that source revision, then creates a new named scenario beside the identical bound bundle. Existing scenario files cannot be overwritten. The server checks the current actor, developer mode, session token and source fingerprint for each export; losing permission while the editor is open prevents further writes. Export status reports the server's acknowledgement. This screen only authors inputs; it never starts servers inside the game.
 
 For version/provider/seed matrices, total deadlines and combined HTML/JSON reports, see [Batch Testing](Batch-Testing.md).
+
+Fixture assertion failures stop a run immediately. Failed reports distinguish `assertion`, `error`, `timeout` and `interrupted`; a budget expiration cannot stand in for an expected probe failure.

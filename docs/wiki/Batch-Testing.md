@@ -30,3 +30,5 @@ An intentionally failing runtime scenario can declare `expected_status: "failed"
 The batch writes local `results.json` and an escaped `report.html`, plus individual job results and logs. Reports distinguish expected and actual outcomes and record fingerprints, provider inputs and generation pins. Durations include startup and validation and must not be treated as generation benchmarks. Interrupting the batch requests orderly server shutdown before the bounded fallback stops its owned process tree. Test directories are retained for investigation and never reused or deleted by the runner.
 
 Run one workbench or batch process per source checkout: the Gradle server task's generated launch arguments are shared. Stop other game/build workloads before using the separate [performance tools](Compatibility-and-Performance.md).
+
+Failed jobs record a `failure_kind`: `assertion`, `error`, `timeout` or `interrupted`. The HTML report shows that type beside the outcome. An expected runtime failure needs an explicit assertion or error result and its specific evidence; stage deadlines and total-batch deadlines both remain failed tests.

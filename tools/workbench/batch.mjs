@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {validateScenario} from './scenario.mjs';
-import {validateBatch,expandBatch,batchHtml} from './batch-schema.mjs';
+import {validateBatch,expandBatch,batchHtml,acceptsExpectedFailure} from './batch-schema.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..'),args={};
 for(let i=2;i<process.argv.length;i+=2){const key=process.argv[i],value=process.argv[i+1];if(!['--matrix','--output','--network','--port'].includes(key)||!value||key in args)throw Error('Invalid or repeated batch option');args[key]=value;}
@@ -53,8 +53,9 @@ try{
         row.status='running';await record();const begin=performance.now(),outcome=await launch(params,join(directory,'runner.log'),Math.max(1,matrix.budgets.timeout_seconds*1000-(performance.now()-started)));row.elapsed_ms=Math.round(performance.now()-begin);
         let observed;try{observed=JSON.parse(await fs.readFile(join(instance,'results.json'),'utf8'));}catch(e){row.error='Runner did not produce a complete result';}
         row.actual=outcome.code===0&&observed?.status==='passed'?'passed':'failed';row.exit_code=outcome.code;row.result=relative(output,join(instance,'results.json'));row.scenario_sha256=sha(await fs.readFile(scenarioFile));
-        const expectedFailure=job.expected==='failed'&&observed?.status==='failed'&&outcome.code!==0&&!outcome.timedOut&&!interrupted&&(await failureText(instance,observed)).includes(job.expected_error);
-        row.status=(job.expected==='passed'?row.actual==='passed':expectedFailure)?'passed':'failed';
+        row.failure_kind=outcome.timedOut?'timeout':interrupted?'interrupted':observed?.failure_kind;
+        const expectedFailure=acceptsExpectedFailure(job,observed,outcome,interrupted,job.expected==='failed'&&observed?await failureText(instance,observed):'');
+        row.status=!outcome.timedOut&&!interrupted&&(job.expected==='passed'?row.actual==='passed':expectedFailure)?'passed':'failed';
         if(observed){row.jar_sha256=observed.jar_sha256;row.bundle_sha256=observed.bundle_sha256;row.mods=observed.mods;row.runs=observed.runs;}
         await record();console.log(`${job.name}: ${job.scenario} / ${job.version} / ${job.provider}: ${row.status}`);
         if(outcome.timedOut)throw Error('Batch deadline exhausted; interrupted results cannot count as expected failures');

@@ -10,4 +10,4 @@ Start with [Installation](Installation.md) and [Getting Started](Getting-Started
 
 Existing worlds keep the generation settings they were created with. Changes to a preset affect future worlds. Read [Backups and Upgrades](Backups-and-Upgrades.md) before updating a server.
 
-New in 1.4: [draft history and recovery](Draft-History.md), shared [terrain-region rules](World-Generation-Rules.md), constrained [procedural pools](Procedural-Pools.md), in-game [scenario authoring](Test-Workbench.md) and [batch comparisons](Batch-Testing.md). These prepared guides cover 1.4.0; earlier releases remain available.
+New in 1.4: [draft history and recovery](Draft-History.md), shared [terrain-region rules](World-Generation-Rules.md), constrained [procedural pools](Procedural-Pools.md), in-game [scenario authoring](Test-Workbench.md) and [batch comparisons](Batch-Testing.md). These guides cover 1.4.0; earlier releases remain available.
