@@ -134,3 +134,7 @@ The server checks the ID and version before generation. Keep the adapter version
 `DimensionProfile.endProgression()` exposes the optional policy. Existing constructors default to an empty policy. Use `withEndProgression` to set or clear it and `EndProgression.vanillaArena(registries)` to create a registry-bound policy. `ManagedGenerator.endProgression()` is a default accessor. Profile copy methods retain the policy. API contract 1 remains supported.
 
 The native arena is restricted to the End in this release. It does not add fights to other dimensions or convert existing saves.
+
+## Version 1.4 data formats
+
+API contract 1 retains its supported signatures. Named terrain-region rule conditions and constrained assembly pools use explicit format 2 and need World Architect 1.4. Existing format-1 definitions retain their encodings and algorithms. Authoring protocol 1.4 requires matching client/server versions. Draft recovery, editor sessions, planner diagnostics and workbench internals are implementation details rather than new public extension contracts.

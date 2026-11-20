@@ -5,3 +5,5 @@ World Architect 0.16.0 adds immutable, per-dimension generation rules to managed
 Read the full guide: [World Generation Rules](wiki/World-Generation-Rules.md), also available in the [GitHub wiki](https://github.com/GWSheridan/World-Architect/wiki/World-Generation-Rules).
 
 See [Rule Inspector](wiki/Rule-Inspector.md) for condition maps, coordinate explanations and conservative order and work-budget warnings.
+
+Version 2 supports named terrain-region masks and winners, shared by material, ore, decoration, template and same-dimension spawn rules. Old version-1 rules retain their encoding and behaviour. See the [shared-region reference](wiki/World-Generation-Rules.md#shared-terrain-regions).

@@ -62,3 +62,7 @@ History retains at most ten operations per author with a shared 32 MiB accountin
 Level 3 administrators can run `/wa_diagnose report`. It writes a local JSON file under `config/worldarchitect/diagnostics/`. Reports contain platform/mod versions, dimension and adapter capabilities, live dependency matches and SHA-256 hashes of generation files. Player identities, addresses, credentials, absolute paths and raw seeds are excluded. No report is uploaded automatically. A world that fails protection during loading must be diagnosed from its startup error before this command becomes available.
 
 Use [Assembly Studio](Assembly-Studio.md) to combine templates into complete modular structures, [Rule Inspector](Rule-Inspector.md) for condition maps and explanations, and [Administration Panel](Administration-Panel.md) for confirmed server changes.
+
+## Draft authoring history
+
+Preset Studio, regional terrain, rules, Assembly Studio and workbench scenarios now have bounded history and explicit interrupted-draft recovery. See [Draft History](Draft-History.md) for the difference between editor Undo/Redo and the manual placement undo described above. Neither changes immutable world generation.

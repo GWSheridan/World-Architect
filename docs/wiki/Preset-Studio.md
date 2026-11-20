@@ -64,3 +64,7 @@ Administrators can use these local-file workflows:
 `capture` snapshots the authoring world's generation settings into a new library version. `validate` prints its dependency report. Authoring operations do not alter the running world's generation. Existing JSON drafts and `/wa_modpack export` remain supported and now share Studio validation and modular-template packaging.
 
 The [ready-to-install examples](https://github.com/GWSheridan/World-Architect/tree/v1.4.0/examples/preset-studio) include a partial preset with a bundled modular build and a fully locked multiplayer Skyblock preset.
+
+## Draft history and workbench export
+
+Use **History / recovery** for completed draft actions and interrupted-session recovery. Immutable saved releases remain separate from history. Save and validate the current draft before choosing **Workbench** to author a fingerprinted scenario for that exact revision. See [Draft History](Draft-History.md) and [Test Workbench](Test-Workbench.md).

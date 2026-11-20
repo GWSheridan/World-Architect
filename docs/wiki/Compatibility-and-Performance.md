@@ -1,6 +1,6 @@
 # Compatibility and performance
 
-World Architect 1.3.0 targets Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Use matching mod/provider versions on clients and servers. Specialised dimensions, structures and native features need compatible adapters; support does not certify every configuration of another mod.
+World Architect 1.4.0 targets Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Use matching mod/provider versions on clients and servers. Specialised dimensions, structures and native features need compatible adapters; support does not certify every configuration of another mod.
 
 Saved profiles pin the versions and definitions used for generation. A missing or mismatched dependency stops loading with an error. Earlier profiles keep their original algorithms, encoding and End policy. Native generation still has decoration and ticking variability; compare managed base terrain separately when testing changes.
 

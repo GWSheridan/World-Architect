@@ -8,6 +8,7 @@ gradle.beforeProject { project ->
             jvmArgument '-Xmx1500m'
             jvmArgument '-XX:ActiveProcessorCount=4'
             jvmArgument '-Dwa.creator.acceptance=true'
+            jvmArgument '-Dwa.creator.locked=' + project.providers.gradleProperty('validationClientLock').orElse('').get()
         }
     }
 }

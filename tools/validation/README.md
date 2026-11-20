@@ -5,12 +5,12 @@ Use Node 22 or newer and Java 25. The asset tools also require Java 21. Set `JAV
 The `validation` JAR is a separate test mod. It is excluded from the gameplay JAR. The portable runner installs the packaged gameplay JAR and fixture into a new disposable directory under `build/`, starts a loopback dedicated server, runs assertions and restarts it. It writes results and local logs to that directory. It refuses to reuse an output directory. Local runs default to offline Gradle. Add `--network online` for a clean host that still needs runtime dependencies such as NeoForge DevLaunch; CI uses that option.
 
 ```text
-node tools/validation/run.mjs --jar build/libs/worldarchitect-1.2.0.jar --fixture build/validation-tools/worldarchitect-1.2.0-validation.jar --output build/validation-new
+node tools/validation/run.mjs --jar build/libs/worldarchitect-1.4.0.jar --fixture build/validation-tools/worldarchitect-1.4.0-validation.jar --output build/validation-new
 ```
 
 Use `--world <source-world>` to copy an existing save before testing. Source files are hashed before and after; the runner writes only to its disposable copy. Provider mods, bundles and datapacks required by that save must also be installed in the copy. The current basic runner accepts extra JARs through `--mods <directory>`; use the complete pack-specific harness for saves with bundled configuration. For a fresh bundled world, pass `--bundle <export.zip>`; omitted server generation properties then come from its manifest.
 
-`--suite compatibility` checks startup, distant chunks and restart without using new authoring commands. It can compare the published 1.1.0 JAR with the candidate. Choose `--profile normal`, `single-block`, `layered`, `void` or `structure-heavy`. External-mod coexistence is narrower than support for every feature in those mods.
+`--suite compatibility` checks startup, distant chunks and restart without using new authoring commands. It can compare the published 1.3.0 JAR with the candidate. Choose `--profile normal`, `single-block`, `layered`, `void` or `structure-heavy`. External-mod coexistence is narrower than support for every feature in those mods.
 
 `mods.lock.json` records official matching public test builds and hashes. `node tools/validation/fetch-mods.mjs` downloads and verifies those inputs into `build/compatibility-inputs/`. Install Terralith with Lithostitched, or Biomes O' Plenty with GlitchCore and TerraBlender. Required dependencies inside a JAR must be checked as well as hosting-site metadata. Third-party binaries are not bundled in the release.
 
@@ -19,16 +19,16 @@ Use `--world <source-world>` to copy an existing save before testing. Source fil
 Install the gameplay and validation JARs in a clean client directory, enable `developer_mode` in that instance, and run `runCreatorValidation` with `-I tools/validation/client.init.gradle -PvalidationClientDirectory=<directory>`. The fixture checks starter exports, draft cancellation, bounds and preview views at GUI scales 1 and 2. It prints `WA_CREATOR_WORKFLOW_PASS`; Gradle exit status alone does not establish that the assertions passed. Screenshots remain in the instance's `screenshots/` directory.
 
 ```text
-node tools/validation/multiplayer.mjs --jar build/libs/worldarchitect-1.2.0.jar --fixture build/validation-tools/worldarchitect-1.2.0-validation.jar --output build/multiplayer-new
+node tools/validation/multiplayer.mjs --jar build/libs/worldarchitect-1.4.0.jar --fixture build/validation-tools/worldarchitect-1.4.0-validation.jar --output build/multiplayer-new
 ```
 
 This starts two real clients and a dedicated server for staged placement, ordinary-player denial, stale revision/destination rejection, ghost previews, undo, client block synchronization and restart checks. Use `--options <test-instance-options.txt>` to reuse accessibility and graphics settings. It uses synthetic offline identities on loopback. It must not be pointed at a production server.
 
-The GitHub workflow repeats the dedicated fixture and pinned public-mod matrix on Windows and Linux. `node tools/validation/compatibility.mjs` compares original and managed terrain with the verified 1.1.0 baseline. Candidate-only failures fail the job; matching identified upstream failures are recorded as blocked. The workflow uploads diagnostics, structured results, JUnit XML and CI server logs. A scheduled workflow is not created; runs follow source changes or a manual dispatch.
+The GitHub workflow repeats the dedicated fixture and pinned public-mod matrix on Windows and Linux. `node tools/validation/compatibility.mjs` compares original and managed terrain with the verified 1.3.0 baseline. Candidate-only failures fail the job; matching identified upstream failures are recorded as blocked. The workflow uploads diagnostics, structured results, JUnit XML and CI server logs. A scheduled workflow is not created; runs follow source changes or a manual dispatch.
 
-The release additionally requires the pack, End progression, dependency rejection, older-save audit, thirty-minute multiplayer soak and alternating same-host performance suites described in [the roadmap](../../docs/ROADMAP-1.1.md). A passing smoke test does not substitute for those checks.
+The release additionally requires the pack, End progression, dependency rejection, older-save audit, one-hour multiplayer soak and alternating same-host performance suites described in [the roadmap](../../docs/ROADMAP-1.4.md). A passing smoke test does not substitute for those checks.
 
-`node tools/validation/bundles.mjs` checks all seven versioned examples in clean dedicated-server instances. Each successful case compares pinned generation files across restart. For Windows resident-memory comparisons, use `benchmark-pairs.ps1 -BaselineJar <1.1.0.jar> -CandidateJar <candidate.jar> -OutputRoot build/<new-directory>` with other game/build workloads stopped. It runs three alternating pairs and writes a threshold report. A threshold flag requires investigation and a fresh repeat before being classified as a reproducible regression.
+`node tools/validation/bundles.mjs` checks all eleven versioned examples in clean dedicated-server instances. Each successful case compares pinned generation files across restart. For Windows resident-memory comparisons, use `benchmark-pairs.ps1 -BaselineJar <1.1.0.jar> -CandidateJar <candidate.jar> -OutputRoot build/<new-directory>` with other game/build workloads stopped. It runs three alternating pairs and writes a threshold report. A threshold flag requires investigation and a fresh repeat before being classified as a reproducible regression.
 
 ## 1.2 authoring and administration
 
@@ -43,3 +43,13 @@ The public-mod matrix now includes the combined five-mod pack. It pins the 1.1.0
 For an existing custom End save, use `--world <source-world> --suite compatibility --dimension minecraft:the_end --check-end true`. This copies the source, audits the native arena, records persistent dragon/portal/gateway state across restart, and waits for every requested outer-End chunk. Compare published and candidate copies with `auditSavedChunkPair`, passing `-PbaselineWorld`, `-PcandidateWorld`, `-PterrainDimension` and a semicolon-separated `-PterrainChunks` list. The comparison includes full block states, biomes, heightmaps and configured structures; it does not assume that an End preset has no End Cities.
 
 The [performance instructions](../../examples/performance/README.md) distinguish strict saved-chunk audits from the explicit native-pyramid diagnostic. Keep initial failures, same-binary controls and fresh timing repeats in the release report. A diagnostic exception must not turn a mismatched existing save into a passing strict comparison.
+
+## 1.4 history, masks and constraints
+
+The authoring suite checks draft history/recovery across restart, immutable workbench bindings and server permissions, shared named-region rules and format-2 pool constraints. It compares 256 legacy pool layouts directly with the published 1.3 JAR. Use `--baseline JAR` to supply that exact baseline offline; online runs verify and cache its pinned download under `build/validation-inputs/`.
+
+`assemblies.mjs` now covers static, format-1 and constrained format-2 exports in each available fixture dimension. `run.mjs --named-regions true --bundle examples/shared-regions/bundles/shared-regions-1.4.0.zip --suite compatibility` checks actual filtered material/ore/decor/template writes and spawn decisions, then repeats the block/biome fingerprint after restart. `bundles.mjs` installs all eleven current examples.
+
+The four-client soak also exercises connected history, pool constraints, background seed sampling, scenario editing, exact seeds, server acknowledgements and permission revocation before its native End and exploration workload. Its default twenty rounds remain the release requirement.
+
+Run `node --test tools/workbench/scenario.test.mjs tools/workbench/batch.test.mjs` for the shared Java/Node scenario contract and matrix validation. `node tools/workbench/batch-cases.mjs --network online` runs real version/provider comparisons, preflight rejections, a total deadline and active-server cancellation. See [Batch Testing](../../docs/wiki/Batch-Testing.md). Only one workbench/batch or runValidationServer process may use the checkout at once.

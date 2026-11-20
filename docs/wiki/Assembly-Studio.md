@@ -36,3 +36,7 @@ Back up drafts with the complete world. Exporting a revised assembly affects new
 Version 1.3 adds [Procedural Pools](Procedural-Pools.md) for seeded branching layouts. Static assemblies retain their existing definition and placement path.
 
 Preset exports read the live dimension registry, including mod-added dimensions outside the selected starting preset. Replacing a modded dimension still requires its registered adapter to support Single Block terrain.
+
+## History and interrupted sessions
+
+Use **History / organize** for Undo/Redo, module duplication and module ordering. Pool choices can also be reordered from their diagnostics menu. Completed edits write a separate recovery document. Reopening after a disconnect requires an explicit Restore/Discard choice; a newer saved revision is never overwritten by old recovery. Histories share the existing server memory budget, and edits keep current permission/token/serial/revision checks. See [Draft History](Draft-History.md) and [constrained pools](Procedural-Pools.md).

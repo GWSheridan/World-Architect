@@ -23,7 +23,7 @@ public final class CreatorAcceptance {
     private static CreateWorldScreen parent;
     private static Screen manager;
     @SubscribeEvent public static void tick(ClientTickEvent.Post event) throws Exception {
-        if (!Boolean.getBoolean("wa.creator.acceptance")) return;
+        if (!Boolean.getBoolean("wa.creator.acceptance")||!System.getProperty("wa.creator.locked","").isEmpty()) return;
         var mc = Minecraft.getInstance();
         if (!started) {
             if (!(mc.gui.screen() instanceof TitleScreen) || ++ticks<30) return;
