@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.8.0
+
+- Added Modpack Builder with guided starters, dimension editing, island catalogs, server policies, locks and matching client/server installation exports.
+- Added Island Studio for 64-block builds, native and schematic imports, capture, native block-model and slice previews, transforms, palette changes, spawn markers and explicit starter inventories.
+- Added saved island catalogs with fixed, weighted seeded or first-join choice layouts, persistent personal/team ownership and safe shared lobbies.
+- Added format-3 new-world runtime defaults and independent spawn, portal and protection permissions, retaining older manifests and saved allocation formats.
+- Added an optional Java-only modpack test kit and shared, choice, team and mixed-dimension examples.
+- Reworked authoring screens with a consistent slate surface, clearer focus states and new island artwork. Kept interface labels and controls accessible through Minecraft's native widgets.
+- Stopped performance comparisons when identical-JAR controls are too noisy to support them.
+
 ## 1.7.0
 
 - Added connected corridor regions with rounded ends, inward terrain transitions, biome choices and shared rule filtering. Corridors explicitly select generator version 6; existing versions retain their saved behavior.

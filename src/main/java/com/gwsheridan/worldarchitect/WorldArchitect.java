@@ -69,6 +69,7 @@ public final class WorldArchitect {
         generators.register(GENERATOR_ID.getPath(), () -> SingleBlockGenerator.CODEC);
         generators.register(LAYERED_PRESET.identifier().getPath(), () -> LayeredGenerator.CODEC);
         generators.register("void", () -> VoidGenerator.CODEC);
+        generators.register("skyblock", () -> com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator.CODEC);
         generators.register(modBus);
         DeferredRegister<MapCodec<? extends BiomeSource>> biomeSources = DeferredRegister.create(Registries.BIOME_SOURCE, ID);
         biomeSources.register("regions", () -> RegionBiomeSource.CODEC);
@@ -94,6 +95,12 @@ public final class WorldArchitect {
         NeoForge.EVENT_BUS.addListener(WorldEnvironment::respawned);
         NeoForge.EVENT_BUS.addListener(SpawnPolicies::respawn);
         NeoForge.EVENT_BUS.addListener(IslandAdministration::register);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.skyblock.IslandSelections::register);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.skyblock.IslandSelections::login);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.skyblock.IslandSelections::logout);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.skyblock.IslandSelections::tick);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.skyblock.IslandCaptures::register);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.skyblock.IslandCaptures::logout);
         NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.skyblock.AdministrationPanel::register);
         NeoForge.EVENT_BUS.addListener(IslandProtection::breaking);
         NeoForge.EVENT_BUS.addListener(IslandProtection::placing);
@@ -119,7 +126,7 @@ public final class WorldArchitect {
             event.getSettings().setSpawn(LevelData.RespawnData.of(level.dimension(), spawn, 0.0F, 0.0F));
             event.setCanceled(true);
         } else if (level.getChunkSource().getGenerator() instanceof VoidGenerator generator) {
-            BlockPos spawn = generator.island().map(island -> island.spawn(0)).orElseGet(() -> new BlockPos(8, level.getMinY() + 4, 8));
+            BlockPos spawn = generator.layout().map(island -> island.spawn(0)).orElseGet(() -> new BlockPos(8, level.getMinY() + 4, 8));
             event.getSettings().setSpawn(LevelData.RespawnData.of(level.dimension(), spawn, 0.0F, 0.0F));
             event.setCanceled(true);
         }

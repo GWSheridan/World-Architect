@@ -130,13 +130,14 @@ public final class IslandAdministration {
             throw new IOException("Unknown spawn dimension " + policy.dimension());
         }
         if (policy.kind() == SpawnPolicy.Kind.ISLAND || policy.kind() == SpawnPolicy.Kind.TEAM) {
-            if (!(level.getChunkSource().getGenerator() instanceof VoidGenerator generator) || generator.island().isEmpty()) {
+            if (!(level.getChunkSource().getGenerator() instanceof VoidGenerator generator) || generator.layout().isEmpty()) {
                 throw new IOException("Island policies require a Skyblock dimension.");
             }
-            if (policy.kind() == SpawnPolicy.Kind.TEAM && (level != server(context).overworld() || generator.island().orElseThrow().personalSlots() == 0)) {
+            if (policy.kind() == SpawnPolicy.Kind.TEAM && (level != server(context).overworld() || generator.layout().orElseThrow().personalSlots() == 0)) {
                 throw new IOException("Team policies require personal Overworld island slots.");
             }
-            if (IslandSpawns.position(level, generator.island().orElseThrow(), 0).isEmpty()) {
+            if(policy.kind()==SpawnPolicy.Kind.TEAM&&!SpawnPolicies.supportsTeamPolicy(generator))throw new IOException("Team spawn policies require a world created with team island allocation.");
+            if (IslandSpawns.position(level, generator.layout().orElseThrow(), 0).isEmpty()) {
                 throw new IOException("The shared island has no safe spawn.");
             }
         } else if (SpawnPolicies.primary(server(context), policy, new UUID(0, 0), "").isEmpty()) {
@@ -166,11 +167,20 @@ public final class IslandAdministration {
 
     private static void allowPolicyEdit(MinecraftServer server, String phase, Identifier dimension) {
         WorldBundles.active(server).ifPresent(bundle -> {
+            if(bundle.manifest().pack().isPresent()){
+                if(!bundle.manifest().pack().orElseThrow().allows(bundle.manifest().lock(),phase.equals("portal")?"portals":phase))throw new IllegalStateException("The bundled spawn policy is locked.");
+                return;
+            }
             if (!bundle.manifest().canEditDimension(dimension) || !phase.equals("portal")
                     && !bundle.manifest().canEditDimension(LevelStem.OVERWORLD.identifier())) {
                 throw new IllegalStateException("The bundled spawn policy is locked.");
             }
         });
+    }
+
+    public static com.gwsheridan.worldarchitect.api.IslandLayout layoutProfile(MinecraftServer server) {
+        if(server.overworld().getChunkSource().getGenerator() instanceof VoidGenerator generator && generator.layout().filter(i->i.personalSlots()>0).isPresent()) return generator.layout().orElseThrow();
+        throw new IllegalStateException("This world needs personal Overworld Skyblock slots.");
     }
 
     public static IslandProfile profile(MinecraftServer server) {
@@ -183,7 +193,7 @@ public final class IslandAdministration {
 
     private static int home(ServerPlayer player) {
         var server = player.level().getServer();
-        profile(server);
+        layoutProfile(server);
         var configured = WorldAdministration.get(server).initial().filter(policy -> policy.kind() == SpawnPolicy.Kind.TEAM);
         SpawnPolicy policy = configured.orElseGet(() -> SpawnPolicy.simple(SpawnPolicy.Kind.ISLAND,
                 server.overworld().dimension().identifier(), BlockPos.ZERO));
@@ -197,7 +207,7 @@ public final class IslandAdministration {
 
     private static int self(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         var player = context.getSource().getPlayerOrException();
-        int capacity = profile(server(context)).personalSlots();
+        int capacity = layoutProfile(server(context)).personalSlots();
         var team = player.getTeam();
         success(context, "Personal island " + IslandAllocations.assignedSlot(data(context), capacity, player.getUUID())
                 + (team == null ? "" : " · Team " + team.getName() + " · Island " + IslandAllocations.teams(data(context), capacity).getOrDefault(team.getName(), 0)));
@@ -205,7 +215,7 @@ public final class IslandAdministration {
     }
 
     private static int list(CommandContext<CommandSourceStack> context) {
-        int capacity = profile(server(context)).personalSlots();
+        int capacity = layoutProfile(server(context)).personalSlots();
         IslandAllocations.players(data(context), capacity).entrySet().stream().sorted(Comparator.comparing(entry -> entry.getKey().toString()))
                 .limit(32).forEach(entry -> success(context, entry.getKey() + " · island " + entry.getValue()));
         IslandAllocations.teams(data(context), capacity).entrySet().stream().sorted(java.util.Map.Entry.comparingByKey())
@@ -214,7 +224,7 @@ public final class IslandAdministration {
     }
 
     private static int inspect(CommandContext<CommandSourceStack> context) {
-        var profile = profile(server(context));
+        var profile = layoutProfile(server(context));
         int slot = IntegerArgumentType.getInteger(context, "slot");
         if (slot > profile.personalSlots()) {
             throw new IllegalArgumentException("Island slot exceeds this world's capacity.");
@@ -230,14 +240,14 @@ public final class IslandAdministration {
 
     private static int reassign(CommandContext<CommandSourceStack> context) {
         int slot = IntegerArgumentType.getInteger(context, "slot");
-        IslandAllocations.reassign(data(context), profile(server(context)).personalSlots(), player(context, "player"), slot);
+        IslandAllocations.reassign(data(context), layoutProfile(server(context)).personalSlots(), player(context, "player"), slot);
         IslandProtection.revalidate(server(context));
         success(context, "Reassigned player island to slot " + slot + ".");
         return 1;
     }
 
     private static int swap(CommandContext<CommandSourceStack> context) {
-        IslandAllocations.swap(data(context), profile(server(context)).personalSlots(), player(context, "first"), player(context, "second"));
+        IslandAllocations.swap(data(context), layoutProfile(server(context)).personalSlots(), player(context, "first"), player(context, "second"));
         IslandProtection.revalidate(server(context));
         success(context, "Swapped player island assignments.");
         return 1;
@@ -249,7 +259,7 @@ public final class IslandAdministration {
             throw new IllegalArgumentException("Create the Minecraft scoreboard team first.");
         }
         int slot = IntegerArgumentType.getInteger(context, "slot");
-        IslandAllocations.reassignTeam(data(context), profile(server(context)).personalSlots(), name, slot);
+        IslandAllocations.reassignTeam(data(context), layoutProfile(server(context)).personalSlots(), name, slot);
         IslandProtection.revalidate(server(context));
         success(context, "Assigned team " + name + " to island " + slot + ".");
         return 1;
@@ -266,7 +276,7 @@ public final class IslandAdministration {
     }
 
     private static int protect(CommandContext<CommandSourceStack> context) {
-        profile(server(context));
+        layoutProfile(server(context));
         var settings = WorldAdministration.get(server(context));
         var old = settings.protection();
         String setting = getString(context, "setting");

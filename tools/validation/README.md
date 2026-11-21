@@ -1,5 +1,15 @@
 # Validation runners
 
+## Modpack Builder and island catalogs
+
+`run.mjs --islands true --bundle examples/modpack-builder/bundles/modpack-choice-1.8.0.zip --suite compatibility` checks actual template states, safe markers, explicit container contents, consumed items across restart, newly generated supplies, empty void chunks and locked runtime writes. The authoring suite also checks 64-block capture/native/schematic imports, transforms, immutable revisions, inventory inclusion and rejected metadata/worker operations.
+
+`island-multiplayer.mjs` starts four real clients. Supply `--jar`, `--fixture`, `--bundle`, a new `--output` and an existing client `--options` file. Use `--teams true` for the team example and `--end true` for native entry, kills, gateway travel and a ritual interrupted by restart. Release validation uses the default twenty three-minute exploration rounds; shorter runs are smoke tests. All evidence stays in the disposable output folder.
+
+`packageTestKit` builds the optional Java-only user kit. Test it against a separately installed NeoForge runtime and a GUI-exported project. Its fixture remains separate from the gameplay JAR.
+
+The direct benchmark runner validates all identical-JAR controls before starting candidate comparisons. Noisy or missing-resident-memory controls produce an `inconclusive` report with zero candidate comparisons. A sampler smoke can verify completed controls without claiming a performance comparison passed.
+
 Use Node 22 or newer and Java 25. The asset tools also require Java 21. Set `JAVA21_HOME` if Gradle cannot discover it. Build with `gradlew.bat -I tools/validation/server.init.gradle build acceptanceJar prepareValidationServerRun` on Windows or `sh ./gradlew -I tools/validation/server.init.gradle build acceptanceJar prepareValidationServerRun` on Linux. Add `-Porg.gradle.java.installations.paths=<Java 21 directory>` when needed. Preparing the server run online populates runtime and asset dependencies before the runner uses offline Gradle.
 
 The `validation` JAR is a separate test mod. It is excluded from the gameplay JAR. The portable runner installs the packaged gameplay JAR and fixture into a new disposable directory under `build/`, starts a loopback dedicated server, runs assertions and restarts it. It writes results and local logs to that directory. It refuses to reuse an output directory. Local runs default to offline Gradle. Add `--network online` for a clean host that still needs runtime dependencies such as NeoForge DevLaunch; CI uses that option.

@@ -43,8 +43,9 @@ public final class SpawnApi {
         policy = checked(policy);
         var server = source.getServer(); var level = level(server, policy.dimension());
         if (policy.kind() == SpawnPolicy.Kind.ISLAND || policy.kind() == SpawnPolicy.Kind.TEAM) {
-            if (!(level.getChunkSource().getGenerator() instanceof VoidGenerator generator) || generator.island().isEmpty()) throw new IOException("Island policies require a Skyblock dimension.");
-            var island = generator.island().orElseThrow();
+            if (!(level.getChunkSource().getGenerator() instanceof VoidGenerator generator) || generator.layout().isEmpty()) throw new IOException("Island policies require a Skyblock dimension.");
+            var island = generator.layout().orElseThrow();
+            if(policy.kind()==SpawnPolicy.Kind.TEAM&&!SpawnPolicies.supportsTeamPolicy(generator))throw new IOException("Team spawn policies require a world created with team island allocation.");
             if (policy.kind() == SpawnPolicy.Kind.TEAM && (level != server.overworld() || island.personalSlots() == 0)) throw new IOException("Team policies require personal Overworld island slots.");
             if (island.personalSlots() > 0 && level != server.overworld()) throw new IOException("Personal islands require the Overworld.");
             if (IslandSpawns.position(level, island, 0).isEmpty()) throw new IOException("The shared island has no safe spawn.");
@@ -62,6 +63,10 @@ public final class SpawnApi {
     private static void allow(CommandSourceStack source, Phase phase, Identifier dimension) {
         ApiAccess.admin(source);
         WorldBundles.active(source.getServer()).ifPresent(bundle -> {
+            if(bundle.manifest().pack().isPresent()){
+                if(!bundle.manifest().pack().orElseThrow().allows(bundle.manifest().lock(),phase==Phase.PORTAL?"portals":key(phase)))throw new IllegalStateException("The bundled spawn policy is locked.");
+                return;
+            }
             if (!bundle.manifest().canEditDimension(dimension) || phase != Phase.PORTAL && !bundle.manifest().canEditDimension(Level.OVERWORLD.identifier())) throw new IllegalStateException("The bundled spawn policy is locked.");
         });
     }

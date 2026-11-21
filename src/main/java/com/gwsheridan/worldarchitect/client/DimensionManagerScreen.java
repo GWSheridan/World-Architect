@@ -101,6 +101,17 @@ final class DimensionManagerScreen extends Screen implements AuthoringContext {
         rows = addRenderableWidget(new DimensionList(left, listWidth, height - 86));
         previewButton = addRenderableWidget(Button.builder(Component.translatable("worldarchitect.preview.open"), button -> openPreview())
                 .bounds(detailLeft, 25, detailWidth, 20).build());
+        previewButton.setWidth((detailWidth-6)/2);
+        var builder=addRenderableWidget(Button.builder(Component.literal("Builder"),button->{
+            try{
+                var all=new LinkedHashMap<ResourceKey<LevelStem>,LevelStem>();keys.forEach(key->all.put(key,effective(key)));
+                var source=com.gwsheridan.worldarchitect.modpack.PresetStudio.capture(com.gwsheridan.worldarchitect.modpack.PresetStudio.defaults("my-modpack","1.0.0",draftOptions),new WorldDimensions(all),context.worldgenLoadContext());
+                minecraft.gui.setScreen(new ModpackBuilderScreen(this,context.worldgenLoadContext(),"my-modpack",source,(name,edited)->{
+                    try{var replacement=com.gwsheridan.worldarchitect.modpack.PresetStudio.forApply(edited,context.worldgenLoadContext()).createWorldDimensions().dimensions();draft.clear();draft.putAll(replacement);draftOptions=edited.manifest().options();studioOptionsChanged=true;keys=DimensionCatalog.discover(draft,context.datapackDimensions());refreshRows();}catch(java.io.IOException error){throw new IllegalArgumentException(error.getMessage(),error);}
+                }));
+            }catch(java.io.IOException error){minecraft.gui.setScreen(new StudioReportScreen(this,"Cannot open Modpack Builder",List.of(error.getMessage())));}
+        }).bounds(detailLeft+(detailWidth+6)/2,25,(detailWidth-6)/2,20).build());
+        builder.active=lock.isEmpty();
         originalButton = addRenderableWidget(Button.builder(text("original"), button -> restoreOriginal())
                 .bounds(detailLeft, actionTop, detailWidth, 20).build());
         int detailHalf = (detailWidth - 6) / 2;
@@ -216,7 +227,7 @@ final class DimensionManagerScreen extends Screen implements AuthoringContext {
         var changed = profile.withEndProgression(generator.endProgression().isPresent() ? Optional.empty()
                 : Optional.of(com.gwsheridan.worldarchitect.config.EndProgression.vanillaArena(context.worldgenLoadContext())));
         var edited = stem.generator() instanceof SolidColumnGenerator solid ? solid.withDimensionProfile(changed)
-                : new VoidGenerator(((VoidGenerator) stem.generator()).biome(), changed, ((VoidGenerator) stem.generator()).island(), ((VoidGenerator) stem.generator()).allowUnsafeSpawn());
+                : ((VoidGenerator)stem.generator()).withDimensionProfile(changed);
         draft.put(selected, new LevelStem(stem.type(), edited));
         updateActions();
     }
@@ -262,7 +273,7 @@ final class DimensionManagerScreen extends Screen implements AuthoringContext {
         var all = new LinkedHashMap<ResourceKey<LevelStem>, LevelStem>(); keys.forEach(dimension -> all.put(dimension, effective(dimension)));
         minecraft.gui.setScreen(new RuleEngineScreen(this, key.identifier(), stem.generator(), profile, context.worldgenLoadContext(), all, draftOptions.seed(), edited -> {
             var changed = stem.generator() instanceof SolidColumnGenerator solid ? solid.withDimensionProfile(edited)
-                    : new VoidGenerator(((VoidGenerator) stem.generator()).biome(), edited, ((VoidGenerator) stem.generator()).island(), ((VoidGenerator) stem.generator()).allowUnsafeSpawn());
+                    : ((VoidGenerator)stem.generator()).withDimensionProfile(edited);
             draft.put(key, new LevelStem(stem.type(), changed)); updateActions();
         }));
     }
@@ -289,6 +300,16 @@ final class DimensionManagerScreen extends Screen implements AuthoringContext {
             return;
         }
         LevelStem stem = effective(key);
+        if(stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator rich){
+            var entries=rich.catalog().entries();
+            minecraft.gui.setScreen(new StudioChoiceScreen(this,"Island templates",entries.stream().map(e->e.id()+" · "+e.title()).toList(),choice->{
+                var entry=entries.stream().filter(e->choice.startsWith(e.id()+" · ")).findFirst().orElseThrow();
+                minecraft.gui.setScreen(new IslandStudioScreen(this,context.worldgenLoadContext(),entry.build(),build->{
+                    var catalog=rich.catalog();var edited=new java.util.ArrayList<>(catalog.entries());edited.replaceAll(e->e.id().equals(entry.id())?new com.gwsheridan.worldarchitect.config.IslandCatalog.Entry(e.id(),e.title(),e.description(),e.icon(),e.weight(),build):e);
+                    draft.put(key,new LevelStem(stem.type(),new com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator(rich.biome(),rich.dimensionProfile().orElseThrow(),new com.gwsheridan.worldarchitect.config.IslandCatalog(edited,catalog.lobby(),catalog.mode(),catalog.teams(),catalog.originY(),catalog.spacing(),catalog.personalSlots()))));
+                }));
+            }));return;
+        }
         var type = stem.type().value();
         var retainedRules = stem.generator() instanceof ManagedGenerator managed ? managed.dimensionProfile().map(DimensionProfile::rules).orElse(com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY) : com.gwsheridan.worldarchitect.rules.RuleSet.EMPTY;
         var profile = new DimensionProfile(type.minY(), type.height(), support.adapter()).withRules(retainedRules)
@@ -397,7 +418,7 @@ final class DimensionManagerScreen extends Screen implements AuthoringContext {
     @Override
     public void onClose() {
         if (!applied && (!draft.equals(initial) || studioOptionsChanged)) {
-            minecraft.gui.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen(discard -> minecraft.gui.setScreen(discard ? parent : this),
+            minecraft.gui.setScreen(new StudioConfirmScreen(discard -> minecraft.gui.setScreen(discard ? parent : this),
                     Component.literal("Discard world draft?"), Component.literal("Changes in this editing session have not been applied to the new world."),
                     Component.literal("Discard changes"), Component.literal("Keep editing")));
         } else minecraft.gui.setScreen(parent);

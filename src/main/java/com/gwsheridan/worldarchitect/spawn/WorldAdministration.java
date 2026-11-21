@@ -66,6 +66,21 @@ public final class WorldAdministration {
     }
 
     public static void save(MinecraftServer server, Settings settings) {
+        com.gwsheridan.worldarchitect.modpack.WorldBundles.active(server).ifPresent(bundle->bundle.manifest().pack().ifPresent(policy->{
+            var old=get(server);var lock=bundle.manifest().lock();
+            if(!policy.allows(lock,"initial")&&!old.initial().equals(settings.initial())||!policy.allows(lock,"respawn")&&!old.respawn().equals(settings.respawn())||!policy.allows(lock,"portals")&&!old.portals().equals(settings.portals())||!policy.allows(lock,"protection")&&!old.protection().equals(settings.protection()))throw new IllegalStateException("The bundled runtime policy is locked.");
+        }));
+        writeSettings(server,settings);
+    }
+
+    public static void initializePack(MinecraftServer server, Settings settings){
+        var data=server.getWorldPath(LevelResource.DATA);
+        if(Files.exists(data.resolve(FILE)))return;
+        if(com.gwsheridan.worldarchitect.compatibility.GenerationSnapshot.exists(data))throw new IllegalStateException("Pack defaults cannot initialize an existing world's administration.");
+        writeSettings(server,settings);
+    }
+
+    private static void writeSettings(MinecraftServer server,Settings settings){
         CompoundTag root = (CompoundTag) Settings.CODEC.encodeStart(NbtOps.INSTANCE, settings).getOrThrow();
         Settings.CODEC.parse(NbtOps.INSTANCE, root).getOrThrow();
         Path file = server.getWorldPath(LevelResource.DATA).resolve(FILE);
@@ -106,7 +121,7 @@ public final class WorldAdministration {
     public record Settings(Optional<SpawnPolicy> initial, Optional<SpawnPolicy> respawn, Map<Identifier, SpawnPolicy> portals, Protection protection,
             Map<Identifier, EnvironmentProfile> environments) {
         public static final Settings DEFAULT = new Settings(Optional.empty(), Optional.empty(), Map.of(), Protection.OFF, Map.of());
-        private static final Codec<Settings> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+        public static final Codec<Settings> CODEC = RecordCodecBuilder.create(builder -> builder.group(
                 Codec.intRange(1, 1).fieldOf("version").forGetter(settings -> 1),
                 SpawnPolicy.CODEC.optionalFieldOf("initial").forGetter(Settings::initial),
                 SpawnPolicy.CODEC.optionalFieldOf("respawn").forGetter(Settings::respawn),

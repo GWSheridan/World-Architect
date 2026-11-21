@@ -1,0 +1,13 @@
+{
+  "pack": {
+    "description": "Mixed-dimension authoring pack for World Architect 1.8.0",
+    "min_format": [
+      121,
+      0
+    ],
+    "max_format": [
+      121,
+      0
+    ]
+  }
+}

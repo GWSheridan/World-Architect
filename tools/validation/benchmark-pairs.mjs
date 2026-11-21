@@ -5,7 +5,7 @@ import {resolve,relative,join,dirname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {gradle} from './process.mjs';
-import {analyzeBenchmarks} from './benchmark-analysis.mjs';
+import {analyzeBenchmarks,analyzeControls} from './benchmark-analysis.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..'),args=process.argv.slice(2);
 if(args.length%2)throw Error('Use --option value pairs');
@@ -31,7 +31,8 @@ async function json(path,seconds=30){const deadline=Date.now()+seconds*1000;whil
 async function stopMemory(directory){if(!memory)return;if(memory.exitCode!==null){memory=undefined;return;}await fs.writeFile(join(directory,'memory-stop'),'stop\n');await Promise.race([new Promise(done=>memory.once('close',done)),new Promise(done=>setTimeout(done,3000))]);if(memory.exitCode===null)memory.kill();memory=undefined;}
 function toolchain(){return process.env.JAVA21_HOME?[`-Porg.gradle.java.installations.paths=${process.env.JAVA21_HOME}`]:[];}
 try{
- for(const kind of ['control','comparison'])for(let pair=1;pair<=(kind==='control'?controls:pairs);pair++){
+ matrix: for(const kind of ['control','comparison'])for(let pair=1;pair<=(kind==='control'?controls:pairs);pair++){
+  if(kind==='comparison'&&pair===1){results.controls=analyzeControls(input,results.runs);if(results.controls.status!=='passed'){results.analysis=results.controls;results.status='inconclusive';await persist();await fs.writeFile(join(output,'comparison.json'),JSON.stringify(results.analysis,null,2)+'\n',{flag:'wx'});console.log('Identical-JAR controls were inconclusive; candidate comparisons were not started.');process.exitCode=1;break matrix;}}
   const directory=join(output,kind,`pair-${pair}`),order=pair%2?['baseline','candidate']:['candidate','baseline'];
   for(const role of order)for(const profile of profiles){
    if(interrupted)throw Error('Benchmark interrupted');
@@ -71,8 +72,10 @@ try{
   }
  }
  if(purpose==='smoke'&&results.runs.some(run=>run.samples.some(sample=>sample.sampled_resident_peak_bytes===null)))throw Error('The benchmark smoke check needs working resident-memory sampling');
+ if(results.status!=='inconclusive'){
  results.analysis=analyzeBenchmarks(input,results.runs);
  if(results.compatibility.some(r=>r.kind==='comparison'&&r.native_pyramid_diagnostic)&&!results.compatibility.some(r=>r.kind==='control'&&r.native_pyramid_diagnostic))throw Error('Native differences need an identical-JAR reproduction');
  results.status=purpose==='smoke'?'smoke_complete':results.analysis.status;await persist();await fs.writeFile(join(output,'comparison.json'),JSON.stringify(results.analysis,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify(results.analysis,null,2));if(purpose==='performance'&&results.status!=='passed')process.exitCode=1;
+ }
 }catch(error){results.status='failed';results.error=error.message;await persist();console.error(error.message);process.exitCode=1;}
 finally{process.removeListener('SIGINT',stop);process.removeListener('SIGTERM',stop);if(current)await current.stop();}

@@ -6,7 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.dimension.DimensionType;
 
-public record IslandProfile(IslandTemplate template, int originY, int spacing, int personalSlots) {
+public record IslandProfile(IslandTemplate template, int originY, int spacing, int personalSlots) implements com.gwsheridan.worldarchitect.api.IslandLayout {
     public static final int MAX_SLOTS = 4095;
     private static final int COLUMNS = 16;
     public static final Codec<IslandProfile> CODEC = RecordCodecBuilder.<IslandProfile>create(builder -> builder.group(
@@ -33,4 +33,6 @@ public record IslandProfile(IslandTemplate template, int originY, int spacing, i
     public BlockPos spawn(int slot) {
         return origin(slot).offset(template.spawn());
     }
+
+    public java.util.List<BlockPos> floors(int slot) { return template.blocks().stream().map(c -> origin(slot).offset(c.pos())).toList(); }
 }

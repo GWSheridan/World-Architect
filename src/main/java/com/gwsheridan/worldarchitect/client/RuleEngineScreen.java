@@ -120,7 +120,7 @@ final class RuleEngineScreen extends Screen {
     }
     private ChunkGenerator copy(DimensionProfile next) {
         return original instanceof SolidColumnGenerator solid ? solid.withDimensionProfile(next)
-                : new VoidGenerator(((VoidGenerator) original).biome(), next, ((VoidGenerator) original).island(), ((VoidGenerator) original).allowUnsafeSpawn());
+                : ((VoidGenerator)original).withDimensionProfile(next);
     }
     private void validate() { done.active = parse() != null && !journal.pending(); }
 
@@ -139,7 +139,7 @@ final class RuleEngineScreen extends Screen {
                 var template = new JsonObject(); template.addProperty("structure", structure.orElseThrow().key().identifier().toString()); template.addProperty("spacing", separation + 1); template.addProperty("separation", separation); action.add("template", template);
             }
             case SPAWN -> {
-                BlockPos position = original instanceof SolidColumnGenerator solid ? solid.initialSpawn(LevelHeightAccessor.create(profile.minY(), profile.height()), seed).orElse(new BlockPos(8, profile.minY() + 1, 8)) : ((VoidGenerator) original).island().map(island -> island.spawn(0)).orElse(new BlockPos(8, profile.minY() + 1, 8));
+                BlockPos position = original instanceof SolidColumnGenerator solid ? solid.initialSpawn(LevelHeightAccessor.create(profile.minY(), profile.height()), seed).orElse(new BlockPos(8, profile.minY() + 1, 8)) : ((VoidGenerator) original).layout().map(island -> island.spawn(0)).orElse(new BlockPos(8, profile.minY() + 1, 8));
                 var spawn = new JsonObject(); spawn.addProperty("kind", "fixed"); spawn.addProperty("dimension", dimension.toString());
                 var pos = new JsonArray(); pos.add(position.getX()); pos.add(position.getY()); pos.add(position.getZ()); spawn.add("position", pos); action.add("spawn", spawn);
             }

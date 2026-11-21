@@ -64,7 +64,7 @@ final class StructurePlacementScreen extends Screen {
         double scale = Math.max(.5, Math.min((width - 32.0) / (size[0] + size[2] + 2), (bottom - top) / (size[1] + (size[0] + size[2]) * .5 + 2)));
         for (int i : order) {
             int p = cells[i * 2]; double x = (p & 31) - size[0] / 2.0, y = (p >> 5 & 31) - size[1] / 2.0, z = (p >> 10 & 31) - size[2] / 2.0;
-            int color = 0xFF000000 | java.awt.Color.HSBtoRGB(Math.floorMod(cells[i * 2 + 1], 360) / 360f, .45f, .83f);
+            int color = 0xFF000000 | (cells[i * 2 + 1] & 0xffffff);
             int cx = width / 2, cy = (top + bottom) / 2;
             IsoCanvas.quad(g, color, IsoCanvas.point(x,y+1,z,yaw,scale,cx,cy), IsoCanvas.point(x+1,y+1,z,yaw,scale,cx,cy),
                     IsoCanvas.point(x+1,y+1,z+1,yaw,scale,cx,cy), IsoCanvas.point(x,y+1,z+1,yaw,scale,cx,cy));

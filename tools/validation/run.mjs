@@ -8,7 +8,7 @@ import { baselineBytes } from './baseline.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const options = Object.fromEntries(Array.from({length: (process.argv.length - 2) / 2}, (_, i) => process.argv.slice(2 + i * 2, 4 + i * 2)));
-for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset','--check-end','--pool','--regional','--baseline','--named-regions','--baseline14','--baseline15','--site','--site-structure'].includes(key)) throw new Error(`Unknown option ${key}`);
+for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset','--check-end','--pool','--regional','--baseline','--named-regions','--baseline14','--baseline15','--site','--site-structure','--islands'].includes(key)) throw new Error(`Unknown option ${key}`);
 if (!['online','offline'].includes(options['--network'] || 'offline')) throw new Error('Network must be online or offline');
 if (!options['--jar'] || !options['--fixture'] || !options['--output']) throw new Error('Use --jar JAR --fixture VALIDATION_JAR --output NEW_DIRECTORY [--world COPIED_SAVE] [--profile single-block] [--port 25945]');
 if(options['--dimension']&&!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--dimension']))throw Error('Invalid dimension ID');
@@ -102,6 +102,7 @@ function launch(stage) {
             if (ended || Date.now()>until) throw new Error(`Missing ${marker}; inspect ${stage}.log`);
             if (text.includes('WA_VALIDATION_STRUCTURES_FAILED')) throw new Error('Dedicated structure assertions failed');
             if (text.includes('WA_SITE_GENERATION_FAILED')) throw new Error('Dedicated site generation assertions failed');
+            if(text.includes('WA18_ISLAND_CATALOG_FAILED')||text.includes('WA18_ISLAND_ASSETS_FAILED'))throw new Error('Dedicated island assertions failed');
             await new Promise(done=>setTimeout(done,200));
         }
     }
@@ -128,7 +129,10 @@ try {
         if (suite === 'authoring') {
             running.send(stage === 'fresh' ? 'wa_validate structures' : 'wa_validate restart');
             await running.wait(stage === 'fresh' ? 'WA_VALIDATION_STRUCTURES_PASS' : 'WA_VALIDATION_RESTART_PASS');
+            if(stage==='fresh'){running.send('wa_validate island_assets');await running.wait('WA18_ISLAND_ASSETS_PASS');}
             running.send('wa_diagnose report'); await running.wait('Saved local diagnostics');
+        } else if(options['--islands']==='true') {
+            running.send('wa_validate island_catalog '+(stage==='fresh'?1:2));await running.wait('WA18_ISLAND_CATALOG_PASS');
         } else if(options['--site']) {
             running.send(`wa_validate site_generation ${options['--site']} ${options['--site-structure']} ${options['--dimension']||'minecraft:overworld'} ${stage==='fresh'?1:2}`);
             await running.wait(['corridor','district'].includes(options['--site'])?'WA17_GENERATION_PASS':['prepared','themed','composite'].includes(options['--site'])?'WA16_GENERATION_PASS':'WA15_GENERATION_PASS');

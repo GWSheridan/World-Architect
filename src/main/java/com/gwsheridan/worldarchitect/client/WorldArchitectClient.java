@@ -16,8 +16,10 @@ public final class WorldArchitectClient {
         modBus.addListener(ClientEnvironment::register);
         modBus.addListener(ClientStructurePreview::register);
         modBus.addListener(ClientStudioViews::register);
+        modBus.addListener(IslandModelPreview::register);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(ClientStructurePreview::tick);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(ClientEnvironment::logout);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(ArchitectTheme::background);
     }
 
     private static void registerEditors(RegisterPresetEditorsEvent event) {

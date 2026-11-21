@@ -43,7 +43,7 @@ import net.minecraft.world.level.levelgen.structure.StructureSet;
 import org.jspecify.annotations.Nullable;
 
 /** Empty chunks except for explicitly configured, immutable starter structures. */
-public final class VoidGenerator extends ChunkGenerator implements ManagedGenerator {
+public class VoidGenerator extends ChunkGenerator implements ManagedGenerator {
     private static final int VERSION = 1;
     public static final MapCodec<VoidGenerator> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
             Codec.intRange(VERSION, VERSION).optionalFieldOf("generator_version", VERSION).forGetter(generator -> VERSION),
@@ -78,6 +78,10 @@ public final class VoidGenerator extends ChunkGenerator implements ManagedGenera
         return island;
     }
 
+    public Optional<com.gwsheridan.worldarchitect.api.IslandLayout> layout() { return island.map(value -> value); }
+
+    public VoidGenerator withDimensionProfile(DimensionProfile profile) { return new VoidGenerator(biome, profile, island, allowUnsafeSpawn); }
+
     public boolean allowUnsafeSpawn() {
         return allowUnsafeSpawn;
     }
@@ -107,7 +111,7 @@ public final class VoidGenerator extends ChunkGenerator implements ManagedGenera
     }
 
     @Override
-    protected MapCodec<VoidGenerator> codec() {
+    protected MapCodec<? extends VoidGenerator> codec() {
         return CODEC;
     }
 

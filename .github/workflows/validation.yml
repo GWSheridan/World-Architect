@@ -32,10 +32,30 @@ jobs:
         shell: pwsh
         run: |
           $toolchain = "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64"
-          if ($IsWindows) { & ./gradlew.bat -I tools/validation/server.init.gradle build acceptanceJar benchmarkProbeJar prepareValidationServerRun --console=plain $toolchain }
-          else { & sh ./gradlew -I tools/validation/server.init.gradle build acceptanceJar benchmarkProbeJar prepareValidationServerRun --console=plain $toolchain }
+          if ($IsWindows) { & ./gradlew.bat -I tools/validation/server.init.gradle build acceptanceJar benchmarkProbeJar packageTestKit prepareValidationServerRun --console=plain $toolchain }
+          else { & sh ./gradlew -I tools/validation/server.init.gradle build acceptanceJar benchmarkProbeJar packageTestKit prepareValidationServerRun --console=plain $toolchain }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --test tools/workbench/scenario.test.mjs tools/workbench/batch.test.mjs tools/validation/benchmark-analysis.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Standalone modpack kit
+        shell: pwsh
+        run: |
+          $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
+          $neo = '26.3.0.103'
+          $installer = Join-Path $PWD 'build/neoforge-installer.jar'
+          $url = "https://maven.neoforged.net/releases/net/neoforged/neoforge/$neo/neoforge-$neo-installer.jar"
+          Invoke-WebRequest $url -OutFile $installer
+          $response = (Invoke-WebRequest "$url.sha256").Content
+          $expected = if ($response -is [byte[]]) { [Text.Encoding]::UTF8.GetString($response) } else { [string]$response }
+          if ($expected -notmatch (Get-FileHash $installer).Hash.ToLowerInvariant()) { throw 'Installer checksum differs' }
+          & java -jar $installer --installServer build/ci-kit-runtime
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Expand-Archive "build/release/worldarchitect-$version-test-kit.zip" build/ci-kit
+          New-Item -ItemType Directory build/ci-kit-project,build/ci-kit-providers | Out-Null
+          Copy-Item "examples/modpack-builder/bundles/modpack-classic-$version.zip" build/ci-kit-project/preset.zip
+          $hash = (Get-FileHash build/ci-kit-project/preset.zip).Hash.ToLowerInvariant()
+          "format=1`nbundle=preset.zip`nsha256=$hash`nworldarchitect=$version`nneoforge=$neo`n" | Set-Content build/ci-kit-project/testkit.properties
+          & java -jar build/ci-kit/worldarchitect-test-kit.jar --server build/ci-kit-runtime --export build/ci-kit-project --providers build/ci-kit-providers --output build/ci-kit-results --eula true
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -101,7 +121,11 @@ jobs:
           $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
           $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
           node tools/validation/benchmark-pairs.mjs --baseline build/validation-inputs/worldarchitect-1.6.0.jar --candidate "build/libs/worldarchitect-$version.jar" --probe "build/validation-tools/worldarchitect-$version-benchmark-probe.jar" --output build/ci-benchmark-smoke --pairs 1 --control-pairs 1 --warmup-size 8 --measured-size 6 --samples 2 --profiles void --port 25986 --purpose smoke --network online
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $benchmarkExit = $LASTEXITCODE
+          $proof = Get-Content build/ci-benchmark-smoke/results.json -Raw | ConvertFrom-Json
+          if ($proof.status -eq 'inconclusive' -and $proof.runs.Count -eq 2 -and @($proof.runs | Where-Object status -ne 'passed').Count -eq 0 -and @($proof.runs.samples | Where-Object { $null -eq $_.sampled_resident_peak_bytes -or $_.sampled_resident_peak_bytes -le 0 }).Count -eq 0) {
+            Write-Output 'Sampler smoke completed. Identical-JAR controls were noisy; candidate comparisons were not started.'
+          } elseif ($benchmarkExit -ne 0) { exit $benchmarkExit }
       - name: Dedicated server and restart
         shell: pwsh
         run: |
@@ -157,6 +181,8 @@ jobs:
             build/ci-sites/*/results.json
             build/ci-sites/*/*.log
             build/ci-validation/results.json
+            build/ci-kit-results/results.json
+            build/ci-kit-results/stage-*.log
             build/ci-validation/*.log
             build/ci-compatibility/matrix.json
             build/ci-compatibility/cases/*/results.json

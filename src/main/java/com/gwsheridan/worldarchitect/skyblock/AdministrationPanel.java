@@ -42,10 +42,10 @@ public final class AdministrationPanel {
     }
     private static Map<UUID,View> views(MinecraftServer server){var all=VIEWS.computeIfAbsent(server,unused->new HashMap<>());all.values().removeIf(v->v.expires<System.nanoTime());return all;}
     private static boolean administrator(ServerPlayer player){return hasPermission(LEVEL_ADMINS).test(player.createCommandSourceStack());}
-    private static Optional<IslandProfile> islands(MinecraftServer server){return server.overworld().getChunkSource().getGenerator() instanceof VoidGenerator empty?empty.island().filter(i->i.personalSlots()>0):Optional.empty();}
+    private static Optional<com.gwsheridan.worldarchitect.api.IslandLayout> islands(MinecraftServer server){return server.overworld().getChunkSource().getGenerator() instanceof VoidGenerator empty?empty.layout().filter(i->i.personalSlots()>0):Optional.empty();}
     private static Set<String> online(MinecraftServer server){return Set.copyOf(Arrays.asList(server.getPlayerNames()));}
     private static Snapshot snapshot(MinecraftServer server)throws IOException{
-        int capacity=islands(server).map(IslandProfile::personalSlots).orElse(0);var data=server.getWorldPath(LevelResource.DATA);
+        int capacity=islands(server).map(com.gwsheridan.worldarchitect.api.IslandLayout::personalSlots).orElse(0);var data=server.getWorldPath(LevelResource.DATA);
         Map<UUID,Integer> players=capacity==0?Map.of():IslandAllocations.players(data,capacity);Map<String,Integer> teams=capacity==0?Map.of():IslandAllocations.teams(data,capacity);
         MessageDigest digest;try{digest=MessageDigest.getInstance("SHA-256");}catch(NoSuchAlgorithmException e){throw new IllegalStateException(e);}
         try(var out=new DataOutputStream(new DigestOutputStream(OutputStream.nullOutputStream(),digest))){

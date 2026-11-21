@@ -41,7 +41,7 @@ abstract class VoidPortalMixin {
             return;
         }
         if (level != null && level.getChunkSource().getGenerator() instanceof VoidGenerator generator) {
-            if (endPortal && current.dimension() == Level.END && generator.island().isPresent()
+            if (endPortal && current.dimension() == Level.END && generator.layout().isPresent()
                     && entity instanceof ServerPlayer player && player.getRespawnConfig() != null) {
                 TeleportTransition respawn = player.findRespawnPositionAndUseSpawnBlock(false, TeleportTransition.DO_NOTHING);
                 if (!respawn.missingRespawnBlock()) {

@@ -99,11 +99,17 @@ public final class SaveProtection {
             }
         }
         LevelStem overworld = settings.dimensions().dimensions().get(LevelStem.OVERWORLD);
-        if (overworld.generator() instanceof VoidGenerator generator) {
-            generator.island().filter(island -> island.personalSlots() > 0).ifPresent(island ->
+        for(var stem:settings.dimensions().dimensions().values())if(stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator rich){
+            try{rich.validateAssets(server.registryAccess());}catch(java.io.IOException error){throw incompatible(error.getMessage());}
+        }
+        if(overworld.generator() instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator rich && rich.catalog().personalSlots()>0){
+            IslandAllocations.prepareCatalog(dataDirectory,rich.catalog(),settings.options().seed(),newWorld&&original.isEmpty());
+        } else if (overworld.generator() instanceof VoidGenerator generator) {
+            generator.layout().filter(island -> island.personalSlots() > 0).ifPresent(island ->
                     IslandAllocations.prepare(dataDirectory, island.personalSlots(), newWorld && original.isEmpty()));
         }
         bundle.ifPresent(value -> WorldBundles.preserve(dataDirectory, value));
+        if(newWorld&&original.isEmpty())bundle.flatMap(value->value.manifest().pack()).ifPresent(policy->WorldAdministration.initializePack(server,policy.defaults()));
         if (original.isPresent()) {
             return;
         }
@@ -281,10 +287,10 @@ public final class SaveProtection {
             throw incompatible("Invalid generation rules in " + key.identifier() + ": " + problem);
         });
         if (generator instanceof VoidGenerator empty) {
-            if (key.equals(LevelStem.OVERWORLD) && empty.island().isEmpty() && !empty.allowUnsafeSpawn()) {
+            if (key.equals(LevelStem.OVERWORLD) && empty.layout().isEmpty() && !empty.allowUnsafeSpawn()) {
                 throw incompatible("The empty Overworld has no safe spawn. Configure an island or explicitly set allow_unsafe_spawn to true");
             }
-            if (!key.equals(LevelStem.OVERWORLD) && empty.island().filter(island -> island.personalSlots() > 0).isPresent()) {
+            if (!key.equals(LevelStem.OVERWORLD) && empty.layout().filter(island -> island.personalSlots() > 0).isPresent()) {
                 throw incompatible("Personal Skyblock allocations require an Overworld Skyblock profile");
             }
         }

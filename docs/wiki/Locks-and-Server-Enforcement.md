@@ -4,6 +4,10 @@ In 1.7, a child preset also carries its parent's pinned policy and resource fing
 
 ## Configure locks
 
+Modpack Builder's lock editor configures these permissions without editing JSON. Format-3 projects also have independent runtime permissions for `initial`, `respawn`, `portals` and `protection`, selected through **Runtime permissions**. A full lock fixes all configured groups. A partial lock permits only the selected groups. Changing protection permission leaves terrain and spawn policy locks in place.
+
+Pack runtime defaults initialize a new world's administration settings once. Existing worlds keep their saved settings and archived policy. Child presets cannot weaken inherited runtime permissions or replace locked defaults. Instance owners can enable authoring through configuration and a restart; an in-game operator cannot use the setup command to unlock a running server.
+
 Set `lock` to one of the following values in the manifest.
 
 | Mode | What players can edit |

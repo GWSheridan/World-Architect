@@ -17,6 +17,7 @@ public final class GenerationPreview {
     private final Surface surface;
     private final BiomeResolver biomes;
     private final Optional<IslandProfile> islands;
+    private Optional<com.gwsheridan.worldarchitect.api.IslandLayout> layout;
     private final Columns columns;
     private final boolean endArena;
     private final Optional<com.gwsheridan.worldarchitect.config.RegionalTerrain> regions;
@@ -27,6 +28,7 @@ public final class GenerationPreview {
         this.surface = surface;
         this.biomes = biomes;
         this.islands = islands;
+        this.layout = islands.map(value -> value);
         this.columns = columns;
         this.endArena = endArena;
         this.regions=regions;
@@ -49,12 +51,14 @@ public final class GenerationPreview {
                     (x, z) -> solid.baseColumn(x, z, height, seed), solid.endProgression().isPresent(),solid.terrainRegions()));
         }
         if (generator instanceof VoidGenerator sky) {
-            return Optional.of(new GenerationPreview(height,
+            var result = new GenerationPreview(height,
                     (x, z) -> sky.endProgression().filter(ignored -> com.gwsheridan.worldarchitect.config.EndProgression.contains(x, z))
                             .map(arena -> arena.generator().getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height, arena.state(seed)))
-                            .orElseGet(() -> sky.baseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height)),
+                            .orElseGet(() -> sky instanceof SkyblockGenerator rich ? rich.previewHeight(x,z,Heightmap.Types.WORLD_SURFACE_WG,height,seed) : sky.baseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height)),
                     (x, y, z) -> sky.getBiomeSource() instanceof EndArenaBiomeSource arena ? arena.sample(x, y, z) : sky.biome(), sky.island(),
-                    (x, z) -> sky.baseColumn(x, z, height, seed), sky.endProgression().isPresent(),Optional.empty()));
+                    (x, z) -> sky.baseColumn(x, z, height, seed), sky.endProgression().isPresent(),Optional.empty());
+            result.layout = sky instanceof SkyblockGenerator rich ? Optional.of(rich.layout(seed)) : sky.layout();
+            return Optional.of(result);
         }
         return Optional.empty();
     }
@@ -70,6 +74,8 @@ public final class GenerationPreview {
     public Optional<IslandProfile> islands() {
         return islands;
     }
+
+    public Optional<com.gwsheridan.worldarchitect.api.IslandLayout> layout() { return layout; }
 
     public boolean endArena() { return endArena; }
     public Optional<com.gwsheridan.worldarchitect.config.RegionalTerrain> regions(){return regions;}

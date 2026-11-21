@@ -51,8 +51,9 @@ public final class RuleSpawns {
                     if (!(target.generator() instanceof SolidColumnGenerator solid) || solid.structureRules().stream().noneMatch(selected -> selected.structure().is(policy.template().orElseThrow()))) throw new IllegalStateException("The generated spawn structure must be enabled in its target dimension.");
                 }
                 if (policy.kind() == SpawnPolicy.Kind.ISLAND || policy.kind() == SpawnPolicy.Kind.TEAM) {
-                    if (!(target.generator() instanceof VoidGenerator sky) || sky.island().isEmpty()) throw new IllegalStateException("Island spawn rules need a Skyblock target.");
-                    if (policy.kind() == SpawnPolicy.Kind.TEAM && (!policy.dimension().equals(LevelStem.OVERWORLD.identifier()) || sky.island().orElseThrow().personalSlots() == 0)) throw new IllegalStateException("Team spawn rules need personal Overworld islands.");
+                    if (!(target.generator() instanceof VoidGenerator sky) || sky.layout().isEmpty()) throw new IllegalStateException("Island spawn rules need a Skyblock target.");
+                    if (policy.kind() == SpawnPolicy.Kind.TEAM && (!policy.dimension().equals(LevelStem.OVERWORLD.identifier()) || sky.layout().orElseThrow().personalSlots() == 0)) throw new IllegalStateException("Team spawn rules need personal Overworld islands.");
+                    if(policy.kind()==SpawnPolicy.Kind.TEAM&&!com.gwsheridan.worldarchitect.spawn.SpawnPolicies.supportsTeamPolicy(sky))throw new IllegalStateException("Team spawn rules require team island allocation.");
                 } else if (policy.position().getY() <= target.type().value().minY() || policy.position().getY() >= target.type().value().minY() + target.type().value().height() - 1) {
                     throw new IllegalStateException("Spawn rule reference position must fit inside its target dimension.");
                 }

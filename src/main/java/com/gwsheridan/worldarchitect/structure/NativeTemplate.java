@@ -42,14 +42,21 @@ public record NativeTemplate(BlockPos size, List<Cell> blocks) {
     }
 
     public static NativeTemplate read(CompoundTag root) throws IOException {
+        return read(root, MAX_SIDE, MAX_CELLS);
+    }
+
+    /** Dedicated island reader; ordinary library and assembly budgets remain unchanged. */
+    public static NativeTemplate readIsland(CompoundTag root) throws IOException { return read(root, 64, 65536); }
+
+    private static NativeTemplate read(CompoundTag root, int maxSide, int maxCells) throws IOException {
         if (root.contains("palettes")) {
             throw new IOException("The library supports native structures with a single palette.");
         }
         BlockPos size = readPosition(root.getListOrEmpty("size"));
-        checkSize(size);
+        if (size.getX()<1||size.getY()<1||size.getZ()<1||size.getX()>maxSide||size.getY()>maxSide||size.getZ()>maxSide) throw new IOException("Template bounds exceed " + maxSide + " blocks per side.");
         List<BlockState> palette = new ArrayList<>();
         ListTag paletteTag = root.getListOrEmpty("palette");
-        if (paletteTag.size() > MAX_CELLS) {
+        if (paletteTag.size() > maxCells) {
             throw new IOException("Structure palette exceeds " + MAX_CELLS + " states.");
         }
         for (var value : paletteTag) {
@@ -75,7 +82,8 @@ public record NativeTemplate(BlockPos size, List<Cell> blocks) {
             if (metadata == null && block.contains("nbt")) {
                 throw new IOException("Invalid block-entity data at " + pos.toShortString());
             }
-            blocks.add(new Cell(pos, palette.get(index), metadata));
+            if(maxSide==MAX_SIDE||!palette.get(index).isAir())blocks.add(new Cell(pos, palette.get(index), metadata));
+            if(blocks.size()>maxCells)throw new IOException("Template exceeds its occupied-cell budget.");
         }
         return new NativeTemplate(size, blocks);
     }

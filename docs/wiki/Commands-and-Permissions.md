@@ -18,6 +18,9 @@ Commands are checked by the server. Preset locks can restrict operations that an
 | `/wa_environment <dimension> edit` | Environment designer | Permission level 3 and editable dimension |
 | `/wa_preset` | Preset authoring and export | Permission level 3; authoring also needs developer mode |
 | `/wa_modpack` | Bundle information and export | Export needs administrator permission and developer mode |
+| `/wa_island choose` | Open the saved world's starting-island choices | Unassigned player or team member |
+| `/wa_island studio`, `pos1`, `pos2`, `capture_selected <name> <release> <contents>` | Capture and save an island revision | Permission level 3 and developer mode |
+| `wa_modpack authoring_enable` | Enable authoring after a restart | Dedicated-server console only |
 
 See [Multiplayer and Islands](Multiplayer-and-Islands.md) for island and spawn administration, [Structure Library](Structure-Library.md) for capture and import, [Environment Controls](Environment-Controls.md) for live settings, and [World Generation Rules](World-Generation-Rules.md) for inspection commands.
 

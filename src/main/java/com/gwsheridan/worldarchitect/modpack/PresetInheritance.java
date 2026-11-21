@@ -24,7 +24,8 @@ public record PresetInheritance(List<Parent> parents,Policy policy,JsonObject ba
         String identity(){return preset+"/"+release;}
     }
     /** No nested manifest or inherited baseline: encoded nesting stays bounded. */
-    public record Policy(BundleManifest.Lock lock,WorldOptions options,List<Identifier> dimensions,Map<Identifier,List<BundleManifest.Feature>> features,List<BundleManifest.Option> editableOptions,List<String> mods,boolean library) {
+    public record Policy(BundleManifest.Lock lock,WorldOptions options,List<Identifier> dimensions,Map<Identifier,List<BundleManifest.Feature>> features,List<BundleManifest.Option> editableOptions,List<String> mods,boolean library,Optional<PackPolicy> pack) {
+        public Policy(BundleManifest.Lock lock,WorldOptions options,List<Identifier> dimensions,Map<Identifier,List<BundleManifest.Feature>> features,List<BundleManifest.Option> editableOptions,List<String> mods,boolean library){this(lock,options,dimensions,features,editableOptions,mods,library,Optional.empty());}
         public Policy {dimensions=List.copyOf(dimensions);features=features.entrySet().stream().collect(java.util.stream.Collectors.toUnmodifiableMap(Map.Entry::getKey,e->List.copyOf(e.getValue())));editableOptions=List.copyOf(editableOptions);mods=List.copyOf(mods);}
         static final Codec<Policy> CODEC=RecordCodecBuilder.create(b->b.group(
                 net.minecraft.util.StringRepresentable.fromEnum(BundleManifest.Lock::values).fieldOf("lock").forGetter(Policy::lock),
@@ -33,9 +34,10 @@ public record PresetInheritance(List<Parent> parents,Policy policy,JsonObject ba
                 Codec.unboundedMap(Identifier.CODEC,net.minecraft.util.StringRepresentable.fromEnum(BundleManifest.Feature::values).listOf(1,BundleManifest.Feature.values().length)).optionalFieldOf("editable_features",Map.of()).forGetter(Policy::features),
                 net.minecraft.util.StringRepresentable.fromEnum(BundleManifest.Option::values).listOf(0,3).optionalFieldOf("editable_options",List.of()).forGetter(Policy::editableOptions),
                 Codec.STRING.listOf(0,256).optionalFieldOf("required_mods",List.of()).forGetter(Policy::mods),
-                Codec.BOOL.optionalFieldOf("allow_structure_library",true).forGetter(Policy::library)).apply(b,Policy::new));
-        static Policy of(BundleManifest m){return new Policy(m.lock(),m.options(),m.editableDimensions(),m.editableFeatures(),m.editableOptions(),m.requiredMods(),m.allowStructureLibrary());}
-        BundleManifest manifest(Parent parent){return new BundleManifest(parent.preset(),"Inherited policy","Immutable parent policy","Modpack author",parent.release(),lock,options,dimensions,features,editableOptions,mods,library);}
+                Codec.BOOL.optionalFieldOf("allow_structure_library",true).forGetter(Policy::library),
+                PackPolicy.CODEC.optionalFieldOf("pack").forGetter(Policy::pack)).apply(b,Policy::new));
+        static Policy of(BundleManifest m){return new Policy(m.lock(),m.options(),m.editableDimensions(),m.editableFeatures(),m.editableOptions(),m.requiredMods(),m.allowStructureLibrary(),m.pack());}
+        BundleManifest manifest(Parent parent){return new BundleManifest(parent.preset(),"Inherited policy","Immutable parent policy","Modpack author",parent.release(),lock,options,dimensions,features,editableOptions,mods,library,Optional.empty(),pack);}
     }
     private static final Codec<JsonObject> OBJECT=Codec.PASSTHROUGH.comapFlatMap(dynamic->{
         var value=dynamic.convert(JsonOps.INSTANCE).getValue();
@@ -65,6 +67,12 @@ public record PresetInheritance(List<Parent> parents,Policy policy,JsonObject ba
         var checked=validate();if(checked.error().isPresent())return Optional.of(checked.error().orElseThrow().message());
         if(parents.stream().anyMatch(p->p.preset().equals(child.preset())&&p.release().equals(child.release())))return Optional.of("A child preset cannot inherit from its own revision.");
         var parent=policy.manifest(parents.getFirst());
+        if(parent.pack().isPresent()&&!parent.pack().orElseThrow().compatibleChild(parent.lock(),child.pack()))return Optional.of("A child cannot weaken or replace inherited runtime policy locks.");
+        if(parent.pack().isEmpty()&&parent.locked()&&child.pack().isPresent()){
+            var pack=child.pack().orElseThrow();var overworld=Identifier.parse("minecraft:overworld");
+            if(!parent.canEditDimension(overworld)&&(pack.defaults().initial().isPresent()||pack.defaults().respawn().isPresent()||pack.editable().contains("initial")||pack.editable().contains("respawn")))return Optional.of("The parent locks Overworld spawn rules; a child cannot override them through runtime defaults.");
+            if(pack.defaults().portals().keySet().stream().anyMatch(id->!parent.canEditDimension(id))||pack.editable().contains("portals")&&baseline.getAsJsonObject("dimensions").keySet().stream().map(Identifier::parse).anyMatch(id->!parent.canEditDimension(id)))return Optional.of("The parent locks portal spawn rules in a dimension.");
+        }
         if(!child.requiredMods().containsAll(parent.requiredMods())||!parent.allowStructureLibrary()&&child.allowStructureLibrary())return Optional.of("A child cannot remove inherited dependencies or enable a disabled structure library.");
         if(!parent.locked())return Optional.empty();
         if(!child.locked()||child.editableDimensions().stream().anyMatch(id->!parent.canEditDimension(id))||child.editableFeatures().entrySet().stream().anyMatch(e->e.getValue().stream().anyMatch(f->!parent.canEditFeature(e.getKey(),f)))||child.editableOptions().stream().anyMatch(o->!parent.canEditOption(o)))return Optional.of("A child may tighten inherited locks but cannot weaken them.");

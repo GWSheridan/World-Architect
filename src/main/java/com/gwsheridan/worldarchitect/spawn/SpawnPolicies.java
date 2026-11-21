@@ -28,6 +28,7 @@ public final class SpawnPolicies {
     private static final org.slf4j.Logger LOGGER = LogUtils.getLogger();
 
     private SpawnPolicies() {}
+    public static boolean supportsTeamPolicy(VoidGenerator generator){return !(generator instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator rich)||rich.catalog().teams();}
 
     public static ServerLevel initialLevel(ServerLevel fallback) {
         return initialPolicy(fallback.getServer()).flatMap(policy -> level(fallback.getServer(), policy)).orElse(fallback);
@@ -50,19 +51,17 @@ public final class SpawnPolicies {
         if (policy.kind() == SpawnPolicy.Kind.MARKER || policy.kind() == SpawnPolicy.Kind.GENERATED) {
             return StructureSpawns.resolve(level, policy);
         }
-        if (!(level.getChunkSource().getGenerator() instanceof VoidGenerator generator) || generator.island().isEmpty()) {
+        if (!(level.getChunkSource().getGenerator() instanceof VoidGenerator generator) || generator.layout().isEmpty()) {
             throw new IOException("Island spawn policies require a Skyblock dimension.");
         }
-        var island = generator.island().orElseThrow();
+        var island = generator.layout().orElseThrow();
+        if(policy.kind()==SpawnPolicy.Kind.TEAM&&!supportsTeamPolicy(generator))throw new IOException("Team spawn policies require a world created with team island allocation.");
         int slot = 0;
         if (island.personalSlots() > 0) {
             if (level != server.overworld()) {
                 throw new IOException("Personal island policies require the Overworld.");
             }
-            var team = server.getScoreboard().getPlayersTeam(name);
-            slot = policy.kind() == SpawnPolicy.Kind.TEAM && team != null
-                    ? IslandAllocations.claimTeam(server.getWorldPath(LevelResource.DATA), island.personalSlots(), team.getName())
-                    : IslandAllocations.claim(server.getWorldPath(LevelResource.DATA), island.personalSlots(), player);
+            slot = com.gwsheridan.worldarchitect.skyblock.IslandSelections.resolveSlot(server,generator,player,name,policy.kind()==SpawnPolicy.Kind.TEAM);
         }
         return IslandSpawns.position(level, island, slot).map(pos -> new SafeSpawns.Target(level, pos, 0.0F));
     }
@@ -81,8 +80,8 @@ public final class SpawnPolicies {
             LOGGER.warn("Cannot resolve configured spawn for {}. {}", name, e.getMessage());
         }
         ServerLevel level = level(server, policy).orElse(server.overworld());
-        if (level.getChunkSource().getGenerator() instanceof VoidGenerator generator && generator.island().isPresent()) {
-            var island = generator.island().orElseThrow();
+        if (level.getChunkSource().getGenerator() instanceof VoidGenerator generator && generator.layout().isPresent()) {
+            var island = generator.layout().orElseThrow();
             int slot = island.personalSlots() == 0 ? 0 : IslandAllocations.assignedSlot(
                     server.getWorldPath(LevelResource.DATA), island.personalSlots(), player);
             var position = IslandSpawns.position(level, island, slot);

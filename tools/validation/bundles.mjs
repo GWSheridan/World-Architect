@@ -22,10 +22,13 @@ const report={format:1,version,cases:[],status:'passed'};
 cases.push({name:'corridor-regions',bundle:`examples/corridor-regions/bundles/corridor-regions-${version}.zip`,site:'corridor',id:'regional_marker'});
 cases.push({name:'structure-districts',bundle:`examples/structure-districts/bundles/structure-districts-${version}.zip`,site:'district',id:'district_0'});
 for(const name of ['reusable-skyblock','inherited-partial','inherited-skyblock'])cases.push({name,bundle:`examples/reusable-presets/bundles/${name}-${version}.zip`});
+for(const kind of ['classic','choice','teams','mixed'])cases.push({name:'modpack-'+kind,bundle:`examples/modpack-builder/bundles/modpack-${kind}-${version}.zip`,islands:true});
 for(const entry of cases) {
+    try{await fs.access(join(root,entry.bundle));}catch(error){if(error.code!=='ENOENT'||entry.islands)throw error;const directory=dirname(entry.bundle),prefix=entry.bundle.slice(entry.bundle.lastIndexOf('/')+1).replace('-'+version+'.zip','-');const alternatives=(await fs.readdir(join(root,directory))).filter(name=>name.startsWith(prefix)&&name.endsWith('.zip')).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));if(!alternatives.length)throw Error('Missing example '+entry.name);entry.bundle=directory.replaceAll('\\','/')+'/'+alternatives.at(-1);}
     const output=destination?relative(root,join(destination,entry.name)):`build/ci-bundle-${entry.name}`;
     const args=['tools/validation/run.mjs','--jar',options['--jar']||`build/libs/worldarchitect-${version}.jar`,'--fixture',options['--fixture']||`build/validation-tools/worldarchitect-${version}-validation.jar`,'--output',output,'--bundle',entry.bundle,'--suite','compatibility','--network',options['--network']||'online'];
     if(entry.name==='assembly-demo')args.push('--assembly','worldarchitect_examples:assembly_demo','--dimension','minecraft:overworld');
+    if(entry.islands)args.push('--islands','true');
     if(entry.name==='regional-demo')args.push('--regional','true');
     if(entry.name==='pool-demo')args.push('--pool','worldarchitect_examples:pool_demo','--dimension','minecraft:overworld');
     if(entry.name==='shared-regions')args.push('--named-regions','true');
@@ -33,7 +36,7 @@ for(const entry of cases) {
     if(entry.site)args.push('--site',entry.site,'--site-structure','worldarchitect_examples:'+entry.id,'--dimension','minecraft:overworld');
     const code=await new Promise((accept,reject)=>{const child=spawn(process.execPath,args,{cwd:root,stdio:'inherit'});child.on('error',reject);child.on('close',accept);});
     const result=JSON.parse(await fs.readFile(join(root,output,'results.json'),'utf8'));
-    report.cases.push({name:entry.name,...result});if(code!==0||result.status!=='passed')report.status='failed';
+    report.cases.push({name:entry.name,bundle:entry.bundle,...result});if(code!==0||result.status!=='passed')report.status='failed';
 }
 await fs.writeFile(destination?join(destination,'results.json'):join(root,'build/ci-bundles.json'),JSON.stringify(report,null,2)+'\n');
 if(report.status!=='passed')process.exitCode=1;

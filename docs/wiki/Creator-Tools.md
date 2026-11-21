@@ -1,5 +1,7 @@
 # Creator tools
 
+**Modpack Builder** guides a detached project through dimensions, island types, server policies, locks and export. **Island Studio** provides native block-model and slice previews, capture/import, markers, transforms and starter contents. Both share draft history and interrupted-draft recovery. See the [modpack workflow](Modpack-Quick-Start.md) and [island guide](Void-and-Skyblock.md).
+
 These controls are included in World Architect 1.5.0. Use matching 1.5 versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
 
 ## Start a world

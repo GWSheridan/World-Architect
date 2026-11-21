@@ -239,7 +239,7 @@ public final class AssemblyStudio {
             }
             sx=1;sy=1;sz=1;
             for(var part:displayed){var entry=part.entry();var offset=part.offset();var size=entry.template().size();sx=Math.max(sx,offset.getX()+size.getX());sy=Math.max(sy,offset.getY()+size.getY());sz=Math.max(sz,offset.getZ()+size.getZ());
-                for(var cell:entry.template().blocks()) {var pos=offset.offset(cell.pos());cells.add(pos.getX()|pos.getY()<<7|pos.getZ()<<14);cells.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(cell.state().getBlock()).toString().hashCode());dependencies.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(cell.state().getBlock()).getNamespace());}
+                for(var cell:entry.template().blocks()) {var pos=offset.offset(cell.pos());cells.add(pos.getX()|pos.getY()<<7|pos.getZ()<<14);cells.add(cell.state().getMapColor(net.minecraft.world.level.EmptyBlockGetter.INSTANCE,net.minecraft.core.BlockPos.ZERO).col);dependencies.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(cell.state().getBlock()).getNamespace());}
                 for(var named:entry.markers().entrySet()){var marker=new CompoundTag();var pos=offset.offset(named.getValue().pos());marker.putString("name",part.name()+":"+named.getKey());marker.putString("facing",named.getValue().facing().getSerializedName());marker.putIntArray("pos",new int[]{pos.getX(),pos.getY(),pos.getZ()});markers.add(marker);}
             }
             if(d.pool().isPresent()&&displayed.isEmpty()&&valid)data.putString("status","Definition valid; no complete layout for this sample seed. Try another seed or revise connections.");

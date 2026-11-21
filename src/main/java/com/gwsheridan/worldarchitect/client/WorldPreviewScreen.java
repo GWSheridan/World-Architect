@@ -45,7 +45,7 @@ final class WorldPreviewScreen extends Screen {
         this.dimension = dimension;
         this.seed = seed;
         this.preview = preview;
-        zoom = preview.islands().isPresent() ? 3 : 2;
+        zoom = preview.layout().isPresent() ? 3 : 2;
         resample();
     }
 
@@ -69,7 +69,7 @@ final class WorldPreviewScreen extends Screen {
         control("⌂", "reset", left + span - 29, 28, () -> {
             centerX = 0;
             centerZ = 0;
-            zoom = preview.islands().isPresent() ? 3 : 2;
+            zoom = preview.layout().isPresent() ? 3 : 2;
             resample();
         });
         control("<", "rotate", left + 114, 28, () -> rotate(-1));
@@ -122,7 +122,7 @@ final class WorldPreviewScreen extends Screen {
         nextSample = 0; nextColumn = 0;
         java.util.Arrays.fill(samples, null); java.util.Arrays.fill(section, null);
         markers.clear();
-        preview.islands().ifPresent(island -> {
+        preview.layout().ifPresent(island -> {
             for (int slot = 0; slot <= island.personalSlots(); slot++) {
                 var marker = island.spawn(slot);
                 int column = Math.floorDiv(marker.getX() - x, step);
@@ -272,7 +272,7 @@ final class WorldPreviewScreen extends Screen {
             int y = preview.maxY() - row * (preview.maxY() - preview.minY() + 1) / rows;
             var block = column.getBlock(y);
             int color = block.isAir() ? 0xFF141E2B : !block.getFluidState().isEmpty() ? 0xFF397CC4
-                    : 0xFF000000 | Color.HSBtoRGB(Math.floorMod(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block.getBlock()).hashCode(), 360) / 360f, .3f, .75f);
+                    : 0xFF000000 | block.getMapColor(net.minecraft.world.level.EmptyBlockGetter.INSTANCE,net.minecraft.core.BlockPos.ZERO).col;
             g.fill(pixelX(x), MAP_TOP + row * mapSide / rows, pixelX(x + 1), MAP_TOP + (row + 1) * mapSide / rows, color);
         }
     }

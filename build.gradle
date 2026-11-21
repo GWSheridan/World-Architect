@@ -233,6 +233,14 @@ tasks.register('assembleRelease') {
     description = 'Build the JAR, source, full distribution, examples and checksums.'
     dependsOn tasks.named('releaseChecksums')
 }
+tasks.named('releaseChecksums').configure { dependsOn 'packageTestKit' }
+tasks.register('prepareCycle18Examples', JavaExec) {
+    group = 'distribution'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseCycle18Examples'
+    args layout.projectDirectory.asFile.absolutePath, project.version.toString()
+}
 
 tasks.register('prepareExampleReleases', JavaExec) {
     group = 'distribution'
@@ -318,6 +326,39 @@ sourceSets {
         compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
         runtimeClasspath += output + compileClasspath
     }
+    packFixture {
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+    testKit { }
+}
+tasks.register('packFixtureJar', Jar) {
+    group = 'distribution'
+    dependsOn tasks.named('classes')
+    from sourceSets.packFixture.output
+    archiveClassifier = 'pack-test'
+    destinationDirectory = layout.buildDirectory.dir('validation-tools')
+}
+tasks.register('testKitJar', Jar) {
+    group = 'distribution'
+    from sourceSets.testKit.output
+    archiveClassifier = 'test-kit'
+    destinationDirectory = layout.buildDirectory.dir('validation-tools')
+    manifest { attributes 'Main-Class': 'com.gwsheridan.worldarchitect.testkit.PackTestKit' }
+}
+tasks.register('packageTestKit', Zip) {
+    group = 'distribution'
+    dependsOn tasks.named('jar'), tasks.named('packFixtureJar'), tasks.named('testKitJar')
+    archiveClassifier = 'test-kit'
+    destinationDirectory = releaseDirectory
+    from(tasks.named('testKitJar')) { rename { 'worldarchitect-test-kit.jar' } }
+    from(tasks.named('jar')) { into 'lib'; rename { 'worldarchitect.jar' } }
+    from(tasks.named('packFixtureJar')) { into 'lib'; rename { 'worldarchitect-pack-test.jar' } }
+    from('tools/pack-test')
+}
+tasks.named('packageRelease').configure {
+    dependsOn tasks.named('packageTestKit')
+    from(tasks.named('packageTestKit')) { into 'tools' }
 }
 tasks.register('benchmarkProbeJar', Jar) {
     group = 'verification'

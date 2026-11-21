@@ -37,10 +37,10 @@ public final class IslandProtection {
             return false;
         }
         if (!(player.level().getChunkSource().getGenerator() instanceof VoidGenerator generator)
-                || generator.island().filter(island -> island.personalSlots() > 0).isEmpty()) {
+                || generator.layout().filter(island -> island.personalSlots() > 0).isEmpty()) {
             return false;
         }
-        IslandProfile profile = generator.island().orElseThrow();
+        com.gwsheridan.worldarchitect.api.IslandLayout profile = generator.layout().orElseThrow();
         int slot = cell(profile, position);
         if (slot < 0) {
             return false;
@@ -58,7 +58,7 @@ public final class IslandProtection {
         }
     }
 
-    private static int cell(IslandProfile profile, BlockPos position) {
+    private static int cell(com.gwsheridan.worldarchitect.api.IslandLayout profile, BlockPos position) {
         int x = position.getX();
         int z = position.getZ();
         if (x < 0 || z < 0 || x / profile.spacing() >= 16) {
@@ -72,6 +72,7 @@ public final class IslandProtection {
         if (!(event.getPlayer() instanceof ServerPlayer player)) {
             return;
         }
+        if(IslandSelections.pending(player)){event.setCanceled(true);event.setNotifyClient(true);return;}
         var protection = WorldAdministration.get(player.level().getServer()).protection();
         if ((protection.breaking() || protection.containers() && designated(protection, event.getState())) && denied(player, event.getPos())) {
             event.setCanceled(true);
@@ -81,6 +82,7 @@ public final class IslandProtection {
     }
 
     public static void placing(BlockEvent.EntityPlaceEvent event) {
+        if(event.getEntity() instanceof ServerPlayer pending&&IslandSelections.pending(pending)){event.setCanceled(true);return;}
         if (!(event.getEntity() instanceof ServerPlayer player) || !WorldAdministration.get(player.level().getServer()).protection().placement()) {
             return;
         }
@@ -97,6 +99,7 @@ public final class IslandProtection {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
+        if(IslandSelections.pending(player)){event.setCanceled(true);event.setCancellationResult(InteractionResult.FAIL);return;}
         var server = player.level().getServer();
         var protection = WorldAdministration.get(server).protection();
         var state = player.level().getBlockState(event.getPos());

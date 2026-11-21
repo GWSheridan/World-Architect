@@ -46,17 +46,19 @@ final class PresetStudioScreen extends Screen {
         if(!developer&&status.isEmpty())status="Enable developer_mode and restart to save, import or export. Help explains setup.";
         if(journal.offer())history();
     }
-    private JsonElement snapshot(){return com.gwsheridan.worldarchitect.authoring.PresetDraftDocument.encode(name,draft);}
+    private JsonElement snapshot(){return com.gwsheridan.worldarchitect.authoring.PackedDraft.pack(com.gwsheridan.worldarchitect.authoring.PresetDraftDocument.encode(name,draft));}
     private void restore(JsonElement value){
+        value=com.gwsheridan.worldarchitect.authoring.PackedDraft.unpack(value);
         if(ModpackRuntime.locked().isPresent())throw new IllegalArgumentException("The active bundle locks this editor.");
         try{var restored=com.gwsheridan.worldarchitect.authoring.PresetDraftDocument.decode(value);var checked=PresetStudio.validate(restored,registries);name=com.gwsheridan.worldarchitect.authoring.PresetDraftDocument.name(value);draft=checked.draft();}
         catch(IOException e){throw new IllegalArgumentException(e.getMessage(),e);}
     }
     private void history(){minecraft.gui.setScreen(new AuthoringHistoryScreen(this,journal,this::snapshot,this::restore,List.of()));}
     private void tools(){
-        var choices=new ArrayList<>(List.of("Help","Structure site inspector"));if(ModpackRuntime.developerMode())choices.add("Derive from saved preset");if(draft.manifest().inheritance().isPresent()){choices.add("Inherited preset report");if(ModpackRuntime.developerMode())choices.add("Edit inherited override");}
+        var choices=new ArrayList<>(List.of("Modpack Builder","Help","Structure site inspector"));if(ModpackRuntime.developerMode())choices.add("Derive from saved preset");if(draft.manifest().inheritance().isPresent()){choices.add("Inherited preset report");if(ModpackRuntime.developerMode())choices.add("Edit inherited override");}
         minecraft.gui.setScreen(new StudioChoiceScreen(this,"Preset Studio tools",choices,choice->{switch(choice){
             case "Help"->minecraft.gui.setScreen(new StudioReportScreen(this,"Preset Studio help",StudioReportScreen.help()));
+            case "Modpack Builder"->act(()->{if(!(registries instanceof net.minecraft.core.RegistryAccess access))throw new IOException("Open the builder from the dimension workspace.");minecraft.gui.setScreen(new ModpackBuilderScreen(this,access,name,draft,(nextName,next)->{name=nextName;draft=next;journal.observe(snapshot());refreshLibrary();status="Project draft ready. Apply to world to test its generation; install its export to enforce locks.";}));});
             case "Structure site inspector"->siteInspector();
             case "Derive from saved preset"->derive();
             case "Inherited preset report"->minecraft.gui.setScreen(new StudioReportScreen(this,"Inherited preset",draft.manifest().inheritance().orElseThrow().report(draft)));
@@ -94,10 +96,10 @@ final class PresetStudioScreen extends Screen {
     private static boolean bool(String text){return text.equals("true")||text.equals("false");}
     private Button button(String label,int x,int y,int w,Runnable run){return addRenderableWidget(Button.builder(Component.literal(label),b->run.run()).bounds(x,y,w,20).build());}
     @FunctionalInterface private interface Action{void run()throws IOException;}
-    private void act(Action action){try{action.run();}catch(IOException|RuntimeException e){status=e.getMessage()==null?"Preset action failed.":e.getMessage();if(minecraft.gui.screen()==this)rebuildWidgets();}}
+    private void act(Action action){try{action.run();}catch(IOException|RuntimeException e){status=e.getMessage()==null?"Preset action failed.":e.getMessage();if(minecraft.gui.screen() instanceof StudioFormScreen form)form.showError(status);else if(minecraft.gui.screen() instanceof StudioChoiceScreen choice)choice.showError(status);else if(minecraft.gui.screen()==this)rebuildWidgets();}}
     private boolean dirty(){return !BundleManifest.CODEC.encodeStart(JsonOps.INSTANCE,initial.manifest()).result().equals(BundleManifest.CODEC.encodeStart(JsonOps.INSTANCE,draft.manifest()).result())||!initial.preset().equals(draft.preset())||!sameTemplates(initial,draft);}
     private static boolean sameTemplates(PresetStudio.Draft a,PresetStudio.Draft b){var first=a.templates();var second=b.templates();return first.keySet().equals(second.keySet())&&first.entrySet().stream().allMatch(e->java.util.Arrays.equals(e.getValue(),second.get(e.getKey())));}
-    private void confirmReplace(Runnable next){if(!dirty()){next.run();return;}minecraft.gui.setScreen(new net.minecraft.client.gui.screens.ConfirmScreen(discard->{if(discard)next.run();else minecraft.gui.setScreen(this);},Component.literal("Replace Studio draft?"),Component.literal("Unsaved draft changes will be discarded. Saved library versions remain available."),Component.literal("Continue"),Component.literal("Keep editing")));}
+    private void confirmReplace(Runnable next){if(!dirty()){next.run();return;}minecraft.gui.setScreen(new StudioConfirmScreen(discard->{if(discard)next.run();else minecraft.gui.setScreen(this);},Component.literal("Replace Studio draft?"),Component.literal("Unsaved draft changes will be discarded. Saved library versions remain available."),Component.literal("Continue"),Component.literal("Keep editing")));}
     @Override public void onClose(){if(!applied&&dirty())confirmReplace(()->journal.close(this,()->minecraft.gui.setScreen(parent)));else journal.close(this,()->minecraft.gui.setScreen(parent));}
     @Override public void extractRenderState(GuiGraphicsExtractor graphics,int x,int y,float tick){super.extractRenderState(graphics,x,y,tick);graphics.centeredText(font,title,width/2,8,0xFFF1E7CE);graphics.centeredText(font,Component.literal("Versioned presets · new worlds only"),width/2,22,0xFFCCCCCC);String selectedLabel=revisions.isEmpty()?"Local library is empty":(selected+1)+"/"+revisions.size()+" · "+revisions.get(selected).label();graphics.text(font,font.plainSubstrByWidth("Draft: "+name+" / "+draft.manifest().release(),span),left,height<300?64:72,0xFFEAEAEA);graphics.text(font,font.plainSubstrByWidth(draft.manifest().preset()+" · "+draft.manifest().lock().getSerializedName(),span),left,height<300?78:88,0xFFCCCCCC);var lines=font.split(Component.literal(status),span);int statusTop=Math.max(height<300?201:230,height-62);for(int i=0;i<Math.min((height-30-statusTop)/10,lines.size());i++)graphics.text(font,lines.get(i),left,statusTop+i*10,0xFFEAEAEA);}
 }

@@ -54,7 +54,7 @@ abstract class PrepareSpawnTaskMixin {
         }
         if (saved.isEmpty() && level.getChunkSource().getGenerator() instanceof VoidGenerator generator) {
             // Capture join refusals in the future even when the executor runs the work inline.
-            return CompletableFuture.supplyAsync(() -> IslandSpawns.initial(level, generator, nameAndId.id()), level.getServer());
+            return CompletableFuture.supplyAsync(() -> IslandSpawns.initial(level, generator, nameAndId.id(),nameAndId.name()), level.getServer());
         }
         return original.call(saved, fallback);
     }

@@ -26,6 +26,7 @@ public final class MultiplayerProbe {
     private static final KeyEvent ENTER=new KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_RETURN,'\r',0);
     private static int ticks,action,finish;
     private static String previous="";
+    private static net.minecraft.nbt.CompoundTag islandChoice;
     @SubscribeEvent public static void tick(ClientTickEvent.Post event)throws Exception {
         if(FOLDER==null)return;
         var root=Path.of(FOLDER);var mc=Minecraft.getInstance();
@@ -48,6 +49,8 @@ public final class MultiplayerProbe {
         var commands=Files.readAllLines(file);if(commands.isEmpty())throw new AssertionError("Empty published action file");
         for(String line:commands){
             if(line.startsWith("COMMAND "))mc.player.connection.send(new ServerboundChatCommandPacket(line.substring(8)));
+            else if(line.equals("CHOICE")){var screen=mc.gui.screen();if(screen!=null&&screen.getClass().getSimpleName().equals("IslandChoiceScreen")){var field=screen.getClass().getDeclaredField("data");field.setAccessible(true);islandChoice=((net.minecraft.nbt.CompoundTag)field.get(screen)).copy();var types=islandChoice.getListOrEmpty("types").stream().map(t->(net.minecraft.nbt.CompoundTag)t).map(t->t.getStringOr("id","")+":"+t.getIntOr("available",0)).toList();record("CHOICE "+islandChoice.getStringOr("token","")+" "+islandChoice.getStringOr("catalog","")+" "+types);}else record("CHOICE_CLOSED");}
+            else if(line.startsWith("CHOOSE ")){if(islandChoice==null)throw new AssertionError("No observed island choice");mc.player.connection.send(new ServerboundChatCommandPacket("wa_island choose "+islandChoice.getStringOr("token","")+" "+islandChoice.getStringOr("catalog","")+" "+line.substring(7)));record("CHOICE_SENT "+line.substring(7));}
             else if(line.equals("SHOT"))Screenshot.grab(mc,false);
             else if(line.equals("CLOSE"))mc.gui.setScreen(null);
             else if(line.equals("SCREEN_CLOSED")){if(mc.gui.screen()!=null)throw new AssertionError("A cancelled preview reopened its screen");record("SCREEN_CLOSED_PASS");}

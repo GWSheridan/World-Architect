@@ -73,7 +73,7 @@ public final class SiteInspector {
             rows.add(piece.name()+" · origin "+piece.origin().toShortString()+" · "+piece.entry().rules().collision().key());
             if(piece.name().equals("root"))data.putIntArray("root",new int[]{offset.getX(),offset.getY(),offset.getZ()});
             for(var cell:piece.entry().template().blocks()){
-                SiteProbe.check();var pos=offset.offset(cell.pos());int packed=pos.getX()|pos.getY()<<7|pos.getZ()<<14;if(piece.operation().equals("clear"))cleared.add(packed);else if(!cell.state().isAir()){cells.add(packed);cells.add(BuiltInRegistries.BLOCK.getKey(cell.state().getBlock()).toString().hashCode());}if(piece.operation().equals("support"))supports++;
+                SiteProbe.check();var pos=offset.offset(cell.pos());int packed=pos.getX()|pos.getY()<<7|pos.getZ()<<14;if(piece.operation().equals("clear"))cleared.add(packed);else if(!cell.state().isAir()){cells.add(packed);cells.add(cell.state().getMapColor(net.minecraft.world.level.EmptyBlockGetter.INSTANCE,net.minecraft.core.BlockPos.ZERO).col);}if(piece.operation().equals("support"))supports++;
                 var world=piece.origin().offset(cell.pos());long key=BlockPos.asLong(world.getX(),0,world.getZ());
                 var column=columnCache.computeIfAbsent(key,k->input.generator.baseColumn(world.getX(),world.getZ(),input.height,input.seed));if(column.getBlock(world.getY()).is(Blocks.WATER))water++;
             }

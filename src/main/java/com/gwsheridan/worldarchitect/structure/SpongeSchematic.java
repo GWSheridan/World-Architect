@@ -18,6 +18,12 @@ final class SpongeSchematic {
     private SpongeSchematic() {}
 
     static CompoundTag toNative(CompoundTag root) throws IOException {
+        return toNative(root,32);
+    }
+
+    static CompoundTag island(CompoundTag root) throws IOException {return toNative(root,64);}
+
+    private static CompoundTag toNative(CompoundTag root,int side) throws IOException {
         CompoundTag schematic = compound(root, "Schematic");
         if (!(schematic.get("Version") instanceof IntTag) || schematic.getIntOr("Version", 0) != 3) {
             throw new IOException("The schematic must be Sponge version 3. Re-export it in that format.");
@@ -33,13 +39,14 @@ final class SpongeSchematic {
             throw new IOException("The schematic offset must contain three integers.");
         }
         var size = new BlockPos(length(schematic, "Width"), length(schematic, "Height"), length(schematic, "Length"));
-        NativeTemplate.checkSize(size);
+        if(size.getX()<1||size.getY()<1||size.getZ()<1||size.getX()>side||size.getY()>side||size.getZ()>side)throw new IOException("Schematic bounds exceed "+side+" blocks per side.");
         int plane = size.getX() * size.getZ();
         int volume = plane * size.getY();
         CompoundTag blocks = compound(schematic, "Blocks");
         CompoundTag spongePalette = compound(blocks, "Palette");
-        if (spongePalette.isEmpty() || spongePalette.size() > MAX_PALETTE) {
-            throw new IOException("The schematic palette must contain between 1 and " + MAX_PALETTE + " states.");
+        int paletteLimit=side==64?IslandBuild.MAX_CELLS:MAX_PALETTE;
+        if (spongePalette.isEmpty() || spongePalette.size() > paletteLimit) {
+            throw new IOException("The schematic palette must contain between 1 and " + paletteLimit + " states.");
         }
         Map<Integer, Integer> indices = new HashMap<>();
         ListTag palette = new ListTag();

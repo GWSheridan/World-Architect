@@ -16,6 +16,9 @@ final class ClientStudioViews {
                 case "site" -> SiteInspectorScreen.show(payload.view());
                 case "assembly" -> mc.gui.setScreen(payload.view().getBooleanOr("theme_editor",false)?new AssemblyThemeScreen(payload.view()):payload.view().getBooleanOr("pool_editor",false)?new AssemblyPoolScreen(payload.view()):new AssemblyStudioScreen(payload.view()));
                 case "administration" -> mc.gui.setScreen(new AdministrationPanelScreen(payload.view()));
+                case "island_choice" -> mc.gui.setScreen(new IslandChoiceScreen(payload.view()));
+                case "island_choice_done" -> {if(mc.gui.screen() instanceof IslandChoiceScreen)mc.gui.setScreen(null);}
+                case "island_editor" -> {if(mc.getConnection()!=null)mc.gui.setScreen(new IslandStudioScreen(null,mc.getConnection().registryAccess(),com.gwsheridan.worldarchitect.structure.IslandBuild.classic(),ignored->{}));}
                 case "administration_confirmation" -> mc.gui.setScreen(new StudioConfirmScreen(answer -> {
                     if(mc.getConnection()!=null)mc.getConnection().sendCommand(answer
                             ? "wa_admin confirm "+payload.view().getStringOr("token","")+" "+payload.view().getStringOr("confirmation","")

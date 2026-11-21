@@ -11,12 +11,14 @@ import net.minecraft.world.level.levelgen.WorldOptions;
 
 public record BundleManifest(Identifier preset, String title, String description, String author, String release,
         Lock lock, WorldOptions options, List<Identifier> editableDimensions, Map<Identifier, List<Feature>> editableFeatures,
-        List<Option> editableOptions, List<String> requiredMods, boolean allowStructureLibrary, java.util.Optional<PresetInheritance> inheritance) {
+        List<Option> editableOptions, List<String> requiredMods, boolean allowStructureLibrary, java.util.Optional<PresetInheritance> inheritance, java.util.Optional<PackPolicy> pack) {
+    /** API 1 inherited-preset constructor. */
+    public BundleManifest(Identifier preset,String title,String description,String author,String release,Lock lock,WorldOptions options,List<Identifier> editableDimensions,Map<Identifier,List<Feature>> editableFeatures,List<Option> editableOptions,List<String> requiredMods,boolean allowStructureLibrary,java.util.Optional<PresetInheritance> inheritance){this(preset,title,description,author,release,lock,options,editableDimensions,editableFeatures,editableOptions,requiredMods,allowStructureLibrary,inheritance,java.util.Optional.empty());}
     /** Retained API 1 constructor for ordinary, self-contained presets. */
     public BundleManifest(Identifier preset,String title,String description,String author,String release,Lock lock,WorldOptions options,List<Identifier> editableDimensions,Map<Identifier,List<Feature>> editableFeatures,List<Option> editableOptions,List<String> requiredMods,boolean allowStructureLibrary){this(preset,title,description,author,release,lock,options,editableDimensions,editableFeatures,editableOptions,requiredMods,allowStructureLibrary,java.util.Optional.empty());}
     private record Encoded(int format,BundleManifest manifest) {}
     public static final Codec<BundleManifest> CODEC = RecordCodecBuilder.<Encoded>create(builder -> builder.group(
-            Codec.intRange(1, 2).fieldOf("format").forGetter(Encoded::format),
+            Codec.intRange(1, 3).fieldOf("format").forGetter(Encoded::format),
             Identifier.CODEC.fieldOf("preset").forGetter(e->e.manifest().preset()),
             Codec.STRING.fieldOf("title").forGetter(e->e.manifest().title()),
             Codec.STRING.fieldOf("description").forGetter(e->e.manifest().description()),
@@ -30,10 +32,11 @@ public record BundleManifest(Identifier preset, String title, String description
             StringRepresentable.fromEnum(Option::values).listOf(0, 3).optionalFieldOf("editable_options", List.of()).forGetter(e->e.manifest().editableOptions()),
             Codec.STRING.listOf(0, 256).optionalFieldOf("required_mods", List.of()).forGetter(e->e.manifest().requiredMods()),
             Codec.BOOL.optionalFieldOf("allow_structure_library", true).forGetter(e->e.manifest().allowStructureLibrary()),
-            PresetInheritance.CODEC.optionalFieldOf("inheritance").forGetter(e->e.manifest().inheritance())
-    ).apply(builder, (format, preset, title, description, author, release, lock, options, dimensions, features, editableOptions, mods, library, inheritance) ->
-            new Encoded(format,new BundleManifest(preset, title, description, author, release, lock, options, dimensions, features, editableOptions, mods, library, inheritance))))
-            .flatXmap(e->e.format()==(e.manifest().inheritance().isPresent()?2:1)?e.manifest().validate():invalid("Bundle format 2 is required exactly when an inherited policy is present."),m->m.validate().map(valid->new Encoded(valid.inheritance().isPresent()?2:1,valid)));
+            PresetInheritance.CODEC.optionalFieldOf("inheritance").forGetter(e->e.manifest().inheritance()),
+            PackPolicy.CODEC.optionalFieldOf("pack").forGetter(e->e.manifest().pack())
+    ).apply(builder, (format, preset, title, description, author, release, lock, options, dimensions, features, editableOptions, mods, library, inheritance, pack) ->
+            new Encoded(format,new BundleManifest(preset, title, description, author, release, lock, options, dimensions, features, editableOptions, mods, library, inheritance, pack))))
+            .flatXmap(e->e.format()==e.manifest().format()?e.manifest().validate():invalid("Use format 3 for pack policies, format 2 for inherited presets, or format 1 for ordinary presets."),m->m.validate().map(valid->new Encoded(valid.format(),valid)));
 
     public BundleManifest {
         editableDimensions = List.copyOf(editableDimensions);
@@ -50,7 +53,7 @@ public record BundleManifest(Identifier preset, String title, String description
                 || !release.matches("[a-zA-Z0-9][a-zA-Z0-9._-]{0,39}")) {
             return invalid("Invalid bundle title, description, author or release.");
         }
-        boolean hasEdits = !editableDimensions.isEmpty() || !editableFeatures.isEmpty() || !editableOptions.isEmpty();
+        boolean hasEdits = !editableDimensions.isEmpty() || !editableFeatures.isEmpty() || !editableOptions.isEmpty() || pack.filter(p->!p.editable().isEmpty()).isPresent();
         if (hasEdits != (lock == Lock.PARTIAL)) {
             return invalid("Only a partial lock accepts edit lists, and it must permit at least one edit.");
         }
@@ -71,7 +74,9 @@ public record BundleManifest(Identifier preset, String title, String description
     public boolean locked() {
         return lock != Lock.UNLOCKED;
     }
-    public BundleManifest withInheritance(java.util.Optional<PresetInheritance> source){return new BundleManifest(preset,title,description,author,release,lock,options,editableDimensions,editableFeatures,editableOptions,requiredMods,allowStructureLibrary,source);}
+    public int format(){return pack.isPresent()?3:inheritance.isPresent()?2:1;}
+    public BundleManifest withInheritance(java.util.Optional<PresetInheritance> source){return new BundleManifest(preset,title,description,author,release,lock,options,editableDimensions,editableFeatures,editableOptions,requiredMods,allowStructureLibrary,source,pack);}
+    public BundleManifest withPack(java.util.Optional<PackPolicy> policy){return new BundleManifest(preset,title,description,author,release,lock,options,editableDimensions,editableFeatures,editableOptions,requiredMods,allowStructureLibrary,inheritance,policy);}
 
     public boolean canEditDimension(Identifier id) {
         return !locked() || editableDimensions.contains(id);

@@ -25,7 +25,7 @@ final class VoxelPreview {
     /** Cache the complete projected image; large assemblies do not rebuild every frame. */
     private void rasterize(int width,int height){
         int[] pixels=new int[Math.multiplyExact(width,height)];
-        for(int i:order){int p=cells[i*2],x=p&127,y=p>>7&127,z=p>>14&127;int color=0xFF000000|java.awt.Color.HSBtoRGB(Math.floorMod(cells[i*2+1],360)/360f,.45f,.83f);
+        for(int i:order){int p=cells[i*2],x=p&127,y=p>>7&127,z=p>>14&127;int color=0xFF000000|(cells[i*2+1]&0xffffff);
             if(!filled(x,y+1,z))quad(pixels,color,width,height,new double[][]{{x,y+1,z},{x+1,y+1,z},{x+1,y+1,z+1},{x,y+1,z+1}});
             int dx=Math.sin(yaw)>=0?1:-1,dz=Math.cos(yaw)>=0?1:-1;
             if(!filled(x+dx,y,z)){int face=x+(dx>0?1:0);quad(pixels,shade(color,.60),width,height,new double[][]{{face,y,z},{face,y,z+1},{face,y+1,z+1},{face,y+1,z}});}

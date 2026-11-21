@@ -145,7 +145,7 @@ final class IslandScreen extends Screen {
 
     private void applyVoid() {
         if (dimension.equals(LevelStem.OVERWORLD)) {
-            minecraft.gui.setScreen(new ConfirmScreen(confirmed -> {
+            minecraft.gui.setScreen(new StudioConfirmScreen(confirmed -> {
                 if (confirmed) {
                     apply(Optional.empty(), true);
                 } else {

@@ -27,7 +27,7 @@ final class StudioFormScreen extends Screen {
     }
     @Override protected void init() {
         int span=Math.min(420,width-24),left=(width-span)/2,half=(span-8)/2,first=height<260?58:68,row=height<260?26:34;
-        apply=addRenderableWidget(Button.builder(Component.literal("Apply"),b->{save.accept(List.copyOf(values));onClose();}).bounds(left,height-26,half,20).build());
+        apply=addRenderableWidget(Button.builder(Component.literal("Apply"),b->{try{error="";save.accept(List.copyOf(values));if(error.isEmpty())onClose();}catch(RuntimeException e){showError(e.getMessage()==null?"Unable to apply these values.":e.getMessage());}}).bounds(left,height-26,half,20).build());
         addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL,b->onClose()).bounds(left+half+8,height-26,half,20).build());
         for(int i=0;i<fields.size();i++){
             int index=i;var field=fields.get(i);var box=addRenderableWidget(new EditBox(font,left+i%2*(half+8),first+i/2*row,half,18,Component.literal(field.label())));
@@ -36,6 +36,7 @@ final class StudioFormScreen extends Screen {
         refresh();
     }
     private void refresh(){try{error=validate.apply(List.copyOf(values));}catch(RuntimeException e){error=e.getMessage()==null?"Check the entered values.":e.getMessage();}apply.active=error.isEmpty();}
+    void showError(String message){error=message;}
     @Override public void onClose(){minecraft.gui.setScreen(parent);}
     @Override public void extractRenderState(GuiGraphicsExtractor graphics,int mouseX,int mouseY,float tick){
         super.extractRenderState(graphics,mouseX,mouseY,tick);int span=Math.min(420,width-24),left=(width-span)/2,half=(span-8)/2,first=height<260?58:68,row=height<260?26:34;

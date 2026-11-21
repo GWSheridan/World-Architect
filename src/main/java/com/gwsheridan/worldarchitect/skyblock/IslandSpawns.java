@@ -24,12 +24,16 @@ public final class IslandSpawns {
     private IslandSpawns() {}
 
     public static Vec3 initial(ServerLevel level, VoidGenerator generator, UUID player) {
-        if (generator.island().isEmpty()) {
+        var current=level.getServer().getPlayerList().getPlayer(player);
+        return initial(level,generator,player,current==null?player.toString():current.getPlainTextName());
+    }
+
+    public static Vec3 initial(ServerLevel level, VoidGenerator generator, UUID player, String name) {
+        if (generator.layout().isEmpty()) {
             return Vec3.atBottomCenterOf(new BlockPos(8, level.getMinY() + 4, 8));
         }
-        IslandProfile profile = generator.island().orElseThrow();
-        int slot = profile.personalSlots() == 0 ? 0 : IslandAllocations.claim(
-                level.getServer().getWorldPath(LevelResource.DATA), profile.personalSlots(), player);
+        com.gwsheridan.worldarchitect.api.IslandLayout profile = generator.layout().orElseThrow();
+        int slot = IslandSelections.resolveSlot(level.getServer(),generator,player,name,false);
         return position(level, profile, slot).map(Vec3::atBottomCenterOf).orElseThrow(() ->
                 new SkyblockJoinException("World Architect could not find a safe Skyblock spawn. Contact the world administrator."));
     }
@@ -40,12 +44,12 @@ public final class IslandSpawns {
             return;
         }
         ServerLevel level = player.level().getServer().overworld();
-        if (!(level.getChunkSource().getGenerator() instanceof VoidGenerator generator) || generator.island().isEmpty()) {
+        if (!(level.getChunkSource().getGenerator() instanceof VoidGenerator generator) || generator.layout().isEmpty()) {
             return;
         }
         var old = event.getOriginalTeleportTransition();
         try {
-            IslandProfile profile = generator.island().orElseThrow();
+            com.gwsheridan.worldarchitect.api.IslandLayout profile = generator.layout().orElseThrow();
             var position = position(level, profile, assignedSlot(level, profile, player.getUUID()));
             if (position.isPresent()) {
                 event.setTeleportTransition(new TeleportTransition(level, Vec3.atBottomCenterOf(position.orElseThrow()), Vec3.ZERO,
@@ -60,10 +64,10 @@ public final class IslandSpawns {
     }
 
     public static @Nullable TeleportTransition portalEntry(ServerLevel level, VoidGenerator generator, Entity entity) {
-        if (generator.island().isEmpty()) {
+        if (generator.layout().isEmpty()) {
             return null;
         }
-        IslandProfile profile = generator.island().orElseThrow();
+        com.gwsheridan.worldarchitect.api.IslandLayout profile = generator.layout().orElseThrow();
         try {
             return position(level, profile, assignedSlot(level, profile, entity.getUUID()))
                     .map(pos -> new TeleportTransition(level, Vec3.atBottomCenterOf(pos), Vec3.ZERO, 0.0F, 0.0F,
@@ -75,23 +79,26 @@ public final class IslandSpawns {
         }
     }
 
-    private static int assignedSlot(ServerLevel level, IslandProfile profile, UUID player) {
+    private static int assignedSlot(ServerLevel level, com.gwsheridan.worldarchitect.api.IslandLayout profile, UUID player) {
+        if(level.getChunkSource().getGenerator() instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator rich){var current=level.getServer().getPlayerList().getPlayer(player);return IslandSelections.assigned(level.getServer(),rich,player,current==null?player.toString():current.getPlainTextName());}
         return profile.personalSlots() == 0 ? 0 : IslandAllocations.assignedSlot(
                 level.getServer().getWorldPath(LevelResource.DATA), profile.personalSlots(), player);
     }
 
-    public static Optional<BlockPos> position(ServerLevel level, IslandProfile profile, int slot) {
+    public static Optional<BlockPos> position(ServerLevel level, IslandProfile profile, int slot) { return position(level,(com.gwsheridan.worldarchitect.api.IslandLayout)profile,slot); }
+
+    public static Optional<BlockPos> position(ServerLevel level, com.gwsheridan.worldarchitect.api.IslandLayout profile, int slot) {
         var personal = safePosition(level, profile, slot);
         return personal.isPresent() || slot == 0 ? personal : safePosition(level, profile, 0);
     }
 
-    private static Optional<BlockPos> safePosition(ServerLevel level, IslandProfile profile, int slot) {
+    private static Optional<BlockPos> safePosition(ServerLevel level, com.gwsheridan.worldarchitect.api.IslandLayout profile, int slot) {
         BlockPos marker = profile.spawn(slot);
         if (safe(level, marker)) {
             return Optional.of(marker);
         }
         BlockPos origin = profile.origin(slot);
-        return profile.template().blocks().stream().map(cell -> origin.offset(cell.pos()).above())
+        return profile.floors(slot).stream().map(BlockPos::above)
                 .sorted(Comparator.comparingDouble(pos -> pos.distSqr(marker)))
                 .filter(pos -> safe(level, pos)).findFirst();
     }

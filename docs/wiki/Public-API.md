@@ -1,6 +1,6 @@
 # Public extension API 1
 
-World Architect 1.5.0 supports Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Compile against the distributed JAR; declare a required NeoForge dependency on World Architect. Call `WorldArchitectApi.requireVersion(1)` in your mod constructor. A different API contract fails during mod construction, before a world opens.
+World Architect 1.8.0 supports Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Compile against the distributed JAR; declare a required NeoForge dependency on World Architect. Call `WorldArchitectApi.requireVersion(1)` in your mod constructor. A different API contract fails during mod construction, before a world opens.
 
 The supported surface is `com.gwsheridan.worldarchitect.api` plus the data types listed below. Other implementation packages, mixins, generator implementation classes, client screens and low-level file writers are internal even when Java visibility is public. API 1 additions retain existing method signatures and codec defaults. Breaking changes require a new API version. Minecraft/NeoForge upgrades may require recompilation; API 1 is not a promise of binary compatibility across game versions.
 
@@ -154,3 +154,5 @@ API 1 retains existing constructors and method signatures. `RegionalTerrain.Zone
 `PlacementAnchor.CODEC` describes explicit version-1 surface, seabed or fixed-height placement. Modular definitions may include optional `placement`; omission retains the legacy seabed behavior. `air_or_water` collision is explicit and does not permit lava, waterlogged solids or containers. `ProceduralPool.withPorts` selects pool format 3 when vertical ports are added; formats 1 and 2 keep their algorithms and constructor contracts. New inputs must be validated before export.
 
 Site-inspector classes, worker/session helpers and rendering code remain internal implementation details. They are not extension APIs. Use registered modular definitions and the documented authoring commands. Matching 1.5 clients and servers are required for authoring networking.
+
+API 1 also exposes read-only `IslandLayout` geometry; the original `IslandProfile` implements it without changing its constructor or codec. `BundleManifest` retains its earlier constructors and supports optional `PackPolicy` data in format 3. Runtime team policies on rich islands require team allocation; checked commands and APIs enforce the same rule.

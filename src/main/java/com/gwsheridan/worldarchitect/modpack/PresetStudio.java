@@ -56,7 +56,11 @@ public final class PresetStudio {
         @Override public Map<String, byte[]> templates() {
             var copy = new TreeMap<String, byte[]>(); templates.forEach((key, value) -> copy.put(key, value.clone())); return copy;
         }
-        public Draft withManifest(BundleManifest next) { return new Draft(manifest.inheritance().isPresent()&&next.inheritance().isEmpty()?next.withInheritance(manifest.inheritance()):next, preset, templates); }
+        public Draft withManifest(BundleManifest next) {
+            if(manifest.inheritance().isPresent()&&next.inheritance().isEmpty())next=next.withInheritance(manifest.inheritance());
+            if(manifest.pack().isPresent()&&next.pack().isEmpty())next=next.withPack(manifest.pack());
+            return new Draft(next,preset,templates);
+        }
     }
     public record Revision(String name, String release, BundleManifest manifest) {
         public String label() { return name + " / " + release + " · " + manifest.lock().getSerializedName(); }
@@ -66,6 +70,7 @@ public final class PresetStudio {
     }
 
     public static Draft capture(BundleManifest manifest, WorldDimensions dimensions, HolderLookup.Provider registries) throws IOException {
+        if(manifest.pack().isEmpty()&&dimensions.dimensions().values().stream().anyMatch(stem->stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator))manifest=manifest.withPack(java.util.Optional.of(PackPolicy.DEFAULT));
         var ops = RegistryOps.create(JsonOps.INSTANCE, registries);
         var json = WorldPreset.DIRECT_CODEC.encodeStart(ops, new WorldPreset(dimensions.dimensions())).getOrThrow(IOException::new).getAsJsonObject();
         var resources = new TreeMap<String, byte[]>();
@@ -99,7 +104,7 @@ public final class PresetStudio {
         }
         namespaces.stream().filter(RuleDependencies.loaded()::contains).forEach(dependencies::add);
         var m = manifest;
-        manifest = new BundleManifest(m.preset(), m.title(), m.description(), m.author(), m.release(), m.lock(), m.options(), m.editableDimensions(), m.editableFeatures(), m.editableOptions(), List.copyOf(dependencies), m.allowStructureLibrary(),m.inheritance());
+        manifest = new BundleManifest(m.preset(), m.title(), m.description(), m.author(), m.release(), m.lock(), m.options(), m.editableDimensions(), m.editableFeatures(), m.editableOptions(), List.copyOf(dependencies), m.allowStructureLibrary(),m.inheritance(),m.pack());
         return new Draft(manifest, json, resources);
     }
 
@@ -159,8 +164,15 @@ public final class PresetStudio {
             var preset = WorldPreset.DIRECT_CODEC.parse(ops, source.preset()).getOrThrow(IOException::new);
             if(manifest.inheritance().isPresent())manifest.inheritance().orElseThrow().enforce(source,preset,registries);
             var dimensions = preset.createWorldDimensions();
+            if(manifest.pack().isPresent())manifest.pack().orElseThrow().validateDimensions(dimensions);
             ModpackRuntime.validateManifestDimensions(manifest, dimensions);
-            dimensions.dimensions().forEach((key, stem) -> { if (stem.generator() instanceof ManagedGenerator) SaveProtection.validateGenerator(key, stem); });
+            for(var entry:dimensions.dimensions().entrySet()){
+                if(entry.getValue().generator() instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator rich){
+                    if(manifest.pack().isEmpty())throw new IOException("Rich Skyblock presets require a format-3 pack policy.");
+                    rich.validateAssets(registries);
+                }
+                if(entry.getValue().generator() instanceof ManagedGenerator)SaveProtection.validateGenerator(entry.getKey(),entry.getValue());
+            }
             RuleSpawns.validate(dimensions.dimensions(), registries);
             var encoded = WorldPreset.DIRECT_CODEC.encodeStart(ops, preset).getOrThrow(IOException::new).getAsJsonObject();
             if (BundleFiles.jsonBytes(encoded).length > BundleFiles.MAX_JSON_BYTES) throw new IOException("Preset exceeds the 8 MiB JSON limit.");
@@ -179,6 +191,10 @@ public final class PresetStudio {
         namespaces.stream().filter(namespace -> !Set.of("minecraft", "worldarchitect").contains(namespace)).forEach(namespace ->
                 rows.add("Resource namespace: " + namespace + (RuleDependencies.loaded().contains(namespace) ? " · installed mod " + RuleDependencies.version(namespace) : " · datapack resource; ensure its registries are supplied")));
         dimensions.dimensions().forEach((key, stem) -> {
+            if(stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator rich){
+                rows.add("Embedded island catalog: "+key.identifier()+" · "+rich.catalog().mode()+" · "+rich.catalog().personalSlots()+" personal slots");
+                for(var entry:rich.catalog().entries())rows.add("Island: "+entry.id()+" · "+entry.build().size().toShortString()+" · "+entry.build().cells().size()+" occupied cells · "+entry.build().markers().size()+" markers (embedded in the saved generator)");
+            }
             if (stem.generator() instanceof SolidColumnGenerator solid) {
                 solid.content().nativeFeatures().forEach(rule -> {
                     var adapter = com.gwsheridan.worldarchitect.api.FeatureAdapters.get(rule.feature().value()).orElseThrow();

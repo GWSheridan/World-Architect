@@ -1,5 +1,25 @@
 # Void and Skyblock
 
+## Modpack Builder and Island Studio
+
+For a new pack, open **Customize → Builder** and choose a Skyblock starter. The **Islands** section supports up to 16 named types, shared, personal or scoreboard-team allocation, fixed templates, seeded weighted layouts and optional player choice. Personal and team allocations use the Overworld; other dimensions can have their own shared island. Existing saves keep their original format and allocation rules.
+
+Open **Edit island catalog → a type → Open Island Studio** to import a vanilla `.nbt`, Sponge v3 `.schem` or saved `.island.json`, capture an authoring build, or choose a Structure Library template. Rich islands fit 64 blocks per side and 65,536 occupied cells. They support registered block states, contained fluids, waterlogged blocks, supported gravity blocks, signs, banners and explicit chest/barrel contents. Machine block entities, entities, active portals and privileged blocks are rejected. Ordinary library and assembly templates retain their existing 32-block budget.
+
+![Island Studio using Minecraft block models](images/island-studio.png)
+
+The 3D preview uses Minecraft's resource-pack block models. Large views use a bounded model sample. **Slice view** displays each exact cell, including liquids; select an air cell there to add or move a spawn marker. A spawn marker needs a safe floor and two air cells inside the saved bounds. Rotate, mirror and palette changes validate the complete island before applying.
+
+Choose **Starter contents** to select a chest or barrel, a slot, a registered item and an amount. Include captured inventories only when you intend to distribute them. Starter items are written during chunk generation and stay consumed after reconnects and restarts. Saving a revision preserves its block states, supported metadata, contents and markers together.
+
+For capture, join a separate authoring world with developer mode enabled and administrator permission. Use `/wa_island pos1` and `/wa_island pos2`, then **Capture selected build**, or `/wa_island capture_selected name release true`. A dedicated server saves the `.island.json` in its own `config/worldarchitect/islands/`; transfer that revision to the authoring client and import it into the project.
+
+Choice layouts assign a type to every slot from the seed before chunks generate. Players wait safely at the protected shared lobby and claim a vacant matching slot through the choice screen or `/wa_island choose`. A changed availability list refreshes before accepting a new choice. For teams, the first successful member reserves the team's island; other members travel to the same assignment. Claims are persisted before travel. Existing explored islands keep their blocks when ownership changes.
+
+When a rich Skyblock End profile preserves the native dragon arena, its shared island starts at `512, 0` outside the reserved central square. Vanilla End entry and dragon progression continue to use the central arena.
+
+## Legacy Void / Skyblock editor
+
 In **Create New World → World**, select **World Architect · Dimensions** and open **Customize**. Select a dimension and choose **Void / Skyblock**. Apply the profile and choose **Done** in the dimension manager.
 
 **Use Empty Void** generates air throughout the dimension's build range. An empty Overworld requires explicit consent because it has no safe spawn. Vanilla Nether and End portals refuse arrival into pure void, which prevents their automatic exit frame or obsidian platform. An administrator can enter with a teleport command.

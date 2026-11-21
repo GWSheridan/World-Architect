@@ -7,14 +7,16 @@ Created and maintained by **GWSHERIDAN**.
 
 See the [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
-World Architect 1.7.0 adds connected corridor regions, weighted structure districts and reusable presets with inherited locks. [Download 1.7.0](https://github.com/GWSheridan/World-Architect/releases/tag/v1.7.0) or read the [changelog](CHANGELOG.md).
+World Architect 1.8.0 adds a guided Modpack Builder, custom island editing, persistent island choices and matching client/server installation exports. Find downloads on the [releases page](https://github.com/GWSheridan/World-Architect/releases) or read the [changelog](CHANGELOG.md).
 
 
 ## Get started
 
-Install `worldarchitect-1.7.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
+Install `worldarchitect-1.8.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
 
 In **Create New World → World**, choose **World Architect · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
+
+For modpacks, open **Builder** to choose a starter, edit island types, set server policies and export an installation. [Island Studio](docs/wiki/Void-and-Skyblock.md) supports captured or imported builds, native model previews, markers and starter containers.
 
 - **World Inspector:** saved profiles, dependency pins and new-world preset comparisons.
 - **Regional terrain:** rectangles, circles, polygon outlines and named compositions, with priority, biome choices and feathered heights.

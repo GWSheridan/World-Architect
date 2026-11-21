@@ -56,6 +56,16 @@ public final class ModpackRuntime {
         return Loaded.config.developerMode;
     }
 
+    /** Explicit setup action; the loaded policy changes only after the instance restarts. */
+    public static void requestAuthoring() throws IOException {
+        Path path=directory().resolve("developer.json");Files.createDirectories(path.getParent());
+        var config=Files.exists(path)?BundleFiles.readJson(path):new com.google.gson.JsonObject();
+        config.addProperty("format",1);config.addProperty("developer_mode",true);
+        Config.CODEC.parse(JsonOps.INSTANCE,config).getOrThrow(IOException::new);
+        Path temporary=Files.createTempFile(path.getParent(),".developer-",".tmp");
+        try{Files.writeString(temporary,config.toString(),java.nio.charset.StandardCharsets.UTF_8);Files.move(temporary,path,java.nio.file.StandardCopyOption.ATOMIC_MOVE,java.nio.file.StandardCopyOption.REPLACE_EXISTING);}finally{Files.deleteIfExists(temporary);}
+    }
+
     public static boolean allowStructureLibrary(MinecraftServer server) {
         return WorldBundles.active(server).map(bundle -> bundle.manifest().allowStructureLibrary()).orElse(true);
     }

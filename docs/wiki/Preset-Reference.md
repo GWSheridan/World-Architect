@@ -1,12 +1,19 @@
 # Preset reference
 
-A preset's `dimensions` object is keyed by dimension ID. Each entry contains a dimension `type` and `generator`. A datapack stores it at `data/<namespace>/worldgen/world_preset/<name>.json`; bundles use `preset.json` beside a manifest.
+A preset's `dimensions` object is keyed by dimension ID. Each entry contains a dimension `type` and `generator`. Datapacks and bundles store it at `data/<namespace>/worldgen/world_preset/<name>.json`. A bundle also includes `worldarchitect.bundle.json`.
 
 | Generator | Fields |
 | --- | --- |
 | `worldarchitect:single_block` | `biome`, `profile`, optional `dimension_profile` |
 | `worldarchitect:layered` | `biome`, `profile`, optional `dimension_profile` |
 | `worldarchitect:void` | `biome`, `dimension`, optional `island`, `allow_unsafe_spawn` (default false) |
+| `worldarchitect:skyblock` | `generator_version` (1), `biome`, `dimension`, `catalog` |
+
+The rich Skyblock catalog contains `types` (1–16), `lobby`, `mode` (`fixed`, `seeded` or `choice`), `teams`, `origin_y`, `spacing` and `personal_slots`. Each type has an `id`, title, description, item icon ID, weight (1–100) and embedded `template`. Templates use format 1 with `size`, named `markers`, `spawn_marker` and occupied `blocks`. Each block contains local `pos`, a serialized block `state`, and optional supported block-entity `data`. [Island Studio](Void-and-Skyblock.md) validates metadata and starter inventories during import and export.
+
+Templates fit 64 blocks per side and 65,536 occupied cells. Imported/saved island files are bounded to 4 MiB; the complete preset JSON is bounded to 8 MiB. Personal/team slots require the Overworld. The saved seed fixes each slot's type before generation; choices reserve matching vacant slots.
+
+Format-3 bundle manifests add a `pack` object with `version: 1`, `defaults` and `editable`. Defaults use administration settings version 1: optional `initial`, `respawn`, `portals` and `protection`. Runtime edit groups have the same four names. They initialize a new world once and remain separate from generation edit scopes. See [Locks and Server Enforcement](Locks-and-Server-Enforcement.md).
 
 Solid profiles include `generator_version`, `elevation` and `relief`. Single Block uses `material`; Layered uses `base_material`, `layers` and optional `strata`. Layers specify `material` and `depth`. Version 2 adds a `terrain` object with `landform`, optional `scale` (32–2048) and `seed_salt`. Read [Terrain and Dimensions](Terrain-and-Dimensions.md) for landforms and strata.
 

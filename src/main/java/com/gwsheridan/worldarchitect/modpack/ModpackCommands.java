@@ -33,6 +33,7 @@ public final class ModpackCommands {
                 }
             })));
         }
+        root.then(Commands.literal("authoring_enable").requires(source->source.getEntity()==null).executes(context->{try{ModpackRuntime.requestAuthoring();context.getSource().sendSuccess(()->Component.literal("Authoring configuration saved. Restart this authoring server to enable it."),false);return 1;}catch(IOException error){context.getSource().sendFailure(Component.literal(error.getMessage()));return 0;}}));
         event.getDispatcher().register(root);
     }
 }

@@ -37,7 +37,7 @@ final class PlacementStudio {
         for (int i = 0; i < cells.size(); i++) {
             var cell = cells.get(i); var pos = zero.position(entry.template().size(), cell.pos());
             visual[i * 2] = pos.getX() | pos.getY() << 5 | pos.getZ() << 10;
-            visual[i * 2 + 1] = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(cell.state().getBlock()).hashCode();
+            visual[i * 2 + 1] = cell.state().getMapColor(net.minecraft.world.level.EmptyBlockGetter.INSTANCE,net.minecraft.core.BlockPos.ZERO).col;
         }
         data.putIntArray("cells", visual);
         var markers = new ListTag();
