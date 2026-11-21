@@ -125,6 +125,7 @@ jobs:
           $proof = Get-Content build/ci-benchmark-smoke/results.json -Raw | ConvertFrom-Json
           if ($proof.status -eq 'inconclusive' -and $proof.runs.Count -eq 2 -and @($proof.runs | Where-Object status -ne 'passed').Count -eq 0 -and @($proof.runs.samples | Where-Object { $null -eq $_.sampled_resident_peak_bytes -or $_.sampled_resident_peak_bytes -le 0 }).Count -eq 0) {
             Write-Output 'Sampler smoke completed. Identical-JAR controls were noisy; candidate comparisons were not started.'
+            exit 0
           } elseif ($benchmarkExit -ne 0) { exit $benchmarkExit }
       - name: Dedicated server and restart
         shell: pwsh
