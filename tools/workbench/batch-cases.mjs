@@ -8,14 +8,15 @@ import {fileURLToPath} from 'node:url';
 import {baselineBytes} from '../validation/baseline.mjs';
 import {gradle} from '../validation/process.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..'),args={};
-for(let i=2;i<process.argv.length;i+=2){const k=process.argv[i],v=process.argv[i+1];if(!['--output','--network','--port'].includes(k)||!v||k in args)throw Error('Invalid batch case option');args[k]=v;}
+for(let i=2;i<process.argv.length;i+=2){const k=process.argv[i],v=process.argv[i+1];if(!['--output','--network','--port','--baseline-fixture'].includes(k)||!v||k in args)throw Error('Invalid batch case option');args[k]=v;}
 const output=resolve(root,args['--output']||'build/ci-batch'),network=args['--network']||'offline',port=Number(args['--port']||25974);
 if(!['online','offline'].includes(network)||!relative(root,output).startsWith('build'+(process.platform==='win32'?'\\':'/')))throw Error('Use a new build/ directory and online/offline network mode');
 await fs.mkdir(output,{recursive:false});const inputs=join(output,'inputs');await fs.mkdir(inputs);
 const sha=b=>createHash('sha256').update(b).digest('hex'),json=(p,v)=>fs.writeFile(p,JSON.stringify(v,null,2)+'\n',{flag:'wx'});
 const version=(await fs.readFile(join(root,'gradle.properties'),'utf8')).match(/^mod_version=(.+)$/m)[1].trim();
 const candidate=await fs.readFile(join(root,`build/libs/worldarchitect-${version}.jar`)),fixture=await fs.readFile(join(root,`build/validation-tools/worldarchitect-${version}-validation.jar`)),baseline=await baselineBytes(root,network);
-for(const [name,bytes]of [['candidate.jar',candidate],['baseline.jar',baseline],['validation.jar',fixture]])await fs.writeFile(join(inputs,name),bytes,{flag:'wx'});
+const baselineFixture=await fs.readFile(resolve(root,args['--baseline-fixture']||'build/validation-tools/worldarchitect-1.3.0-validation.jar'));
+for(const [name,bytes]of [['candidate.jar',candidate],['baseline.jar',baseline],['validation.jar',fixture],['baseline-validation.jar',baselineFixture]])await fs.writeFile(join(inputs,name),bytes,{flag:'wx'});
 const prep=['-p','examples/api-fixture','jar','--no-daemon','--console=plain',`-PworldArchitectJar=${join(inputs,'baseline.jar')}`];if(network==='offline')prep.push('--offline');if(process.env.JAVA21_HOME)prep.push(`-Porg.gradle.java.installations.paths=${process.env.JAVA21_HOME}`);
 const compiled=gradle(root,prep,join(output,'api-build.log'));if(await compiled.exit!==0)throw Error('Cannot compile the independent API consumer against 1.3');
 await fs.mkdir(join(inputs,'plain'));await fs.mkdir(join(inputs,'api'));
@@ -28,7 +29,7 @@ modern.runs[0].regions=[{dimension:'minecraft:overworld',chunk_x:0,chunk_z:0,wid
 const bad=structuredClone(modern);bad.budgets.timeout_seconds=120;bad.runs[0].restart=false;bad.runs[0].probes[0].block='minecraft:gold_block';
 for(const [name,value]of [['legacy',legacy],['modern',modern],['bad-probe',bad]])await json(join(inputs,name+'.json'),value);
 const sources=[];for(const name of ['legacy','modern','bad-probe'])sources.push({name,file:name+'.json',sha256:sha(await fs.readFile(join(inputs,name+'.json'))),...(name==='legacy'?{}:{versions:['candidate']}),...(name==='bad-probe'?{expected_status:'failed',expected_error:'Block probe failed'}:{})});
-const matrix={format:1,budgets:{max_jobs:8,timeout_seconds:1800},versions:[{name:'baseline',jar:'baseline.jar',sha256:sha(baseline),fixture:'validation.jar',fixture_sha256:sha(fixture)},{name:'candidate',jar:'candidate.jar',sha256:sha(candidate),fixture:'validation.jar',fixture_sha256:sha(fixture)}],scenarios:sources,providers:[{name:'plain',mods:'plain',files:{}},{name:'api',mods:'api',files:{'provider.jar':sha(provider)}}]};
+const matrix={format:1,budgets:{max_jobs:8,timeout_seconds:1800},versions:[{name:'baseline',jar:'baseline.jar',sha256:sha(baseline),fixture:'baseline-validation.jar',fixture_sha256:sha(baselineFixture)},{name:'candidate',jar:'candidate.jar',sha256:sha(candidate),fixture:'validation.jar',fixture_sha256:sha(fixture)}],scenarios:sources,providers:[{name:'plain',mods:'plain',files:{}},{name:'api',mods:'api',files:{'provider.jar':sha(provider)}}]};
 await json(join(inputs,'matrix.json'),matrix);const results={format:1,status:'running',cases:[]};
 const record=()=>fs.writeFile(join(output,'results.json'),JSON.stringify(results,null,2)+'\n');
 let launches=0;
