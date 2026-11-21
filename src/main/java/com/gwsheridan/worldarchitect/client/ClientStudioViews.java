@@ -10,6 +10,7 @@ final class ClientStudioViews {
     static void register(RegisterClientPayloadHandlersEvent event){event.register(StudioViewPayload.TYPE,(payload,context)->{
         var mc=Minecraft.getInstance();try{
             switch(payload.view().getStringOr("kind","")) {
+                case "cell_progress" -> mc.gui.setScreen(new CellProgressScreen(payload.view()));
                 case "inspection" -> mc.gui.setScreen(new WorldInspectorScreen(payload.view()));
                 case "workbench" -> mc.gui.setScreen(new WorkbenchScenarioScreen(payload.view()));
                 case "workbench_export" -> WorkbenchScenarioScreen.acknowledge(payload.view());

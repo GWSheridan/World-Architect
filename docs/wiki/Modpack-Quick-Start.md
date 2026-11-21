@@ -2,7 +2,7 @@
 
 1. Create a separate authoring instance with World Architect and every required provider mod.
 2. Choose **World Architect · Dimensions → Customize → Builder** when creating a world. In **Review / export**, choose **Authoring setup** and restart the instance. The interrupted project remains available through draft recovery. On a dedicated authoring server, its console can run `wa_modpack authoring_enable` before restarting.
-3. In **Project → Choose starter**, select shared Skyblock, personal islands, team islands, empty void or mixed dimensions. Set a unique project name, preset ID, title, author and release in **Project details**.
+3. In **Project → Choose starter**, select Skyblock, void, mixed dimensions, or one of the six [cell-world recipes](Cell-Worlds.md), including Hex Continents and Expanding One Chunk. Set a unique project name, preset ID, title, author and release in **Project details**.
 4. Use **Dimensions** for terrain and features. In **Islands**, edit the catalog, open Island Studio and configure allocation. The native End remains available for ordinary dragon progression.
 5. Set new-world spawn, portal and protection defaults in **Server policies**. Use **Locks** to select generation permissions and the independent runtime permissions.
 6. In **Review / export**, inspect validation and dependencies, save a version, then export a client/server installation. Both sides receive the same preset archive with developer mode disabled. Keep each saved revision for future releases.
@@ -13,9 +13,9 @@
 
 ## Test an exported project
 
-The optional `worldarchitect-1.8.0-test-kit.zip` runs with Java 25, an installed NeoForge 26.3.0.103 server, the exported project and any required provider JARs. Extract the complete ZIP and run `run.cmd --help` or `sh run.sh --help`. It needs no source checkout, Gradle, Node or development SDK.
+The optional `worldarchitect-1.9.0-test-kit.zip` runs with Java 25, an installed NeoForge 26.3.0.103 server, the exported project and any required provider JARs. Extract the complete ZIP and run `run.cmd --help` or `sh run.sh --help`. It needs no source checkout, Gradle, Node or development SDK.
 
-Choose a new output folder and accept the Minecraft EULA using the documented flag. The kit copies the selected runtime libraries into that folder and checks a disposable server's startup, islands, markers, starter contents, configured runtime locks and restart snapshots. Logs and `results.json` stay there. Follow with real multiplayer, progression and external-mod gameplay checks before distributing the pack.
+Choose a new output folder and accept the Minecraft EULA using the documented flag. The kit copies the selected runtime libraries into that folder and checks a disposable server's startup, islands, markers, starter contents, configured runtime locks and restart snapshots. Cell worlds also check reserved-cell activation and void gaps. Logs and `results.json` stay there. Follow with real multiplayer, progression and external-mod gameplay checks before distributing the pack.
 
 Start with the supplied [partial and full examples](Example-Presets.md). Read [Preset Studio](Preset-Studio.md), [Preset Reference](Preset-Reference.md) and [Locks and Server Enforcement](Locks-and-Server-Enforcement.md) before changing a production pack.
 

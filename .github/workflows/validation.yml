@@ -52,7 +52,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Expand-Archive "build/release/worldarchitect-$version-test-kit.zip" build/ci-kit
           New-Item -ItemType Directory build/ci-kit-project,build/ci-kit-providers | Out-Null
-          Copy-Item "examples/modpack-builder/bundles/modpack-classic-$version.zip" build/ci-kit-project/preset.zip
+          Copy-Item "examples/cell-worlds/bundles/expanding-one-chunk-$version.zip" build/ci-kit-project/preset.zip
           $hash = (Get-FileHash build/ci-kit-project/preset.zip).Hash.ToLowerInvariant()
           "format=1`nbundle=preset.zip`nsha256=$hash`nworldarchitect=$version`nneoforge=$neo`n" | Set-Content build/ci-kit-project/testkit.properties
           & java -jar build/ci-kit/worldarchitect-test-kit.jar --server build/ci-kit-runtime --export build/ci-kit-project --providers build/ci-kit-providers --output build/ci-kit-results --eula true
@@ -108,12 +108,13 @@ jobs:
           Push-Location build/frozen-1.6-source
           try {
             $toolchain = "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64"
-            if ($IsWindows) { & ./gradlew.bat jar --console=plain $toolchain }
-            else { & sh ./gradlew jar --console=plain $toolchain }
+            if ($IsWindows) { & ./gradlew.bat jar acceptanceJar --console=plain $toolchain }
+            else { & sh ./gradlew jar acceptanceJar --console=plain $toolchain }
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             $jar = 'build/libs/worldarchitect-1.6.0.jar'
             if ((Get-FileHash $jar).Hash.ToLowerInvariant() -ne '57eda6cdd5dea8192fb252601c0c4366ac08cd4ae9d28d4c1cd115a333a84b56') { throw 'Published 1.6 source produced a different JAR' }
             Copy-Item -LiteralPath $jar -Destination (Join-Path $target 'worldarchitect-1.6.0.jar')
+            Copy-Item -LiteralPath 'build/validation-tools/worldarchitect-1.6.0-validation.jar' -Destination (Join-Path $target 'worldarchitect-1.6.0-validation.jar')
           } finally { Pop-Location }
       - name: Direct benchmark and memory sampler smoke
         shell: pwsh
@@ -134,6 +135,13 @@ jobs:
           $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
           node tools/validation/run.mjs --jar "build/libs/worldarchitect-$version.jar" --fixture "build/validation-tools/worldarchitect-$version-validation.jar" --output build/ci-validation --network online
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Cell worlds and interrupted activation
+        shell: pwsh
+        run: |
+          $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
+          $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
+          node tools/validation/cells.mjs --jar "build/libs/worldarchitect-$version.jar" --fixture "build/validation-tools/worldarchitect-$version-validation.jar" --output build/ci-cell-worlds --network online --crash true
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Exported assembly generation and restart
         shell: pwsh
         run: |
@@ -150,7 +158,7 @@ jobs:
         shell: pwsh
         run: |
           $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
-          node tools/validation/compatibility.mjs
+          node tools/validation/compatibility.mjs --baseline-fixture build/validation-inputs/worldarchitect-1.6.0-validation.jar
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Clean example bundle installations
         shell: pwsh

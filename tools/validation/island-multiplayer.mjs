@@ -6,9 +6,9 @@ import {createHash} from 'node:crypto';
 import {gradle} from './process.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..'),argv=process.argv.slice(2);
 if(argv.length%2)throw Error('Use option/value pairs');const args=Object.fromEntries(Array.from({length:argv.length/2},(_,i)=>argv.slice(i*2,i*2+2)));
-for(const key of Object.keys(args))if(!['--jar','--fixture','--bundle','--output','--options','--port','--rounds','--round-seconds','--teams','--end'].includes(key))throw Error('Unknown '+key);
+for(const key of Object.keys(args))if(!['--jar','--fixture','--bundle','--output','--options','--port','--rounds','--round-seconds','--teams','--end','--cells'].includes(key))throw Error('Unknown '+key);
 for(const key of ['--jar','--fixture','--bundle','--output','--options'])if(!args[key])throw Error('Missing '+key);
-const output=resolve(root,args['--output']),port=Number(args['--port']||25963),rounds=Number(args['--rounds']||20),seconds=Number(args['--round-seconds']||180),teams=args['--teams']==='true',end=args['--end']==='true';
+const output=resolve(root,args['--output']),port=Number(args['--port']||25963),rounds=Number(args['--rounds']||20),seconds=Number(args['--round-seconds']||180),teams=args['--teams']==='true',end=args['--end']==='true',cells=args['--cells']==='true';
 if(!relative(root,output).startsWith('build'+sep)||!Number.isInteger(port)||port<1024||port>65535||!Number.isInteger(rounds)||rounds<1||rounds>40||!Number.isInteger(seconds)||seconds<1||seconds>180)throw Error('Invalid workload bounds');
 await fs.mkdir(output,{recursive:false});const names=['Alice','Bob','Carol','Dave'],sha=b=>createHash('sha256').update(b).digest('hex'),jar=await fs.readFile(resolve(root,args['--jar'])),fixture=await fs.readFile(resolve(root,args['--fixture'])),bundle=await fs.readFile(resolve(root,args['--bundle']));
 for(const name of ['server',...names.map(n=>'client-'+n.toLowerCase())]){const dir=join(output,name);await fs.mkdir(join(dir,'mods'),{recursive:true});await fs.writeFile(join(dir,'mods/worldarchitect.jar'),jar);await fs.writeFile(join(dir,'mods/validation.jar'),fixture);if(name!=='server'){let options=await fs.readFile(resolve(root,args['--options']),'utf8');options=options.replace(/^maxFps:.*$/m,'maxFps:20').replace(/^renderDistance:.*$/m,'renderDistance:2').replace(/^simulationDistance:.*$/m,'simulationDistance:2');await fs.writeFile(join(dir,'options.txt'),options);}}
@@ -24,11 +24,41 @@ async function act(p,commands){const n=counters[p]++,dir=join(output,'evidence',
 function location(text){const row=[...text.matchAll(/^AT (\S+) (-?[\d.]+) (-?[\d.]+) (-?[\d.]+)/gm)].at(-1);if(!row)throw Error('Missing client position');return row.slice(1);}
 async function at(p,expected){const deadline=Date.now()+60000;while(Date.now()<deadline){try{const actual=location(await read(observed(p)));if(actual[0]===expected[0]&&actual.slice(1).every((v,i)=>Math.abs(Number(v)-Number(expected[i+1]))<.1))return;}catch{}await pause(200);}throw Error('Missing safe home for '+p);}
 async function open(next){stage=next;counters=Object.fromEntries(names.map(p=>[p,0]));for(const p of names)await fs.mkdir(join(output,'evidence',stage,p),{recursive:true});server=start('runSoakServer','server');await server.wait('Done (');if(stage==='fresh'){await command('gamerule minecraft:random_tick_speed 0');if(teams){for(const team of ['builders','explorers'])await command('team add '+team);for(let i=0;i<names.length;i++)await command('team join '+(i<2?'builders':'explorers')+' WA12'+names[i]);}}const clients=names.map(p=>start('runSoak'+p,p));for(const p of names){await server.wait('WA12'+p+' joined the game');await wait(observed(p),'AT ');}return clients;}
-async function protectedHashes(){const data=join(output,'server/world/data'),result={};for(const file of ['worldarchitect-generation-v1.dat','minecraft/world_gen_settings.dat','worldarchitect-islands-v1.dat'])result[file]=sha(await fs.readFile(join(data,file)));return result;}
+async function protectedHashes(){const data=join(output,'server/world/data'),result={};for(const file of (cells?['worldarchitect-generation-v1.dat','minecraft/world_gen_settings.dat']:['worldarchitect-generation-v1.dat','minecraft/world_gen_settings.dat','worldarchitect-islands-v1.dat']))result[file]=sha(await fs.readFile(join(data,file)));return result;}
 async function close(clients){for(const p of names)await fs.writeFile(join(output,'evidence',stage,p,'stop'),'');for(const client of clients)if(await client.exit!==0)throw Error('Client failed');await command('save-all flush');server.send('stop');if(await server.exit!==0)throw Error('Server failed');server=undefined;const current=await protectedHashes();if(pins&&JSON.stringify(pins)!==JSON.stringify(current))throw Error('Pinned generation or ownership changed');pins=current;report.generation_and_island_sha256=current;await persist();}
 async function fight(){await command('dragon_test state');const row=[...(await read(join(output,stage+'-server.log'))).matchAll(/DRAGON_STATE (\{.*\}) ENTITIES (\d+)/g)].at(-1);if(!row)throw Error('Missing fight state');return{...JSON.parse(row[1]),entities:Number(row[2])};}
 async function untilFight(test){const deadline=Date.now()+180000;while(Date.now()<deadline){const state=await fight();if(test(state))return state;await pause(1000);}throw Error('Dragon state deadline exceeded');}
 try{
+ if(cells){
+ let clients=await open('fresh');await pause(10000);
+ for(const p of names)await act(p,['COMMAND wa_cells home','CLOSE']);await pause(2500);
+ homes=Object.fromEntries(await Promise.all(names.map(async p=>[p,location(await read(observed(p)))])));
+ const distinct=new Set(Object.values(homes).map(p=>p.join(','))).size;if(distinct!==(teams?2:4))throw Error('Unexpected territory count '+distinct);
+ if(names.some(p=>Number(homes[p][1])<200000))throw Error('A player remained at the hub');
+ if(teams&&(homes.Alice.join()!=homes.Bob.join()||homes.Carol.join()!=homes.Dave.join()))throw Error('Teammates received different territories');
+ await command('wa_cells_test multiplayer');await server.wait('WA19_MULTIPLAYER_PASS',90,['WA19_CELLS_FAILED']);
+ for(const p of names)await act(p,['COMMAND wa_cells admin unlock 0 2 2','CLOSE']);
+ for(const p of names){await act(p,['COMMAND wa_cells panel']);await act(p,['BOUNDS','SHOT']);}
+ await Promise.all(names.map(p=>act(p,['PRESS Choose frontier cell','ROW 3','PRESS Select'])));await pause(9000);
+ await command('wa_cells_test multi_ready');await server.wait('WA19_MULTI_READY_PASS',90,['WA19_CELLS_FAILED']);
+ await command('gamemode spectator @a');const began=Date.now();
+ for(let round=0;round<rounds;round++){
+  for(const dimension of ['minecraft:overworld','minecraft:the_end'])await command(`execute in ${dimension} run forceload remove all`);
+  for(let i=0;i<names.length;i++){const dimension=i%2?'minecraft:the_end':'minecraft:overworld',coordinate=32768+round*512+i*96;await command(`execute in ${dimension} run forceload add ${coordinate} ${coordinate} ${coordinate+48} ${coordinate+48}`);await command(`execute in ${dimension} run tp WA12${names[i]} ${coordinate+.5} 140 ${coordinate+.5}`);await at(names[i],[dimension,coordinate+.5,140,coordinate+.5]);}
+  await command('save-all flush');await pause(seconds*1000);const token='WA_CELLS_FOUR_CONNECTED_'+round;server.send('execute '+names.map(p=>'if entity @a[name=WA12'+p+']').join(' ')+' run say '+token);await server.wait(token,15);
+  for(const p of names)if(Date.now()-(await fs.stat(observed(p))).mtimeMs>10000)throw Error('Client stopped observing: '+p);
+  report.rounds.push({round,requested_chunks:64,connected_seconds:(Date.now()-began)/1000});await persist();console.log('WA_CELLS_FOUR_PLAYER_ROUND '+round);
+ }
+ report.connected_seconds=(Date.now()-began)/1000;report.requested_chunks=rounds*64;
+ report.tests.push({case:'four-real-clients-safe-independent-homes-permission-denial-deduplicated-quest-and-frontier-selection',status:'passed'});
+ if(end){await command('gamemode creative @a');await command('dragon_test entry');await untilFight(d=>d.entities===1&&!d.dragon_killed);await command('dragon_test kill');await untilFight(d=>d.entities===0&&d.dragon_killed);await command('dragon_test travel');await server.wait('DRAGON_GATEWAY_ROUNDTRIP_PASS');await command('dragon_test rewards');await server.wait('DRAGON_REWARDS_PASS');await command('dragon_test ritual');await untilFight(d=>d.respawn_stage&&d.respawn_time>0);}
+ await close(clients);clients=await open('restart');await pause(3000);
+ if(end){await untilFight(d=>d.entities===1&&!d.dragon_killed);await command('dragon_test kill');await untilFight(d=>d.entities===0&&d.dragon_killed);await command('dragon_test rewards');await server.wait('DRAGON_REWARDS_PASS');await command('dragon_test exit');report.tests.push({case:'cell-terrain-native-end-gateway-ritual-restart-and-second-kill',status:'passed'});}
+ for(const p of names){await act(p,['COMMAND wa_cells home','CLOSE']);await at(p,homes[p]);}
+ await command('wa_cells_test multi_restart');await server.wait('WA19_MULTI_RESTART_PASS',90,['WA19_CELLS_FAILED']);
+ report.tests.push({case:'assignments-objectives-credits-and-player-builds-survive-restart',status:'passed'});await close(clients);report.status='passed';
+
+ }else{
  let clients=await open('fresh');const lobby=Object.fromEntries(await Promise.all(names.map(async p=>[p,location(await read(observed(p)))])));for(const p of names)await act(p,['CHOICE','BOUNDS','SHOT']);
  // Both teammates submit their original server tokens. Exactly one team reservation may win.
  if(teams){await Promise.all(names.map((p,i)=>act(p,['CHOOSE '+(i%2?'orchard':'classic')])));await pause(1600);for(const p of ['Alice','Carol'])if(location(await read(observed(p))).join()===lobby[p].join()){await act(p,['COMMAND wa_island choose']);await act(p,['CHOICE']);await act(p,['CHOOSE classic']);await pause(1200);}for(const p of names)await act(p,['COMMAND wa_island home','CLOSE']);}
@@ -43,5 +73,6 @@ try{
  for(const p of names){await act(p,['COMMAND wa_island home','CLOSE']);await at(p,homes[p]);}await command('gamemode spectator @a');const began=Date.now();
  for(let round=0;round<rounds;round++){for(const dimension of ['minecraft:overworld','minecraft:the_end'])await command(`execute in ${dimension} run forceload remove all`);for(let i=0;i<names.length;i++){const dimension=i%2?'minecraft:the_end':'minecraft:overworld',coordinate=32768+round*512+i*96;await command(`execute in ${dimension} run forceload add ${coordinate} ${coordinate} ${coordinate+48} ${coordinate+48}`);await command(`execute in ${dimension} run tp WA12${names[i]} ${coordinate+.5} 140 ${coordinate+.5}`);await at(names[i],[dimension,coordinate+.5,140,coordinate+.5]);}await command('save-all flush');await pause(seconds*1000);const token='WA_ISLAND_FOUR_CONNECTED_'+round;server.send('execute '+names.map(p=>'if entity @a[name=WA12'+p+']').join(' ')+' run say '+token);await server.wait(token,15);for(const p of names)if(Date.now()-(await fs.stat(observed(p))).mtimeMs>10000)throw Error('Client stopped observing: '+p);report.rounds.push({round,requested_chunks:64,connected_seconds:(Date.now()-began)/1000});await persist();console.log('WA_ISLAND_FOUR_PLAYER_ROUND '+round);}
  report.connected_seconds=(Date.now()-began)/1000;report.requested_chunks=rounds*64;report.homes=homes;await close(clients);clients=await open('restart');for(const p of names){await act(p,['COMMAND wa_island home','CLOSE']);await at(p,homes[p]);}await command('wa_validate island_catalog 2');await server.wait('WA18_ISLAND_CATALOG_PASS stage=2',180,['WA18_ISLAND_CATALOG_FAILED']);report.tests.push({case:'four-player-generation-ownership-snapshot-and-starter-consumption-persistence',status:'passed'});await close(clients);report.status='passed';
+}
 }catch(error){report.status=error.code==='WA_INTERRUPTED'?'interrupted':'failed';report.error=error.stack;process.exitCode=1;}
 finally{for(const next of ['fresh','soak','restart'])for(const p of names){const dir=join(output,'evidence',next,p);await fs.mkdir(dir,{recursive:true});await fs.writeFile(join(dir,'stop'),'');}for(const run of runs.toReversed())await run.stop();await persist();console.log('Island multiplayer validation '+report.status+': '+relative(root,join(output,'results.json')));}

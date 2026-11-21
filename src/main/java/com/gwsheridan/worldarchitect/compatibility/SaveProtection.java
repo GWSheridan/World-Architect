@@ -102,6 +102,8 @@ public final class SaveProtection {
         for(var stem:settings.dimensions().dimensions().values())if(stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator rich){
             try{rich.validateAssets(server.registryAccess());}catch(java.io.IOException error){throw incompatible(error.getMessage());}
         }
+        for(var stem:settings.dimensions().dimensions().values())if(stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.CellGenerator cells)try{cells.validateAssets(server.registryAccess());}catch(IOException error){throw incompatible(error.getMessage());}
+        com.gwsheridan.worldarchitect.cells.CellWorlds.prepare(server,newWorld&&original.isEmpty());
         if(overworld.generator() instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator rich && rich.catalog().personalSlots()>0){
             IslandAllocations.prepareCatalog(dataDirectory,rich.catalog(),settings.options().seed(),newWorld&&original.isEmpty());
         } else if (overworld.generator() instanceof VoidGenerator generator) {
@@ -241,6 +243,7 @@ public final class SaveProtection {
             throw incompatible(decoded.error().orElseThrow().message());
         }
         var chosen = decoded.getOrThrow();
+        com.gwsheridan.worldarchitect.cells.CellWorlds.verifySaved(dataDirectory,chosen.dimensions(),chosen.options().seed(),registries);
         var effective = new WorldDimensions(chosen.dimensions().bake(datapackDimensions).dimensions());
         ModpackRuntime.validate(bundle, chosen.options(), chosen.dimensions(), effective, registries, configuration.dataPacks().getEnabled());
         if (GenerationSnapshot.hasDependencyPins(saved)) {
@@ -264,6 +267,7 @@ public final class SaveProtection {
             if (!adapter.inspect(key, source).modes().contains(mode)) {
                 throw incompatible("The adapter for " + key.identifier() + " does not support " + mode);
             }
+            if(mode==com.gwsheridan.worldarchitect.api.DimensionAdapter.TerrainMode.CELLULAR&&!adapter.supportsCellularTerrain())throw incompatible("The adapter for "+key.identifier()+" has not opted into cellular terrain");
         });
     }
 
@@ -276,6 +280,7 @@ public final class SaveProtection {
             }
         });
         var type = stem.type().value();
+        if(generator instanceof com.gwsheridan.worldarchitect.worldgen.CellGenerator cells&&cells.cells().progressive()&&type.hasEnderDragonFight())throw incompatible("Progressive cells require a dimension without a native dragon fight. Keep static cells in the End or use a separate custom dimension");
         if (generator.endProgression().isPresent() && (!key.equals(LevelStem.END) || !type.hasEnderDragonFight()
                 || type.minY() != 0 || type.height() != 256 || generator.dimensionProfile().orElseThrow().adapter().isPresent())) {
             throw incompatible("Vanilla End progression requires minecraft:the_end with its native fight and 0..255 build range");
@@ -299,6 +304,7 @@ public final class SaveProtection {
                     .filter(adapter -> adapter.version() == binding.version()).isEmpty()) {
                 throw incompatible("Dimension " + key.identifier() + " requires adapter " + binding.id() + " version " + binding.version());
             }
+            if(generator.terrainMode()==com.gwsheridan.worldarchitect.api.DimensionAdapter.TerrainMode.CELLULAR&&!DimensionAdapterRegistry.get(binding.id()).orElseThrow().supportsCellularTerrain())throw incompatible("The adapter for "+binding.id()+" has not opted into cellular terrain");
         });
     }
 

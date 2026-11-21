@@ -17,6 +17,7 @@
 - [Structure Site Inspector](Structure-Site-Inspector.md)
 - [Procedural Pools](Procedural-Pools.md)
 - [Void and Skyblock](Void-and-Skyblock.md)
+- [Cell Worlds and Chunk Progression](Cell-Worlds.md)
 - [End Progression](End-Progression.md)
 - [Environment Controls](Environment-Controls.md)
 - [World Generation Rules](World-Generation-Rules.md)

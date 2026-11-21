@@ -84,7 +84,7 @@ try { await fs.cp(join(root,'examples/performance/profiles',profile,'datapacks')
 catch (error) { if (error.code !== 'ENOENT') throw error; }
 
 function launch(stage) {
-    const args = ['-I','tools/validation/server.init.gradle','runValidationServer','--console=plain',`-PtestWorldDirectory=${server}`];
+    const args = ['-x','compileJava','-x','processResources','-I','tools/validation/server.init.gradle','runValidationServer','--console=plain',`-PtestWorldDirectory=${server}`];
     if (options['--network'] !== 'online') args.push('--offline');
     if (process.env.JAVA21_HOME) args.push(`-Porg.gradle.java.installations.paths=${process.env.JAVA21_HOME}`);
     let child;

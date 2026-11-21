@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.9.0
+
+- Added original square and hex world layouts with cell-specific biomes, terrain, ores, caves, fluids, borders and embedded structures.
+- Added advancement and quest objectives that open reserved void cells, with prerequisites, expansion credits and player-selected frontiers.
+- Added shared, personal and team territories with saved assignments, administrator controls and protection for locked terrain.
+- Added Cell World Studio and six Builder starters: Hex Continents, Hex Skyblock, Expanding One Chunk, Resource Archipelago, Biome Mosaic and Underground Start.
+- Added interrupted activation recovery, conflict preservation and starter inventories that remain consumed after restart.
+- Added a server-side quest API and explicit cell-terrain opt-in for dimension adapters. Existing generator versions retain their saved behaviour.
+
 ## 1.8.0
 
 - Added Modpack Builder with guided starters, dimension editing, island catalogs, server policies, locks and matching client/server installation exports.

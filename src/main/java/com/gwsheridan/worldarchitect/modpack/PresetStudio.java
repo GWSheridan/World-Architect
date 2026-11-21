@@ -167,6 +167,7 @@ public final class PresetStudio {
             if(manifest.pack().isPresent())manifest.pack().orElseThrow().validateDimensions(dimensions);
             ModpackRuntime.validateManifestDimensions(manifest, dimensions);
             for(var entry:dimensions.dimensions().entrySet()){
+                if(entry.getValue().generator() instanceof com.gwsheridan.worldarchitect.worldgen.CellGenerator cells)cells.validateAssets(registries);
                 if(entry.getValue().generator() instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator rich){
                     if(manifest.pack().isEmpty())throw new IOException("Rich Skyblock presets require a format-3 pack policy.");
                     rich.validateAssets(registries);
@@ -191,6 +192,11 @@ public final class PresetStudio {
         namespaces.stream().filter(namespace -> !Set.of("minecraft", "worldarchitect").contains(namespace)).forEach(namespace ->
                 rows.add("Resource namespace: " + namespace + (RuleDependencies.loaded().contains(namespace) ? " · installed mod " + RuleDependencies.version(namespace) : " · datapack resource; ensure its registries are supplied")));
         dimensions.dimensions().forEach((key, stem) -> {
+            if(stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.CellGenerator cells){
+                var profile=cells.cells();rows.add("Cell world: "+key.identifier()+" · "+profile.layout().shape().getSerializedName()+" · size "+profile.layout().size()+" · gap "+profile.layout().gap());
+                rows.add("Cell progression: "+profile.growth().scope().getSerializedName()+" · "+profile.growth().goals().size()+" objectives · "+profile.growth().blocksPerTick()+" activation positions per tick");
+                for(var tile:profile.tiles())rows.add("Cell type: "+tile.id()+" · "+tile.biome().unwrapKey().orElseThrow().identifier()+" · weight "+tile.weight()+tile.template().map(build->" · "+build.cells().size()+" embedded blocks / "+build.markers().size()+" markers").orElse(""));
+            }
             if(stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator rich){
                 rows.add("Embedded island catalog: "+key.identifier()+" · "+rich.catalog().mode()+" · "+rich.catalog().personalSlots()+" personal slots");
                 for(var entry:rich.catalog().entries())rows.add("Island: "+entry.id()+" · "+entry.build().size().toShortString()+" · "+entry.build().cells().size()+" occupied cells · "+entry.build().markers().size()+" markers (embedded in the saved generator)");

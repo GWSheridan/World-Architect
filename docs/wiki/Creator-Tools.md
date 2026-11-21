@@ -2,7 +2,9 @@
 
 **Modpack Builder** guides a detached project through dimensions, island types, server policies, locks and export. **Island Studio** provides native block-model and slice previews, capture/import, markers, transforms and starter contents. Both share draft history and interrupted-draft recovery. See the [modpack workflow](Modpack-Quick-Start.md) and [island guide](Void-and-Skyblock.md).
 
-These controls are included in World Architect 1.8.0. Use matching 1.8 versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
+Builder and Island Studio were introduced in World Architect 1.8.0. Use matching mod versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
+
+World Architect 1.9 adds [Cell World Studio](Cell-Worlds.md): original hex and square layouts, per-cell terrain and islands, and advancement or quest objectives that open reserved void cells. The six Builder recipes include Hex Continents, Hex Skyblock, Expanding One Chunk, Resource Archipelago, Biome Mosaic and Underground Start.
 
 ## Start a world
 

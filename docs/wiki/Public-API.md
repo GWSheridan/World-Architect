@@ -1,6 +1,6 @@
 # Public extension API 1
 
-World Architect 1.8.0 supports Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Compile against the distributed JAR; declare a required NeoForge dependency on World Architect. Call `WorldArchitectApi.requireVersion(1)` in your mod constructor. A different API contract fails during mod construction, before a world opens.
+World Architect 1.9.0 supports Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Compile against the distributed JAR; declare a required NeoForge dependency on World Architect. Call `WorldArchitectApi.requireVersion(1)` in your mod constructor. A different API contract fails during mod construction, before a world opens.
 
 The supported surface is `com.gwsheridan.worldarchitect.api` plus the data types listed below. Other implementation packages, mixins, generator implementation classes, client screens and low-level file writers are internal even when Java visibility is public. API 1 additions retain existing method signatures and codec defaults. Breaking changes require a new API version. Minecraft/NeoForge upgrades may require recompilation; API 1 is not a promise of binary compatibility across game versions.
 
@@ -156,3 +156,13 @@ API 1 retains existing constructors and method signatures. `RegionalTerrain.Zone
 Site-inspector classes, worker/session helpers and rendering code remain internal implementation details. They are not extension APIs. Use registered modular definitions and the documented authoring commands. Matching 1.5 clients and servers are required for authoring networking.
 
 API 1 also exposes read-only `IslandLayout` geometry; the original `IslandProfile` implements it without changing its constructor or codec. `BundleManifest` retains its earlier constructors and supports optional `PackPolicy` data in format 3. Runtime team policies on rich islands require team allocation; checked commands and APIs enforce the same rule.
+
+## 1.9 additions
+
+`CellLayout` provides square and hex geometry, stable coordinates, bounds and neighbours. Cell-world configuration uses the version-one `CellWorldProfile` and `GrowthRules` codecs. The generator, activation worker, saved ledger and client screens remain internal.
+
+Dimension adapters must include `TerrainMode.CELLULAR` in their advertised modes and explicitly return `true` from `supportsCellularTerrain()`. Its default is false: an older adapter using `EnumSet.allOf` keeps its earlier capabilities without automatically accepting a new generator.
+
+`CellProgressionApi.VERSION` is 1. Call `CellProgressionApi.signal(territoryLevel, player, signalId)` on the server thread after verifying a quest reward. The overload taking only a player targets the current dimension. The call returns newly completed objective IDs; repeated signals pay once per saved territory. All rewards and prerequisites come from the immutable preset. It cannot regenerate arbitrary player chunks.
+
+These additions require World Architect 1.9.0 or newer. Declare that minimum mod version as well as requiring API 1. See [Cell Worlds](Cell-Worlds.md) for configuration limits and administration.

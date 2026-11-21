@@ -40,6 +40,14 @@ abstract class VoidPortalMixin {
             callback.setReturnValue(SpawnPolicies.portal(level, entity).orElse(null));
             return;
         }
+        if(level!=null&&level.getChunkSource().getGenerator() instanceof com.gwsheridan.worldarchitect.worldgen.CellGenerator cells&&entity instanceof ServerPlayer player){
+            if(endPortal&&current.dimension()==Level.END&&player.getRespawnConfig()!=null){var respawn=player.findRespawnPositionAndUseSpawnBlock(false,TeleportTransition.DO_NOTHING);if(!respawn.missingRespawnBlock()){callback.setReturnValue(respawn);return;}}
+            try{
+                var state=com.gwsheridan.worldarchitect.cells.CellWorlds.state(level);int slot=state==null?0:com.gwsheridan.worldarchitect.cells.CellWorlds.arrival(state,player);
+                var marker=cells.spawn(new com.gwsheridan.worldarchitect.worldgen.CellGenerator.Key(slot,com.gwsheridan.worldarchitect.api.CellLayout.Cell.ORIGIN),level);
+                callback.setReturnValue(com.gwsheridan.worldarchitect.spawn.SafeSpawns.nearby(level,marker).map(pos->new com.gwsheridan.worldarchitect.spawn.SafeSpawns.Target(level,pos,0).transition(TeleportTransition.DO_NOTHING)).orElse(null));return;
+            }catch(java.io.IOException error){throw new java.io.UncheckedIOException(error);}
+        }
         if (level != null && level.getChunkSource().getGenerator() instanceof VoidGenerator generator) {
             if (endPortal && current.dimension() == Level.END && generator.layout().isPresent()
                     && entity instanceof ServerPlayer player && player.getRespawnConfig() != null) {

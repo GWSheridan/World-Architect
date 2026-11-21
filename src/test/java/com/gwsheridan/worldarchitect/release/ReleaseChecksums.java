@@ -21,6 +21,7 @@ public final class ReleaseChecksums {
         var bundleDirectories=new ArrayList<Path>();bundleDirectories.add(Path.of(args[4]));
         for(int index=6;index<args.length;index++)bundleDirectories.add(Path.of(args[index]));
         var projects=Path.of(args[4]).getParent().getParent().resolve("modpack-builder/bundles");if(Files.isDirectory(projects))bundleDirectories.add(projects);
+        var cells=Path.of(args[4]).getParent().getParent().resolve("cell-worlds/bundles");if(Files.isDirectory(cells))bundleDirectories.add(cells);
         for(Path bundleDirectory:bundleDirectories)try (var bundles = Files.list(bundleDirectory)) {
             for (Path bundle : bundles.filter(path -> path.getFileName().toString().endsWith("-"+version+".zip")).sorted().toList()) assets.add(stage(bundle, directory));
         }

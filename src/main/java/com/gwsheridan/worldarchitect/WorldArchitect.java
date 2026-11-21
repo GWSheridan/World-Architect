@@ -70,14 +70,26 @@ public final class WorldArchitect {
         generators.register(LAYERED_PRESET.identifier().getPath(), () -> LayeredGenerator.CODEC);
         generators.register("void", () -> VoidGenerator.CODEC);
         generators.register("skyblock", () -> com.gwsheridan.worldarchitect.worldgen.SkyblockGenerator.CODEC);
+        generators.register("cells", () -> com.gwsheridan.worldarchitect.worldgen.CellGenerator.CODEC);
         generators.register(modBus);
         DeferredRegister<MapCodec<? extends BiomeSource>> biomeSources = DeferredRegister.create(Registries.BIOME_SOURCE, ID);
         biomeSources.register("regions", () -> RegionBiomeSource.CODEC);
         biomeSources.register("terrain_regions", () -> com.gwsheridan.worldarchitect.worldgen.ZoneBiomeSource.CODEC);
         biomeSources.register("end_arena", () -> com.gwsheridan.worldarchitect.worldgen.EndArenaBiomeSource.CODEC);
+        biomeSources.register("cells", () -> com.gwsheridan.worldarchitect.worldgen.CellBiomeSource.CODEC);
         biomeSources.register(modBus);
         NeoForge.EVENT_BUS.addListener(WorldArchitect::createSpawn);
         NeoForge.EVENT_BUS.addListener(SaveProtection::recordNewWorld);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.cells.CellWorlds::tick);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.cells.CellWorlds::stopped);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.cells.CellWorlds::earned);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.cells.CellWorlds::breaking);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.cells.CellWorlds::placing);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.cells.CellWorlds::interacting);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.cells.CellWorlds::piston);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.cells.CellWorlds::spawning);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.cells.CellWorlds::logout);
+        NeoForge.EVENT_BUS.addListener(com.gwsheridan.worldarchitect.cells.CellCommands::register);
         NeoForge.EVENT_BUS.addListener(WorldAdministration::load);
         NeoForge.EVENT_BUS.addListener(WorldEnvironment::validateSaved);
         NeoForge.EVENT_BUS.addListener(EnvironmentCommands::register);
@@ -119,7 +131,12 @@ public final class WorldArchitect {
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
-        if (level.getChunkSource().getGenerator() instanceof SolidColumnGenerator generator) {
+        if (level.getChunkSource().getGenerator() instanceof com.gwsheridan.worldarchitect.worldgen.CellGenerator generator) {
+            var planned=generator.spawn(new com.gwsheridan.worldarchitect.worldgen.CellGenerator.Key(0,com.gwsheridan.worldarchitect.api.CellLayout.Cell.ORIGIN),level);
+            var spawn=com.gwsheridan.worldarchitect.spawn.SafeSpawns.nearby(level,planned).orElseThrow(()->new IllegalStateException("The starting cell needs a safe floor and two blocks of headroom. Add or repair its spawn marker."));
+            event.getSettings().setSpawn(LevelData.RespawnData.of(level.dimension(),spawn,0.0F,0.0F));
+            event.setCanceled(true);
+        } else if (level.getChunkSource().getGenerator() instanceof SolidColumnGenerator generator) {
             BlockPos spawn = generator.initialSpawn(level, level.getChunkSource().randomState().seed())
                     .orElseThrow(() -> new IllegalStateException("World Architect could not find a safe starting island near the origin. "
                             + "Choose a different seed, sea level, or island material."));

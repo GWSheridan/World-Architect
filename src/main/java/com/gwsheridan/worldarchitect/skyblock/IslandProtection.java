@@ -32,11 +32,15 @@ public final class IslandProtection {
     private IslandProtection() {}
 
     public static boolean denied(ServerPlayer player, BlockPos position) {
-        var server = player.level().getServer();
-        if (player.level() != server.overworld() || Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(player.createCommandSourceStack())) {
+        return denied(player.level(),player,position);
+    }
+    public static boolean denied(net.minecraft.server.level.ServerLevel level,ServerPlayer player,BlockPos position){
+        if(com.gwsheridan.worldarchitect.cells.CellWorlds.denied(level,player,position))return true;
+        var server = level.getServer();
+        if (level != server.overworld() || Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(player.createCommandSourceStack())) {
             return false;
         }
-        if (!(player.level().getChunkSource().getGenerator() instanceof VoidGenerator generator)
+        if (!(level.getChunkSource().getGenerator() instanceof VoidGenerator generator)
                 || generator.layout().filter(island -> island.personalSlots() > 0).isEmpty()) {
             return false;
         }

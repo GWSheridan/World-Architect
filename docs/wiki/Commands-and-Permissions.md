@@ -2,6 +2,8 @@
 
 Commands are checked by the server. Preset locks can restrict operations that an administrator would otherwise be allowed to perform. Use command suggestions for the full argument tree and replace example IDs with installed resources.
 
+Cell-world players use `/wa_cells`, `/wa_cells panel`, `/wa_cells home` and `/wa_cells choose <q> <r>`. Unlocking, retrying conflicts, quest signals and reassignment require permission level 3. See the [cell command table](Cell-Worlds.md#player-and-administrator-commands) for arguments and ownership rules.
+
 | Command | Purpose | Access |
 | --- | --- | --- |
 | `/wa_inspect [installed] [report]` | Saved generation and preset comparison | Permission level 3 |

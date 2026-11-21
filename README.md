@@ -7,12 +7,12 @@ Created and maintained by **GWSHERIDAN**.
 
 See the [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
-World Architect 1.8.0 adds a guided Modpack Builder, custom island editing, persistent island choices and matching client/server installation exports. Find downloads on the [releases page](https://github.com/GWSheridan/World-Architect/releases) or read the [changelog](CHANGELOG.md).
+World Architect 1.9.0 adds hex and square cell worlds, advancement-based chunk expansion, saved player and team territories, and six modpack starters. Build and export them through [Cell World Studio](docs/wiki/Cell-Worlds.md). Find downloads on the [releases page](https://github.com/GWSheridan/World-Architect/releases) or read the [changelog](CHANGELOG.md).
 
 
 ## Get started
 
-Install `worldarchitect-1.8.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
+Install `worldarchitect-1.9.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
 
 In **Create New World → World**, choose **World Architect · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
 
@@ -28,6 +28,7 @@ For modpacks, open **Builder** to choose a starter, edit island types, set serve
 - **Single Block and Layered terrain:** block states, surface layers, landforms and biome-aware strata.
 - **Features and structures:** biomes, ores, decoration, caves, fluids, native structures and modular assemblies.
 - **Void and Skyblock:** empty terrain or template islands with persistent multiplayer assignments.
+- **Cell worlds:** original hex and square layouts, custom islands, resource cells and advancement or quest-driven expansion.
 - **End progression:** a native central arena and dragon fight surrounded by custom terrain.
 - **Assembly Studio:** visual modules, transformed markers, saved drafts and datapack or preset exports.
 - **Rule Inspector:** condition maps, coordinate explanations and rule order without generating chunks.

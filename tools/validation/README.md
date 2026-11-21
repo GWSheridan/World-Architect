@@ -1,5 +1,11 @@
 # Validation runners
 
+## Cell worlds
+
+`cells.mjs --jar JAR --fixture VALIDATION_JAR --output build/NEW_FOLDER --crash true` validates the six recipe exports, true voids, activation of saved void chunks, protected conflicts and recovery after forcibly terminating its disposable server. Omitting `--crash true` uses an orderly interrupted-activation restart. The fixture is separate from the gameplay JAR.
+
+`island-multiplayer.mjs --cells true` uses the same four real clients to check separate player/team territories, duplicate quest signals, frontier selection, command permissions, consumed supplies and restart persistence. Use a cell fixture bundle, `--teams true` for scoreboard teams, and `--end true` for the native arena/dragon sequence. The optional pack test kit also activates reserved cells and audits gaps and template inventories.
+
 ## Modpack Builder and island catalogs
 
 `run.mjs --islands true --bundle examples/modpack-builder/bundles/modpack-choice-1.8.0.zip --suite compatibility` checks actual template states, safe markers, explicit container contents, consumed items across restart, newly generated supplies, empty void chunks and locked runtime writes. The authoring suite also checks 64-block capture/native/schematic imports, transforms, immutable revisions, inventory inclusion and rejected metadata/worker operations.
@@ -15,7 +21,7 @@ Use Node 22 or newer and Java 25. The asset tools also require Java 21. Set `JAV
 The `validation` JAR is a separate test mod. It is excluded from the gameplay JAR. The portable runner installs the packaged gameplay JAR and fixture into a new disposable directory under `build/`, starts a loopback dedicated server, runs assertions and restarts it. It writes results and local logs to that directory. It refuses to reuse an output directory. Local runs default to offline Gradle. Add `--network online` for a clean host that still needs runtime dependencies such as NeoForge DevLaunch; CI uses that option.
 
 ```text
-node tools/validation/run.mjs --jar build/libs/worldarchitect-1.8.0.jar --fixture build/validation-tools/worldarchitect-1.8.0-validation.jar --output build/validation-new
+node tools/validation/run.mjs --jar build/libs/worldarchitect-1.9.0.jar --fixture build/validation-tools/worldarchitect-1.9.0-validation.jar --output build/validation-new
 ```
 
 Use `--world <source-world>` to copy an existing save before testing. Source files are hashed before and after; the runner writes only to its disposable copy. Provider mods, bundles and datapacks required by that save must also be installed in the copy. The current basic runner accepts extra JARs through `--mods <directory>`; use the complete pack-specific harness for saves with bundled configuration. For a fresh bundled world, pass `--bundle <export.zip>`; omitted server generation properties then come from its manifest.
@@ -29,7 +35,7 @@ Use `--world <source-world>` to copy an existing save before testing. Source fil
 Install the gameplay and validation JARs in a clean client directory, enable `developer_mode` in that instance, and run `runCreatorValidation` with `-I tools/validation/client.init.gradle -PvalidationClientDirectory=<directory>`. The fixture checks starter exports, draft cancellation, bounds and preview views at GUI scales 1 and 2. It prints `WA_CREATOR_WORKFLOW_PASS`; Gradle exit status alone does not establish that the assertions passed. Screenshots remain in the instance's `screenshots/` directory.
 
 ```text
-node tools/validation/multiplayer.mjs --jar build/libs/worldarchitect-1.8.0.jar --fixture build/validation-tools/worldarchitect-1.8.0-validation.jar --output build/multiplayer-new
+node tools/validation/multiplayer.mjs --jar build/libs/worldarchitect-1.9.0.jar --fixture build/validation-tools/worldarchitect-1.9.0-validation.jar --output build/multiplayer-new
 ```
 
 This starts two real clients and a dedicated server for staged placement, ordinary-player denial, stale revision/destination rejection, ghost previews, undo, client block synchronization and restart checks. Use `--options <test-instance-options.txt>` to reuse accessibility and graphics settings. It uses synthetic offline identities on loopback. It must not be pointed at a production server.
@@ -48,7 +54,7 @@ The release additionally requires the pack, End progression, dependency rejectio
 
 `soak.mjs` takes the same inputs and runs four real clients for twenty three-minute exploration rounds. It checks four island homes, ordinary-player denial, placement and synchronized undo, native portal entry, dragon kills, gateway travel and a crystal ritual across restart. It then splits players across the Overworld and End for 1,280 requested chunks and verifies all four clients remain active. A final restart compares positions, safe homes and pinned generation and island files. The default workload exceeds one hour. Shorter `--rounds` and `--round-seconds` values are rehearsal options and do not meet release acceptance.
 
-The public-mod matrix now includes the combined five-mod pack. It accepts `--output` and `--network`, and distinguishes candidate failures from matching upstream linkage failures. Do not run another `runValidationServer` fixture concurrently in the same checkout, because generated launch arguments share a task name. The Studio, soak and older integration tasks have distinct names. Stop all game and build workloads before measuring performance.
+The public-mod matrix now includes the combined five-mod pack. It accepts `--output` and `--network`, and distinguishes candidate failures from matching upstream linkage failures. Pass `--baseline-fixture` with a fixture built for the published baseline when the current fixture uses newer APIs. Do not run another `runValidationServer` fixture concurrently in the same checkout, because generated launch arguments share a task name. The Studio, soak and older integration tasks have distinct names. Stop all game and build workloads before measuring performance.
 
 For an existing custom End save, use `--world <source-world> --suite compatibility --dimension minecraft:the_end --check-end true`. This copies the source, audits the native arena, records persistent dragon/portal/gateway state across restart, and waits for every requested outer-End chunk. Compare published and candidate copies with `auditSavedChunkPair`, passing `-PbaselineWorld`, `-PcandidateWorld`, `-PterrainDimension` and a semicolon-separated `-PterrainChunks` list. The comparison includes full block states, biomes, heightmaps and configured structures; it does not assume that an End preset has no End Cities.
 

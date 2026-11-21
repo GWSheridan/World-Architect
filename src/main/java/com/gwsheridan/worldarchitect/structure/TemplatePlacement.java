@@ -80,8 +80,8 @@ record TemplatePlacement(BlockPos origin, Rotation rotation, Mirror mirror) {
             if (actor != null && !level.mayInteract(actor, pos)) {
                 throw new IOException("Placement is protected at " + pos.toShortString());
             }
-            if (actor instanceof ServerPlayer player && com.gwsheridan.worldarchitect.spawn.WorldAdministration.get(level.getServer()).protection().placement()
-                    && com.gwsheridan.worldarchitect.skyblock.IslandProtection.denied(player, pos)) {
+            if (actor instanceof ServerPlayer player && (com.gwsheridan.worldarchitect.cells.CellWorlds.denied(level,player,pos)||com.gwsheridan.worldarchitect.spawn.WorldAdministration.get(level.getServer()).protection().placement()
+                    && com.gwsheridan.worldarchitect.skyblock.IslandProtection.denied(level,player, pos))) {
                 throw new IOException("Island protection denies placement at " + pos.toShortString());
             }
             if (rules.biome().isPresent() && !level.getBiome(pos).unwrapKey()
@@ -147,6 +147,7 @@ record TemplatePlacement(BlockPos origin, Rotation rotation, Mirror mirror) {
     }
 
     static void requireAvailable(ServerLevel level, BlockPos pos) throws IOException {
+        if(com.gwsheridan.worldarchitect.cells.CellWorlds.locked(level,pos))throw new IOException("Placement touches locked cell terrain at "+pos.toShortString());
         if (!level.isInWorldBounds(pos) || !level.getWorldBorder().isWithinBounds(pos)) {
             throw new IOException("Placement falls outside the build bounds or world border at " + pos.toShortString());
         }

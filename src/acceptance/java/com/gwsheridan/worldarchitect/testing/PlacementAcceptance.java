@@ -22,7 +22,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 /** Dedicated-server assertions in a separate mod, never in the gameplay JAR. */
 @Mod("wa_validation")
 public final class PlacementAcceptance {
-    public PlacementAcceptance() { NeoForge.EVENT_BUS.addListener(PlacementAcceptance::register); NeoForge.EVENT_BUS.addListener(ProgressionAcceptance::register); }
+    public PlacementAcceptance() { NeoForge.EVENT_BUS.addListener(PlacementAcceptance::register); NeoForge.EVENT_BUS.addListener(ProgressionAcceptance::register); NeoForge.EVENT_BUS.addListener(CellAcceptance::register); }
     private static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("wa_validate").requires(Commands.hasPermission(Commands.LEVEL_OWNERS))
                 .then(Commands.literal("island_assets").executes(c->{try{IslandAssetsAcceptance.check(c.getSource().getServer());return 1;}catch(Exception|AssertionError error){throw new IllegalStateException("WA18_ISLAND_ASSETS_FAILED",error);}}))

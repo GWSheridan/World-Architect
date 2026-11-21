@@ -31,3 +31,5 @@ The 1.6 examples add [composite regions](composite-regions/README.md), [foundati
 The 1.7 release contains 23 current bundles, adding [corridor paths](corridor-regions/README.md), weighted [structure districts](structure-districts/README.md), and a [reusable Skyblock base with partial/full child presets](reusable-presets/README.md). All older bundles remain intact.
 
 The [Modpack Builder examples](modpack-builder/README.md) add shared, choice, team and mixed-dimension packs in 1.8. Unchanged examples keep their existing versions; they remain compatible without duplicate release files.
+
+The [cell-world examples](cell-worlds/README.md) add six editable 1.9 starters: Hex Continents, Hex Skyblock, Expanding One Chunk, Resource Archipelago, Biome Mosaic and Underground Start. Their bundles embed the terrain, templates and objective definitions needed by a clean server.

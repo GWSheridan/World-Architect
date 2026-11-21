@@ -32,13 +32,14 @@ public final class ModpackProject {
         else if(value.isJsonPrimitive()&&value.getAsJsonPrimitive().isString()){String text=value.getAsString();int colon=text.indexOf(':');if(colon>0){String ns=text.substring(0,colon);if(com.gwsheridan.worldarchitect.rules.RuleDependencies.loaded().contains(ns))mods.add(ns);}}
     }
     public static PresetStudio.Draft starter(PresetStudio.Draft source,String style,RegistryAccess registries)throws IOException{
-        if(!Set.of("Shared Skyblock","Personal islands","Team islands","Empty void","Mixed dimensions").contains(style))throw new IOException("Unknown project starter.");
+        if(!Set.of("Shared Skyblock","Personal islands","Team islands","Empty void","Mixed dimensions").contains(style)&&!com.gwsheridan.worldarchitect.cells.CellRecipes.NAMES.contains(style))throw new IOException("Unknown project starter.");
         var checked=PresetStudio.validate(source,registries);var key=style.equals("Mixed dimensions")?LevelStem.NETHER:LevelStem.OVERWORLD;var old=checked.preset().createWorldDimensions().dimensions().get(key);
         if(old==null)throw new IOException("The starter dimension is missing.");
         var type=old.type().value();var profile=new DimensionProfile(type.minY(),type.height(),Optional.empty());
         var biome=registries.lookupOrThrow(Registries.BIOME).getOrThrow(style.equals("Mixed dimensions")?Biomes.NETHER_WASTES:Biomes.PLAINS);
         net.minecraft.world.level.chunk.ChunkGenerator generator;
-        if(style.equals("Empty void"))generator=new VoidGenerator(biome,profile,Optional.empty(),true);
+        if(com.gwsheridan.worldarchitect.cells.CellRecipes.NAMES.contains(style))generator=new CellGenerator(profile,com.gwsheridan.worldarchitect.cells.CellRecipes.create(style,registries));
+        else if(style.equals("Empty void"))generator=new VoidGenerator(biome,profile,Optional.empty(),true);
         else {
             int slots=style.equals("Personal islands")||style.equals("Team islands")?64:0;
             var catalog=new IslandCatalog(List.of(new IslandCatalog.Entry("classic","Classic island","Grass, a sapling and a safe starting platform.","minecraft:grass_block",1,IslandBuild.classic())),"classic","fixed",style.equals("Team islands"),64,128,slots);

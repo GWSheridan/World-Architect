@@ -60,7 +60,8 @@ public final class DimensionCatalog {
                 LOGGER.warn("Dimension adapter {} failed to inspect its source", key.identifier(), exception);
                 return unavailable("worldarchitect.dimensions.adapter_invalid");
             }
-            if (support.modes().isEmpty()) {
+            var modes=support.modes().stream().filter(mode->mode!=TerrainMode.CELLULAR||adapter.supportsCellularTerrain()).collect(java.util.stream.Collectors.toUnmodifiableSet());
+            if (modes.isEmpty()) {
                 return new Replacement(Set.of(), Optional.empty(), Optional.empty(), support.detail());
             }
             if (adapter.version() < 1) {
@@ -70,7 +71,7 @@ public final class DimensionCatalog {
                     ? registries.lookupOrThrow(Registries.BIOME).get(support.preferredBiome().orElseThrow()).map(holder -> holder)
                     : selectBiome(registries, key, original);
             return biome.isPresent()
-                    ? new Replacement(support.modes(), biome, Optional.of(new DimensionProfile.AdapterBinding(key.identifier(), adapter.version())), support.detail())
+                    ? new Replacement(modes, biome, Optional.of(new DimensionProfile.AdapterBinding(key.identifier(), adapter.version())), support.detail())
                     : unavailable("worldarchitect.dimensions.missing_biome");
         }
 

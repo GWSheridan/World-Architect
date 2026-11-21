@@ -1,0 +1,1455 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "dimension": {
+          "min_y": -64,
+          "height": 384
+        },
+        "cells": {
+          "layout": {
+            "shape": "pointy_hex",
+            "size": 32,
+            "gap": 1,
+            "rim": 1
+          },
+          "starting_type": "start",
+          "types": [
+            {
+              "id": "meadow",
+              "title": "Meadow",
+              "weight": 3,
+              "biome": "minecraft:plains",
+              "terrain": {
+                "base_material": "minecraft:stone",
+                "layers": [
+                  {
+                    "material": "minecraft:grass_block[snowy=false]",
+                    "depth": 1
+                  },
+                  {
+                    "material": "minecraft:dirt",
+                    "depth": 3
+                  }
+                ],
+                "generator_version": 1,
+                "elevation": 68,
+                "relief": 12
+              },
+              "content": {
+                "ores": [
+                  {
+                    "material": "minecraft:coal_ore",
+                    "target": "minecraft:stone",
+                    "attempts": 16,
+                    "size": 8,
+                    "min_y": -48,
+                    "max_y": 64
+                  },
+                  {
+                    "material": "minecraft:iron_ore",
+                    "target": "minecraft:stone",
+                    "attempts": 12,
+                    "size": 5,
+                    "min_y": -48,
+                    "max_y": 48
+                  }
+                ],
+                "sea": {
+                  "fluid": "water",
+                  "level": 64
+                }
+              }
+            },
+            {
+              "id": "desert",
+              "title": "Desert",
+              "biome": "minecraft:desert",
+              "terrain": {
+                "base_material": "minecraft:stone",
+                "layers": [
+                  {
+                    "material": "minecraft:sandstone",
+                    "depth": 1
+                  },
+                  {
+                    "material": "minecraft:sandstone",
+                    "depth": 3
+                  }
+                ],
+                "generator_version": 1,
+                "elevation": 68,
+                "relief": 12
+              },
+              "content": {
+                "ores": [
+                  {
+                    "material": "minecraft:coal_ore",
+                    "target": "minecraft:stone",
+                    "attempts": 16,
+                    "size": 8,
+                    "min_y": -48,
+                    "max_y": 64
+                  },
+                  {
+                    "material": "minecraft:iron_ore",
+                    "target": "minecraft:stone",
+                    "attempts": 12,
+                    "size": 5,
+                    "min_y": -48,
+                    "max_y": 48
+                  }
+                ],
+                "sea": {
+                  "fluid": "water",
+                  "level": 64
+                }
+              }
+            },
+            {
+              "id": "taiga",
+              "title": "Taiga",
+              "biome": "minecraft:snowy_taiga",
+              "terrain": {
+                "base_material": "minecraft:stone",
+                "layers": [
+                  {
+                    "material": "minecraft:grass_block[snowy=false]",
+                    "depth": 1
+                  },
+                  {
+                    "material": "minecraft:dirt",
+                    "depth": 3
+                  }
+                ],
+                "generator_version": 1,
+                "elevation": 68,
+                "relief": 12
+              },
+              "content": {
+                "ores": [
+                  {
+                    "material": "minecraft:coal_ore",
+                    "target": "minecraft:stone",
+                    "attempts": 16,
+                    "size": 8,
+                    "min_y": -48,
+                    "max_y": 64
+                  },
+                  {
+                    "material": "minecraft:iron_ore",
+                    "target": "minecraft:stone",
+                    "attempts": 12,
+                    "size": 5,
+                    "min_y": -48,
+                    "max_y": 48
+                  }
+                ],
+                "sea": {
+                  "fluid": "water",
+                  "level": 64
+                }
+              }
+            },
+            {
+              "id": "start",
+              "title": "Starting cell",
+              "weight": 0,
+              "biome": "minecraft:plains",
+              "terrain": {
+                "base_material": "minecraft:stone",
+                "layers": [
+                  {
+                    "material": "minecraft:grass_block[snowy=false]",
+                    "depth": 1
+                  },
+                  {
+                    "material": "minecraft:dirt",
+                    "depth": 3
+                  }
+                ],
+                "generator_version": 1,
+                "elevation": 68,
+                "relief": 0
+              },
+              "content": {
+                "ores": [
+                  {
+                    "material": "minecraft:coal_ore",
+                    "target": "minecraft:stone",
+                    "attempts": 16,
+                    "size": 8,
+                    "min_y": -48,
+                    "max_y": 64
+                  },
+                  {
+                    "material": "minecraft:iron_ore",
+                    "target": "minecraft:stone",
+                    "attempts": 12,
+                    "size": 5,
+                    "min_y": -48,
+                    "max_y": 48
+                  }
+                ],
+                "sea": {
+                  "fluid": "water",
+                  "level": 64
+                }
+              },
+              "template": {
+                "format": 1,
+                "size": [
+                  9,
+                  6,
+                  9
+                ],
+                "markers": {
+                  "spawn": [
+                    4,
+                    4,
+                    4
+                  ]
+                },
+                "spawn_marker": "spawn",
+                "blocks": [
+                  {
+                    "pos": [
+                      3,
+                      3,
+                      0
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      2,
+                      0
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      3,
+                      0
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      2,
+                      0
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      3,
+                      0
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      2,
+                      0
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      3,
+                      1
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      2,
+                      1
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      3,
+                      1
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      2,
+                      1
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      3,
+                      1
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      2,
+                      1
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      1,
+                      1
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      3,
+                      1
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      2,
+                      1
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      3,
+                      1
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      2,
+                      1
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      1,
+                      3,
+                      2
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      1,
+                      2,
+                      2
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      3,
+                      2
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      2,
+                      2
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      3,
+                      2
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      2,
+                      2
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      1,
+                      2
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      3,
+                      2
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      2,
+                      2
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      1,
+                      2
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      3,
+                      2
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      2,
+                      2
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      1,
+                      2
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      3,
+                      2
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      2,
+                      2
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      7,
+                      3,
+                      2
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      7,
+                      2,
+                      2
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      0,
+                      3,
+                      3
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      0,
+                      2,
+                      3
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      1,
+                      3,
+                      3
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      1,
+                      2,
+                      3
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      3,
+                      3
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      2,
+                      3
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      1,
+                      3
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      3,
+                      3
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      2,
+                      3
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      1,
+                      3
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      3,
+                      3
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      2,
+                      3
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      1,
+                      3
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      0,
+                      3
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      3,
+                      3
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      2,
+                      3
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      1,
+                      3
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      3,
+                      3
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      2,
+                      3
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      1,
+                      3
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      7,
+                      3,
+                      3
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      7,
+                      2,
+                      3
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      8,
+                      3,
+                      3
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      8,
+                      2,
+                      3
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      0,
+                      3,
+                      4
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      0,
+                      2,
+                      4
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      1,
+                      3,
+                      4
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      1,
+                      2,
+                      4
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      1,
+                      1,
+                      4
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      3,
+                      4
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      2,
+                      4
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      1,
+                      4
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      3,
+                      4
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      2,
+                      4
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      1,
+                      4
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      0,
+                      4
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      3,
+                      4
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      2,
+                      4
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      1,
+                      4
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      0,
+                      4
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      3,
+                      4
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      2,
+                      4
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      1,
+                      4
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      0,
+                      4
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      3,
+                      4
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      2,
+                      4
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      1,
+                      4
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      7,
+                      3,
+                      4
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      7,
+                      2,
+                      4
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      7,
+                      1,
+                      4
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      8,
+                      3,
+                      4
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      8,
+                      2,
+                      4
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      0,
+                      3,
+                      5
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      0,
+                      2,
+                      5
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      1,
+                      3,
+                      5
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      1,
+                      2,
+                      5
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      3,
+                      5
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      2,
+                      5
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      1,
+                      5
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      3,
+                      5
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      2,
+                      5
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      1,
+                      5
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      3,
+                      5
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      2,
+                      5
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      1,
+                      5
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      0,
+                      5
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      3,
+                      5
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      2,
+                      5
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      1,
+                      5
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      3,
+                      5
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      2,
+                      5
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      1,
+                      5
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      7,
+                      3,
+                      5
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      7,
+                      2,
+                      5
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      8,
+                      3,
+                      5
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      8,
+                      2,
+                      5
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      1,
+                      3,
+                      6
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      1,
+                      2,
+                      6
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      3,
+                      6
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      2,
+                      6
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      3,
+                      6
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      2,
+                      6
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      1,
+                      6
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      3,
+                      6
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      2,
+                      6
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      1,
+                      6
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      3,
+                      6
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      2,
+                      6
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      1,
+                      6
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      3,
+                      6
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      2,
+                      6
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      7,
+                      3,
+                      6
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      7,
+                      2,
+                      6
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      3,
+                      7
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      2,
+                      7
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      3,
+                      7
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      2,
+                      7
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      3,
+                      7
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      2,
+                      7
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      1,
+                      7
+                    ],
+                    "state": "minecraft:stone"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      3,
+                      7
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      2,
+                      7
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      3,
+                      7
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      2,
+                      7
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      3,
+                      8
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      3,
+                      2,
+                      8
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      3,
+                      8
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      4,
+                      2,
+                      8
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      3,
+                      8
+                    ],
+                    "state": "minecraft:grass_block[snowy=false]"
+                  },
+                  {
+                    "pos": [
+                      5,
+                      2,
+                      8
+                    ],
+                    "state": "minecraft:dirt"
+                  },
+                  {
+                    "pos": [
+                      6,
+                      4,
+                      4
+                    ],
+                    "state": "minecraft:oak_sapling[stage=0]"
+                  },
+                  {
+                    "pos": [
+                      2,
+                      4,
+                      4
+                    ],
+                    "state": "minecraft:chest[facing=north,type=single,waterlogged=false]",
+                    "data": {
+                      "Items": [
+                        {
+                          "count": 16,
+                          "Slot": 0,
+                          "id": "minecraft:oak_log"
+                        },
+                        {
+                          "count": 2,
+                          "Slot": 1,
+                          "id": "minecraft:oak_sapling"
+                        },
+                        {
+                          "count": 16,
+                          "Slot": 2,
+                          "id": "minecraft:dirt"
+                        },
+                        {
+                          "count": 1,
+                          "Slot": 3,
+                          "id": "minecraft:water_bucket"
+                        },
+                        {
+                          "count": 1,
+                          "Slot": 4,
+                          "id": "minecraft:lava_bucket"
+                        },
+                        {
+                          "count": 8,
+                          "Slot": 5,
+                          "id": "minecraft:bone_meal"
+                        },
+                        {
+                          "count": 8,
+                          "Slot": 6,
+                          "id": "minecraft:torch"
+                        }
+                      ],
+                      "id": "minecraft:chest"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "border_to_floor": true
+        },
+        "type": "worldarchitect:cells"
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "biome_source": {
+          "preset": "minecraft:nether",
+          "type": "minecraft:multi_noise"
+        },
+        "settings": "minecraft:nether",
+        "type": "minecraft:noise"
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "biome_source": {
+          "type": "minecraft:the_end"
+        },
+        "settings": "minecraft:end",
+        "type": "minecraft:noise"
+      }
+    }
+  }
+}

@@ -15,6 +15,8 @@ public interface DimensionAdapter {
 
     /** Opt in only when every custom portal entry calls EnvironmentApi.canEnter before teleporting. */
     default boolean supportsPortalPolicies() { return false; }
+    /** Explicit opt-in: an older adapter using EnumSet.allOf must not silently claim a new generator. */
+    default boolean supportsCellularTerrain() { return false; }
 
     /** Inspect the original stem. Implementations must be side-effect free. */
     Support inspect(ResourceKey<LevelStem> dimension, LevelStem original);
@@ -23,7 +25,8 @@ public interface DimensionAdapter {
         SINGLE_BLOCK,
         LAYERED,
         VOID,
-        SKYBLOCK
+        SKYBLOCK,
+        CELLULAR
     }
 
     /** An empty mode set keeps the dimension's original generator available. */

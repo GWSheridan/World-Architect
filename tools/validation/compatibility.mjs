@@ -7,7 +7,7 @@ import {baselineBytes} from './baseline.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const version=(await fs.readFile(join(root,'gradle.properties'),'utf8')).match(/^mod_version=(.+)$/m)[1].trim();
 const args=Object.fromEntries(Array.from({length:(process.argv.length-2)/2},(_,i)=>process.argv.slice(2+i*2,4+i*2)));
-for(const key of Object.keys(args))if(!['--jar','--fixture','--output','--baseline-version','--network'].includes(key))throw Error('Unknown option '+key);
+for(const key of Object.keys(args))if(!['--jar','--fixture','--baseline-fixture','--output','--baseline-version','--network'].includes(key))throw Error('Unknown option '+key);
 const baselineVersion=args['--baseline-version']||'1.6.0',checksums={'1.6.0':'57eda6cdd5dea8192fb252601c0c4366ac08cd4ae9d28d4c1cd115a333a84b56','1.5.0':'27a6a5e55567e04db4c93818daa2a866bd9bc0d0313780b08f17dcba1e20be42','1.4.0':'3684963461df2331c7f0fa4968d12b972fceff6c73c3568c77a19dcc66474fe4','1.3.0':'c4d5cd556958fade5f995a80d7c1140a80ff18f60992fea7718634f17bacd7a9','1.2.0':'4d4732da16802e1d85e1d821e287b78bf3b2ea70cf4f6acb28cb42f4f8bc64b1','1.0.0':'14fe208d2fed07e8dec98e33b1f06c519cb35a81a95412e60b1c808d94b332cd','1.1.0':'2bb93f40d6c9d03a1f461cb62c888ec650132ef44ba5f18052da5cc7d8e79efa'};
 if(!checksums[baselineVersion])throw Error('Unknown verified baseline');
 const network=args['--network']||'online';if(!['online','offline'].includes(network))throw Error('Invalid network mode');
@@ -39,7 +39,8 @@ for(const [pack,projects] of Object.entries({terralith:['8oi3bsk5','XaDC71GB'],b
         const results={};
         for(const kind of ['baseline','candidate']) {
             const output=relative(root,join(directory,`cases/${pack}-${kind}-${profile}`));await fs.mkdir(join(directory,'cases'),{recursive:true});
-            const commandArgs=['tools/validation/run.mjs','--jar',kind==='baseline'?baseline:(args['--jar']||`build/libs/worldarchitect-${version}.jar`),'--fixture',args['--fixture']||`build/validation-tools/worldarchitect-${version}-validation.jar`,'--output',output,'--profile',profile,'--mods',mods,'--suite','compatibility','--network',network];
+            const fixture=kind==='baseline'&&args['--baseline-fixture']?args['--baseline-fixture']:(args['--fixture']||`build/validation-tools/worldarchitect-${version}-validation.jar`);
+            const commandArgs=['tools/validation/run.mjs','--jar',kind==='baseline'?baseline:(args['--jar']||`build/libs/worldarchitect-${version}.jar`),'--fixture',fixture,'--output',output,'--profile',profile,'--mods',mods,'--suite','compatibility','--network',network];
             const code=await new Promise((accept,reject)=>{const child=spawn(process.execPath,commandArgs,{cwd:root,stdio:'inherit'});child.on('error',reject);child.on('close',accept);});
             const result=JSON.parse(await fs.readFile(join(root,output,'results.json'),'utf8'));
             if(code!==0&&result.status==='passed')throw new Error('Inconsistent compatibility result');

@@ -203,8 +203,10 @@ final class DimensionManagerScreen extends Screen implements AuthoringContext {
         singleButton.active = canEdit && replacement != null && replacement.modes().contains(TerrainMode.SINGLE_BLOCK);
         layeredButton.active = canEdit && replacement != null && replacement.modes().contains(TerrainMode.LAYERED);
         voidButton.active = canEdit && replacement != null && (replacement.modes().contains(TerrainMode.VOID) || replacement.modes().contains(TerrainMode.SKYBLOCK));
-        featuresButton.active = canEditFeatures && stem != null && stem.generator() instanceof SolidColumnGenerator;
-        rulesButton.active = canEdit && stem != null && stem.generator() instanceof ManagedGenerator;
+        boolean cellular=stem!=null&&stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.CellGenerator;
+        featuresButton.active = cellular?canEdit:canEditFeatures && stem != null && stem.generator() instanceof SolidColumnGenerator;
+        featuresButton.setMessage(cellular?Component.literal("Cell World Studio"):text("features"));
+        rulesButton.active = canEdit && stem != null && stem.generator() instanceof ManagedGenerator&&!cellular;
         featuresButton.setTooltip(featuresButton.active ? null : Tooltip.create(canEditFeatures ? GenerationRuleScreen.text("requires_terrain")
                 : Component.translatable("worldarchitect.modpack.option_locked")));
         endButton.visible = key != null && key.equals(LevelStem.END) && stem.generator() instanceof ManagedGenerator;
@@ -227,7 +229,7 @@ final class DimensionManagerScreen extends Screen implements AuthoringContext {
         var changed = profile.withEndProgression(generator.endProgression().isPresent() ? Optional.empty()
                 : Optional.of(com.gwsheridan.worldarchitect.config.EndProgression.vanillaArena(context.worldgenLoadContext())));
         var edited = stem.generator() instanceof SolidColumnGenerator solid ? solid.withDimensionProfile(changed)
-                : ((VoidGenerator)stem.generator()).withDimensionProfile(changed);
+                : stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.CellGenerator cells ? cells.withDimensionProfile(changed) : ((VoidGenerator)stem.generator()).withDimensionProfile(changed);
         draft.put(selected, new LevelStem(stem.type(), edited));
         updateActions();
     }
@@ -255,6 +257,9 @@ final class DimensionManagerScreen extends Screen implements AuthoringContext {
             return;
         }
         LevelStem stem = effective(key);
+        if(stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.CellGenerator cells&&canEditDimension(key)){
+            minecraft.gui.setScreen(new CellStudioScreen(this,context.worldgenLoadContext(),stem,draftOptions.seed(),edited->draft.put(key,new LevelStem(stem.type(),edited))));return;
+        }
         if (stem.generator() instanceof SolidColumnGenerator generator) {
             var type = stem.type().value();
             var profile = generator.dimensionProfile().orElseGet(() -> new DimensionProfile(type.minY(), type.height(), Optional.empty()));
@@ -273,7 +278,7 @@ final class DimensionManagerScreen extends Screen implements AuthoringContext {
         var all = new LinkedHashMap<ResourceKey<LevelStem>, LevelStem>(); keys.forEach(dimension -> all.put(dimension, effective(dimension)));
         minecraft.gui.setScreen(new RuleEngineScreen(this, key.identifier(), stem.generator(), profile, context.worldgenLoadContext(), all, draftOptions.seed(), edited -> {
             var changed = stem.generator() instanceof SolidColumnGenerator solid ? solid.withDimensionProfile(edited)
-                    : ((VoidGenerator)stem.generator()).withDimensionProfile(edited);
+                    : stem.generator() instanceof com.gwsheridan.worldarchitect.worldgen.CellGenerator cells ? cells.withDimensionProfile(edited) : ((VoidGenerator)stem.generator()).withDimensionProfile(edited);
             draft.put(key, new LevelStem(stem.type(), changed)); updateActions();
         }));
     }
@@ -367,6 +372,7 @@ final class DimensionManagerScreen extends Screen implements AuthoringContext {
             case LAYERED -> "layered";
             case VOID -> "void";
             case SKYBLOCK -> "skyblock";
+            case CELLULAR -> "cellular";
         } : "original";
         var type = stem.type().value();
         graphics.text(font, text(mode), detailLeft, 51, 0xFFF1E7CE);

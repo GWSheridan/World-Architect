@@ -117,6 +117,14 @@ public final class SpawnPolicies {
                 .or(() -> RuleSpawns.select(player.level(), RuleSet.SpawnEvent.RESPAWN))
                 .or(() -> RuleSpawns.select(player.level().getServer().overworld(), RuleSet.SpawnEvent.RESPAWN));
         if (policy.isEmpty()) {
+            var original=event.getOriginalTeleportTransition();var cellState=com.gwsheridan.worldarchitect.cells.CellWorlds.state(original.newLevel());
+            if(cellState!=null){
+                try{int slot=com.gwsheridan.worldarchitect.cells.CellWorlds.territory(cellState,player,true);if(cellState.ledger.status(new com.gwsheridan.worldarchitect.worldgen.CellGenerator.Key(slot,com.gwsheridan.worldarchitect.api.CellLayout.Cell.ORIGIN))!=com.gwsheridan.worldarchitect.cells.CellLedger.Status.READY)slot=0;
+                    var pos=cellState.generator.spawn(new com.gwsheridan.worldarchitect.worldgen.CellGenerator.Key(slot,com.gwsheridan.worldarchitect.api.CellLayout.Cell.ORIGIN),original.newLevel());
+                    var safe=SafeSpawns.nearby(original.newLevel(),pos);if(safe.isEmpty()){player.connection.disconnect(Component.literal("World Architect could not find a safe cell respawn. Ask an administrator to repair its marker."));return;}
+                    event.setTeleportTransition(new TeleportTransition(original.newLevel(),net.minecraft.world.phys.Vec3.atBottomCenterOf(safe.orElseThrow()),net.minecraft.world.phys.Vec3.ZERO,0,0,original.missingRespawnBlock(),false,original.relatives(),original.postTeleportTransition()));return;
+                }catch(IOException error){throw new java.io.UncheckedIOException(error);}
+            }
             IslandSpawns.respawn(event);
             return;
         }

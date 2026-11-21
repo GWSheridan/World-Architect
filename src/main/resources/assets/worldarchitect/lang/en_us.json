@@ -97,6 +97,7 @@
   "worldarchitect.dimensions.void_sky": "Void / Skyblock",
   "worldarchitect.dimensions.void": "Void",
   "worldarchitect.dimensions.skyblock": "Skyblock",
+  "worldarchitect.dimensions.cellular": "Cell world",
   "worldarchitect.island.title": "Void and Skyblock",
   "worldarchitect.island.template": "%1$s · %2$s",
   "worldarchitect.island.marker": "Local spawn X Y Z",

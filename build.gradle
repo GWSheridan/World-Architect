@@ -412,3 +412,13 @@ tasks.register('auditNativePyramidPair', JavaExec) {
         file(providers.gradleProperty('candidateWorld').get()).absolutePath,
         providers.gradleProperty('benchmarkSize').orElse('6').get(), providers.gradleProperty('benchmarkSamples').orElse('2').get()] } as CommandLineArgumentProvider)
 }
+
+tasks.register('prepareCycle19Examples', JavaExec) {
+    group = 'distribution'
+    description = 'Prepare cell-world examples from verified Studio exports.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseCycle19Examples'
+    argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
+        file(providers.gradleProperty('cellExportsDirectory').get()).absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
+}

@@ -3,11 +3,11 @@ loaderVersion="[12,)"
 license="All Rights Reserved"
 [[mods]]
 modId="wa_pack_test"
-version="1.8.0"
+version="1.9.0"
 displayName="World Architect Pack Test"
 [[dependencies.wa_pack_test]]
 modId="worldarchitect"
 type="required"
-versionRange="[1.8.0,1.9.0)"
+versionRange="[1.9.0,1.10.0)"
 ordering="AFTER"
 side="SERVER"

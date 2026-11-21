@@ -38,6 +38,12 @@ public final class GenerationPreview {
         var type = stem.type().value();
         var height = LevelHeightAccessor.create(type.minY(), type.height());
         var generator = stem.generator();
+        if(generator instanceof CellGenerator cellular){
+            var source=new CellBiomeSource(cellular.cells());source.seed(seed);
+            return Optional.of(new GenerationPreview(height,(x,z)->cellular.previewHeight(x,z,Heightmap.Types.WORLD_SURFACE_WG,height,seed),
+                    (x,y,z)->cellular.endProgression().filter(a->com.gwsheridan.worldarchitect.config.EndProgression.contains(x*4,z*4)).map(a->a.biome()).orElseGet(()->source.sample(x*4,z*4)),Optional.empty(),
+                    (x,z)->cellular.previewColumn(x,z,height,seed),cellular.endProgression().isPresent(),Optional.empty()));
+        }
         if (generator instanceof SolidColumnGenerator solid) {
             BiomeResolver biomes = switch (solid.getBiomeSource()) {
                 case FixedBiomeSource fixed -> fixed::getNoiseBiome;

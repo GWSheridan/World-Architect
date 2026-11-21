@@ -46,6 +46,7 @@ public final class ApiFixture {
             adapters.register("lab", () -> new DimensionAdapter() {
                 public int version() { return Integer.getInteger("wa.fixture.dimensionVersion", 1); }
                 public boolean supportsPortalPolicies() { return true; }
+                public boolean supportsCellularTerrain() { return Boolean.getBoolean("wa.fixture.cells"); }
                 public Support inspect(ResourceKey<net.minecraft.world.level.dimension.LevelStem> key, net.minecraft.world.level.dimension.LevelStem original) {
                     return new Support(EnumSet.allOf(TerrainMode.class), Optional.of(Biomes.PLAINS), Component.literal("Fixture dimension contract"));
                 }

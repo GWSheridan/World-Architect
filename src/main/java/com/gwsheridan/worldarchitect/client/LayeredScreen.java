@@ -38,6 +38,7 @@ final class LayeredScreen extends Screen implements AuthoringContext {
     private final LayeredGenerator original;
     private final RegistryAccess registries;
     private final LongSupplier seed;
+    private boolean naturalSurface;
     private final Consumer<LayeredGenerator> save;
     private final List<LayerDraft> layers = new ArrayList<>();
     private String base;
@@ -68,6 +69,7 @@ final class LayeredScreen extends Screen implements AuthoringContext {
         }
         selected = layers.isEmpty() ? -1 : 0;
     }
+    LayeredScreen(Screen parent,LayeredGenerator generator,RegistryAccess registries,LongSupplier seed,Consumer<LayeredGenerator> save,boolean naturalSurface){this(parent,generator,registries,seed,save);this.naturalSurface=naturalSurface;}
 
     @Override
     protected void init() {
@@ -180,7 +182,7 @@ final class LayeredScreen extends Screen implements AuthoringContext {
             for (int index = 0; index < layers.size(); index++) {
                 int number = index + 1;
                 LayerDraft layer = layers.get(index);
-                var state = TerrainMaterial.parse(layer.material());
+                var state = naturalSurface?com.gwsheridan.worldarchitect.cells.CellTerrain.parse(layer.material()):TerrainMaterial.parse(layer.material());
                 if (state.error().isPresent()) {
                     return DataResult.error(() -> "Layer " + number + ": " + state.error().orElseThrow().message());
                 }
