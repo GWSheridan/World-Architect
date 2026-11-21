@@ -198,6 +198,7 @@ jobs:
             build/ci-benchmark-smoke/comparison.json
             build/ci-benchmark-smoke/**/console.log
             build/ci-workbench/results.json
+            build/ci-workbench/prepare.log
             build/ci-workbench/*/results.json
             build/ci-workbench/*/clean-install/*.log
             build/ci-batch/results.json

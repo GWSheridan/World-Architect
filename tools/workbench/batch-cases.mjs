@@ -21,7 +21,7 @@ const compiled=gradle(root,prep,join(output,'api-build.log'));if(await compiled.
 await fs.mkdir(join(inputs,'plain'));await fs.mkdir(join(inputs,'api'));
 const provider=await fs.readFile(join(root,'examples/api-fixture/build/libs/worldarchitect-api-fixture-1.0.0.jar'));await fs.writeFile(join(inputs,'api/provider.jar'),provider,{flag:'wx'});
 function scenario(bundle,hash,seed){return {format:1,bundle:{file:bundle,sha256:hash},budgets:{timeout_seconds:120,heap_mib:1400},runs:[{name:'clean',seed,expect_startup:'accept',safe_spawn:true,restart:true,dimensions:['minecraft:overworld'],regions:[{dimension:'minecraft:overworld',chunk_x:-32,chunk_z:32,width:2,depth:2}],probes:[]}]};}
-const legacyBytes=await fs.readFile(join(root,'examples/creator-starters/bundles/single-block-1.3.0.zip')),modernBytes=await fs.readFile(join(root,`examples/shared-regions/bundles/shared-regions-${version}.zip`));
+const legacyBytes=await fs.readFile(join(root,'examples/creator-starters/bundles/single-block-1.3.0.zip')),modernBytes=await fs.readFile(join(root,'examples/shared-regions/bundles/shared-regions-1.7.0.zip'));
 await fs.writeFile(join(inputs,'legacy.zip'),legacyBytes,{flag:'wx'});await fs.writeFile(join(inputs,'modern.zip'),modernBytes,{flag:'wx'});
 const legacy=scenario('legacy.zip',sha(legacyBytes),'9223372036854775807'),modern=scenario('modern.zip',sha(modernBytes),'-9223372036854775808');
 modern.runs[0].regions=[{dimension:'minecraft:overworld',chunk_x:0,chunk_z:0,width:2,depth:2}];modern.runs[0].probes=[{dimension:'minecraft:overworld',x:1,y:64,z:1,block:'minecraft:diamond_block'}];

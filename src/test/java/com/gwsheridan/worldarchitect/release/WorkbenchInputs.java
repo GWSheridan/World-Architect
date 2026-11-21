@@ -10,7 +10,8 @@ import java.util.*;
 public final class WorkbenchInputs {
     public static void main(String[] args)throws Exception {
         Path root=Path.of(args[0]),out=Path.of(args[1]);String version=args[2];Files.createDirectory(out);
-        Path regional=root.resolve("examples/regional-terrain/bundles/regional-demo-"+version+".zip"),locked=root.resolve("examples/preset-studio/bundles/studio-skyblock-"+version+".zip");
+        // These immutable fixtures retain their bundle release across mod updates.
+        Path regional=root.resolve("examples/regional-terrain/bundles/regional-demo-1.7.0.zip"),locked=root.resolve("examples/preset-studio/bundles/studio-skyblock-1.7.0.zip");
         Files.copy(regional,out.resolve("regional.zip"));Files.copy(locked,out.resolve("locked.zip"));
         var valid=scenario(out,"regional.zip",194723);var run=valid.getAsJsonArray("runs").get(0).getAsJsonObject();run.getAsJsonArray("regions").get(0).getAsJsonObject().addProperty("chunk_x",-32);
         var p=new JsonObject();p.addProperty("dimension","minecraft:overworld");p.addProperty("x",0);p.addProperty("y",180);p.addProperty("z",0);p.addProperty("block","minecraft:andesite");p.addProperty("biome","minecraft:desert");run.getAsJsonArray("probes").add(p);write(out,"valid",valid);
