@@ -8,7 +8,7 @@ From an extracted source distribution, build the fixture with JDK 25, JDK 21 and
 
 ```powershell
 .\gradlew.bat build acceptanceJar
-node tools/workbench/run.mjs --scenario path/to/preset.scenario.json --jar build/libs/worldarchitect-1.6.0.jar --fixture build/validation-tools/worldarchitect-1.6.0-validation.jar --output build/pack-test
+node tools/workbench/run.mjs --scenario path/to/preset.scenario.json --jar build/libs/worldarchitect-1.7.0.jar --fixture build/validation-tools/worldarchitect-1.7.0-validation.jar --output build/pack-test
 ```
 
 Use `bash ./gradlew` on Linux. Add `--network online` if Gradle dependencies/assets have not been cached; the runner otherwise uses offline mode. `JAVA21_HOME` selects the asset downloader's JDK. `--mods <directory>` copies explicitly selected provider JARs and records their hashes. Use matching provider versions. Review the EULA before running: each disposable instance writes `eula=true`.
