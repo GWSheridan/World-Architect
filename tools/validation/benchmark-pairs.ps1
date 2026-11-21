@@ -1,40 +1,31 @@
 param(
     [Parameter(Mandatory)][string]$BaselineJar,
     [Parameter(Mandatory)][string]$CandidateJar,
+    [string]$ProbeJar,
     [string]$OutputRoot='build/performance-comparison',
     [string]$JavaHome=$env:JAVA_HOME,
     [string]$Jdk21=$env:JAVA21_HOME,
-    [ValidateRange(4,8)][int]$WarmupSize=8,
-    [ValidateRange(6,8)][int]$MeasuredSize=8,
-    [ValidateRange(2,5)][int]$Samples=5
+    [ValidateRange(8,32)][int]$WarmupSize=32,
+    [ValidateRange(6,32)][int]$MeasuredSize=24,
+    [ValidateRange(2,5)][int]$Samples=5,
+    [ValidateRange(1,5)][int]$Pairs=3,
+    [ValidateRange(1,3)][int]$ControlPairs=1,
+    [ValidateSet('normal','void','single-block','layered','structure-heavy')][string[]]$Profiles=@('normal','void','single-block','layered','structure-heavy'),
+    [ValidateSet('performance','smoke')][string]$Purpose='performance',
+    [ValidateSet('offline','online')][string]$Network='offline',
+    [ValidateRange(1024,65535)][int]$Port=25919
 )
 $ErrorActionPreference='Stop'
-if(-not $IsWindows){throw 'The resident-memory sampler requires Windows. Dedicated and compatibility runners support both platforms.'}
-if(-not $JavaHome){throw 'Set JAVA_HOME to Java 25.'}
+if(-not $JavaHome){throw 'Set JAVA_HOME to a Java 25 JDK.'}
 $projectRoot=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
-$destination=[IO.Path]::GetFullPath((Join-Path $projectRoot $OutputRoot))
-if(-not $destination.StartsWith((Join-Path $projectRoot 'build')+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Benchmark output must stay under build/.'}
-if(Test-Path -LiteralPath $destination){throw 'Use a new output directory.'}
-$previous=Get-Location
+$previousLocation=Get-Location
 try {
     Set-Location -LiteralPath $projectRoot
-    $baseline=(Resolve-Path -LiteralPath $BaselineJar).Path;$candidate=(Resolve-Path -LiteralPath $CandidateJar).Path
     $env:JAVA_HOME=$JavaHome
-    $inputs=@{baseline_sha256=(Get-FileHash -LiteralPath $baseline).Hash.ToLower();candidate_sha256=(Get-FileHash -LiteralPath $candidate).Hash.ToLower();pairs=3;profiles=@('normal','void','single-block','layered','structure-heavy');warmup_chunks=$WarmupSize*$WarmupSize;measured_size=$MeasuredSize;samples=$Samples;chunks_per_sample=$MeasuredSize*$MeasuredSize;generation_limit_percent=10;memory_limit_percent=15}
-    New-Item -ItemType Directory -Path $destination|Out-Null
-    $inputs|ConvertTo-Json -Depth 5|Set-Content -LiteralPath (Join-Path $destination 'inputs.json') -Encoding utf8NoBOM
-    foreach($pair in 1,2,3){
-        $directory=Join-Path $destination "pair-$pair"
-        & ./examples/performance/prepare.ps1 -BaselineJar $baseline -CandidateJar $candidate -OutputRoot $directory
-        $order=if($pair%2 -eq 1){@('baseline','candidate')}else{@('candidate','baseline')}
-        foreach($version in $order){
-            & ./examples/performance/benchmark.ps1 -Version $version -OutputRoot $directory -JavaHome $JavaHome -Jdk21 $Jdk21 -WarmupSize $WarmupSize -MeasuredSize $MeasuredSize -Samples $Samples
-            if(-not $?){throw "Benchmark failed: $pair/$version"}
-        }
-        $toolchain=@();if($Jdk21){$toolchain+="-Porg.gradle.java.installations.paths=$Jdk21"}
-        & ./gradlew.bat auditBenchmarkWorlds --offline --console=plain "-PbenchmarkBaseline=$directory/bench-baseline" "-PbenchmarkCandidate=$directory/bench-candidate" "-PbenchmarkSize=$MeasuredSize" "-PbenchmarkSamples=$Samples" @toolchain
-        if($LASTEXITCODE -ne 0){throw "Saved-region comparison failed: $pair"}
-    }
-    & node ./tools/validation/compare-performance.mjs $destination
-    if($LASTEXITCODE -ne 0){throw 'A benchmark threshold needs investigation.'}
-} finally {Set-Location -LiteralPath $previous}
+    if($Jdk21){$env:JAVA21_HOME=$Jdk21}
+    if(-not $ProbeJar){$version=(Get-Content -LiteralPath 'gradle.properties'|Where-Object {$_ -like 'mod_version=*'}).Split('=',2)[1];$ProbeJar="build/validation-tools/worldarchitect-$version-benchmark-probe.jar"}
+    if(-not(Test-Path -LiteralPath $ProbeJar)){throw 'Build the separate fixture with gradlew benchmarkProbeJar first.'}
+    $arguments=@('tools/validation/benchmark-pairs.mjs','--baseline',$BaselineJar,'--candidate',$CandidateJar,'--probe',$ProbeJar,'--output',$OutputRoot,'--warmup-size',"$WarmupSize",'--measured-size',"$MeasuredSize",'--samples',"$Samples",'--pairs',"$Pairs",'--control-pairs',"$ControlPairs",'--profiles',($Profiles -join ','),'--purpose',$Purpose,'--network',$Network,'--port',"$Port")
+    & node @arguments
+    if($LASTEXITCODE -ne 0){throw 'Benchmark failed, is inconclusive, or needs investigation. Retain the complete output.'}
+} finally {Set-Location -LiteralPath $previousLocation}

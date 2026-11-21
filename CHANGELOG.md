@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.0 — release candidate
+
+- Added connected corridor regions with rounded ends, inward terrain transitions, biome choices and shared rule filtering. Corridors explicitly select generator version 6; existing versions retain their saved behavior.
+- Added weighted structure districts with shared native grids, named-region limits and deterministic minimum spacing across exclusion groups. Site inspection and searches use the same placement rules.
+- Added reusable presets pinned to an immutable parent revision and SHA-256. Child exports include their templates and inherited policy, support explicit overrides and cannot weaken a parent's locks.
+- Added corridor, district, reusable base, partially locked child and fully locked Skyblock examples.
+- Replaced release benchmark polling with a separate direct-generation probe, actual resident-memory sampling and identical-JAR controls on Windows and Linux. Historical benchmark inputs and the original runner remain available.
+- Refused invalid map moves without interrupting the editor and preserved district metadata when editing ordinary structure fields.
+
 ## 1.6.0
 
 - Added named union, intersection and subtraction regions with shared terrain, biome, rule and inspector geometry in opt-in generator version 5.

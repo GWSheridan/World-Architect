@@ -56,7 +56,7 @@ public final class PresetStudio {
         @Override public Map<String, byte[]> templates() {
             var copy = new TreeMap<String, byte[]>(); templates.forEach((key, value) -> copy.put(key, value.clone())); return copy;
         }
-        public Draft withManifest(BundleManifest next) { return new Draft(next, preset, templates); }
+        public Draft withManifest(BundleManifest next) { return new Draft(manifest.inheritance().isPresent()&&next.inheritance().isEmpty()?next.withInheritance(manifest.inheritance()):next, preset, templates); }
     }
     public record Revision(String name, String release, BundleManifest manifest) {
         public String label() { return name + " / " + release + " · " + manifest.lock().getSerializedName(); }
@@ -99,7 +99,7 @@ public final class PresetStudio {
         }
         namespaces.stream().filter(RuleDependencies.loaded()::contains).forEach(dependencies::add);
         var m = manifest;
-        manifest = new BundleManifest(m.preset(), m.title(), m.description(), m.author(), m.release(), m.lock(), m.options(), m.editableDimensions(), m.editableFeatures(), m.editableOptions(), List.copyOf(dependencies), m.allowStructureLibrary());
+        manifest = new BundleManifest(m.preset(), m.title(), m.description(), m.author(), m.release(), m.lock(), m.options(), m.editableDimensions(), m.editableFeatures(), m.editableOptions(), List.copyOf(dependencies), m.allowStructureLibrary(),m.inheritance());
         return new Draft(manifest, json, resources);
     }
 
@@ -157,6 +157,7 @@ public final class PresetStudio {
             }
             var ops = RegistryOps.create(JsonOps.INSTANCE, registries);
             var preset = WorldPreset.DIRECT_CODEC.parse(ops, source.preset()).getOrThrow(IOException::new);
+            if(manifest.inheritance().isPresent())manifest.inheritance().orElseThrow().enforce(source,preset,registries);
             var dimensions = preset.createWorldDimensions();
             ModpackRuntime.validateManifestDimensions(manifest, dimensions);
             dimensions.dimensions().forEach((key, stem) -> { if (stem.generator() instanceof ManagedGenerator) SaveProtection.validateGenerator(key, stem); });
@@ -194,6 +195,7 @@ public final class PresetStudio {
         rows.add("Embedded templates: " + draft.templates.size() + " · " + draft.templates.values().stream().mapToInt(bytes -> bytes.length).sum() + " compressed/source bytes");
         draft.templates.keySet().forEach(path -> rows.add("Embedded: " + path));
         rows.add("Validation passed: profiles, locks, adapters, templates and spawn references.");
+        draft.manifest().inheritance().ifPresent(source->rows.addAll(source.report(draft)));
         return rows;
     }
     private static void collectNamespaces(JsonElement json, Set<String> output) {
@@ -226,6 +228,22 @@ public final class PresetStudio {
         if (!bundle.manifest().release().equals(release)) throw new IOException("Revision filename and manifest disagree.");
         return new Draft(bundle.manifest(), bundle.presetJson(), bundle.templates());
     }
+    public static String fingerprint(Path directory,String name,String release)throws IOException{return BundleFiles.fingerprint(revisionPath(directory,name,release));}
+    /** Resolves once. The child contains all parent resources and never needs the parent archive to run. */
+    public static Draft derive(Path directory,String name,String release,String expectedSha,String child,String childRelease,HolderLookup.Provider registries)throws IOException{
+        var bundle=PresetBundle.read(revisionPath(directory,name,release));if(!bundle.fingerprint().equals(expectedSha))throw new IOException("The selected parent changed. Reopen its saved revision.");
+        var parent=validate(new Draft(bundle.manifest(),bundle.presetJson(),bundle.templates()),registries).draft();
+        var inherited=PresetInheritance.capture(parent,expectedSha);var copy=duplicate(parent,child,childRelease);
+        return validate(copy.withManifest(copy.manifest().withInheritance(java.util.Optional.of(inherited))),registries).draft();
+    }
+    public static Draft override(Draft source,String pointer,com.google.gson.JsonElement value,boolean remove,HolderLookup.Provider registries)throws IOException{
+        if(source.manifest().inheritance().isEmpty())throw new IOException("Derive a child from a saved parent before editing overrides.");
+        var changed=validate(new Draft(source.manifest(),PresetInheritance.override(source.preset(),pointer,value,remove),source.templates()),registries);
+        var captured=capture(changed.draft().manifest(),changed.preset().createWorldDimensions(),changed.registries());
+        var resources=source.templates();captured.templates().forEach(resources::putIfAbsent);
+        return validate(new Draft(captured.manifest(),captured.preset(),resources),registries).draft();
+    }
+    public static Draft withRelease(Draft source,String release){var m=source.manifest();return source.withManifest(new BundleManifest(m.preset(),m.title(),m.description(),m.author(),release,m.lock(),m.options(),m.editableDimensions(),m.editableFeatures(),m.editableOptions(),m.requiredMods(),m.allowStructureLibrary(),m.inheritance()));}
     public static Path save(Path directory, String name, Draft source, HolderLookup.Provider registries) throws IOException {
         requireDeveloper(); var checked = validate(source, registries); var draft = checked.draft();
         var output = revisionPath(directory, name, draft.manifest().release());

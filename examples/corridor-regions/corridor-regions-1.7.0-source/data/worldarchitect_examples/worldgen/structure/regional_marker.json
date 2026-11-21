@@ -1,0 +1,145 @@
+{
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:desert"
+  ],
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "modules": [
+    {
+      "name": "start",
+      "offset": [
+        0,
+        0,
+        0
+      ],
+      "template": {
+        "worldarchitect": {
+          "author": "GWSHERIDAN",
+          "format": 1,
+          "rules": {},
+          "title": "Regional marker",
+          "category": "Custom Structures",
+          "markers": {
+            "entry": {
+              "pos": [
+                1,
+                1,
+                1
+              ],
+              "facing": "north"
+            }
+          },
+          "revision": 3
+        },
+        "size": [
+          3,
+          4,
+          3
+        ],
+        "entities": [],
+        "blocks": [
+          {
+            "pos": [
+              0,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              2,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              2,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              2,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "nbt": {
+              "CustomName": "Pool supplies",
+              "id": "minecraft:chest"
+            },
+            "pos": [
+              0,
+              1,
+              0
+            ],
+            "state": 1
+          }
+        ],
+        "palette": [
+          {
+            "id": "minecraft:bricks"
+          },
+          {
+            "id": "minecraft:chest",
+            "properties": {
+              "waterlogged": "false",
+              "facing": "east",
+              "type": "single"
+            }
+          }
+        ],
+        "DataVersion": 5023
+      }
+    }
+  ],
+  "type": "worldarchitect:modular"
+}

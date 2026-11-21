@@ -10,7 +10,7 @@ Enable authoring in `config/worldarchitect/developer.json`, then restart:
 {"format":1,"developer_mode":true}
 ```
 
-In **Create New World → Customize**, configure the dimensions, then choose **Preset Studio**. Studio is available from the dimension manager in an authoring instance; an installed locked bundle retains its own editors. **Help** explains authoring, installation, lock modes and dependencies in game. A fully locked preset also has **Preset help**.
+In **Create New World → Customize**, configure the dimensions, then choose **Preset Studio**. Studio is available from the dimension manager in an authoring instance; an installed locked bundle retains its own editors. **Tools / help → Help** explains authoring, installation, lock modes and dependencies in game. A fully locked preset also has **Preset help**.
 
 ## Author a version
 
@@ -31,7 +31,7 @@ Imported modular definitions that are absent from the active registries can be v
 
 Copy an incoming bundle ZIP into `config/worldarchitect/imports`, choose **Import ZIP**, and enter its local filename. Import validates dependencies, profiles, locks and templates before loading the draft. Use **Save version** to retain it. Unsupported registry files, malformed templates, missing blocks/mods, invalid markers and oversized resources produce errors. Archive entry paths and filenames are restricted; archives are read directly rather than extracted into arbitrary directories.
 
-Bundles retain manifest format 1 and the existing saved-world archive contract. Alongside native `data/<namespace>/structure/<path>.nbt`, bundles support embedded `worldarchitect:modular` definitions at `data/<namespace>/worldgen/structure/<path>.json`. Other registry file types are outside this bundle format. The limits remain 128 combined template files, 4 MiB per template, 8 MiB per JSON document and 32 MiB per archive/template set. A Studio library holds up to 256 revisions.
+Ordinary bundles retain manifest format 1 and the existing saved-world archive contract. Inherited presets use format 2, described below. Alongside native `data/<namespace>/structure/<path>.nbt`, bundles support embedded `worldarchitect:modular` definitions at `data/<namespace>/worldgen/structure/<path>.json`. Other registry file types are outside this bundle format. The limits remain 128 combined template files, 4 MiB per template, 8 MiB per JSON document and 32 MiB per archive/template set. A Studio library holds up to 256 revisions.
 
 ## Install and enforce
 
@@ -68,3 +68,22 @@ The [ready-to-install examples](https://github.com/GWSheridan/World-Architect/tr
 ## Draft history and workbench export
 
 Use **History / recovery** for completed draft actions and interrupted-session recovery. Immutable saved releases remain separate from history. Save and validate the current draft before choosing **Workbench** to author a fingerprinted scenario for that exact revision. See [Draft History](Draft-History.md) and [Test Workbench](Test-Workbench.md).
+
+## Reusable base presets in 1.7
+
+Save and validate a parent revision, then choose **Tools / help → Derive from saved preset**. Select its saved version and choose a child library name and release. Studio pins the parent's preset ID, release and exact archive SHA-256. The child receives all effective generation settings and embedded resources. A changed or missing parent archive is refused while deriving; no existing revision is overwritten.
+
+Use **Inherited preset report** to inspect the pinned ancestry, policy and effective override paths. **Edit inherited override** accepts a JSON pointer, a JSON value and an optional remove operation. A pointer such as `/dimensions/minecraft:overworld/generator/profile/material` addresses one field. Escape a literal `~` as `~0` and `/` as `~1`. Object paths must already exist up to their final field; array edits address existing numeric indexes. Overrides validate before changing the draft. Normal dimension editors remain available within the inherited policy.
+
+A child may tighten its parent's locks but cannot broaden an edit scope, remove an inherited mod dependency or re-enable a disabled Structure Library. Locked world options remain fixed. Every embedded resource inherited from a locked parent is byte-pinned, including resources used by editable dimensions; add new resources for new structures instead of rewriting a pinned file. An unlocked parent permits generation changes and records its ancestry without imposing generation locks.
+
+Exports are self-contained. Clients and servers need the child ZIP and its external mods or registry dependencies; they do not need the parent ZIP. Deleting, replacing or releasing a later parent cannot change an exported child or an existing world's archived child. Creating an updated child requires deriving another immutable revision. Cycles, repeated ancestor identities and chains beyond eight parent revisions are refused. The embedded policy baseline is limited to 4 MiB and 64 levels. Format 2 is required exactly when `inheritance` is present; older releases refuse it.
+
+Dedicated authoring commands use the same validation:
+
+```text
+/wa_preset derive <parent> <release> <child> <child_release>
+/wa_preset override <child> <release> <new_release> "<json_pointer>" <json_value>
+```
+
+Both require administrator permission and developer mode. `override` saves a new immutable child version. See the [reusable Skyblock examples](https://github.com/GWSheridan/World-Architect/tree/release/1.7.0/examples/reusable-presets) for a base, a partially locked child and a fully locked child with bundled island templates and native End progression.

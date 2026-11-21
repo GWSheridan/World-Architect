@@ -74,6 +74,7 @@ final class DimensionFeaturesScreen extends Screen {
         category(Feature.CAVES, draft.caves().isPresent() ? 1 : 0, left + half + 8, 77, half, this::caves);
         category(Feature.FLUIDS, draft.sea().isPresent() ? 1 : 0, left, 105, half, this::fluids);
         category(Feature.STRUCTURES, draft.structures().size(), left + half + 8, 105, half, this::structures);
+        button(Component.literal("Structure districts"),left+half+8,129,half,()->minecraft.gui.setScreen(new StructureDistrictScreen(this,original.terrainRegions(),draft,updated->draft=updated))).active=editable.test(Feature.STRUCTURES);
         done = button(CommonComponents.GUI_DONE, left, 153, half, this::apply);
         button(CommonComponents.GUI_CANCEL, left + half + 8, 153, half, this::onClose);
         refresh();
@@ -171,7 +172,7 @@ final class DimensionFeaturesScreen extends Screen {
         super.extractRenderState(graphics, mouseX, mouseY, tick);
         graphics.centeredText(font, title, width / 2, top + 9, 0xFFF1E7CE);
         graphics.centeredText(font, font.plainSubstrByWidth(dimension.getString(), span), width / 2, top + 24, 0xFFCCCCCC);
-        var lines = font.split(status, span);
+        var lines = font.split(status, (span-8)/2);
         for (int i = 0; i < Math.min(2, lines.size()); i++) {
             graphics.text(font, lines.get(i), left, top + 130 + i * 9, done.active ? 0xFFCCCCCC : 0xFFFFAAAA);
         }

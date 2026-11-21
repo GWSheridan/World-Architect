@@ -14,5 +14,5 @@ public record WorkbenchEditPayload(String token,int serial,String operation,Stri
         ByteBufCodecs.stringUtf8(16),WorkbenchEditPayload::operation,ByteBufCodecs.stringUtf8(64),WorkbenchEditPayload::name,
         ByteBufCodecs.stringUtf8(WorkbenchScenario.MAX_BYTES),WorkbenchEditPayload::document,WorkbenchEditPayload::new);
     @Override public Type<? extends CustomPacketPayload> type(){return TYPE;}
-    public static void register(RegisterPayloadHandlersEvent event){event.registrar("1.6").playToServer(TYPE,STREAM_CODEC,(payload,context)->context.enqueueWork(()->{if(context.player() instanceof ServerPlayer player)WorkbenchStudio.handle(player,payload);}));}
+    public static void register(RegisterPayloadHandlersEvent event){event.registrar("1.7").playToServer(TYPE,STREAM_CODEC,(payload,context)->context.enqueueWork(()->{if(context.player() instanceof ServerPlayer player)WorkbenchStudio.handle(player,payload);}));}
 }

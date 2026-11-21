@@ -39,7 +39,7 @@ public final class SiteInspector {
     public static List<RandomSpreadStructurePlacement> placements(PresetStudio.Checked source,Identifier dimension,Identifier selected)throws IOException{
         var stem=source.preset().createWorldDimensions().dimensions().get(ResourceKey.create(Registries.LEVEL_STEM,dimension));if(stem==null||!(stem.generator() instanceof SolidColumnGenerator generator))throw new IOException("Select a managed solid-terrain dimension.");
         var holder=source.registries().lookupOrThrow(Registries.STRUCTURE).get(ResourceKey.create(Registries.STRUCTURE,selected)).orElseThrow(()->new IOException("Missing assembly."));
-        var result=Stream.concat(generator.structureRules().stream(),generator.rules().ordered().stream().flatMap(r->r.action().template().stream())).filter(r->r.structure().value()==holder.value()).map(r->new RandomSpreadStructurePlacement(r.spacing(),r.separation(),RandomSpreadType.LINEAR,selected.toString().hashCode()&Integer.MAX_VALUE)).toList();
+        var result=Stream.concat(generator.structureRules().stream(),generator.rules().ordered().stream().flatMap(r->r.action().template().stream())).filter(r->r.structure().value()==holder.value()).map(r->StructureDistricts.placement(r)).toList();
         if(result.isEmpty())throw new IOException("This assembly is not selected in that preset dimension.");return result;
     }
     public static CompoundTag inspect(Input input){

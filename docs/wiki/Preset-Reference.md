@@ -39,8 +39,12 @@ Solid terrain elevation is −2032–2028 and relief is 0–80, further constrai
 
 ## Bundle manifest
 
-Required keys are `format` (1), `preset`, `title`, `description`, `author`, `release`, `lock` and `options`. The preset ID uses a non-Minecraft namespace. Title is 1–80 characters, description up to 512, and author 1–64. Release names are 1–40 characters using letters, digits, dots, underscores or hyphens, beginning with a letter or digit.
+Required keys are `format` (1 for ordinary bundles, 2 for inherited bundles), `preset`, `title`, `description`, `author`, `release`, `lock` and `options`. The preset ID uses a non-Minecraft namespace. Title is 1–80 characters, description up to 512, and author 1–64. Release names are 1–40 characters using letters, digits, dots, underscores or hyphens, beginning with a letter or digit.
 
 Optional keys are `editable_dimensions` (empty, up to 128), `editable_features` (empty), `editable_options` (empty), `required_mods` (empty, up to 256) and `allow_structure_library` (true). Edit lists belong only to partial locks; a partial lock must allow at least one edit. Give a dimension either whole-dimension permission or feature permissions.
 
 Feature categories are `biomes`, `ores`, `decorations`, `caves`, `fluids`, `structures` and `native_features`. The Minecraft `options` object and editable world-option names use `seed`, `generate_structures` and `bonus_chest`. Use Studio to produce a validated manifest and review its dependency report before release.
+
+In 1.7, corridor profiles explicitly use generator version 6; see [Regional Terrain](Regional-Terrain.md). Structure districts add `content.version: 2` and per-structure `district` settings; see [Structures](Structures.md). All older profile encodings remain supported.
+
+Inherited bundle format 2 adds `inheritance` with `parents` (preset/release/SHA-256 identities), `policy` (the immediate parent's lock, options, edit scopes, mods and library permission), `baseline` (its effective preset JSON) and `resource_hashes` (embedded resource paths to SHA-256). Ancestry is flattened, not recursively nested. Studio derives this metadata from a validated saved parent and compiles a complete child export. See [Preset Studio](Preset-Studio.md) for bounds and policy enforcement.

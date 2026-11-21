@@ -12,6 +12,7 @@ public final class RegionalTerrain {
     public static final int VERSION = 3, MAX_REGIONS = 32, WORLD_BOUND = 29_999_984;
     public static final int POLYGON_VERSION = 4, MAX_VERTICES = 64, MAX_PROFILE_VERTICES = 512;
     public static final int COMPOSITE_VERSION = 5, MAX_COMPOSITE_DEPTH = 8;
+    public static final int CORRIDOR_VERSION = 6;
     public static final Codec<RegionalTerrain> CODEC = Zone.CODEC.listOf(1, MAX_REGIONS).xmap(RegionalTerrain::new, RegionalTerrain::zones).validate(RegionalTerrain::validate);
     private final List<Zone> zones, ordered;
     private final Map<String,Zone> named;
@@ -21,7 +22,7 @@ public final class RegionalTerrain {
         this.zones = List.copyOf(zones);
         this.ordered = zones.stream().sorted(Comparator.comparingInt(Zone::priority).reversed()).toList();
         var names=new LinkedHashMap<String,Zone>();zones.forEach(z->names.put(z.name(),z));named=Map.copyOf(names);
-        version=zones.stream().anyMatch(z->z.mask()==Mask.COMPOSITE)?COMPOSITE_VERSION:zones.stream().anyMatch(z->z.mask()==Mask.POLYGON)?POLYGON_VERSION:VERSION;
+        version=zones.stream().anyMatch(z->z.mask()==Mask.CORRIDOR)?CORRIDOR_VERSION:zones.stream().anyMatch(z->z.mask()==Mask.COMPOSITE)?COMPOSITE_VERSION:zones.stream().anyMatch(z->z.mask()==Mask.POLYGON)?POLYGON_VERSION:VERSION;
         String failure=null;try{if(zones.size()>MAX_REGIONS)throw new IllegalArgumentException("At most 32 terrain regions are supported.");var seen=new HashMap<String,Integer>();for(var z:zones)graph(z.name(),new HashSet<>(),0,seen);}catch(IllegalArgumentException e){failure=e.getMessage();}graphError=failure;
     }
     public List<Zone> zones() { return zones; }
@@ -31,7 +32,7 @@ public final class RegionalTerrain {
     public List<Zone> ordered() { return ordered; }
     public DataResult<RegionalTerrain> validate() {
         if (zones.isEmpty() || zones.size() > MAX_REGIONS || zones.stream().map(Zone::name).distinct().count() != zones.size()) return DataResult.error(() -> "Use 1–32 regions with unique names.");
-        if (zones.stream().mapToLong(z -> z.vertices().size()).sum() > MAX_PROFILE_VERTICES) return DataResult.error(() -> "A dimension supports at most 512 polygon vertices.");
+        if (zones.stream().mapToLong(z -> z.vertices().size()+z.corridor().map(c->c.points().size()).orElse(0)).sum() > MAX_PROFILE_VERTICES) return DataResult.error(() -> "A dimension supports at most 512 polygon and corridor points.");
         for (var zone : zones) { var error = zone.validate().error(); if (error.isPresent()) return DataResult.error(() -> error.orElseThrow().message()); }
         if(graphError!=null)return DataResult.error(()->graphError);
         try { var memo=new HashMap<String,int[]>();for(var zone:zones) bounds(zone.name(),new HashSet<>(),0,memo); }
@@ -39,12 +40,12 @@ public final class RegionalTerrain {
         return DataResult.success(this);
     }
     public Optional<Holder<Biome>> biomeAt(int x, int z) {
-        if(version()==COMPOSITE_VERSION){var sample=distances(x,z);return ordered.stream().filter(zone->zone.biome().isPresent()&&weight(zone,sample.get(zone.name()))>=.5).map(zone->zone.biome().orElseThrow()).findFirst();}
+        if(version()>=COMPOSITE_VERSION){var sample=distances(x,z);return ordered.stream().filter(zone->zone.biome().isPresent()&&weight(zone,sample.get(zone.name()))>=.5).map(zone->zone.biome().orElseThrow()).findFirst();}
         return ordered.stream().filter(zone -> zone.biome().isPresent() && zone.weight(x,z) >= 0.5).map(zone -> zone.biome().orElseThrow()).findFirst();
     }
     /** One bounded, memoized evaluation shared by terrain, rule masks and previews. */
     public Map<String,Double> distances(int x,int z){if(graphError!=null)throw new IllegalArgumentException(graphError);var result=new HashMap<String,Double>();for(var zone:zones)distance(zone.name(),x,z,result,new HashSet<>(),0);return Map.copyOf(result);}
-    public double edgeDistance(Zone zone,int x,int z){return version()==COMPOSITE_VERSION?distance(zone.name(),x,z,new HashMap<>(),new HashSet<>(),0):zone.edgeDistance(x,z);}
+    public double edgeDistance(Zone zone,int x,int z){return version()>=COMPOSITE_VERSION?distance(zone.name(),x,z,new HashMap<>(),new HashSet<>(),0):zone.edgeDistance(x,z);}
     public static double weight(Zone zone,double edge){if(edge<0)return 0;if(zone.transition()==0)return 1;double t=Math.clamp(edge/zone.transition(),0,1);return t*t*(3-2*t);}
     private double distance(String name,int x,int z,Map<String,Double> memo,Set<String> path,int depth){
         if(memo.containsKey(name))return memo.get(name);var zone=named.get(name);
@@ -67,7 +68,7 @@ public final class RegionalTerrain {
     @Override public boolean equals(Object o) { return o instanceof RegionalTerrain other && zones.equals(other.zones); }
     @Override public int hashCode() { return zones.hashCode(); }
     public enum Mask implements StringRepresentable {
-        RECTANGLE, CIRCLE, POLYGON, COMPOSITE;
+        RECTANGLE, CIRCLE, POLYGON, COMPOSITE, CORRIDOR;
         @Override public String getSerializedName() { return name().toLowerCase(Locale.ROOT); }
     }
     public enum Operation implements StringRepresentable {UNION,INTERSECTION,SUBTRACT;@Override public String getSerializedName(){return name().toLowerCase(Locale.ROOT);}}
@@ -80,8 +81,31 @@ public final class RegionalTerrain {
                 ExactInt.range(-WORLD_BOUND, WORLD_BOUND).fieldOf("x").forGetter(Vertex::x),
                 ExactInt.range(-WORLD_BOUND, WORLD_BOUND).fieldOf("z").forGetter(Vertex::z)).apply(b, Vertex::new));
     }
+    /** Union of round-ended segments. Crossings and closed paths need no chunk state. */
+    public record Corridor(List<Vertex> points, int radius) {
+        public Corridor { points=List.copyOf(points); }
+        public static final Codec<Corridor> CODEC=RecordCodecBuilder.<Corridor>create(b->b.group(
+                Vertex.CODEC.listOf(2,MAX_VERTICES).fieldOf("points").forGetter(Corridor::points),
+                Codec.intRange(1,4096).fieldOf("radius").forGetter(Corridor::radius)).apply(b,Corridor::new)).validate(Corridor::validate);
+        public DataResult<Corridor> validate(){
+            if(radius<1||radius>4096||points.size()<2||points.size()>MAX_VERTICES)return DataResult.error(()->"Use 2–64 corridor points and a radius of 1–4096 blocks.");
+            for(int i=0;i<points.size();i++){var p=points.get(i);if(Math.abs((long)p.x())+radius>WORLD_BOUND||Math.abs((long)p.z())+radius>WORLD_BOUND||i>0&&p.equals(points.get(i-1)))return DataResult.error(()->"Corridor points must fit inside world bounds with their radius and consecutive points must differ.");}
+            return DataResult.success(this);
+        }
+        public int minX(){return points.stream().mapToInt(Vertex::x).min().orElse(0)-radius;}
+        public int minZ(){return points.stream().mapToInt(Vertex::z).min().orElse(0)-radius;}
+        public int maxX(){return points.stream().mapToInt(Vertex::x).max().orElse(0)+radius;}
+        public int maxZ(){return points.stream().mapToInt(Vertex::z).max().orElse(0)+radius;}
+        public double edgeDistance(int x,int z){
+            double best=Double.POSITIVE_INFINITY;
+            for(int i=1;i<points.size();i++){var a=points.get(i-1);var b=points.get(i);double dx=(double)b.x()-a.x(),dz=(double)b.z()-a.z(),ox=(double)x-a.x(),oz=(double)z-a.z(),t=Math.clamp((ox*dx+oz*dz)/(dx*dx+dz*dz),0,1),px=ox-t*dx,pz=oz-t*dz;best=Math.min(best,px*px+pz*pz);}
+            return radius-StrictMath.sqrt(best);
+        }
+    }
     public record Zone(String name, Mask mask, int minX, int minZ, int maxX, int maxZ, int priority, int transition,
-                       int elevation, int relief, AdvancedTerrain terrain, Optional<Holder<Biome>> biome, List<Vertex> vertices, Optional<Composition> composition) {
+                       int elevation, int relief, AdvancedTerrain terrain, Optional<Holder<Biome>> biome, List<Vertex> vertices, Optional<Composition> composition, Optional<Corridor> corridor) {
+        /** Retained API 1 composite constructor. */
+        public Zone(String name,Mask mask,int minX,int minZ,int maxX,int maxZ,int priority,int transition,int elevation,int relief,AdvancedTerrain terrain,Optional<Holder<Biome>> biome,List<Vertex> vertices,Optional<Composition> composition){this(name,mask,minX,minZ,maxX,maxZ,priority,transition,elevation,relief,terrain,biome,vertices,composition,Optional.empty());}
         public Zone(String name,Mask mask,int minX,int minZ,int maxX,int maxZ,int priority,int transition,int elevation,int relief,AdvancedTerrain terrain,Optional<Holder<Biome>> biome,List<Vertex> vertices){this(name,mask,minX,minZ,maxX,maxZ,priority,transition,elevation,relief,terrain,biome,vertices,Optional.empty());}
         /** Retained API 1 constructor; legacy masks keep their exact encoding. */
         public Zone(String name, Mask mask, int minX, int minZ, int maxX, int maxZ, int priority, int transition,
@@ -99,7 +123,8 @@ public final class RegionalTerrain {
                 Codec.intRange(0,TerrainShape.MAX_RELIEF).fieldOf("relief").forGetter(Zone::relief),
                 AdvancedTerrain.CODEC.fieldOf("terrain").forGetter(Zone::terrain), Codec.lazyInitialized(() -> Biome.CODEC).optionalFieldOf("biome").forGetter(Zone::biome),
                 Vertex.CODEC.listOf(0,MAX_VERTICES).optionalFieldOf("vertices",List.of()).forGetter(Zone::vertices),
-                Composition.CODEC.optionalFieldOf("composition").forGetter(Zone::composition)
+                Composition.CODEC.optionalFieldOf("composition").forGetter(Zone::composition),
+                Corridor.CODEC.optionalFieldOf("corridor").forGetter(Zone::corridor)
         ).apply(b,Zone::new)).validate(Zone::validate);
         public DataResult<Zone> validate() {
             long width=(long)maxX-minX, depth=(long)maxZ-minZ;
@@ -111,16 +136,22 @@ public final class RegionalTerrain {
                 return DataResult.error(() -> "Region bounds, name, transition or terrain are invalid. Circles need square bounds; regional terrain needs solid landforms.");
             if (mask != Mask.POLYGON && !vertices.isEmpty()) return DataResult.error(() -> "Only polygon masks accept vertices.");
             if((mask==Mask.COMPOSITE)!=composition.isPresent())return DataResult.error(()->"Only composite masks require a composition.");
+            if((mask==Mask.CORRIDOR)!=corridor.isPresent())return DataResult.error(()->"Only corridor masks require a corridor path.");
+            if(corridor.isPresent()){var c=corridor.orElseThrow();if(c.validate().error().isPresent()||minX!=c.minX()||minZ!=c.minZ()||maxX!=c.maxX()||maxZ!=c.maxZ()||transition>c.radius())return DataResult.error(()->"Corridor bounds must follow the path and radius; feathering cannot exceed its radius.");}
             if(composition.isPresent()&&Composition.CODEC.encodeStart(JsonOps.INSTANCE,composition.orElseThrow()).error().isPresent())return DataResult.error(()->"Use 2–8 distinct valid operands.");
             if (mask == Mask.POLYGON && !validPolygon()) return DataResult.error(() -> "Use 3–64 unique vertices in a simple polygon with nonzero area and matching derived bounds. Holes and crossings are not supported.");
             return DataResult.success(this);
         }
         public Zone withVertices(List<Vertex> points) {
+            if(mask==Mask.CORRIDOR)return withCorridor(new Corridor(points,corridor.orElseThrow().radius()));
             return new Zone(name,Mask.POLYGON,points.stream().mapToInt(Vertex::x).min().orElse(0),points.stream().mapToInt(Vertex::z).min().orElse(0),
                     points.stream().mapToInt(Vertex::x).max().orElse(0),points.stream().mapToInt(Vertex::z).max().orElse(0),priority,transition,elevation,relief,terrain,biome,points);
         }
+        public List<Vertex> editablePoints(){return corridor.map(Corridor::points).orElse(vertices);}
+        public Zone withCorridor(Corridor path){path.validate().getOrThrow();return new Zone(name,Mask.CORRIDOR,path.minX(),path.minZ(),path.maxX(),path.maxZ(),priority,Math.min(transition,path.radius()),elevation,relief,terrain,biome,List.of(),Optional.empty(),Optional.of(path));}
         public Zone translated(int dx,int dz) {
             if(mask==Mask.COMPOSITE)throw new IllegalArgumentException("Move a composite region's operands instead.");
+            if(mask==Mask.CORRIDOR)return withCorridor(new Corridor(corridor.orElseThrow().points().stream().map(p->new Vertex(Math.addExact(p.x(),dx),Math.addExact(p.z(),dz))).toList(),corridor.orElseThrow().radius()));
             return new Zone(name,mask,Math.addExact(minX,dx),Math.addExact(minZ,dz),Math.addExact(maxX,dx),Math.addExact(maxZ,dz),priority,transition,elevation,relief,terrain,biome,
                     vertices.stream().map(p -> new Vertex(Math.addExact(p.x,dx),Math.addExact(p.z,dz))).toList());
         }
@@ -150,6 +181,7 @@ public final class RegionalTerrain {
         }
         public double geometricDistance(int x,int z){return distance(x,z,true);}
         private double distance(int x,int z,boolean full) {
+            if(mask==Mask.CORRIDOR)return corridor.orElseThrow().edgeDistance(x,z);
             if(mask==Mask.RECTANGLE)return Math.min(Math.min((double)x-minX,(double)maxX-x),Math.min((double)z-minZ,(double)maxZ-z));
             if(mask==Mask.POLYGON){
                 if(!full&&(x<minX||x>maxX||z<minZ||z>maxZ))return -1;

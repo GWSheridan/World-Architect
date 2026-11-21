@@ -26,9 +26,10 @@ final class AuthoringHistoryScreen extends Screen {
         button("Redo", left + half + 8, 34, half, ()->journal.canRedo()&&!journal.pending(), () -> {journal.step(false,restore,snapshot);onClose();});
         button("Restore recovery", left, 58, half, journal::canRecover, () -> { restore.accept(journal.recovery()); journal.resolved(snapshot.get()); onClose(); });
         button("Discard recovery", left + half + 8, 58, half, journal::pending, () -> { journal.discard(); rebuildWidgets(); });
+        int columns=86+Math.max(0,actions.size()-1)*23+20>height-58?2:1;
         for (int i = 0; i < actions.size(); i++) {
             var action = actions.get(i);
-            button(action.label(), left, 86 + i * 23, span, ()->!journal.pending()&&action.enabled().getAsBoolean(), () -> { action.run().run(); if(minecraft.gui.screen()==this)onClose(); });
+            button(action.label(), left+(i%columns)*(half+8), 86+(i/columns)*23, columns==1?span:half, ()->!journal.pending()&&action.enabled().getAsBoolean(), () -> { action.run().run(); if(minecraft.gui.screen()==this)onClose(); });
         }
         button("Back", left, height - 26, span, () -> true, this::onClose);
     }

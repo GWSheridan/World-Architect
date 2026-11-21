@@ -14,12 +14,14 @@ public final class BenchmarkWorldAudit {
     public static void main(String[] args) throws Exception {
         output = Path.of(args[1]);
         if(args.length>3)size=Integer.parseInt(args[3]);if(args.length>4)samples=Integer.parseInt(args[4]);
-        if(size<6||size>8||samples<2||samples>5)throw new IllegalArgumentException("Invalid benchmark sampling plan");
+        if(size<6||size>32||samples<2||samples>5)throw new IllegalArgumentException("Invalid benchmark sampling plan");
         if (args.length > 2 && !args[2].isEmpty()) compare("same-binary 0.9.0 native control", Path.of(args[0], "normal", "world"), Path.of(args[2]), false);
-        for (String profile : new String[] {"normal", "void", "single-block", "layered", "structure-heavy"}) {
+        var profiles=args.length>5?args[5].split(","):new String[] {"normal", "void", "single-block", "layered", "structure-heavy"};
+        if(profiles.length<1||profiles.length>5||java.util.Arrays.stream(profiles).distinct().count()!=profiles.length||java.util.Arrays.stream(profiles).anyMatch(profile->!java.util.List.of("normal","void","single-block","layered","structure-heavy").contains(profile)))throw new IllegalArgumentException("Invalid benchmark profiles");
+        for (String profile : profiles) {
             compare(profile, Path.of(args[0], profile, "world"), Path.of(args[1], profile, "world"), !profile.equals("normal"));
         }
-        int chunks=size*size*samples;System.out.println("Compared "+(chunks*5)+" measured chunks: "+(chunks*4)+" managed chunks strictly; "+chunks+" native chunks diagnostically.");
+        int chunks=size*size*samples;System.out.println("Compared "+(chunks*profiles.length)+" measured chunks across "+profiles.length+" profiles; native normal terrain remains diagnostic.");
     }
     private static void compare(String profile, Path left, Path right, boolean strict) throws Exception {
         var a = new HashMap<String, CompoundTag>(); var b = new HashMap<String, CompoundTag>();

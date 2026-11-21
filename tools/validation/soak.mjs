@@ -5,12 +5,13 @@ import {createHash} from 'node:crypto';
 import {gradle} from './process.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const args=Object.fromEntries(Array.from({length:(process.argv.length-2)/2},(_,i)=>process.argv.slice(2+i*2,4+i*2)));
-for(const key of Object.keys(args))if(!['--jar','--fixture','--bundle','--output','--options','--port','--rounds','--round-seconds','--explore-dimension','--site-structure','--site-kind'].includes(key))throw Error('Unknown option '+key);
+for(const key of Object.keys(args))if(!['--jar','--fixture','--bundle','--output','--options','--port','--rounds','--round-seconds','--explore-dimension','--site-structure','--site-kind','--district-dimension','--district-structure'].includes(key))throw Error('Unknown option '+key);
 for(const key of ['--jar','--fixture','--bundle','--output','--options'])if(!args[key])throw Error('Missing '+key);
 const output=resolve(root,args['--output']),port=Number(args['--port']||25960),rounds=Number(args['--rounds']||20),seconds=Number(args['--round-seconds']||180);
 const exploreDimension=args['--explore-dimension']||'minecraft:overworld';
 const siteKind=args['--site-kind']||'vertical';if(!['vertical','prepared','themed'].includes(siteKind))throw Error('Invalid site fixture kind');
-for(const id of [exploreDimension,args['--site-structure']].filter(Boolean))if(!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(id))throw Error('Invalid fixture resource ID');
+for(const id of [exploreDimension,args['--site-structure'],args['--district-dimension'],args['--district-structure']].filter(Boolean))if(!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(id))throw Error('Invalid fixture resource ID');
+if(Boolean(args['--district-dimension'])!==Boolean(args['--district-structure']))throw Error('Choose a district dimension and structure together');
 if(!relative(root,output).startsWith('build'+(process.platform==='win32'?'\\':'/')))throw Error('Use a new build/ directory');
 if(!Number.isInteger(port)||port<1024||port>65535||!Number.isInteger(rounds)||rounds<1||rounds>40||!Number.isInteger(seconds)||seconds<1||seconds>180)throw Error('Invalid workload bounds');
 await fs.mkdir(output,{recursive:false});
@@ -104,6 +105,7 @@ try{
   await command(`wa_validate site_generation ${siteKind} ${args['--site-structure']} ${exploreDimension} 1`);await server.wait(siteKind==='vertical'?'WA15_GENERATION_PASS':'WA16_GENERATION_PASS',180,['WA_SITE_GENERATION_FAILED']);
   results.tests.push({case:'connected-site-preview-scales-cancel-late-result-and-revoked-permission',status:'passed'});
  }
+ if(args['--district-dimension']){await command(`wa_validate site_generation district ${args['--district-structure']} ${args['--district-dimension']} 1`);await server.wait('WA17_GENERATION_PASS kind=district stage=1',180,['WA_SITE_GENERATION_FAILED']);}
  await command('deop WA12Alice');await command('gamemode creative @a');await command('dragon_test entry');
  await untilFight(d=>d.entities===1&&!d.dragon_killed);await command('dragon_test kill');await untilFight(d=>d.entities===0&&d.dragon_killed);
  await command('dragon_test travel');await server.wait('DRAGON_GATEWAY_ROUNDTRIP_PASS');await command('dragon_test rewards');await server.wait('DRAGON_REWARDS_PASS');await command('dragon_test ritual');await untilFight(d=>d.respawn_stage&&d.respawn_time>0);
@@ -112,9 +114,9 @@ try{
  for(const p of players){await act(p,['COMMAND wa_island home']);const h=homes[p];await at(p,h[0],Number(h[1]),Number(h[2]),Number(h[3]));}
  await command('gamemode spectator @a');const started=Date.now();
  for(let round=0;round<rounds;round++){
-  for(const dimension of [exploreDimension,'minecraft:the_end'])await command(`execute in ${dimension} run forceload remove all`);
+  for(const dimension of [...new Set([exploreDimension,'minecraft:the_end',args['--district-dimension']].filter(Boolean))])await command(`execute in ${dimension} run forceload remove all`);
   for(let i=0;i<players.length;i++){
-   const dimension=i%2?'minecraft:the_end':exploreDimension,coordinate=round===0&&dimension===exploreDimension&&args['--site-structure']?i*96:32768+round*512+i*96,end=coordinate+48;
+   const dimension=i%2?'minecraft:the_end':i===2&&args['--district-dimension']?args['--district-dimension']:exploreDimension,coordinate=round===0&&dimension===exploreDimension&&args['--site-structure']?i*96:32768+round*512+i*96,end=coordinate+48;
    await command(`execute in ${dimension} run forceload add ${coordinate} ${coordinate} ${end} ${end}`);
    await command(`execute in ${dimension} run tp WA12${players[i]} ${coordinate+.5} 140 ${coordinate+.5}`);await at(players[i],dimension,coordinate+.5,140,coordinate+.5);
    await act(players[i],['COMMAND wa_structure list']);
@@ -128,6 +130,7 @@ try{
  results.connected_seconds=(Date.now()-started)/1000;results.requested_chunks=rounds*64;results.homes=homes;results.final_positions=Object.fromEntries(await Promise.all(players.map(async p=>[p,location(await read(observed(p)))])));results.tests.push({case:'native-ritual-restart-second-kill-four-player-soak',status:'passed'});await close(clients);
  clients=await open('restart');for(const p of players){const saved=results.final_positions[p];await at(p,saved[0],Number(saved[1]),Number(saved[2]),Number(saved[3]));await act(p,['COMMAND wa_island home']);const h=homes[p];await at(p,h[0],Number(h[1]),Number(h[2]),Number(h[3]));}
  if(args['--site-structure']){await command(`wa_validate site_generation ${siteKind} ${args['--site-structure']} ${exploreDimension} 2`);await server.wait(siteKind==='vertical'?'WA15_GENERATION_PASS':'WA16_GENERATION_PASS',180,['WA_SITE_GENERATION_FAILED']);}
+ if(args['--district-dimension']){await command(`wa_validate site_generation district ${args['--district-structure']} ${args['--district-dimension']} 2`);await server.wait('WA17_GENERATION_PASS kind=district stage=2',180,['WA_SITE_GENERATION_FAILED']);results.tests.push({case:'custom-district-spacing-regions-markers-persisted-starts',status:'passed'});}
  results.tests.push({case:'after-soak-positions-ledger-safe-home-and-generation-persistence',status:'passed'});await close(clients);results.status='passed';
 }catch(error){results.status='failed';results.error=error.stack;process.exitCode=1;}
 finally{

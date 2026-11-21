@@ -90,6 +90,7 @@ public final class PresetBundle {
     public BundleManifest manifest() {
         return manifest;
     }
+    String fingerprint(){return fingerprint;}
 
     /** Library labels need metadata only; a missing mod must not hide unrelated saved revisions. */
     static BundleManifest summary(Path archive) throws IOException {
@@ -152,8 +153,10 @@ public final class PresetBundle {
 
     WorldPreset expectedPreset(HolderLookup.Provider registries) {
         var ops = RegistryOps.create(JsonOps.INSTANCE, registries);
-        return WorldPreset.DIRECT_CODEC.parse(ops, preset).getOrThrow(message ->
+        var decoded=WorldPreset.DIRECT_CODEC.parse(ops, preset).getOrThrow(message ->
                 ModpackRuntime.problem("Cannot decode bundled preset " + manifest.preset() + ": " + message));
+        if(manifest.inheritance().isPresent())try{manifest.inheritance().orElseThrow().enforce(new PresetStudio.Draft(manifest,preset,templates()),decoded,registries);}catch(IOException e){throw ModpackRuntime.problem(e.getMessage());}
+        return decoded;
     }
 
     public CompoundTag pin() {

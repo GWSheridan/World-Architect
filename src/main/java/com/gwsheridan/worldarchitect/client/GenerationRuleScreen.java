@@ -25,6 +25,7 @@ final class GenerationRuleScreen<T> extends Screen {
     private final DynamicOps<JsonElement> ops;
     private final List<Field> fields;
     private final List<List<String>> drafts = new ArrayList<>();
+    private final List<JsonObject> preserved = new ArrayList<>();
     private final int limit;
     private final Consumer<List<T>> doneCallback;
     private final Component guidance;
@@ -48,6 +49,7 @@ final class GenerationRuleScreen<T> extends Screen {
         this.doneCallback = doneCallback;
         for (T rule : rules) {
             JsonObject encoded = codec.encodeStart(ops, rule).getOrThrow().getAsJsonObject();
+            preserved.add(encoded.deepCopy());
             List<String> values = new ArrayList<>();
             for (Field field : fields) {
                 JsonElement value = encoded.get(field.name());
@@ -74,10 +76,12 @@ final class GenerationRuleScreen<T> extends Screen {
         control(Component.literal("→"), left + span - 34, navigationY, 34, () -> select(index + 1)).active = index < drafts.size() - 1;
         control(text("add"), left + offset, editY, half - offset, () -> {
             drafts.add(new ArrayList<>(fields.stream().map(Field::initial).toList()));
+            preserved.add(new JsonObject());
             select(drafts.size() - 1);
         }).active = drafts.size() < limit;
         control(text("remove"), left + half + 8, editY, half - offset, () -> {
             drafts.remove(index);
+            preserved.remove(index);
             select(Math.max(0, Math.min(index, drafts.size() - 1)));
         }).active = !drafts.isEmpty();
         done = control(CommonComponents.GUI_DONE, left, footer, half, this::save);
@@ -129,11 +133,12 @@ final class GenerationRuleScreen<T> extends Screen {
     private DataResult<List<T>> parse() {
         List<T> decoded = new ArrayList<>();
         for (int row = 0; row < drafts.size(); row++) {
-            JsonObject json = new JsonObject();
+            JsonObject json = preserved.get(row).deepCopy();
             List<String> draft = drafts.get(row);
             for (int slot = 0; slot < fields.size(); slot++) {
                 Field field = fields.get(slot);
                 String value = draft.get(slot).strip();
+                json.remove(field.name());
                 if (value.isEmpty() && field.optional()) {
                     continue;
                 }

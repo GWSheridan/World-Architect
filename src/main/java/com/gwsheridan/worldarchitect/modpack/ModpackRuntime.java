@@ -165,7 +165,7 @@ public final class ModpackRuntime {
         }
     }
 
-    private static void compareDimensions(BundleManifest manifest, WorldDimensions expected, WorldDimensions actual, HolderLookup.Provider registries) {
+    static void compareDimensions(BundleManifest manifest, WorldDimensions expected, WorldDimensions actual, HolderLookup.Provider registries) {
         if (!actual.dimensions().keySet().equals(expected.dimensions().keySet())) {
             throw problem("The dimension set differs from bundled preset " + manifest.preset());
         }
@@ -192,6 +192,8 @@ public final class ModpackRuntime {
             for (Feature feature : features) {
                 feature.fields().forEach(content::remove);
             }
+            // Districts version the structure field; an allowed structure edit may change that version.
+            if(features.contains(Feature.STRUCTURES))content.remove("version");
             if (content.isEmpty()) {
                 profile.remove("content");
             }

@@ -56,6 +56,7 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     private final RuleSet rules;
     private final List<ContentProfile.StructureRule> structureRules;
     private final boolean hasMaterialRules;
+    private final boolean hasDistricts;
 
     protected SolidColumnGenerator(Holder<Biome> biome, int elevation, int relief, Optional<DimensionProfile> dimensionProfile) {
         this(biome, new TerrainShape(elevation, relief), List.of(), dimensionProfile);
@@ -72,6 +73,7 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
         this.content = dimensionProfile.map(DimensionProfile::content).orElse(ContentProfile.EMPTY);
         this.rules = dimensionProfile.map(DimensionProfile::rules).orElse(RuleSet.EMPTY);
         this.structureRules = RuleExecution.structures(content, rules);
+        this.hasDistricts = structureRules.stream().anyMatch(rule->rule.district().isPresent());
         this.hasMaterialRules = rules.ordered().stream().anyMatch(rule -> rule.action().type() == RuleSet.Kind.MATERIAL);
     }
 
@@ -110,6 +112,7 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     public final RuleSet rules() { return rules; }
     public final Optional<com.gwsheridan.worldarchitect.config.RegionalTerrain> terrainRegions(){return shape.regions();}
     public final List<ContentProfile.StructureRule> structureRules() { return structureRules; }
+    public final boolean hasStructureDistricts(){return hasDistricts;}
 
     public final RuleSet.Context ruleContext(long seed, int x, int y, int z) {
         Holder<Biome> selected = biomeSource instanceof EndArenaBiomeSource arena ? arena.sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biomeSource instanceof RegionBiomeSource regions ? regions.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biomeSource instanceof ZoneBiomeSource zones ? zones.sample(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)) : biome;
@@ -118,6 +121,9 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
 
     public Optional<String> contentProblem() {
         if (shape.validate().error().isPresent()) return Optional.of(shape.validate().error().orElseThrow().message());
+        var districtProblem=com.gwsheridan.worldarchitect.structure.StructureDistricts.problem(structureRules,shape.regions(),true);if(districtProblem.isPresent())return districtProblem;
+        if(rules.ordered().stream().flatMap(r->r.action().template().stream()).anyMatch(r->r.district().isPresent()))return Optional.of("District membership belongs in Features → Structures, not a template action.");
+        if(rules.ordered().stream().flatMap(r->r.action().template().stream()).anyMatch(r->content.structures().stream().anyMatch(c->c.district().isPresent()&&c.structure().equals(r.structure()))))return Optional.of("A district assembly cannot also be selected by a template rule.");
         var regionProblem=rules.regionProblem(shape.regions());if(regionProblem.isPresent())return regionProblem;
         int min = getMinY();
         int max = min + getGenDepth() - 1;
@@ -188,6 +194,7 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
 
     @Override
     public ChunkGeneratorStructureState createState(HolderLookup<StructureSet> sets, RandomState state, long seed) {
+        if(structureRules.stream().anyMatch(r->r.district().isPresent()))return ChunkGeneratorStructureState.createForFlat(state,seed,getOrigin(state),biomeSource,com.gwsheridan.worldarchitect.structure.StructureDistricts.placements(structureRules));
         return ChunkGeneratorStructureState.createForFlat(state, seed, getOrigin(state), biomeSource, NativeStructures.placements(structureRules.stream()));
     }
 
@@ -406,6 +413,7 @@ public abstract class SolidColumnGenerator extends ChunkGenerator implements Man
     }
 
     private Column sampleColumn(int x, int z, LevelHeightAccessor height, long seed) {
+        if (shape.version() == com.gwsheridan.worldarchitect.config.RegionalTerrain.CORRIDOR_VERSION) return com.gwsheridan.worldarchitect.worldgen.terrain.HeightfieldV6.sample(shape, seed, x, z, height);
         if (shape.version() == com.gwsheridan.worldarchitect.config.RegionalTerrain.COMPOSITE_VERSION) return com.gwsheridan.worldarchitect.worldgen.terrain.HeightfieldV5.sample(shape, seed, x, z, height);
         if (shape.version() == com.gwsheridan.worldarchitect.config.RegionalTerrain.POLYGON_VERSION) return com.gwsheridan.worldarchitect.worldgen.terrain.HeightfieldV4.sample(shape, seed, x, z, height);
         if (shape.regions().isPresent()) return com.gwsheridan.worldarchitect.worldgen.terrain.HeightfieldV3.sample(shape, seed, x, z, height);

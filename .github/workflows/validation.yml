@@ -32,10 +32,10 @@ jobs:
         shell: pwsh
         run: |
           $toolchain = "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64"
-          if ($IsWindows) { & ./gradlew.bat -I tools/validation/server.init.gradle build acceptanceJar prepareValidationServerRun --console=plain $toolchain }
-          else { & sh ./gradlew -I tools/validation/server.init.gradle build acceptanceJar prepareValidationServerRun --console=plain $toolchain }
+          if ($IsWindows) { & ./gradlew.bat -I tools/validation/server.init.gradle build acceptanceJar benchmarkProbeJar prepareValidationServerRun --console=plain $toolchain }
+          else { & sh ./gradlew -I tools/validation/server.init.gradle build acceptanceJar benchmarkProbeJar prepareValidationServerRun --console=plain $toolchain }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node --test tools/workbench/scenario.test.mjs tools/workbench/batch.test.mjs
+          node --test tools/workbench/scenario.test.mjs tools/workbench/batch.test.mjs tools/validation/benchmark-analysis.test.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -76,6 +76,32 @@ jobs:
             if ((Get-FileHash $jar).Hash.ToLowerInvariant() -ne '27a6a5e55567e04db4c93818daa2a866bd9bc0d0313780b08f17dcba1e20be42') { throw 'Published 1.5 source produced a different JAR' }
             Copy-Item -LiteralPath $jar -Destination (Join-Path $target 'worldarchitect-1.5.0.jar')
           } finally { Pop-Location }
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ef7de4221eb464105e374a304b37bbcbc6a17156
+          path: build/frozen-1.6-source
+          persist-credentials: false
+      - name: Build published 1.6 comparison input
+        shell: pwsh
+        run: |
+          $target = Join-Path $PWD 'build/validation-inputs'
+          Push-Location build/frozen-1.6-source
+          try {
+            $toolchain = "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64"
+            if ($IsWindows) { & ./gradlew.bat jar --console=plain $toolchain }
+            else { & sh ./gradlew jar --console=plain $toolchain }
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $jar = 'build/libs/worldarchitect-1.6.0.jar'
+            if ((Get-FileHash $jar).Hash.ToLowerInvariant() -ne '57eda6cdd5dea8192fb252601c0c4366ac08cd4ae9d28d4c1cd115a333a84b56') { throw 'Published 1.6 source produced a different JAR' }
+            Copy-Item -LiteralPath $jar -Destination (Join-Path $target 'worldarchitect-1.6.0.jar')
+          } finally { Pop-Location }
+      - name: Direct benchmark and memory sampler smoke
+        shell: pwsh
+        run: |
+          $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
+          $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
+          node tools/validation/benchmark-pairs.mjs --baseline build/validation-inputs/worldarchitect-1.6.0.jar --candidate "build/libs/worldarchitect-$version.jar" --probe "build/validation-tools/worldarchitect-$version-benchmark-probe.jar" --output build/ci-benchmark-smoke --pairs 1 --control-pairs 1 --warmup-size 8 --measured-size 6 --samples 2 --profiles void --port 25986 --purpose smoke --network online
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Dedicated server and restart
         shell: pwsh
         run: |
@@ -89,7 +115,7 @@ jobs:
           $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
           node tools/validation/assemblies.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Composite, prepared and legacy generation and restart
+      - name: Corridor, district, prepared and legacy generation and restart
         shell: pwsh
         run: |
           $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
@@ -140,6 +166,10 @@ jobs:
             build/ci-bundle-*/*.log
             build/ci-validation/server/config/worldarchitect/diagnostics/*.json
             build/test-results/test/*.xml
+            build/ci-benchmark-smoke/results.json
+            build/ci-benchmark-smoke/inputs.json
+            build/ci-benchmark-smoke/comparison.json
+            build/ci-benchmark-smoke/**/console.log
             build/ci-workbench/results.json
             build/ci-workbench/*/results.json
             build/ci-workbench/*/clean-install/*.log

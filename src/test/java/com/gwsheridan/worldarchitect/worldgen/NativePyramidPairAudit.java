@@ -14,7 +14,7 @@ public final class NativePyramidPairAudit {
     public static void main(String[] args) throws Exception {
         Path left = Path.of(args[0]), right = Path.of(args[1]);
         int size=args.length>2?Integer.parseInt(args[2]):6,samples=args.length>3?Integer.parseInt(args[3]):2;
-        require(size>=6&&size<=8&&samples>=2&&samples<=5,"Invalid benchmark sampling plan");
+        require(size>=6&&size<=32&&samples>=2&&samples<=5,"Invalid benchmark sampling plan");
         int[] origins=Arrays.copyOf(new int[]{1000,-1000,2000,-2000,3000},samples);
         var a = new HashMap<String, CompoundTag>(); var b = new HashMap<String, CompoundTag>();
         var footprints = new HashSet<Footprint>(); var starts = new HashSet<Long>();

@@ -67,7 +67,7 @@ Supported generation data: `DimensionProfile`, `ContentProfile` and nested rules
 | `SpawnApi.resolve` | Codec validation and safe primary target; may return empty. Island/team resolution can persist an allocation: call for actual players only. Never invent a UUID for preflight. Server thread. |
 | `EnvironmentApi.profile/capabilities/canEnter` | Server-thread reads; native dimension capabilities and portal-entry decision. |
 | `EnvironmentApi.set(source, dimension, profile)` | Permission level 3, server thread, codec/capability checks, dimension lock enforcement, atomic persistence, weather/cache refresh and player synchronization. |
-| `PresetApi.capture/load/save/export/readImport` | Permission level 3 and server thread. File outputs retain Studio name/path/size checks and developer-mode requirements. Capture/validate author detached presets for future worlds. |
+| `PresetApi.capture/load/save/export/readImport/derive/override` | Permission level 3 and server thread. File outputs retain Studio name/path/size checks and developer-mode requirements. Capture/validate author detached presets for future worlds. |
 | `PresetApi.validate/duplicate` | Detached authoring; validate uses a private structure overlay and returns dependency diagnostics. Do not run registry reads concurrently with a registry reload. |
 
 Supported data: `SpawnPolicy` and its codec; `SafeSpawns.Target`; `EnvironmentProfile` and nested records; `WorldEnvironment.Capabilities`; `BundleManifest` (including locks and `NATIVE_FEATURES`); `PresetStudio.Draft`, `Checked`, `Revision`. Draft JSON and byte arrays are copied defensively. Use checked APIs for server actions rather than low-level `WorldAdministration.save` or arbitrary paths. These guards protect ordinary callers and commands; installed mods remain trusted Java code and can access Minecraft directly.
@@ -142,6 +142,14 @@ API contract 1 retains its supported signatures. Named terrain-region rule condi
 ## Version 1.5 data additions
 
 API 1 retains existing constructors and method signatures. `RegionalTerrain.Zone` adds an immutable vertex list and retains its original constructor. `RegionalTerrain.Vertex` and the existing codecs support bounded polygon masks; only polygon profiles select terrain generator version 4. Earlier profile encodings remain unchanged.
+
+## 1.7 additions
+
+`RegionalTerrain.Corridor` is an immutable point path plus radius. `Zone.withCorridor`, `editablePoints`, `withVertices` and `translated` support detached editing. Corridor profiles select generator version 6. Earlier Zone constructors remain available, including the composite constructor added in 1.6. Use the complete terrain codec to validate bounds, budgets and version selection.
+
+`ContentProfile.StructureRule` adds optional `StructureDistricts.Member` data: group, exclusion family, weight, minimum distance and optional region. The three-argument constructor remains available. District content explicitly encodes schema version 2; content without districts retains version 1. The placement implementation remains internal. Providers should supply valid modular definitions and let the generation engine enforce ownership and strict cell limits.
+
+`BundleManifest` retains its ordinary constructor and adds optional `PresetInheritance`. `PresetApi.derive(source, parent, release, expectedSha, child, childRelease)` resolves a saved parent once and validates its archive hash. `PresetApi.override(source, draft, pointer, value, remove)` returns a validated detached child; it does not save or replace active world generation. Both enforce the server thread and administrator permission. Save the result through `PresetApi.save` under a new revision. Inherited metadata uses bundle format 2; ordinary API 1 manifests retain format 1. See [Preset Studio](Preset-Studio.md) for inherited policy restrictions and bounds.
 
 `PlacementAnchor.CODEC` describes explicit version-1 surface, seabed or fixed-height placement. Modular definitions may include optional `placement`; omission retains the legacy seabed behavior. `air_or_water` collision is explicit and does not permit lava, waterlogged solids or containers. `ProceduralPool.withPorts` selects pool format 3 when vertical ports are added; formats 1 and 2 keep their algorithms and constructor contracts. New inputs must be validated before export.
 

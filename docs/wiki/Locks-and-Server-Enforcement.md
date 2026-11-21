@@ -1,5 +1,7 @@
 # Locks and server enforcement
 
+In 1.7, a child preset also carries its parent's pinned policy and resource fingerprints. Child locks may tighten that policy but cannot weaken it. Exported children are self-contained, and client creation and dedicated-server startup validate the same effective constraints. See [reusable presets](Preset-Studio.md#reusable-base-presets-in-17).
+
 ## Configure locks
 
 Set `lock` to one of the following values in the manifest.

@@ -28,19 +28,23 @@ public record ContentProfile(List<Holder<Biome>> biomes, int biomeScale, long bi
             list.stream().allMatch(biome -> biome.unwrapKey().isPresent()) && new HashSet<>(list).size() == list.size()
                     ? DataResult.success(list) : DataResult.error(() -> "Biome choices must be distinct registered biomes."));
     public static final ContentProfile EMPTY = new ContentProfile(List.of(), 128, 0L, List.of(), List.of(), Optional.empty(), Optional.empty(), List.of());
-    public static final Codec<ContentProfile> CODEC = RecordCodecBuilder.<ContentProfile>create(builder -> builder.group(
-            Codec.intRange(1, 1).optionalFieldOf("version", 1).forGetter(profile -> 1),
-            BIOMES.optionalFieldOf("biomes", List.of()).forGetter(ContentProfile::biomes),
-            Codec.intRange(16, 1024).optionalFieldOf("biome_scale", 128).forGetter(ContentProfile::biomeScale),
-            Codec.LONG.optionalFieldOf("biome_seed", 0L).forGetter(ContentProfile::biomeSeed),
-            Ore.CODEC.listOf(0, MAX_RULES).optionalFieldOf("ores", List.of()).forGetter(ContentProfile::ores),
-            Decoration.CODEC.listOf(0, MAX_RULES).optionalFieldOf("decorations", List.of()).forGetter(ContentProfile::decorations),
-            Caves.CODEC.optionalFieldOf("caves").forGetter(ContentProfile::caves),
-            Sea.CODEC.optionalFieldOf("sea").forGetter(ContentProfile::sea),
-            StructureRule.CODEC.listOf(0, MAX_RULES).optionalFieldOf("structures", List.of()).forGetter(ContentProfile::structures),
-            com.gwsheridan.worldarchitect.api.NativeFeatureRule.CODEC.listOf(0, MAX_RULES).optionalFieldOf("native_features", List.of()).forGetter(ContentProfile::nativeFeatures)
+    private record Encoded(int version,ContentProfile profile) {}
+    private int encodingVersion(){return structures.stream().anyMatch(r->r.district().isPresent())?2:1;}
+    public static final Codec<ContentProfile> CODEC = RecordCodecBuilder.<Encoded>create(builder -> builder.group(
+            Codec.intRange(1, 2).optionalFieldOf("version", 1).forGetter(Encoded::version),
+            BIOMES.optionalFieldOf("biomes", List.of()).forGetter(e->e.profile().biomes()),
+            Codec.intRange(16, 1024).optionalFieldOf("biome_scale", 128).forGetter(e->e.profile().biomeScale()),
+            Codec.LONG.optionalFieldOf("biome_seed", 0L).forGetter(e->e.profile().biomeSeed()),
+            Ore.CODEC.listOf(0, MAX_RULES).optionalFieldOf("ores", List.of()).forGetter(e->e.profile().ores()),
+            Decoration.CODEC.listOf(0, MAX_RULES).optionalFieldOf("decorations", List.of()).forGetter(e->e.profile().decorations()),
+            Caves.CODEC.optionalFieldOf("caves").forGetter(e->e.profile().caves()),
+            Sea.CODEC.optionalFieldOf("sea").forGetter(e->e.profile().sea()),
+            StructureRule.CODEC.listOf(0, MAX_RULES).optionalFieldOf("structures", List.of()).forGetter(e->e.profile().structures()),
+            com.gwsheridan.worldarchitect.api.NativeFeatureRule.CODEC.listOf(0, MAX_RULES).optionalFieldOf("native_features", List.of()).forGetter(e->e.profile().nativeFeatures())
     ).apply(builder, (version, biomes, scale, seed, ores, decorations, caves, sea, structures, nativeFeatures) ->
-            new ContentProfile(biomes, scale, seed, ores, decorations, caves, sea, structures, nativeFeatures))).validate(ContentProfile::validate);
+            new Encoded(version,new ContentProfile(biomes, scale, seed, ores, decorations, caves, sea, structures, nativeFeatures)))).flatXmap(
+            e->e.version()==e.profile().encodingVersion()?e.profile().validate():DataResult.error(()->"Content version 2 is required exactly when structure districts are present."),
+            profile->profile.validate().map(valid->new Encoded(valid.encodingVersion(),valid)));
 
     public ContentProfile {
         biomes = List.copyOf(biomes);
@@ -59,6 +63,8 @@ public record ContentProfile(List<Holder<Biome>> biomes, int biomeScale, long bi
         if (structures.stream().map(StructureRule::structure).distinct().count() != structures.size()) {
             return DataResult.error(() -> "Select a structure only once per dimension.");
         }
+        var districts=com.gwsheridan.worldarchitect.structure.StructureDistricts.problem(structures,Optional.empty(),false);
+        if(districts.isPresent())return DataResult.error(districts::orElseThrow);
         return DataResult.success(this);
     }
 
@@ -161,11 +167,14 @@ public record ContentProfile(List<Holder<Biome>> biomes, int biomeScale, long bi
         public BlockState state() { return (this == WATER ? Blocks.WATER : Blocks.LAVA).defaultBlockState(); }
     }
 
-    public record StructureRule(Holder<Structure> structure, int spacing, int separation) {
+    public record StructureRule(Holder<Structure> structure, int spacing, int separation, Optional<com.gwsheridan.worldarchitect.structure.StructureDistricts.Member> district) {
+        /** Retained API 1 constructor. Empty district settings keep the original placement. */
+        public StructureRule(Holder<Structure> structure,int spacing,int separation){this(structure,spacing,separation,Optional.empty());}
         public static final Codec<StructureRule> CODEC = RecordCodecBuilder.<StructureRule>create(builder -> builder.group(
                 Structure.CODEC.fieldOf("structure").forGetter(StructureRule::structure),
                 Codec.intRange(4, 128).fieldOf("spacing").forGetter(StructureRule::spacing),
-                Codec.intRange(3, 127).fieldOf("separation").forGetter(StructureRule::separation)
+                Codec.intRange(3, 127).fieldOf("separation").forGetter(StructureRule::separation),
+                com.gwsheridan.worldarchitect.structure.StructureDistricts.Member.CODEC.optionalFieldOf("district").forGetter(StructureRule::district)
         ).apply(builder, StructureRule::new)).validate(rule -> {
             if (rule.separation >= rule.spacing) {
                 return DataResult.error(() -> "Structure separation must be smaller than spacing.");

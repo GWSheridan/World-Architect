@@ -12,8 +12,9 @@ await fs.mkdir(output,{recursive:false});
 const exports=[...(await fs.readFile(join(source,'fresh.log'),'utf8')).matchAll(/^WA15_BUNDLE (vertical|coastal|polygon|stress) ([a-z0-9_.-]+:[a-z0-9_./-]+) ([a-z0-9_.-]+:[a-z0-9_./-]+) (.+)$/gm)];
 if(exports.length<6||exports.length>7||new Set(exports.map(x=>x[1])).size!==4)throw Error('Missing 1.5 example and stress exports');
 const extensions=[...(await fs.readFile(join(source,'fresh.log'),'utf8')).matchAll(/^WA16_BUNDLE (prepared|themed|composite) ([a-z0-9_.-]+:[a-z0-9_./-]+) ([a-z0-9_.-]+:[a-z0-9_./-]+) (.+)$/gm)];if(extensions.length<5||extensions.length>6)throw Error('Missing composite and prepared generation exports');
+const current=[...(await fs.readFile(join(source,'fresh.log'),'utf8')).matchAll(/^WA17_BUNDLE (corridor|district) ([a-z0-9_.-]+:[a-z0-9_./-]+) ([a-z0-9_.-]+:[a-z0-9_./-]+) (.+)$/gm)];if(current.length!==2)throw Error('Missing corridor and district exports');
 const report={format:1,version,cases:[],status:'passed'};
-for(const [,kind,dimension,id,path] of [...exports,...extensions]){
+for(const [,kind,dimension,id,path] of [...exports,...extensions,...current]){
     const bundle=resolve(path.trim());if(!relative(source,bundle).startsWith('server'+sep))throw Error('Export escaped the authoring fixture');
     const name=kind+'_'+dimension.replace(':','_');
     const command=['tools/validation/run.mjs','--jar',args['--jar']||`build/libs/worldarchitect-${version}.jar`,'--fixture',args['--fixture']||`build/validation-tools/worldarchitect-${version}-validation.jar`,'--output',relative(root,join(output,name)),'--suite','compatibility','--bundle',bundle,'--site',kind,'--site-structure',id,'--dimension',dimension,'--network',args['--network']||'online'];

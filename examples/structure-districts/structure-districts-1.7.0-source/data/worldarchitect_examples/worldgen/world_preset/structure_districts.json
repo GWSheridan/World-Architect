@@ -1,0 +1,97 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "biome": "minecraft:plains",
+        "profile": {
+          "material": "minecraft:stone",
+          "generator_version": 3,
+          "elevation": 64,
+          "relief": 0,
+          "terrain": {
+            "landform": "plateaus"
+          },
+          "terrain_regions": [
+            {
+              "name": "district_land",
+              "mask": "rectangle",
+              "min_x": 256,
+              "min_z": 256,
+              "max_x": 8192,
+              "max_z": 8192,
+              "transition": 0,
+              "elevation": 64,
+              "relief": 0,
+              "terrain": {
+                "landform": "plateaus"
+              }
+            }
+          ]
+        },
+        "dimension_profile": {
+          "min_y": -64,
+          "height": 384,
+          "content": {
+            "version": 2,
+            "structures": [
+              {
+                "structure": "worldarchitect_examples:district_0",
+                "spacing": 8,
+                "separation": 6,
+                "district": {
+                  "group": "village",
+                  "weight": 3,
+                  "min_distance": 8,
+                  "region": "district_land"
+                }
+              },
+              {
+                "structure": "worldarchitect_examples:district_1",
+                "spacing": 8,
+                "separation": 6,
+                "district": {
+                  "group": "village",
+                  "min_distance": 8,
+                  "region": "district_land"
+                }
+              },
+              {
+                "structure": "worldarchitect_examples:district_2",
+                "spacing": 8,
+                "separation": 6,
+                "district": {
+                  "group": "outpost",
+                  "min_distance": 8,
+                  "region": "district_land"
+                }
+              }
+            ]
+          }
+        },
+        "type": "worldarchitect:single_block"
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "biome_source": {
+          "preset": "minecraft:nether",
+          "type": "minecraft:multi_noise"
+        },
+        "settings": "minecraft:nether",
+        "type": "minecraft:noise"
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "biome_source": {
+          "type": "minecraft:the_end"
+        },
+        "settings": "minecraft:end",
+        "type": "minecraft:noise"
+      }
+    }
+  }
+}

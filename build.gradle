@@ -151,7 +151,7 @@ tasks.register('auditBenchmarkWorlds', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     javaLauncher = javaToolchains.launcherFor(java.toolchain)
     mainClass = 'com.gwsheridan.worldarchitect.worldgen.BenchmarkWorldAudit'
-    argumentProviders.add({ [file(providers.gradleProperty('benchmarkBaseline').get()).absolutePath, file(providers.gradleProperty('benchmarkCandidate').get()).absolutePath, providers.gradleProperty('benchmarkNativeControl').map { file(it).absolutePath }.orElse('').get(), providers.gradleProperty('benchmarkSize').orElse('6').get(), providers.gradleProperty('benchmarkSamples').orElse('2').get()] } as CommandLineArgumentProvider)
+    argumentProviders.add({ [file(providers.gradleProperty('benchmarkBaseline').get()).absolutePath, file(providers.gradleProperty('benchmarkCandidate').get()).absolutePath, providers.gradleProperty('benchmarkNativeControl').map { file(it).absolutePath }.orElse('').get(), providers.gradleProperty('benchmarkSize').orElse('6').get(), providers.gradleProperty('benchmarkSamples').orElse('2').get(), providers.gradleProperty('benchmarkProfiles').orElse('normal,void,single-block,layered,structure-heavy').get()] } as CommandLineArgumentProvider)
 }
 tasks.register('auditStudioWorld', JavaExec) {
     group = 'verification'
@@ -223,7 +223,9 @@ tasks.register('releaseChecksums', JavaExec) {
         file('examples/polygon-regions/bundles').absolutePath, file('examples/terrain-anchors/bundles').absolutePath,
         file('examples/vertical-pools/bundles').absolutePath, file('examples/locked-archipelago/bundles').absolutePath,
         file('examples/composite-regions/bundles').absolutePath, file('examples/structure-foundations/bundles').absolutePath,
-        file('examples/structure-themes/bundles').absolutePath] } as CommandLineArgumentProvider)
+        file('examples/structure-themes/bundles').absolutePath,
+        file('examples/corridor-regions/bundles').absolutePath, file('examples/structure-districts/bundles').absolutePath,
+        file('examples/reusable-presets/bundles').absolutePath] } as CommandLineArgumentProvider)
 }
 
 tasks.register('assembleRelease') {
@@ -287,6 +289,17 @@ tasks.register('prepareCycle16Examples', JavaExec) {
         file(providers.gradleProperty('compositeExport').get()).absolutePath,
         file(providers.gradleProperty('preparedExport').get()).absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
 }
+tasks.register('prepareCycle17Examples', JavaExec) {
+    group = 'distribution'
+    description = 'Prepare corridor, district and reusable preset examples from verified exports.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldarchitect.release.ReleaseCycle17Examples'
+    argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
+        file(providers.gradleProperty('corridorExport').get()).absolutePath,
+        file(providers.gradleProperty('districtExport').get()).absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
+}
+
 tasks.register('prepareWorkbenchInputs', JavaExec) {
     group = 'verification'
     classpath = sourceSets.test.runtimeClasspath
@@ -297,10 +310,22 @@ tasks.register('prepareWorkbenchInputs', JavaExec) {
 }
 
 sourceSets {
+    benchmark {
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += output + compileClasspath
+    }
     acceptance {
         compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
         runtimeClasspath += output + compileClasspath
     }
+}
+tasks.register('benchmarkProbeJar', Jar) {
+    group = 'verification'
+    description = 'Build the separate, cross-version generation timing fixture.'
+    dependsOn tasks.named('benchmarkClasses')
+    from sourceSets.benchmark.output
+    archiveClassifier = 'benchmark-probe'
+    destinationDirectory = layout.buildDirectory.dir('validation-tools')
 }
 tasks.register('acceptanceJar', Jar) {
     group = 'verification'

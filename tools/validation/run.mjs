@@ -13,7 +13,7 @@ if (!['online','offline'].includes(options['--network'] || 'offline')) throw new
 if (!options['--jar'] || !options['--fixture'] || !options['--output']) throw new Error('Use --jar JAR --fixture VALIDATION_JAR --output NEW_DIRECTORY [--world COPIED_SAVE] [--profile single-block] [--port 25945]');
 if(options['--dimension']&&!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--dimension']))throw Error('Invalid dimension ID');
 if(options['--check-end']&&!['true','false'].includes(options['--check-end']))throw Error('Invalid End check flag');
-if(options['--site']&&!['vertical','coastal','polygon','stress','prepared','themed','composite'].includes(options['--site']))throw Error('Invalid site fixture kind');
+if(options['--site']&&!['vertical','coastal','polygon','stress','prepared','themed','composite','corridor','district'].includes(options['--site']))throw Error('Invalid site fixture kind');
 if(options['--site-structure']&&!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--site-structure']))throw Error('Invalid site structure ID');
 const output = resolve(root, options['--output']);
 if (!relative(root, output).startsWith('build' + (process.platform === 'win32' ? '\\' : '/'))) throw new Error('Output must be under build/');
@@ -131,7 +131,7 @@ try {
             running.send('wa_diagnose report'); await running.wait('Saved local diagnostics');
         } else if(options['--site']) {
             running.send(`wa_validate site_generation ${options['--site']} ${options['--site-structure']} ${options['--dimension']||'minecraft:overworld'} ${stage==='fresh'?1:2}`);
-            await running.wait(['prepared','themed','composite'].includes(options['--site'])?'WA16_GENERATION_PASS':'WA15_GENERATION_PASS');
+            await running.wait(['corridor','district'].includes(options['--site'])?'WA17_GENERATION_PASS':['prepared','themed','composite'].includes(options['--site'])?'WA16_GENERATION_PASS':'WA15_GENERATION_PASS');
         } else if(options['--named-regions']==='true') {
             running.send('wa_validate named_regions '+(stage==='fresh'?1:2));await running.wait('WA_NAMED_REGIONS_GENERATION_PASS');
         } else if(options['--regional']==='true') {

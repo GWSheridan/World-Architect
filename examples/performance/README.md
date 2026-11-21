@@ -1,6 +1,25 @@
 # Same-host performance comparison
 
-Run from the repository root with Java 25 in `JAVA_HOME`. Build the candidate and prepare the Gradle run artifacts first. The profiles and datapacks are the fixed 0.9.0 benchmark workload, with local test server settings and no server management credentials. See [verification results](../../tools/validation/README.md).
+Run from the repository root with Java 25 in `JAVA_HOME` and Java 21 in `JAVA21_HOME` for asset tools. The profiles and datapacks retain the fixed 0.9.0 workload. The 1.7 runner loads packaged JARs and a separate measurement mod. See [validation runners](../../tools/validation/README.md).
+
+## Direct generation runner
+
+```text
+gradlew.bat build benchmarkProbeJar
+node tools/validation/benchmark-pairs.mjs --baseline build/validation-inputs/worldarchitect-1.6.0.jar --candidate build/libs/worldarchitect-1.7.0.jar --probe build/validation-tools/worldarchitect-1.7.0-benchmark-probe.jar --output build/performance-new
+```
+
+On Linux, build with `sh ./gradlew` and use the same Node command. An equivalent Windows wrapper is `tools/validation/benchmark-pairs.ps1 -BaselineJar <JAR> -CandidateJar <JAR> -OutputRoot build/performance-new`. New outputs must stay under `build/` and must not exist already. First-time dependency preparation needs `--network online`; cached local runs default to offline. The runner records SHA-256 for both inputs, the probe, runtime configuration and the JAR actually loaded by each server.
+
+Defaults are three comparison pairs, one identical-baseline control pair and all five profiles, alternating baseline/candidate order. Every fresh server warms up 1,024 chunks, then generates five separate 576-chunk samples. The probe times synchronous FULL chunk requests with `System.nanoTime`; console polling, startup and shutdown are outside that timer. Generation still includes the requested chunks' dependencies and any GC that occurs inside the measurement. The probe records GC deltas, sampled heap and actual resident memory. Windows uses a separate working-set sampler; Linux reads `/proc/self/status`. Missing resident samples make a result inconclusive.
+
+Each JVM uses four active processors and a fixed 1,300 MiB heap. Stop other game servers, clients, builds and heavy work before measuring. Pair totals, median time, sampled heap and resident memory are reported separately. Generation above 10% or memory above 15% needs investigation. An identical-JAR control outside those limits makes the comparison inconclusive, even when the candidate looks faster. Preserve every raw result, threshold flag and failed control. A small `--purpose smoke --pairs 1 --control-pairs 1 --warmup-size 8 --measured-size 6 --samples 2 --profiles void` run checks the tools, never release performance.
+
+Use `--deadline-seconds` for a total deadline, or create an empty `stop` file in the output directory to cancel. The runner stops its own server and retains completed records. Increase `--control-pairs` up to 3 when a planned repeat needs more controls. Strict terrain audits run after timed pairs; native diagnostics below remain separate from existing-save protection.
+
+## Historical polling runner
+
+The original scripts remain available to reproduce earlier release measurements:
 
 ```powershell
 .\gradlew.bat build

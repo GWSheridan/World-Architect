@@ -69,3 +69,11 @@ The 1.6 authoring suite validates shared composite masks, bounded supports and c
 Format-3 pool layouts are compared exactly against 256 seeds from the published 1.5 JAR. Supply `--baseline15 <JAR>` or place that input at `build/validation-inputs/worldarchitect-1.5.0.jar`, with SHA-256 `27a6a5e55567e04db4c93818daa2a866bd9bc0d0313780b08f17dcba1e20be42`. CI builds it from tag `v1.5.0`. The frozen 1.3 and 1.4 comparisons remain in place.
 
 The four-client soak also exercises foundation/theme editing, captured variant history, search results, report export and cancellation through real screens. Use `--site-kind themed` with `--site-structure` for a prepared themed integration fixture. Keep its default twenty 180-second rounds for a release endurance run; a shortened rehearsal does not replace that run. Reports and disposable worlds stay under `build/`.
+
+## Corridors, districts and inherited presets
+
+The 1.7 authoring fixture exports connected corridors and weighted districts, compares detached planning across worker threads and reordered member lists, and checks bounded search agreement. It tests parent archive pins, inherited lock scopes and resource fingerprints, self-contained children, immutable revisions, command permissions and API thread guards. The site runner generates actual corridor blocks/biomes and district structures, checks every occupied district cell and safe marker, then repeats after restart. District starts are requested in reverse order on restart.
+
+`node tools/validation/bundles.mjs --output build/bundles-new --network offline` installs all 23 current examples in clean instances. The output option keeps local repeats separate from CI. Real creator fixtures also exercise corridor point history, shared district settings and child derivation/override/report controls at both GUI scales.
+
+Build `benchmarkProbeJar` separately and follow the [direct-generation instructions](../../examples/performance/README.md). Windows and Linux CI run a small probe/RSS smoke matrix against the fingerprinted published 1.6 JAR; full same-host performance remains a separate quiet-host release check. Run the seven analysis checks with `node --test tools/validation/benchmark-analysis.test.mjs` alongside the existing workbench tests. Validation fixtures, measurement mods, raw logs and worlds are excluded from the gameplay JAR.

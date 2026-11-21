@@ -9,6 +9,9 @@ See the [creator tools guide](docs/wiki/Creator-Tools.md) for the current author
 
 World Architect 1.6.0 adds composite terrain regions, bounded foundations, weighted structure themes and batch site searches. [Download 1.6.0](https://github.com/GWSheridan/World-Architect/releases/tag/v1.6.0) or read the [changelog](CHANGELOG.md).
 
+The `release/1.7.0` branch prepares corridor regions, structure districts and reusable presets. This branch is a release candidate; 1.6.0 remains the published release. Candidate documentation and examples describe the 1.7 features below.
+
+
 ## Get started
 
 Install `worldarchitect-1.6.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.

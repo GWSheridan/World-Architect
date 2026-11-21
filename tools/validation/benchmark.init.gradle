@@ -1,0 +1,8 @@
+gradle.beforeProject { project ->
+ project.pluginManager.withPlugin('net.neoforged.moddev') {
+  project.neoForge.runs.configureEach { if(name=='server') {
+   loadedMods=[]
+   jvmArgument '-Xms1300m';jvmArgument '-Xmx1300m';jvmArgument '-XX:+AlwaysPreTouch';jvmArgument '-XX:ActiveProcessorCount=4'
+  }}
+ }
+}

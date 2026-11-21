@@ -1,0 +1,13 @@
+{
+  "pack": {
+    "description": "Corridor regions for World Architect 1.7.0",
+    "min_format": [
+      121,
+      0
+    ],
+    "max_format": [
+      121,
+      0
+    ]
+  }
+}

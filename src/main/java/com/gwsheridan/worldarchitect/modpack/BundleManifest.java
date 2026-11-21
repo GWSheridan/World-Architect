@@ -11,25 +11,29 @@ import net.minecraft.world.level.levelgen.WorldOptions;
 
 public record BundleManifest(Identifier preset, String title, String description, String author, String release,
         Lock lock, WorldOptions options, List<Identifier> editableDimensions, Map<Identifier, List<Feature>> editableFeatures,
-        List<Option> editableOptions, List<String> requiredMods, boolean allowStructureLibrary) {
-    public static final Codec<BundleManifest> CODEC = RecordCodecBuilder.<BundleManifest>create(builder -> builder.group(
-            Codec.intRange(1, 1).fieldOf("format").forGetter(manifest -> 1),
-            Identifier.CODEC.fieldOf("preset").forGetter(BundleManifest::preset),
-            Codec.STRING.fieldOf("title").forGetter(BundleManifest::title),
-            Codec.STRING.fieldOf("description").forGetter(BundleManifest::description),
-            Codec.STRING.fieldOf("author").forGetter(BundleManifest::author),
-            Codec.STRING.fieldOf("release").forGetter(BundleManifest::release),
-            StringRepresentable.fromEnum(Lock::values).fieldOf("lock").forGetter(BundleManifest::lock),
-            WorldOptions.CODEC.codec().fieldOf("options").forGetter(BundleManifest::options),
-            Identifier.CODEC.listOf(0, 128).optionalFieldOf("editable_dimensions", List.of()).forGetter(BundleManifest::editableDimensions),
+        List<Option> editableOptions, List<String> requiredMods, boolean allowStructureLibrary, java.util.Optional<PresetInheritance> inheritance) {
+    /** Retained API 1 constructor for ordinary, self-contained presets. */
+    public BundleManifest(Identifier preset,String title,String description,String author,String release,Lock lock,WorldOptions options,List<Identifier> editableDimensions,Map<Identifier,List<Feature>> editableFeatures,List<Option> editableOptions,List<String> requiredMods,boolean allowStructureLibrary){this(preset,title,description,author,release,lock,options,editableDimensions,editableFeatures,editableOptions,requiredMods,allowStructureLibrary,java.util.Optional.empty());}
+    private record Encoded(int format,BundleManifest manifest) {}
+    public static final Codec<BundleManifest> CODEC = RecordCodecBuilder.<Encoded>create(builder -> builder.group(
+            Codec.intRange(1, 2).fieldOf("format").forGetter(Encoded::format),
+            Identifier.CODEC.fieldOf("preset").forGetter(e->e.manifest().preset()),
+            Codec.STRING.fieldOf("title").forGetter(e->e.manifest().title()),
+            Codec.STRING.fieldOf("description").forGetter(e->e.manifest().description()),
+            Codec.STRING.fieldOf("author").forGetter(e->e.manifest().author()),
+            Codec.STRING.fieldOf("release").forGetter(e->e.manifest().release()),
+            StringRepresentable.fromEnum(Lock::values).fieldOf("lock").forGetter(e->e.manifest().lock()),
+            WorldOptions.CODEC.codec().fieldOf("options").forGetter(e->e.manifest().options()),
+            Identifier.CODEC.listOf(0, 128).optionalFieldOf("editable_dimensions", List.of()).forGetter(e->e.manifest().editableDimensions()),
             Codec.unboundedMap(Identifier.CODEC, StringRepresentable.fromEnum(Feature::values).listOf(1, Feature.values().length))
-                    .optionalFieldOf("editable_features", Map.of()).forGetter(BundleManifest::editableFeatures),
-            StringRepresentable.fromEnum(Option::values).listOf(0, 3).optionalFieldOf("editable_options", List.of()).forGetter(BundleManifest::editableOptions),
-            Codec.STRING.listOf(0, 256).optionalFieldOf("required_mods", List.of()).forGetter(BundleManifest::requiredMods),
-            Codec.BOOL.optionalFieldOf("allow_structure_library", true).forGetter(BundleManifest::allowStructureLibrary)
-    ).apply(builder, (format, preset, title, description, author, release, lock, options, dimensions, features, editableOptions, mods, library) ->
-            new BundleManifest(preset, title, description, author, release, lock, options, dimensions, features, editableOptions, mods, library)))
-            .validate(BundleManifest::validate);
+                    .optionalFieldOf("editable_features", Map.of()).forGetter(e->e.manifest().editableFeatures()),
+            StringRepresentable.fromEnum(Option::values).listOf(0, 3).optionalFieldOf("editable_options", List.of()).forGetter(e->e.manifest().editableOptions()),
+            Codec.STRING.listOf(0, 256).optionalFieldOf("required_mods", List.of()).forGetter(e->e.manifest().requiredMods()),
+            Codec.BOOL.optionalFieldOf("allow_structure_library", true).forGetter(e->e.manifest().allowStructureLibrary()),
+            PresetInheritance.CODEC.optionalFieldOf("inheritance").forGetter(e->e.manifest().inheritance())
+    ).apply(builder, (format, preset, title, description, author, release, lock, options, dimensions, features, editableOptions, mods, library, inheritance) ->
+            new Encoded(format,new BundleManifest(preset, title, description, author, release, lock, options, dimensions, features, editableOptions, mods, library, inheritance))))
+            .flatXmap(e->e.format()==(e.manifest().inheritance().isPresent()?2:1)?e.manifest().validate():invalid("Bundle format 2 is required exactly when an inherited policy is present."),m->m.validate().map(valid->new Encoded(valid.inheritance().isPresent()?2:1,valid)));
 
     public BundleManifest {
         editableDimensions = List.copyOf(editableDimensions);
@@ -56,6 +60,7 @@ public record BundleManifest(Identifier preset, String title, String description
         if (requiredMods.stream().anyMatch(mod -> !mod.matches("[a-z][a-z0-9_]{1,63}"))) {
             return invalid("Invalid mod ID in required_mods.");
         }
+        if(inheritance.isPresent()){var problem=inheritance.orElseThrow().manifestProblem(this);if(problem.isPresent())return invalid(problem.orElseThrow());}
         return DataResult.success(this);
     }
 
@@ -66,6 +71,7 @@ public record BundleManifest(Identifier preset, String title, String description
     public boolean locked() {
         return lock != Lock.UNLOCKED;
     }
+    public BundleManifest withInheritance(java.util.Optional<PresetInheritance> source){return new BundleManifest(preset,title,description,author,release,lock,options,editableDimensions,editableFeatures,editableOptions,requiredMods,allowStructureLibrary,source);}
 
     public boolean canEditDimension(Identifier id) {
         return !locked() || editableDimensions.contains(id);

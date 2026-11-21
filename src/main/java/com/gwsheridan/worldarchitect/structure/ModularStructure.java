@@ -165,6 +165,7 @@ public final class ModularStructure extends Structure {
             ChunkGenerator generator, BiomeSource biomes, Climate.Sampler sampler, RandomState random,
             StructureTemplateManager templates, long seed, ChunkPos chunk, int references,
             LevelHeightAccessor height, java.util.function.Predicate<Holder<Biome>> validBiome) {
+        if(generator instanceof SolidColumnGenerator solid&&solid.hasStructureDistricts()){var district=StructureDistricts.rejection(solid,selected,seed,chunk);if(district.isPresent()){SiteProbe.reject(district.orElseThrow());return StructureStart.INVALID_START;}}
         if (generator instanceof SolidColumnGenerator solid && !com.gwsheridan.worldarchitect.worldgen.RuleExecution.allowsTemplate(solid, selected, seed, chunk, height, random)) {
             SiteProbe.reject("Rule-engine selection or candidate spacing rejected this chunk.");
             return StructureStart.INVALID_START;
@@ -225,6 +226,9 @@ public final class ModularStructure extends Structure {
     }
 
     private boolean accepts(GenerationContext context, SolidColumnGenerator generator, List<ModularPiece> pieces,Map<BlockPos,BlockState> prepared) throws IOException {
+        var district=generator.hasStructureDistricts()?StructureDistricts.member(generator,this):Optional.<StructureDistricts.Member>empty();
+        var districtRegion=district.flatMap(StructureDistricts.Member::region).flatMap(name->generator.terrainRegions().flatMap(regions->regions.zones().stream().filter(zone->zone.name().equals(name)).findFirst()));
+        Map<Long,Boolean> districtColumns=districtRegion.isPresent()?new HashMap<>():Map.of();
         var columns = new HashMap<Long, NoiseColumn>();
         var occupied = new HashMap<BlockPos, BlockState>();
         var planned=new HashMap<BlockPos,BlockState>();
@@ -242,7 +246,8 @@ public final class ModularStructure extends Structure {
             for (var cell : entry.template().blocks()) {
                 SiteProbe.check();
                 BlockPos pos = piece.origin().offset(cell.pos());
-                if((anchor.isPresent()||foundation.isPresent()||themes.isPresent()||pool.filter(p->p.format()==3).isPresent())&&generator.endProgression().isPresent()
+                if(districtRegion.isPresent()&&!districtColumns.computeIfAbsent(columnKey(pos),key->generator.terrainRegions().orElseThrow().edgeDistance(districtRegion.orElseThrow(),pos.getX(),pos.getZ())>=0))return SiteProbe.reject("A template or preparation cell crosses its district region.");
+                if((anchor.isPresent()||foundation.isPresent()||themes.isPresent()||pool.filter(p->p.format()==3).isPresent()||district.isPresent())&&generator.endProgression().isPresent()
                         &&!com.gwsheridan.worldarchitect.config.EndProgression.allowsGenerationWrite(context.chunkPos().getMinBlockX(),context.chunkPos().getMinBlockZ(),pos.getX(),pos.getZ()))return SiteProbe.reject("A template cell crosses the native End arena reservation.");
                 if (!com.gwsheridan.worldarchitect.worldgen.RuleExecution.templateCell(generator, this, context.seed(), pos)) return SiteProbe.reject("A template cell falls outside its height, biome or region rule at "+pos.toShortString());
                 if (!context.heightAccessor().isInsideBuildHeight(pos) || pos.getY() < rules.minY() || pos.getY() > rules.maxY()

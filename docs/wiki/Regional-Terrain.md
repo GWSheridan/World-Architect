@@ -33,3 +33,13 @@ A composite opts that dimension into **generator version 5**. Its geometry is sh
 Use 2–8 distinct operands per composite, at most 32 regions per dimension and at most eight reference levels including primitive regions. Unknown names, cycles and intersections with bounding spans smaller than two blocks are refused. The editor derives composite bounds from its operands; it updates dependent composites when operands move or are renamed. A composite cannot be dragged independently. Remove its incoming references before deleting an operand. Rule references still need updating when a referenced name changes.
 
 JSON adds `"mask": "composite"` and `"composition": {"operation": "subtract", "regions": ["mainland", "lake"]}` to a normal region entry. The min/max fields describe the derived bounds; they do not clip the referenced geometry. The [composite example](https://github.com/GWSheridan/World-Architect/tree/v1.6.0/examples/composite-regions) demonstrates a concave outline with an excluded hole.
+
+## Corridor paths in 1.7
+
+Choose **History / organize → Add corridor region**, then **Bounds & priority**. Set its name, priority, radius and transition, or edit its path points. Point editing supports coordinate entry, insertion, removal and map movement. The map derives the bounds from the path and radius. Invalid changes leave the draft intact.
+
+A corridor is the union of round-ended line segments. It accepts 2–64 points and a radius of 1–4096 blocks. Consecutive points must differ; crossings, loops and a repeated final point are allowed. The path and its radius must fit inside the world bounds. Polygon vertices and corridor points share the 512-point budget per dimension. Transition width cannot exceed the radius and feathers inward; the boundary remains inclusive for geometric rule masks.
+
+Corridors opt the dimension into **generator version 6**. They can be composite operands and share their evaluator with height blending, biome choices, named-region rules and previews. Existing versions 1–5 retain their algorithms and encoding. Biomes still use the four-block grid and half-transition threshold.
+
+JSON adds `"mask": "corridor"` and `"corridor": {"points": [{"x": -64, "z": 0}, {"x": 64, "z": 0}], "radius": 16}`. Its bounds must be `min_x: -80`, `min_z: -16`, `max_x: 80`, `max_z: 16`. Use the [corridor example](https://github.com/GWSheridan/World-Architect/tree/release/1.7.0/examples/corridor-regions) for a complete preset.

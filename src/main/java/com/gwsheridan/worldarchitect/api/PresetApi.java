@@ -28,6 +28,12 @@ public final class PresetApi {
         ApiAccess.admin(source); return PresetStudio.export(ModpackRuntime.directory(), name, release, source.getServer().registryAccess());
     }
     public static PresetStudio.Draft duplicate(PresetStudio.Draft source, String name, String release) { return PresetStudio.duplicate(source, name, release); }
+    public static PresetStudio.Draft derive(CommandSourceStack source,String parent,String release,String expectedSha,String child,String childRelease)throws IOException{
+        ApiAccess.admin(source);return PresetStudio.derive(ModpackRuntime.directory(),parent,release,expectedSha,child,childRelease,source.getServer().registryAccess());
+    }
+    public static PresetStudio.Draft override(CommandSourceStack source,PresetStudio.Draft draft,String pointer,com.google.gson.JsonElement value,boolean remove)throws IOException{
+        ApiAccess.admin(source);return PresetStudio.override(draft,pointer,value,remove,source.getServer().registryAccess());
+    }
     public static PresetStudio.Draft readImport(CommandSourceStack source, String zip) throws IOException {
         ApiAccess.admin(source); return PresetStudio.readImport(ModpackRuntime.directory(), zip, source.getServer().registryAccess());
     }
