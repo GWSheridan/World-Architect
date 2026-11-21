@@ -36,7 +36,7 @@ A `StructureAdapter` declares a positive `version()` and pure `supports(Structur
 
 `StructureTemplates.modular(JsonObject, HolderLookup.Provider)` decodes a detached `worldarchitect:modular` definition, checks size/overlap/rules/markers and validates metadata. It never inserts entries into a live registry. `StructureTemplates.read(CompoundTag, registries)` reads and sanitizes a detached native template: decorative supported metadata survives; inventories, commands and unsupported data are removed or rejected. Neither method places blocks.
 
-Supported template data: `NativeTemplate`/`Cell`, `TemplateRules`, `TemplatePlacement`; `ModularStructure` supports `CODEC`, `validateTemplates`, `horizontalSpan`, `blockCount` and `hasMarker`. Constructors/native override methods on the generator implementation are not extension points. Register a decoded modular definition via a datapack before selecting its holder. See [template rules and markers](Structure-Library.md) and [cross-dimension examples](https://github.com/GWSheridan/World-Architect/tree/v1.6.0/examples/cross-dimension-structures).
+Supported template data: `NativeTemplate`/`Cell`, `TemplateRules`, `TemplatePlacement`; `ModularStructure` supports `CODEC`, `validateTemplates`, `horizontalSpan`, `blockCount` and `hasMarker`. Constructors/native override methods on the generator implementation are not extension points. Register a decoded modular definition via a datapack before selecting its holder. See [template rules and markers](Structure-Library.md) and [cross-dimension examples](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/cross-dimension-structures).
 
 ## Features and blocks
 
@@ -80,7 +80,7 @@ New native extension worlds pin selected adapter IDs/versions/work costs, featur
 
 ## External consumer and verification
 
-[The separate fixture project](https://github.com/GWSheridan/World-Architect/tree/v1.6.0/examples/api-fixture) compiles against the shipped JAR and supplies a dimension adapter, custom block, native feature and structure codec. It exercises template/marker decoding, preset validation, environment/spawn persistence, permissions and thread guards. No fixture classes or resources are included in the production JAR. Use matching providers and retain their declared adapter versions. See [Installation](Installation.md#compatibility) for compatibility requirements.
+[The separate fixture project](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/api-fixture) compiles against the shipped JAR and supplies a dimension adapter, custom block, native feature and structure codec. It exercises template/marker decoding, preset validation, environment/spawn persistence, permissions and thread guards. No fixture classes or resources are included in the production JAR. Use matching providers and retain their declared adapter versions. See [Installation](Installation.md#compatibility) for compatibility requirements.
 
 ## Dimension adapters
 

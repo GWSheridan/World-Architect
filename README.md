@@ -7,14 +7,12 @@ Created and maintained by **GWSHERIDAN**.
 
 See the [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
-World Architect 1.6.0 adds composite terrain regions, bounded foundations, weighted structure themes and batch site searches. [Download 1.6.0](https://github.com/GWSheridan/World-Architect/releases/tag/v1.6.0) or read the [changelog](CHANGELOG.md).
-
-The `release/1.7.0` branch prepares corridor regions, structure districts and reusable presets. This branch is a release candidate; 1.6.0 remains the published release. Candidate documentation and examples describe the 1.7 features below.
+World Architect 1.7.0 adds connected corridor regions, weighted structure districts and reusable presets with inherited locks. [Download 1.7.0](https://github.com/GWSheridan/World-Architect/releases/tag/v1.7.0) or read the [changelog](CHANGELOG.md).
 
 
 ## Get started
 
-Install `worldarchitect-1.6.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
+Install `worldarchitect-1.7.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
 
 In **Create New World → World**, choose **World Architect · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
 

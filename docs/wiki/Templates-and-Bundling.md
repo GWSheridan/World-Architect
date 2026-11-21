@@ -4,14 +4,14 @@ World Architect bundles package a world preset, developer policy, and native str
 
 ## Preset Studio
 
-Use [Preset Studio](Preset-Studio.md) to save immutable releases, duplicate, import/export and validate presets, edit locks, inspect dependencies and read help in game. Ready-to-install partial and full examples are included in [the Studio examples](https://github.com/GWSheridan/World-Architect/tree/v1.6.0/examples/preset-studio). The original JSON authoring workflow remains available below.
+Use [Preset Studio](Preset-Studio.md) to save immutable releases, duplicate, import/export and validate presets, edit locks, inspect dependencies and read help in game. Ready-to-install partial and full examples are included in [the Studio examples](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/preset-studio). The original JSON authoring workflow remains available below.
 
 Bundles can also embed selected `worldarchitect:modular` definitions under `data/<namespace>/worldgen/structure/`. Studio captures those definitions and native starting islands automatically. The dedicated authoring export shares Studio validation.
 
 ## Author and export
 
 1. In an authoring instance, create `config/worldarchitect/developer.json` with `{"format":1,"developer_mode":true}`. Restart the instance. The server console and administrators can now use `/wa_modpack export`.
-2. Copy [the locked Skyblock draft](https://github.com/GWSheridan/World-Architect/tree/v1.6.0/examples/locked-skyblock) into `config/worldarchitect/drafts/locked-skyblock`. Edit its three JSON files and place any additional native templates under `data/<namespace>/structure/<path>.nbt` in the draft.
+2. Copy [the locked Skyblock draft](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/locked-skyblock) into `config/worldarchitect/drafts/locked-skyblock`. Edit its three JSON files and place any additional native templates under `data/<namespace>/structure/<path>.nbt` in the draft.
 3. Run `/wa_modpack export locked-skyblock`. The bundle appears in `config/worldarchitect/exports/locked-skyblock.zip`. Choose a new draft name for each export.
 
 | Draft file | Purpose |

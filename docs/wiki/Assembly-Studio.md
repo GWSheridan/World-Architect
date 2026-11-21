@@ -49,7 +49,7 @@ An explicit definition uses, for example, `"placement": {"version": 1, "mode": "
 
 **Settings → Selected module collision** changes that module's captured rule without editing the library source. `air` remains the default. `matching` additionally accepts identical existing states without block entities. `air_or_water` accepts air and actual source/flowing water blocks; it never permits lava, waterlogged solid blocks or containers. Empty template spaces remain wet. A submerged spawn marker is still unsafe and rejects placement.
 
-Anchors set the starting height. Use the [site inspector](Structure-Site-Inspector.md) to understand rejected sites and the [coastal example](https://github.com/GWSheridan/World-Architect/tree/v1.6.0/examples/terrain-anchors) for water placement.
+Anchors set the starting height. Use the [site inspector](Structure-Site-Inspector.md) to understand rejected sites and the [coastal example](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/terrain-anchors) for water placement.
 
 ## Foundations and clearance
 
@@ -67,4 +67,4 @@ A variant records a name, existing module name, weight and saved library ID. It 
 
 Palettes and variants use a separate seeded random stream, preserving existing pool planning. Limits are eight palettes, 32 mappings per palette and sixteen variants. The complete base and variant catalog must also fit 65,536 cells. Every captured template is checked against every palette before export; selected layouts also pass the production placement checks. Undo, redo, recovery, revision conflicts, current permissions and pack locks apply to these edits.
 
-The optional `themes` object has `version: 1`, a `palettes` list (`name`, `weight`, `mappings` with `from`, `to`, `preserve_properties`) and a `variants` list (`name`, `module`, `weight`, `source`, embedded `snapshot`). See the [foundation example](https://github.com/GWSheridan/World-Architect/tree/v1.6.0/examples/structure-foundations) and [theme example](https://github.com/GWSheridan/World-Architect/tree/v1.6.0/examples/structure-themes) for complete definitions.
+The optional `themes` object has `version: 1`, a `palettes` list (`name`, `weight`, `mappings` with `from`, `to`, `preserve_properties`) and a `variants` list (`name`, `module`, `weight`, `source`, embedded `snapshot`). See the [foundation example](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/structure-foundations) and [theme example](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/structure-themes) for complete definitions.

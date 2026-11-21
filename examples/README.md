@@ -28,4 +28,4 @@ The 1.4 examples add [shared terrain regions](shared-regions/README.md) and [con
 
 The 1.6 examples add [composite regions](composite-regions/README.md), [foundations](structure-foundations/README.md) and [themes with captured variants](structure-themes/README.md). Each has a zipped preset and editable source resources.
 
-The 1.7 candidate contains 23 current bundles, adding [corridor paths](corridor-regions/README.md), weighted [structure districts](structure-districts/README.md), and a [reusable Skyblock base with partial/full child presets](reusable-presets/README.md). All older bundles remain intact.
+The 1.7 release contains 23 current bundles, adding [corridor paths](corridor-regions/README.md), weighted [structure districts](structure-districts/README.md), and a [reusable Skyblock base with partial/full child presets](reusable-presets/README.md). All older bundles remain intact.

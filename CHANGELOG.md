@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.7.0 — release candidate
+## 1.7.0
 
 - Added connected corridor regions with rounded ends, inward terrain transitions, biome choices and shared rule filtering. Corridors explicitly select generator version 6; existing versions retain their saved behavior.
 - Added weighted structure districts with shared native grids, named-region limits and deterministic minimum spacing across exclusion groups. Site inspection and searches use the same placement rules.
