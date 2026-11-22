@@ -29,7 +29,7 @@ final class Cycle16Acceptance {
         var data=server.getWorldPath(LevelResource.DATA);byte[] snapshot=Files.readAllBytes(data.resolve("worldsunwritten-generation-v1.dat")),settings=Files.readAllBytes(data.resolve("minecraft/world_gen_settings.dat"));int loaded=server.overworld().getChunkSource().getLoadedChunksCount();
         var previous=stat("AssemblyDraft","load",server,Identifier.parse("validation:vertical_tower"));var previousStructure=(Structure)call(previous,"structure",server);LegacyPoolComparison.check15(server,previousStructure,Structure.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE,server.registryAccess()),previousStructure).getOrThrow());
         var base=entry("Base",Blocks.ANDESITE.defaultBlockState());var other=entry("Alternative",Blocks.STONE_BRICKS.defaultBlockState());
-        foundations(base);
+        foundations(server,base);
         var palettes=List.of(new StructureThemes.Palette("dark",3,List.of(new StructureThemes.Mapping(Identifier.withDefaultNamespace("andesite"),Identifier.withDefaultNamespace("deepslate_bricks"),true),new StructureThemes.Mapping(Identifier.withDefaultNamespace("oak_stairs"),Identifier.withDefaultNamespace("spruce_stairs"),true))),new StructureThemes.Palette("light",1,List.of(new StructureThemes.Mapping(Identifier.withDefaultNamespace("andesite"),Identifier.withDefaultNamespace("calcite"),true))));
         var variants=List.of(variant("original",base),variant("brick",other));var themes=new StructureThemes(palettes,variants);
         var foundation=new StructureFoundation(StructureFoundation.Mode.FOOTPRINT,Blocks.COBBLESTONE.defaultBlockState(),8,0,false);
@@ -56,7 +56,20 @@ final class Cycle16Acceptance {
     }
     private static StructureThemes.Variant variant(String name,Object entry){try{return (StructureThemes.Variant)make("StructureThemes$Variant",name,"house",1,Identifier.parse("validation:house"),entry);}catch(Exception e){throw new IllegalStateException(e);}}
     private static Object entry(String name,BlockState floor)throws Exception{var cells=new ArrayList<NativeTemplate.Cell>();for(int x=0;x<3;x++)for(int z=0;z<3;z++)cells.add(new NativeTemplate.Cell(new BlockPos(x,0,z),floor,null));cells.add(new NativeTemplate.Cell(new BlockPos(2,1,0),Blocks.OAK_STAIRS.defaultBlockState().setValue(StairBlock.FACING,Direction.EAST),null));var metadata=new CompoundTag();metadata.putString("CustomName","House supplies");cells.add(new NativeTemplate.Cell(new BlockPos(2,1,2),Blocks.CHEST.defaultBlockState(),metadata));var e=stat("LibraryEntry","read",new NativeTemplate(new BlockPos(3,4,3),cells),new CompoundTag(),name,"Validation");return call(e,"withMarker","entry",make("LibraryEntry$Marker",new BlockPos(1,1,1),Direction.NORTH));}
-    private static void foundations(Object entry)throws Exception{var origin=new BlockPos(0,70,0);var piece=make("ModularPiece","house",origin,entry);var height=LevelHeightAccessor.create(-64,384);Function<BlockPos,NoiseColumn> flat=p->column(64,Blocks.STONE.defaultBlockState(),Blocks.AIR.defaultBlockState());
+    private static void foundations(MinecraftServer server,Object entry)throws Exception{var origin=new BlockPos(0,70,0);var piece=make("ModularPiece","house",origin,entry);var height=LevelHeightAccessor.create(-64,384);Function<BlockPos,NoiseColumn> flat=p->column(64,Blocks.STONE.defaultBlockState(),Blocks.AIR.defaultBlockState());
+        var context=net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext.fromLevel(server.overworld());
+        for(boolean legacy:new boolean[]{false,true}){
+            var parent=make("ModularPiece","house",origin,entry,"",false,legacy);
+            var foundation=new StructureFoundation(StructureFoundation.Mode.POSTS,Blocks.COBBLESTONE.defaultBlockState(),8,0,false);
+            var plan=((Optional<?>)call(foundation,"plan",List.of(parent),flat,height)).orElseThrow();
+            for(var prepared:(List<?>)call(plan,"pieces")){
+                var tag=((ModularPiece)prepared).createTag(context);String namespace=legacy?"worldarchitect":"worldsunwritten";
+                require(tag.getStringOr("id","").equals(namespace+":module"),"Foundation piece changed its saved encoding");
+                var template=tag.getCompoundOrEmpty("template");
+                require(template.getCompound(namespace).isPresent()&&!template.contains(legacy?"worldsunwritten":"worldarchitect"),"Foundation template changed its saved metadata namespace");
+            }
+        }
+        System.out.println("WA_LEGACY_FOUNDATION_ENCODING_PASS piece_ids,template_metadata");
         for(var mode:StructureFoundation.Mode.values()){var f=new StructureFoundation(mode,Blocks.COBBLESTONE.defaultBlockState(),8,0,false);var plan=(Optional<?>)call(f,"plan",List.of(piece),flat,height);require(plan.isPresent()&&((Map<?,?>)call(plan.orElseThrow(),"writes")).size()==(mode==StructureFoundation.Mode.POSTS?20:45),"Foundation depth or footprint is wrong");}
         var f=new StructureFoundation(StructureFoundation.Mode.FOOTPRINT,Blocks.STONE.defaultBlockState(),4,0,false);require(((Optional<?>)call(f,"plan",List.of(piece),flat,height)).isEmpty(),"Unreachable ground accepted");
         for(var top:List.of(Blocks.LAVA.defaultBlockState(),Blocks.CHEST.defaultBlockState(),Blocks.OAK_SLAB.defaultBlockState().setValue(SlabBlock.WATERLOGGED,true),Blocks.WATER.defaultBlockState())){Function<BlockPos,NoiseColumn> blocked=p->column(64,Blocks.STONE.defaultBlockState(),top);require(((Optional<?>)call(new StructureFoundation(StructureFoundation.Mode.POSTS,Blocks.STONE.defaultBlockState(),8,0,false),"plan",List.of(piece),blocked,height)).isEmpty(),"Foundation replaced protected or unapproved fluid terrain");}

@@ -4,7 +4,7 @@
 
 - Renamed the mod to Worlds Unwritten, including the JAR, interface, commands, authoring tools and documentation.
 - Moved the primary mod namespace and public API to `worldsunwritten`. Existing saves and API 1 add-ons use an included legacy compatibility bridge.
-- Kept saved generation settings, templates, island assignments and generation algorithms intact. New worlds and exports use the new identity.
+- Kept saved generation settings, templates, foundation metadata, island assignments and generation algorithms intact. New worlds and exports use the new identity.
 - Updated the repository and wiki links. Earlier releases remain available with their original files and checksums.
 
 ## 1.9.0

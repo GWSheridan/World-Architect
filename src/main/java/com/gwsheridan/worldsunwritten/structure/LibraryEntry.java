@@ -94,6 +94,12 @@ record LibraryEntry(NativeTemplate template, String title, String category, Stri
         return root;
     }
 
+    LibraryEntry forEncoding(boolean legacy) {
+        return new LibraryEntry(template, title, category, author, revision, rules, markers,
+                legacy ? com.gwsheridan.worldsunwritten.compatibility.legacy.LegacyIds.NAMESPACE
+                        : com.gwsheridan.worldsunwritten.compatibility.legacy.LegacyIds.CURRENT);
+    }
+
     LibraryEntry withMarker(String name, Marker marker) throws IOException {
         var next = new TreeMap<>(markers);
         next.put(name, marker);
