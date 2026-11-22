@@ -37,6 +37,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --test tools/workbench/scenario.test.mjs tools/workbench/batch.test.mjs tools/validation/benchmark-analysis.test.mjs tools/validation/identity.test.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve compiled mod for verification
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: compiled-${{ matrix.os }}
+          path: build/libs/Worlds-Unwritten-*.jar
+          if-no-files-found: error
+          retention-days: 7
       - name: Standalone modpack kit
         shell: pwsh
         run: |

@@ -103,7 +103,7 @@ final class Cycle15Acceptance {
         var manifest=PresetStudio.defaults("polygon_regions","1.5.0",original.manifest().options());var draft=new PresetStudio.Draft(manifest,preset,original.templates());PresetStudio.save(ModpackRuntime.directory(),"polygon_regions",draft,server.registryAccess());System.out.println("WA15_BUNDLE polygon minecraft:overworld validation:regional_marker "+PresetStudio.export(ModpackRuntime.directory(),"polygon_regions","1.5.0",server.registryAccess()));
     }
     static void generated(MinecraftServer server,String kind,Identifier id,Identifier dimension,int stage)throws Exception{
-        if(kind.equals("polygon")){polygonGeneration(server,stage);return;}
+        if(kind.equals("polygon")){polygonGeneration(server,id,stage);return;}
         boolean pooled=kind.equals("vertical")||kind.equals("stress");long started=System.nanoTime();
         var level=server.getLevel(ResourceKey.create(Registries.DIMENSION,dimension));require(level!=null,"Missing site dimension");var holder=server.registryAccess().lookupOrThrow(Registries.STRUCTURE).getOrThrow(ResourceKey.create(Registries.STRUCTURE,id));var state=level.getChunkSource().getGeneratorState();
         var receipt=server.getWorldPath(LevelResource.DATA).resolve("worldsunwritten-site15-"+UUID.nameUUIDFromBytes((id+"/"+dimension).getBytes(java.nio.charset.StandardCharsets.UTF_8))+".json");
@@ -138,9 +138,9 @@ final class Cycle15Acceptance {
             }
         }throw new AssertionError("No complete site structure generated");
     }
-    private static void polygonGeneration(MinecraftServer server,int stage)throws Exception{
+    private static void polygonGeneration(MinecraftServer server,Identifier id,int stage)throws Exception{
         var level=server.overworld();var generator=(SolidColumnGenerator)level.getChunkSource().getGenerator();var regions=generator.terrainRegions().orElseThrow();require(regions.version()==4,"Polygon profile did not use version 4");var polygon=regions.zones().stream().filter(z->z.mask()==RegionalTerrain.Mask.POLYGON).findFirst().orElseThrow();
-        var registry=server.registryAccess().lookupOrThrow(Registries.STRUCTURE);var structure=registry.get(ResourceKey.create(Registries.STRUCTURE,Identifier.parse("validation:regional_marker"))).orElseGet(()->registry.getOrThrow(ResourceKey.create(Registries.STRUCTURE,Identifier.parse("worldsunwritten_examples:polygon_marker")))).value();
+        var structure=server.registryAccess().lookupOrThrow(Registries.STRUCTURE).getOrThrow(ResourceKey.create(Registries.STRUCTURE,id)).value();
         var digest=java.security.MessageDigest.getInstance("SHA-256");long ores=0,decorations=0,diamonds=0,starts=0;
         for(int[] point:new int[][]{{-17,-1},{-16,-1},{-5,-1},{-4,-1},{3,-1},{4,-1},{15,-1},{16,-1},{17,-1},{-4,-4},{-3,-3},{0,0},{1,0},{0,1},{1,1},{2,1},{3,1},{3,3}}){
             var chunk=level.getChunk(point[0],point[1]);for(int x=point[0]*16;x<point[0]*16+16;x++)for(int z=point[1]*16;z<point[1]*16+16;z++){
