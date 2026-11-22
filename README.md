@@ -5,6 +5,8 @@ Design each Minecraft dimension before creating a world. Choose terrain and laye
 **Minecraft Java 26.3 · NeoForge 26.3.0.103 · Java 25**
 Created and maintained by **GWSHERIDAN**.
 
+Licensed under the [MIT License](LICENSE).
+
 See the [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
 Create hex and square cell worlds, advancement-based chunk expansion, saved player and team territories, and six modpack starters. Build and export them through [Cell World Studio](docs/wiki/Cell-Worlds.md). Find downloads on the [releases page](https://github.com/GWSheridan/Worlds-Unwritten/releases) or read the [changelog](CHANGELOG.md).

@@ -187,7 +187,7 @@ def releaseSources = tasks.register('releaseSources', Zip) {
         include 'src/**', 'gradle/**', 'docs/**', 'examples/**', '.github/**',
                 'gradlew', 'gradlew.bat', 'build.gradle', 'settings.gradle', 'gradle.properties', 'README.md', 'CHANGELOG.md', 'tools/**'
     }
-    from('.gitignore', '.gitattributes')
+    from('.gitignore', '.gitattributes', 'LICENSE')
 }
 
 tasks.register('packageRelease', Zip) {
@@ -198,7 +198,7 @@ tasks.register('packageRelease', Zip) {
     destinationDirectory = releaseDirectory
     from(tasks.named('jar')) { into 'mods' }
     from(releaseSources) { into 'source' }
-    from('README.md', 'CHANGELOG.md')
+    from('README.md', 'CHANGELOG.md', 'LICENSE')
     from('docs') { into 'docs' }
     from('examples') { into 'examples'; exclude '**/build/**', '**/.gradle/**', '**/.gradle-local/**', '**/run/**' }
     def lockedBundle = providers.gradleProperty('releaseLockedBundle')
@@ -357,6 +357,7 @@ tasks.register('packageTestKit', Zip) {
     from(tasks.named('jar')) { into 'lib'; rename { 'Worlds-Unwritten.jar' } }
     from(tasks.named('packFixtureJar')) { into 'lib'; rename { 'Worlds-Unwritten-pack-test.jar' } }
     from('tools/pack-test')
+    from('LICENSE')
 }
 tasks.named('packageRelease').configure {
     dependsOn tasks.named('packageTestKit')
@@ -386,6 +387,10 @@ tasks.register('creatorAcceptanceJar', Jar) {
     archiveClassifier = 'creator-validation'
     destinationDirectory = layout.buildDirectory.dir('validation-tools')
 }
+['jar', 'packFixtureJar', 'testKitJar', 'benchmarkProbeJar', 'acceptanceJar', 'creatorAcceptanceJar'].each { archiveTask ->
+    tasks.named(archiveTask, Jar).configure { from('LICENSE') }
+}
+
 // Stable ordering and timestamps make the gameplay JAR reproducible from a clean extraction.
 tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false

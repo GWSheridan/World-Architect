@@ -1,6 +1,6 @@
 modLoader="javafml"
 loaderVersion="[4,)"
-license="All Rights Reserved"
+license="MIT"
 [[mods]]
 modId="wa_api_fixture"
 version="1.0.0"
