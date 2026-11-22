@@ -1,4 +1,4 @@
-# World Architect
+# Worlds Unwritten
 
 Design each Minecraft dimension before creating a world. Choose terrain and layers, control resources and structures, build Skyblock islands, or package the setup as a locked modpack preset.
 
@@ -7,14 +7,14 @@ Created and maintained by **GWSHERIDAN**.
 
 See the [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
-World Architect 1.9.0 adds hex and square cell worlds, advancement-based chunk expansion, saved player and team territories, and six modpack starters. Build and export them through [Cell World Studio](docs/wiki/Cell-Worlds.md). Find downloads on the [releases page](https://github.com/GWSheridan/World-Architect/releases) or read the [changelog](CHANGELOG.md).
+Create hex and square cell worlds, advancement-based chunk expansion, saved player and team territories, and six modpack starters. Build and export them through [Cell World Studio](docs/wiki/Cell-Worlds.md). Find downloads on the [releases page](https://github.com/GWSheridan/Worlds-Unwritten/releases) or read the [changelog](CHANGELOG.md).
 
 
 ## Get started
 
-Install `worldarchitect-1.9.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
+Install `Worlds-Unwritten-2.0.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
 
-In **Create New World → World**, choose **World Architect · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
+In **Create New World → World**, choose **Worlds Unwritten · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
 
 For modpacks, open **Builder** to choose a starter, edit island types, set server policies and export an installation. [Island Studio](docs/wiki/Void-and-Skyblock.md) supports captured or imported builds, native model previews, markers and starter containers.
 
@@ -35,11 +35,11 @@ For modpacks, open **Builder** to choose a starter, edit island types, set serve
 - **Preset Studio:** versioned presets, embedded templates, validation and server-enforced locks.
 - **Server administration:** confirmed island, team, spawn and protection changes, plus environment settings.
 
-The [full wiki](https://github.com/GWSheridan/World-Architect/wiki) has guides for players, server owners and modpack developers. An [offline Markdown copy](docs/wiki/Home.md) is included in the source and complete release ZIP.
+The [full wiki](https://github.com/GWSheridan/Worlds-Unwritten/wiki) has guides for players, server owners and modpack developers. An [offline Markdown copy](docs/wiki/Home.md) is included in the source and complete release ZIP.
 
 ## Downloads and guides
 
-- [Latest release](https://github.com/GWSheridan/World-Architect/releases/latest)
+- [Latest release](https://github.com/GWSheridan/Worlds-Unwritten/releases/latest)
 - [Installation](docs/wiki/Installation.md) and [first world](docs/wiki/Getting-Started.md)
 - [Server setup](docs/wiki/Server-Setup.md)
 - [Modpack authoring](docs/wiki/Modpack-Quick-Start.md) and [preset reference](docs/wiki/Preset-Reference.md)
@@ -47,6 +47,8 @@ The [full wiki](https://github.com/GWSheridan/World-Architect/wiki) has guides f
 - [Changelog](CHANGELOG.md)
 
 ## Existing worlds
+
+Version 2.0.0 introduces the Worlds Unwritten identity and namespace. Replace the previous mod JAR; install one version at a time. Existing saves and API 1 add-ons use the included compatibility bridge. Follow [Backups and Upgrades](docs/wiki/Backups-and-Upgrades.md) for legacy data paths and configuration import.
 
 Worlds keep their original generation settings, templates and required dependencies. Changing an installed preset supplies defaults for future worlds. End progression is chosen before creation; older custom End saves keep their previous behaviour.
 

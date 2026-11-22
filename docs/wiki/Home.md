@@ -1,12 +1,12 @@
-# World Architect
+# Worlds Unwritten
 
 Build a world around the way you want to play. Give each dimension its own terrain, biomes, resources and structures, build Skyblock islands, or distribute the whole setup as a modpack preset.
 
-**World Architect 1.9.0** runs on Minecraft Java **26.3**, NeoForge **26.3.0.103** and Java **25**. Created and maintained by **GWSHERIDAN**.
+**Worlds Unwritten 2.0.0** runs on Minecraft Java **26.3**, NeoForge **26.3.0.103** and Java **25**. Created and maintained by **GWSHERIDAN**.
 
 Start with [Installation](Installation.md) and [Getting Started](Getting-Started.md). [Creator Tools](Creator-Tools.md) covers the starter gallery, terrain preview and staged structure placement. Use [Assembly Studio](Assembly-Studio.md) for modular structures and [Rule Inspector](Rule-Inspector.md) for condition maps and explanations. Server owners should read [Server Setup](Server-Setup.md) and [Administration Panel](Administration-Panel.md); pack authors can follow [Modpack Quick Start](Modpack-Quick-Start.md).
 
-[Download the release](https://github.com/GWSheridan/World-Architect/releases/latest), or browse [Example Presets](Example-Presets.md). These guides describe World Architect 1.9.0.
+[Download the release](https://github.com/GWSheridan/Worlds-Unwritten/releases/latest), or browse [Example Presets](Example-Presets.md). These guides describe Worlds Unwritten 2.0.0.
 
 Existing worlds keep the generation settings they were created with. Changes to a preset affect future worlds. Read [Backups and Upgrades](Backups-and-Upgrades.md) before updating a server.
 
@@ -17,3 +17,5 @@ New in 1.7: connected [corridor regions](Regional-Terrain.md#corridor-paths-in-1
 New in 1.8: guided [modpack projects](Modpack-Quick-Start.md), [custom island editing and persistent island choices](Void-and-Skyblock.md), independent runtime locks and an optional Java-only test kit.
 
 New in 1.9: [hex and square cell worlds](Cell-Worlds.md), advancement-based chunk expansion, quest signals and persistent player or team territories. Cell World Studio includes six editable starters for modpack authors.
+
+New in 2.0: the Worlds Unwritten name, JAR and primary namespace, with compatibility for existing worlds, archived presets and API 1 add-ons. See [Backups and Upgrades](Backups-and-Upgrades.md).

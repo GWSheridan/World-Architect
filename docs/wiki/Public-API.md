@@ -1,12 +1,12 @@
 # Public extension API 1
 
-World Architect 1.9.0 supports Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Compile against the distributed JAR; declare a required NeoForge dependency on World Architect. Call `WorldArchitectApi.requireVersion(1)` in your mod constructor. A different API contract fails during mod construction, before a world opens.
+Worlds Unwritten 2.0.0 supports Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Compile against the distributed JAR; declare a required NeoForge dependency on Worlds Unwritten. Call `WorldsUnwrittenApi.requireVersion(1)` in your mod constructor. A different API contract fails during mod construction, before a world opens.
 
-The supported surface is `com.gwsheridan.worldarchitect.api` plus the data types listed below. Other implementation packages, mixins, generator implementation classes, client screens and low-level file writers are internal even when Java visibility is public. API 1 additions retain existing method signatures and codec defaults. Breaking changes require a new API version. Minecraft/NeoForge upgrades may require recompilation; API 1 is not a promise of binary compatibility across game versions.
+The supported surface is `com.gwsheridan.worldsunwritten.api` plus the data types listed below. Other implementation packages, mixins, generator implementation classes, client screens and low-level file writers are internal even when Java visibility is public. API 1 additions retain existing method signatures and codec defaults. Breaking changes require a new API version. Minecraft/NeoForge upgrades may require recompilation; API 1 is not a promise of binary compatibility across game versions.
 
 ## Registration and dimensions
 
-Register on **both physical sides**, during the mod constructor, with NeoForge `DeferredRegister`. Attach the deferred register to the **mod event bus**. World Architect creates its three adapter registries during `NewRegistryEvent`; consumers must not register values manually after registry freeze. See the official [registry lifecycle](https://docs.neoforged.net/docs/concepts/registries/) and [event buses](https://docs.neoforged.net/docs/concepts/events/).
+Register on **both physical sides**, during the mod constructor, with NeoForge `DeferredRegister`. Attach the deferred register to the **mod event bus**. Worlds Unwritten creates its three adapter registries during `NewRegistryEvent`; consumers must not register values manually after registry freeze. See the official [registry lifecycle](https://docs.neoforged.net/docs/concepts/registries/) and [event buses](https://docs.neoforged.net/docs/concepts/events/).
 
 | Extension | DeferredRegister key | Entry ID |
 | --- | --- | --- |
@@ -15,7 +15,7 @@ Register on **both physical sides**, during the mod constructor, with NeoForge `
 | Feature | `FeatureAdapters.KEY` | Exact native `FEATURE_TYPE` codec ID |
 
 ```java
-WorldArchitectApi.requireVersion(1);
+WorldsUnwrittenApi.requireVersion(1);
 var adapters = DeferredRegister.create(FeatureAdapters.KEY, "example");
 adapters.register("crystal", () -> new FeatureAdapter() {
     public int version() { return 1; }
@@ -32,11 +32,11 @@ adapters.register(modBus);
 
 ## Structures and templates
 
-A `StructureAdapter` declares a positive `version()` and pure `supports(Structure)` check. It opts explicitly selected native structures into managed Single Block/Layered terrain. Register native structure codecs, pieces, templates and structure definitions through Minecraft/NeoForge as usual. World Architect supplies deterministic random-spread placement; your structure owns its native lifecycle, bounding boxes, biome checks, serialization and placement. Built-in pyramids, temples, huts, End Cities and World Architect modular structures retain their existing implementations.
+A `StructureAdapter` declares a positive `version()` and pure `supports(Structure)` check. It opts explicitly selected native structures into managed Single Block/Layered terrain. Register native structure codecs, pieces, templates and structure definitions through Minecraft/NeoForge as usual. Worlds Unwritten supplies deterministic random-spread placement; your structure owns its native lifecycle, bounding boxes, biome checks, serialization and placement. Built-in pyramids, temples, huts, End Cities and Worlds Unwritten modular structures retain their existing implementations.
 
-`StructureTemplates.modular(JsonObject, HolderLookup.Provider)` decodes a detached `worldarchitect:modular` definition, checks size/overlap/rules/markers and validates metadata. It never inserts entries into a live registry. `StructureTemplates.read(CompoundTag, registries)` reads and sanitizes a detached native template: decorative supported metadata survives; inventories, commands and unsupported data are removed or rejected. Neither method places blocks.
+`StructureTemplates.modular(JsonObject, HolderLookup.Provider)` decodes a detached `worldsunwritten:modular` definition, checks size/overlap/rules/markers and validates metadata. It never inserts entries into a live registry. `StructureTemplates.read(CompoundTag, registries)` reads and sanitizes a detached native template: decorative supported metadata survives; inventories, commands and unsupported data are removed or rejected. Neither method places blocks.
 
-Supported template data: `NativeTemplate`/`Cell`, `TemplateRules`, `TemplatePlacement`; `ModularStructure` supports `CODEC`, `validateTemplates`, `horizontalSpan`, `blockCount` and `hasMarker`. Constructors/native override methods on the generator implementation are not extension points. Register a decoded modular definition via a datapack before selecting its holder. See [template rules and markers](Structure-Library.md) and [cross-dimension examples](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/cross-dimension-structures).
+Supported template data: `NativeTemplate`/`Cell`, `TemplateRules`, `TemplatePlacement`; `ModularStructure` supports `CODEC`, `validateTemplates`, `horizontalSpan`, `blockCount` and `hasMarker`. Constructors/native override methods on the generator implementation are not extension points. Register a decoded modular definition via a datapack before selecting its holder. See [template rules and markers](Structure-Library.md) and [cross-dimension examples](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/cross-dimension-structures).
 
 ## Features and blocks
 
@@ -48,7 +48,7 @@ Minecraft 26.3 uses `Feature` implementations and `Registries.FEATURE` definitio
 {"native_features":[{"feature":"example:crystals","attempts":2,"min_y":32,"max_y":64,"biomes":["minecraft:plains"]}]}
 ```
 
-This is available on managed solid terrain. Void/Skyblock reject natural feature rules to preserve empty chunks. At most 16 rules and 65,536 declared work units per chunk are allowed. `FeatureAdapter.workLimit` returns a conservative positive cost per invocation or zero to reject a configuration. Cost should include blocks visited/written and expensive sampling. World Architect bounds dispatch count and declared work, not arbitrary third-party code execution. Providers are trusted code and must honor the declared limit, use the supplied random source, remain thread safe and deterministic, and avoid unrelated chunks or live server/player state. Do not cache mutable random sources or world references.
+This is available on managed solid terrain. Void/Skyblock reject natural feature rules to preserve empty chunks. At most 16 rules and 65,536 declared work units per chunk are allowed. `FeatureAdapter.workLimit` returns a conservative positive cost per invocation or zero to reject a configuration. Cost should include blocks visited/written and expensive sampling. Worlds Unwritten bounds dispatch count and declared work, not arbitrary third-party code execution. Providers are trusted code and must honor the declared limit, use the supplied random source, remain thread safe and deterministic, and avoid unrelated chunks or live server/player state. Do not cache mutable random sources or world references.
 
 Each native type ID has one adapter provider; duplicate registrations fail through the registry. Coordinate shared adapters rather than replacing providers after registration.
 
@@ -80,15 +80,15 @@ New native extension worlds pin selected adapter IDs/versions/work costs, featur
 
 ## External consumer and verification
 
-[The separate fixture project](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/api-fixture) compiles against the shipped JAR and supplies a dimension adapter, custom block, native feature and structure codec. It exercises template/marker decoding, preset validation, environment/spawn persistence, permissions and thread guards. No fixture classes or resources are included in the production JAR. Use matching providers and retain their declared adapter versions. See [Installation](Installation.md#compatibility) for compatibility requirements.
+[The separate fixture project](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/api-fixture) compiles against the shipped JAR and supplies a dimension adapter, custom block, native feature and structure codec. It exercises template/marker decoding, preset validation, environment/spawn persistence, permissions and thread guards. No fixture classes or resources are included in the production JAR. Use matching providers and retain their declared adapter versions. See [Installation](Installation.md#compatibility) for compatibility requirements.
 
 ## Dimension adapters
 
-World Architect reads dimensions from the active world preset and Minecraft's `LEVEL_STEM` registry. It offers Original Generation for every discovered dimension and can replace compatible standard noise generators. Mod authors can opt a specialized generator into replacement or restrict the modes offered for their dimension.
+Worlds Unwritten reads dimensions from the active world preset and Minecraft's `LEVEL_STEM` registry. It offers Original Generation for every discovered dimension and can replace compatible standard noise generators. Mod authors can opt a specialized generator into replacement or restrict the modes offered for their dimension.
 
 ## Register an adapter
 
-Compile against World Architect 1.5.0 and call `WorldArchitectApi.requireVersion(1)`. Existing adapters continue to offer the modes they declare. On both physical sides, register a `DimensionAdapter` with NeoForge `DeferredRegister` during your mod's constructor. Use the exact dimension registry ID. The [public API contract](Public-API.md) also covers structures, features, blocks, spawning, environments and presets.
+Compile against Worlds Unwritten 1.5.0 and call `WorldsUnwrittenApi.requireVersion(1)`. Existing adapters continue to offer the modes they declare. On both physical sides, register a `DimensionAdapter` with NeoForge `DeferredRegister` during your mod's constructor. Use the exact dimension registry ID. The [public API contract](Public-API.md) also covers structures, features, blocks, spawning, environments and presets.
 
 ```java
 var adapters = DeferredRegister.create(DimensionAdapterRegistry.KEY, "examplemod");
@@ -111,9 +111,9 @@ adapters.register("undergarden", () -> new DimensionAdapter() {
 adapters.register(modBus);
 ```
 
-Import `DimensionAdapter` and `DimensionAdapterRegistry` from `com.gwsheridan.worldarchitect.api`. `TerrainMode` and `Support` are nested in `DimensionAdapter`. Replace `MyGenerator` with the generator class whose replacement your mod supports. An empty mode set exposes Original Generation only. The optional preferred biome becomes the fixed biome of the replacement generator. Without that preference, World Architect selects a registered biome from the original generator. Use a translatable `Component` for public-facing diagnostics.
+Import `DimensionAdapter` and `DimensionAdapterRegistry` from `com.gwsheridan.worldsunwritten.api`. `TerrainMode` and `Support` are nested in `DimensionAdapter`. Replace `MyGenerator` with the generator class whose replacement your mod supports. An empty mode set exposes Original Generation only. The optional preferred biome becomes the fixed biome of the replacement generator. Without that preference, Worlds Unwritten selects a registered biome from the original generator. Use a translatable `Component` for public-facing diagnostics.
 
-`inspect` reads the original `LevelStem`. Keep it side-effect free. World Architect calls it in the editor and validates the selected mode when a profile replaces a datapack stem. The replacement retains the dimension type. Check your gameplay hooks for assumptions about terrain or the original generator before offering a mode.
+`inspect` reads the original `LevelStem`. Keep it side-effect free. Worlds Unwritten calls it in the editor and validates the selected mode when a profile replaces a datapack stem. The replacement retains the dimension type. Check your gameplay hooks for assumptions about terrain or the original generator before offering a mode.
 
 ## Saved configuration
 
@@ -137,7 +137,7 @@ The native arena is restricted to the End in this release. It does not add fight
 
 ## Version 1.4 data formats
 
-API contract 1 retains its supported signatures. Named terrain-region rule conditions and constrained assembly pools use explicit format 2 and need World Architect 1.4. Existing format-1 definitions retain their encodings and algorithms. Authoring protocol 1.4 requires matching client/server versions. Draft recovery, editor sessions, planner diagnostics and workbench internals are implementation details rather than new public extension contracts.
+API contract 1 retains its supported signatures. Named terrain-region rule conditions and constrained assembly pools use explicit format 2 and need Worlds Unwritten 1.4. Existing format-1 definitions retain their encodings and algorithms. Authoring protocol 1.4 requires matching client/server versions. Draft recovery, editor sessions, planner diagnostics and workbench internals are implementation details rather than new public extension contracts.
 
 ## Version 1.5 data additions
 
@@ -165,4 +165,10 @@ Dimension adapters must include `TerrainMode.CELLULAR` in their advertised modes
 
 `CellProgressionApi.VERSION` is 1. Call `CellProgressionApi.signal(territoryLevel, player, signalId)` on the server thread after verifying a quest reward. The overload taking only a player targets the current dimension. The call returns newly completed objective IDs; repeated signals pay once per saved territory. All rewards and prerequisites come from the immutable preset. It cannot regenerate arbitrary player chunks.
 
-These additions require World Architect 1.9.0 or newer. Declare that minimum mod version as well as requiring API 1. See [Cell Worlds](Cell-Worlds.md) for configuration limits and administration.
+These additions require Worlds Unwritten 2.0.0 or newer. Declare that minimum mod version as well as requiring API 1. See [Cell Worlds](Cell-Worlds.md) for configuration limits and administration.
+
+## Version 2.0 migration
+
+New consumers use `com.gwsheridan.worldsunwritten.api` and declare a required NeoForge dependency on `worldsunwritten` version 2.0.0 or newer. Compile against `Worlds-Unwritten-2.0.0.jar`; the supported API contract remains version 1.
+
+Already compiled API 1 consumers using `com.gwsheridan.worldarchitect.api` can keep their existing dependency and provider IDs. The included `worldarchitect` compatibility module exposes the frozen 1.9 contract and forwards supported calls to the current implementation. Its version describes the legacy contract; the main mod reports 2.0.0. Do not change saved adapter IDs or bump adapter versions for a branding-only rebuild. Migrate a provider's imports and dependency together, and register an adapter through one API family: duplicate IDs across the old and new registries are rejected.

@@ -2,11 +2,12 @@ plugins {
     id 'java-library'
     id 'net.neoforged.moddev' version '2.0.148'
 }
-group = 'com.gwsheridan.worldarchitect.fixture'
+group = 'com.gwsheridan.worldsunwritten.fixture'
 version = '1.0.0'
+base { archivesName = 'Worlds-Unwritten-api-fixture' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 neoForge { version = '26.3.0.103' }
 dependencies {
-    compileOnly files(providers.gradleProperty('worldArchitectJar').orElse('../../build/libs/worldarchitect-1.9.0.jar').get())
+    compileOnly files(providers.gradleProperty('worldsUnwrittenJar').orElse('../../build/libs/Worlds-Unwritten-2.0.0.jar').get())
 }
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }

@@ -4,11 +4,11 @@ license="All Rights Reserved"
 [[mods]]
 modId="wa_api_fixture"
 version="1.0.0"
-displayName="World Architect External API Fixture"
+displayName="Worlds Unwritten External API Fixture"
 [[dependencies.wa_api_fixture]]
-modId="worldarchitect"
+modId="worldsunwritten"
 type="required"
-versionRange="[1.0.0,2.0.0)"
+versionRange="[2.0.0,3.0.0)"
 ordering="AFTER"
 side="BOTH"
 [[dependencies.wa_api_fixture]]

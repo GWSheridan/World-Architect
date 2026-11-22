@@ -1,6 +1,6 @@
 # Assembly Studio
 
-Assembly Studio combines saved structure templates into a modular structure. Open the structure library and choose **Assembly Studio**, or use `/wa_assembly`. Authoring requires operator level 2 and a preset that permits the structure library. Preset export also requires level 3 and `developer_mode`.
+Assembly Studio combines saved structure templates into a modular structure. Open the structure library and choose **Assembly Studio**, or use `/worldsunwritten assembly`. Authoring requires operator level 2 and a preset that permits the structure library. Preset export also requires level 3 and `developer_mode`.
 
 ## Build an assembly
 
@@ -19,15 +19,15 @@ Modules contain captured templates, block states, permitted decorative metadata 
 
 ## Export for new worlds
 
-**Export datapack** writes a ZIP under the world's `generated/worldarchitect/assembly-exports/` directory. It contains the registered structure definition and a native random-spread placement set. Install it in a new world or modpack. Select the structure in a managed Single Block or Layered dimension with the matching biome. Modular assemblies require managed solid terrain; Original Generation and Void do not supply their placement surface.
+**Export datapack** writes a ZIP under the world's `generated/worldsunwritten/assembly-exports/` directory. It contains the registered structure definition and a native random-spread placement set. Install it in a new world or modpack. Select the structure in a managed Single Block or Layered dimension with the matching biome. Modular assemblies require managed solid terrain; Original Generation and Void do not supply their placement surface.
 
-**Export preset** creates a validated bundle in `config/worldarchitect/exports/`. Choose an unused export ID, target dimension, release and seed. The selected dimension becomes flat stone with the assembly enabled. Other dimension profiles are retained. A compatible native End keeps its central dragon arena. Modded dimensions require a compatible Single Block adapter. The export includes the definition and captured resources; supplying mods and dimension datapacks must still be installed.
+**Export preset** creates a validated bundle in `config/worldsunwritten/exports/`. Choose an unused export ID, target dimension, release and seed. The selected dimension becomes flat stone with the assembly enabled. Other dimension profiles are retained. A compatible native End keeps its central dragon arena. Modded dimensions require a compatible Single Block adapter. The export includes the definition and captured resources; supplying mods and dimension datapacks must still be installed.
 
 Exports are inert files. They do not install resources or change the world where you authored them. Existing export files and preset revisions cannot be overwritten. Install a bundle through the [modpack configuration](Modpack-Quick-Start.md), then restart before creating a new world.
 
 ## Multiple authors and saved worlds
 
-Drafts live in `world/data/worldarchitect/assemblies/<namespace>/<path>.json`, separately from immutable generation snapshots. Two authors may open the same revision. After one saves, the other must reopen before saving; the server refuses an obsolete save.
+Drafts live in `world/data/worldsunwritten/assemblies/<namespace>/<path>.json`, separately from immutable generation snapshots. Two authors may open the same revision. After one saves, the other must reopen before saving; the server refuses an obsolete save.
 
 Editing sessions expire after 30 minutes without an action. Save before leaving. A server retains at most 16 sessions and an estimated 64 MiB working set; it refuses new work when that budget is full. Closing an editor releases its session. Save/export actions recheck permissions and the server's current editor token.
 
@@ -49,7 +49,7 @@ An explicit definition uses, for example, `"placement": {"version": 1, "mode": "
 
 **Settings → Selected module collision** changes that module's captured rule without editing the library source. `air` remains the default. `matching` additionally accepts identical existing states without block entities. `air_or_water` accepts air and actual source/flowing water blocks; it never permits lava, waterlogged solid blocks or containers. Empty template spaces remain wet. A submerged spawn marker is still unsafe and rejects placement.
 
-Anchors set the starting height. Use the [site inspector](Structure-Site-Inspector.md) to understand rejected sites and the [coastal example](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/terrain-anchors) for water placement.
+Anchors set the starting height. Use the [site inspector](Structure-Site-Inspector.md) to understand rejected sites and the [coastal example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/terrain-anchors) for water placement.
 
 ## Foundations and clearance
 
@@ -67,4 +67,4 @@ A variant records a name, existing module name, weight and saved library ID. It 
 
 Palettes and variants use a separate seeded random stream, preserving existing pool planning. Limits are eight palettes, 32 mappings per palette and sixteen variants. The complete base and variant catalog must also fit 65,536 cells. Every captured template is checked against every palette before export; selected layouts also pass the production placement checks. Undo, redo, recovery, revision conflicts, current permissions and pack locks apply to these edits.
 
-The optional `themes` object has `version: 1`, a `palettes` list (`name`, `weight`, `mappings` with `from`, `to`, `preserve_properties`) and a `variants` list (`name`, `module`, `weight`, `source`, embedded `snapshot`). See the [foundation example](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/structure-foundations) and [theme example](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/structure-themes) for complete definitions.
+The optional `themes` object has `version: 1`, a `palettes` list (`name`, `weight`, `mappings` with `from`, `to`, `preserve_properties`) and a `variants` list (`name`, `module`, `weight`, `source`, embedded `snapshot`). See the [foundation example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/structure-foundations) and [theme example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/structure-themes) for complete definitions.

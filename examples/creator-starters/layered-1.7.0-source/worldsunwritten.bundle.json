@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "preset": "worldsunwritten_examples:layered",
+  "title": "Layered starter",
+  "description": "Dirt over andesite and stone, ready for layer and terrain editing.",
+  "author": "GWSHERIDAN",
+  "release": "1.7.0",
+  "lock": "unlocked",
+  "options": {
+    "seed": 18,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "minecraft",
+    "worldsunwritten"
+  ]
+}

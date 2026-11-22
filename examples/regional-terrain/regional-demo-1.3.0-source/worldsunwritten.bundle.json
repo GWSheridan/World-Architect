@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "preset": "worldsunwritten_examples:regional_demo",
+  "title": "Regional terrain example",
+  "description": "Feathered forest rectangle and a higher-priority desert circle on Layered terrain.",
+  "author": "GWSHERIDAN",
+  "release": "1.3.0",
+  "lock": "unlocked",
+  "options": {
+    "seed": 194723,
+    "generate_structures": false,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "minecraft",
+    "worldsunwritten"
+  ]
+}

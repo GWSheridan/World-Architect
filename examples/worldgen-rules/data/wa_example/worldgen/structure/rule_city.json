@@ -1,5 +1,5 @@
 {
-  "type": "worldarchitect:modular",
+  "type": "worldsunwritten:modular",
   "biomes": "minecraft:plains",
   "spawn_overrides": {},
   "step": "surface_structures",
@@ -2102,7 +2102,7 @@
             "state": 6
           }
         ],
-        "worldarchitect": {
+        "worldsunwritten": {
           "format": 1,
           "title": "Sky City main",
           "author": "GWSHERIDAN",
@@ -4225,7 +4225,7 @@
             "state": 6
           }
         ],
-        "worldarchitect": {
+        "worldsunwritten": {
           "format": 1,
           "title": "Sky City east",
           "author": "GWSHERIDAN",
@@ -6348,7 +6348,7 @@
             "state": 6
           }
         ],
-        "worldarchitect": {
+        "worldsunwritten": {
           "format": 1,
           "title": "Sky City south",
           "author": "GWSHERIDAN",
@@ -8471,7 +8471,7 @@
             "state": 6
           }
         ],
-        "worldarchitect": {
+        "worldsunwritten": {
           "format": 1,
           "title": "Sky City south_east",
           "author": "GWSHERIDAN",
@@ -11714,7 +11714,7 @@
             "state": 6
           }
         ],
-        "worldarchitect": {
+        "worldsunwritten": {
           "format": 1,
           "title": "Sky City tower",
           "author": "GWSHERIDAN",
@@ -14957,7 +14957,7 @@
             "state": 6
           }
         ],
-        "worldarchitect": {
+        "worldsunwritten": {
           "format": 1,
           "title": "Sky City hall",
           "author": "GWSHERIDAN",
@@ -17412,7 +17412,7 @@
             "state": 7
           }
         ],
-        "worldarchitect": {
+        "worldsunwritten": {
           "format": 1,
           "title": "Sky City plaza",
           "author": "GWSHERIDAN",
@@ -18715,7 +18715,7 @@
             "state": 7
           }
         ],
-        "worldarchitect": {
+        "worldsunwritten": {
           "format": 1,
           "title": "Sky City garden",
           "author": "GWSHERIDAN",

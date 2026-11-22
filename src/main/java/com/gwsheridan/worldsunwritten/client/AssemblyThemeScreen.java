@@ -1,0 +1,28 @@
+package com.gwsheridan.worldsunwritten.client;
+
+import java.util.*;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+
+/** Server-owned palette and snapshot edits share the assembly's revision, history and recovery guards. */
+final class AssemblyThemeScreen extends Screen {
+    private final CompoundTag data;
+    AssemblyThemeScreen(CompoundTag data){super(Component.literal("Assembly themes and variants"));this.data=data.copy();}
+    private List<CompoundTag> rows(String key){return data.getListOrEmpty(key).stream().filter(CompoundTag.class::isInstance).map(CompoundTag.class::cast).toList();}
+    private void send(String op,String args){if(minecraft.getConnection()!=null)minecraft.getConnection().sendCommand("worldsunwritten assembly "+op+" "+data.getStringOr("token","")+" "+data.getIntOr("serial",0)+(args.isEmpty()?"":" "+args));}
+    @Override protected void init(){int span=Math.min(420,width-24),x=(width-span)/2,half=(span-8)/2;button("Add/edit palette mapping",x,28,span,()->palette(null));button("Remove palette mapping",x,52,half,this::removeMapping);button("Remove palette",x+half+8,52,half,()->remove("palettes","palette_remove"));button("Add/edit template variant",x,76,span,this::variant);button("Remove variant",x,100,half,()->remove("variants","variant_remove"));button("Review themes",x+half+8,100,half,this::report);button("Back to assembly",x,height-26,span,()->send("theme_back",""));}
+    private void button(String label,int x,int y,int width,Runnable action){addRenderableWidget(Button.builder(Component.literal(label),b->action.run()).bounds(x,y,width,20).build());}
+    private StudioFormScreen.Field f(String name,Object value){return new StudioFormScreen.Field(name,""+value);}
+    private void palette(CompoundTag selected){var p=selected==null?new CompoundTag():selected;var m=p.getListOrEmpty("mappings").stream().filter(CompoundTag.class::isInstance).map(CompoundTag.class::cast).findFirst().orElse(new CompoundTag());minecraft.gui.setScreen(new StudioFormScreen(this,"Palette mapping","Use the same palette name to add mappings. A matching source block replaces its old mapping. One weighted palette applies to an entire candidate.",List.of(f("Palette name",p.getStringOr("name","stonework")),f("Palette weight · 1–100",p.getIntOr("weight",1)),f("Source block ID",m.getStringOr("from","minecraft:cobblestone")),f("Target block ID",m.getStringOr("to","minecraft:stone_bricks")),f("Preserve properties · true/false",m.getBooleanOr("preserve",true))),v->{if(!v.get(0).matches("[a-z0-9_-]{1,32}"))return "Use a simple palette name.";int w=Integer.parseInt(v.get(1));Identifier.parse(v.get(2));Identifier.parse(v.get(3));return w>=1&&w<=100&&List.of("true","false").contains(v.get(4))?"":"Check weight and property handling.";},v->send("palette",String.join(" ",v))));}
+    private void variant(){String module=rows("modules").stream().map(m->m.getStringOr("name","")).findFirst().orElse("module_1"),source=data.getListOrEmpty("library").stream().map(t->t.asString().orElse("")).findFirst().orElse("builds:template");minecraft.gui.setScreen(new StudioFormScreen(this,"Template variant","A source is captured now. Variants retain module bounds and base marker names. Per-module weighted choices are repeatable for each assembly candidate.",List.of(f("Variant name","alternate"),f("Module name",module),f("Weight · 1–100",1),f("Saved template ID",source)),v->{if(!v.get(0).matches("[a-z0-9_-]{1,32}")||rows("modules").stream().noneMatch(m->m.getStringOr("name","").equals(v.get(1))))return "Use a valid variant name and an existing module.";Identifier.parse(v.get(3));int n=Integer.parseInt(v.get(2));return n>=1&&n<=100?"":"Weights must be 1–100.";},v->send("variant",String.join(" ",v))));}
+    private void remove(String key,String op){var names=rows(key).stream().map(t->t.getStringOr("name","")).toList();minecraft.gui.setScreen(new StudioChoiceScreen(this,"Choose entry",names,name->send(op,name)));}
+    private void removeMapping(){var names=new ArrayList<String>();for(var p:rows("palettes"))for(var v:p.getListOrEmpty("mappings"))if(v instanceof CompoundTag m)names.add(p.getStringOr("name","")+" "+m.getStringOr("from",""));minecraft.gui.setScreen(new StudioChoiceScreen(this,"Choose mapping",names,name->send("palette_mapping_remove",name)));}
+    private void report(){var lines=new ArrayList<String>();for(var p:rows("palettes")){lines.add(p.getStringOr("name","")+" · weight "+p.getIntOr("weight",1));for(var value:p.getListOrEmpty("mappings"))if(value instanceof CompoundTag m)lines.add(m.getStringOr("from","")+" → "+m.getStringOr("to","")+" · preserve properties "+m.getBooleanOr("preserve",true));}for(var v:rows("variants"))lines.add(v.getStringOr("name","")+" · "+v.getStringOr("module","")+" · weight "+v.getIntOr("weight",1)+" · captured "+v.getStringOr("source",""));if(lines.isEmpty())lines.add("No theme options. Existing templates and generation remain unchanged.");minecraft.gui.setScreen(new StudioReportScreen(this,"Theme definitions",lines));}
+    @Override public void onClose(){send("theme_back","");}
+    @Override public boolean isPauseScreen(){return false;}
+    @Override public void extractRenderState(GuiGraphicsExtractor g,int x,int y,float tick){super.extractRenderState(g,x,y,tick);g.centeredText(font,title,width/2,8,0xFFF1E7CE);int left=(width-Math.min(420,width-24))/2;g.text(font,rows("palettes").size()+" palettes · "+rows("variants").size()+" captured variants",left,132,0xFFDDDDDD);}
+}

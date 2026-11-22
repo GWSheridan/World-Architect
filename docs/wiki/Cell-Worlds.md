@@ -1,6 +1,6 @@
 # Cell worlds and chunk progression
 
-Cell World Studio builds a dimension from square or hexagonal cells. Each cell has a saved type, biome, terrain, resources and optional embedded structure. Gaps stay empty. The layout is World Architect's own implementation.
+Cell World Studio builds a dimension from square or hexagonal cells. Each cell has a saved type, biome, terrain, resources and optional embedded structure. Gaps stay empty. The layout is Worlds Unwritten's own implementation.
 
 ## Choose a starter
 
@@ -40,7 +40,7 @@ Choose a progression scope before creating the world:
 
 Territory capacity and radius are fixed in the preset. Progressive cells support sizes up to 64 and dimension heights up to 512 blocks. Separate territories are spaced 262,144 blocks apart, so players never see different terrain at the same coordinates.
 
-Objectives use an advancement registry ID or a named server signal. Configure prerequisite IDs and choose **all** or **any**. The editor rejects unknown prerequisites and dependency cycles. Rewards may target fixed cells, award expansion credits, or do both. Automatic mode spends credits on a deterministic frontier; choice mode lets players select a neighbouring cell in `/wa_cells panel`.
+Objectives use an advancement registry ID or a named server signal. Configure prerequisite IDs and choose **all** or **any**. The editor rejects unknown prerequisites and dependency cycles. Rewards may target fixed cells, award expansion credits, or do both. Automatic mode spends credits on a deterministic frontier; choice mode lets players select a neighbouring cell in `/worldsunwritten cells panel`.
 
 Signals received before prerequisites are remembered. A completed objective pays once per territory, including when two teammates complete it together. Revoking an advancement never removes terrain or refunds an objective. Advancements earned while visiting another dimension still count.
 
@@ -50,14 +50,14 @@ For an external quest mod, call `CellProgressionApi.signal(territoryLevel, playe
 
 | Command | Access |
 | --- | --- |
-| `/wa_cells` | Show territory progress |
-| `/wa_cells panel` | Open objectives and frontier selection |
-| `/wa_cells home` | Return to a safe starting marker |
-| `/wa_cells choose <q> <r>` | Spend one earned credit in choice mode |
-| `/wa_cells admin unlock <territory> <q> <r>` | Permission level 3 |
-| `/wa_cells admin retry <territory> <q> <r>` | Permission level 3; retry a preserved conflict after inspecting it |
-| `/wa_cells admin signal <player> <signal>` | Permission level 3; target the command's dimension |
-| `/wa_cells admin reassign <territory> <owner>` | Permission level 3; owner is `player:UUID` or `team:NAME` |
+| `/worldsunwritten cells` | Show territory progress |
+| `/worldsunwritten cells panel` | Open objectives and frontier selection |
+| `/worldsunwritten cells home` | Return to a safe starting marker |
+| `/worldsunwritten cells choose <q> <r>` | Spend one earned credit in choice mode |
+| `/worldsunwritten cells admin unlock <territory> <q> <r>` | Permission level 3 |
+| `/worldsunwritten cells admin retry <territory> <q> <r>` | Permission level 3; retry a preserved conflict after inspecting it |
+| `/worldsunwritten cells admin signal <player> <signal>` | Permission level 3; target the command's dimension |
+| `/worldsunwritten cells admin reassign <territory> <owner>` | Permission level 3; owner is `player:UUID` or `team:NAME` |
 
 Reassignment preserves the previous region. Automatic allocation never recycles a previously used territory. Players can edit their own open cells; other territories and the personal/team hub are protected. Locked cells reject ordinary block writes, piston movement and container access.
 
@@ -67,6 +67,6 @@ Create these worlds from a new preset. There is no conversion command for turnin
 
 Locked cells are actual void, even after their chunks have been loaded and saved. Unlocking queues a bounded activation job. The server checks the whole reserved volume before writing. Unexpected blocks preserve the cell as a conflict for an administrator to inspect. Interrupted jobs are checked again after restart. Containers remain inaccessible during activation, and their inventories are flushed before the cell is committed as ready.
 
-Back up the entire world, including `data/worldarchitect-cells/`. This directory holds assignments, objectives, credits and activation states. The immutable generation snapshot separately preserves the cell definitions and embedded templates. A missing or mismatched journal stops loading rather than recreating progression.
+Back up the entire world, including `data/worldsunwritten-cells/`. This directory holds assignments, objectives, credits and activation states. The immutable generation snapshot separately preserves the cell definitions and embedded templates. A missing or mismatched journal stops loading rather than recreating progression.
 
 Use matching mod versions on clients and servers. Keep the native End arena enabled for static cell terrain around the dragon fight. Progressive cells with that arena are rejected; put progression worlds in the Overworld or a separate custom dimension.

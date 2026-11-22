@@ -1,4 +1,4 @@
-World Architect 1.8.0 — optional modpack test kit
+Worlds Unwritten 1.8.0 — optional modpack test kit
 
 Extract the complete ZIP. Install Java 25 and a matching NeoForge 26.3.0.103 dedicated server separately. Export a project from Modpack Builder, then place the required provider mods in a separate folder. Minecraft, NeoForge, provider mods and Java are not included in this kit.
 

@@ -11,7 +11,7 @@
         0
       ],
       "template": {
-        "worldarchitect": {
+        "worldsunwritten": {
           "author": "Fixture",
           "format": 1,
           "rules": {
@@ -210,7 +210,7 @@
         0
       ],
       "template": {
-        "worldarchitect": {
+        "worldsunwritten": {
           "author": "Fixture",
           "format": 1,
           "rules": {
@@ -409,7 +409,7 @@
         16
       ],
       "template": {
-        "worldarchitect": {
+        "worldsunwritten": {
           "author": "Fixture",
           "format": 1,
           "rules": {
@@ -601,5 +601,5 @@
       }
     }
   ],
-  "type": "worldarchitect:modular"
+  "type": "worldsunwritten:modular"
 }

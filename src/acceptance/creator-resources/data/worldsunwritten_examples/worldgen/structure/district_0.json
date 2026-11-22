@@ -1,0 +1,189 @@
+{
+  "biomes": "minecraft:plains",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "modules": [
+    {
+      "name": "house",
+      "offset": [
+        0,
+        0,
+        0
+      ],
+      "template": {
+        "worldsunwritten": {
+          "author": "GWSHERIDAN",
+          "format": 1,
+          "rules": {},
+          "title": "Base",
+          "category": "Custom Structures",
+          "markers": {
+            "entry": {
+              "pos": [
+                1,
+                1,
+                1
+              ],
+              "facing": "north"
+            }
+          },
+          "revision": 3
+        },
+        "size": [
+          3,
+          4,
+          3
+        ],
+        "entities": [],
+        "blocks": [
+          {
+            "pos": [
+              0,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              0,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              1,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              2,
+              0,
+              0
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              2,
+              0,
+              1
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              2,
+              0,
+              2
+            ],
+            "state": 0
+          },
+          {
+            "pos": [
+              2,
+              1,
+              0
+            ],
+            "state": 1
+          },
+          {
+            "nbt": {
+              "CustomName": "House supplies"
+            },
+            "pos": [
+              2,
+              1,
+              2
+            ],
+            "state": 2
+          }
+        ],
+        "palette": [
+          {
+            "id": "minecraft:andesite"
+          },
+          {
+            "id": "minecraft:oak_stairs",
+            "properties": {
+              "half": "bottom",
+              "waterlogged": "false",
+              "shape": "straight",
+              "facing": "east"
+            }
+          },
+          {
+            "id": "minecraft:chest",
+            "properties": {
+              "waterlogged": "false",
+              "facing": "north",
+              "type": "single"
+            }
+          }
+        ],
+        "DataVersion": 5023
+      }
+    }
+  ],
+  "random_rotation": false,
+  "placement": {
+    "version": 1,
+    "mode": "fixed",
+    "fixed_y": 70
+  },
+  "foundation": {
+    "version": 1,
+    "mode": "footprint",
+    "material": "minecraft:cobblestone",
+    "max_depth": 8
+  },
+  "themes": {
+    "version": 1,
+    "palettes": [
+      {
+        "name": "dark",
+        "weight": 3,
+        "mappings": [
+          {
+            "from": "minecraft:andesite",
+            "to": "minecraft:deepslate_bricks"
+          },
+          {
+            "from": "minecraft:oak_stairs",
+            "to": "minecraft:spruce_stairs"
+          }
+        ]
+      }
+    ]
+  },
+  "type": "worldsunwritten:modular"
+}

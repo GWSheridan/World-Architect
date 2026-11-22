@@ -7,6 +7,6 @@
   "release": "1.0.0",
   "lock": "full",
   "options": {"seed": 24071609, "generate_structures": false, "bonus_chest": false},
-  "required_mods": ["worldarchitect"],
+  "required_mods": ["worldsunwritten"],
   "allow_structure_library": false
 }

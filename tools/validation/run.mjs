@@ -5,14 +5,17 @@ import { resolve, relative, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { baselineBytes } from './baseline.mjs';
+import {identityFromJar} from './identity.mjs';
+import {profileProperties,copyProfilePacks} from './profiles.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const options = Object.fromEntries(Array.from({length: (process.argv.length - 2) / 2}, (_, i) => process.argv.slice(2 + i * 2, 4 + i * 2)));
-for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset','--check-end','--pool','--regional','--baseline','--named-regions','--baseline14','--baseline15','--site','--site-structure','--islands'].includes(key)) throw new Error(`Unknown option ${key}`);
+for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset','--check-end','--pool','--regional','--baseline','--named-regions','--baseline14','--baseline15','--site','--site-structure','--islands','--api'].includes(key)) throw new Error(`Unknown option ${key}`);
 if (!['online','offline'].includes(options['--network'] || 'offline')) throw new Error('Network must be online or offline');
 if (!options['--jar'] || !options['--fixture'] || !options['--output']) throw new Error('Use --jar JAR --fixture VALIDATION_JAR --output NEW_DIRECTORY [--world COPIED_SAVE] [--profile single-block] [--port 25945]');
 if(options['--dimension']&&!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--dimension']))throw Error('Invalid dimension ID');
 if(options['--check-end']&&!['true','false'].includes(options['--check-end']))throw Error('Invalid End check flag');
+if(options['--api']&&!['true','false'].includes(options['--api']))throw Error('Invalid API check flag');
 if(options['--site']&&!['vertical','coastal','polygon','stress','prepared','themed','composite','corridor','district'].includes(options['--site']))throw Error('Invalid site fixture kind');
 if(options['--site-structure']&&!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--site-structure']))throw Error('Invalid site structure ID');
 const output = resolve(root, options['--output']);
@@ -44,7 +47,8 @@ if (options['--world']) {
     const source = resolve(root,options['--world']); original = await hashes(source);
     await fs.cp(source,join(server,'world'),{recursive:true,errorOnExist:true,force:false});
 }
-for (const [flag,name] of [['--jar','worldarchitect.jar'],['--fixture','validation.jar']]) {
+const identity=identityFromJar(await fs.readFile(resolve(root,options['--jar'])));
+for (const [flag,name] of [['--jar',identity.runtimeFile],['--fixture','validation.jar']]) {
     const bytes = await fs.readFile(resolve(root,options[flag]));
     if (flag === '--jar') results.jar_sha256 = sha(bytes);
     await fs.writeFile(join(server,'mods',name),bytes,{flag:'wx'});
@@ -59,28 +63,31 @@ if (options['--mods']) {
     }
 }
 let properties = await fs.readFile(join(root,'examples/performance/profiles',profile,'server.properties'),'utf8');
+properties=profileProperties(properties,identity);
 properties = properties.split(/\r?\n/).filter(line => !/^(server-port|management-server|rcon\.|resource-pack|text-filter|log-ips|motd)=/.test(line)).join('\n');
 if(options['--preset']){if(options['--bundle']||!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--preset']))throw Error('Choose one valid preset ID or a bundle');properties=properties.replace(/^level-type=.*$/m,'level-type='+options['--preset']);}
 if (options['--bundle']) {
     if (options['--world']) throw new Error('Use a pack-specific upgrade fixture for an existing bundled world');
-    const config=join(server,'config/worldarchitect');await fs.mkdir(join(config,'bundles'),{recursive:true});
+    const config=join(server,'config',identity.id);await fs.mkdir(join(config,'bundles'),{recursive:true});
     await fs.copyFile(resolve(root,options['--bundle']),join(config,'bundles/preset.zip'));
     await fs.writeFile(join(config,'developer.json'),JSON.stringify({format:1,bundle:'preset.zip'}));
     properties=properties.split(/\r?\n/).filter(line=>!/^(level-type|level-seed|generator-settings|generate-structures|initial-enabled-packs)=/.test(line)).join('\n');
 }
-if(suite === 'authoring') {
-    const config=join(server,'config/worldarchitect');await fs.mkdir(config,{recursive:true});
+if(suite === 'authoring'||options['--api']==='true') {
+    const config=join(server,'config',identity.id);await fs.mkdir(config,{recursive:true});
     const file=join(config,'developer.json');let developer={format:1};try{developer=JSON.parse(await fs.readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
     developer.developer_mode=true;await fs.writeFile(file,JSON.stringify(developer));
+    if(suite === 'authoring') {
     await fs.writeFile(join(config,'validation-baseline-1.3.0.jar'),await baselineBytes(root,options['--network'],options['--baseline']?resolve(root,options['--baseline']):undefined),{flag:'wx'});
     const frozen14=resolve(root,options['--baseline14']||'build/validation-inputs/worldarchitect-1.4.0.jar');const bytes14=await fs.readFile(frozen14);
     if(bytes14.length>33554432||sha(bytes14)!=='3684963461df2331c7f0fa4968d12b972fceff6c73c3568c77a19dcc66474fe4')throw Error('Frozen 1.4 baseline fingerprint differs');
     await fs.writeFile(join(config,'validation-baseline-1.4.0.jar'),bytes14,{flag:'wx'});
     const bytes15=await fs.readFile(resolve(root,options['--baseline15']||'build/validation-inputs/worldarchitect-1.5.0.jar'));if(sha(bytes15)!=='27a6a5e55567e04db4c93818daa2a866bd9bc0d0313780b08f17dcba1e20be42')throw Error('Frozen 1.5 baseline fingerprint differs');await fs.writeFile(join(config,'validation-baseline-1.5.0.jar'),bytes15,{flag:'wx'});
+    }
 }
-await fs.writeFile(join(server,'server.properties'),properties + `\nserver-port=${port}\nmanagement-server-enabled=false\nlog-ips=false\nmotd=World Architect validation\n`);
+await fs.writeFile(join(server,'server.properties'),properties + `\nserver-port=${port}\nmanagement-server-enabled=false\nlog-ips=false\nmotd=Worlds Unwritten validation\n`);
 await fs.writeFile(join(server,'eula.txt'),'eula=true\n');
-try { await fs.cp(join(root,'examples/performance/profiles',profile,'datapacks'),join(server,'world/datapacks'),{recursive:true}); }
+try { await copyProfilePacks(join(root,'examples/performance/profiles',profile,'datapacks'),join(server,'world/datapacks'),identity); }
 catch (error) { if (error.code !== 'ENOENT') throw error; }
 
 function launch(stage) {
@@ -112,12 +119,13 @@ let running;
 let pinned;
 async function generationPins() {
     const data=join(server,'world/data'),pins={};
-    for(const file of ['worldarchitect-generation-v1.dat','minecraft/world_gen_settings.dat']) {
+    const namespace=await fs.access(join(data,'worldarchitect-generation-v1.dat')).then(()=> 'worldarchitect',()=> 'worldsunwritten');
+    for(const file of [namespace+'-generation-v1.dat','minecraft/world_gen_settings.dat']) {
         try{pins[file]=sha(await fs.readFile(join(data,file)));}catch(error){if(error.code!=='ENOENT')throw error;}
     }
     try {
-        for(const file of (await fs.readdir(join(data,'worldarchitect/generation'))).filter(name=>name.endsWith('.zip')).sort())
-            pins['worldarchitect/generation/'+file]=sha(await fs.readFile(join(data,'worldarchitect/generation',file)));
+        for(const file of (await fs.readdir(join(data,namespace+'/generation'))).filter(name=>name.endsWith('.zip')).sort())
+            pins[namespace+'/generation/'+file]=sha(await fs.readFile(join(data,namespace+'/generation',file)));
     } catch(error){if(error.code!=='ENOENT')throw error;}
     return pins;
 }
@@ -126,11 +134,14 @@ try {
         running = launch(stage); await running.wait('Done (');
         let beforeAuthoring;
         if(stage==='fresh'&&suite==='authoring'){running.send('save-all flush');await running.wait('Saved the game');beforeAuthoring=await generationPins();}
-        if (suite === 'authoring') {
+        if(options['--api']==='true') {
+            running.send('wa_fixture '+(stage==='fresh'?'verify':'persisted'));
+            await running.wait(stage==='fresh'?'WA_API_FIXTURE_PASS':'WA_API_PERSISTENCE_PASS');
+        } else if (suite === 'authoring') {
             running.send(stage === 'fresh' ? 'wa_validate structures' : 'wa_validate restart');
             await running.wait(stage === 'fresh' ? 'WA_VALIDATION_STRUCTURES_PASS' : 'WA_VALIDATION_RESTART_PASS');
             if(stage==='fresh'){running.send('wa_validate island_assets');await running.wait('WA18_ISLAND_ASSETS_PASS');}
-            running.send('wa_diagnose report'); await running.wait('Saved local diagnostics');
+            running.send(identity.command('diagnose')+' report'); await running.wait('Saved local diagnostics');
         } else if(options['--islands']==='true') {
             running.send('wa_validate island_catalog '+(stage==='fresh'?1:2));await running.wait('WA18_ISLAND_CATALOG_PASS');
         } else if(options['--site']) {

@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.gwsheridan.worldsunwritten.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": ["WorldCreationUiStateMixin", "ModpackWorldTabMixin", "ModpackCreateWorldMixin", "ModpackWorldTypeMixin", "ProtectedWorldOpenMixin", "UnwrittenButtonMixin", "UnwrittenListMixin"],
+  "injectors": {"defaultRequire": 1}
+}

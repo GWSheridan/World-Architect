@@ -1,0 +1,29 @@
+{
+  "format": 1,
+  "preset": "wa_studio:partial",
+  "title": "Studio Partial",
+  "description": "Created with Worlds Unwritten Preset Studio",
+  "author": "GWSHERIDAN",
+  "release": "1.1.0",
+  "lock": "partial",
+  "options": {
+    "seed": 18,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "editable_dimensions": [
+    "minecraft:the_end"
+  ],
+  "editable_features": {
+    "minecraft:overworld": [
+      "ores"
+    ]
+  },
+  "editable_options": [
+    "seed"
+  ],
+  "required_mods": [
+    "minecraft",
+    "worldsunwritten"
+  ]
+}

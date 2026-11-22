@@ -12,7 +12,7 @@ await fs.mkdir(output,{recursive:false});
 const jar=await fs.readFile(resolve(root,args['--jar'])),fixture=await fs.readFile(resolve(root,args['--fixture']));
 for(const name of ['server','client-alice','client-bob']) {
     const dir=join(output,name);await fs.mkdir(join(dir,'mods'),{recursive:true});
-    await fs.writeFile(join(dir,'mods/worldarchitect.jar'),jar);await fs.writeFile(join(dir,'mods/validation.jar'),fixture);
+    await fs.writeFile(join(dir,'mods/worldsunwritten.jar'),jar);await fs.writeFile(join(dir,'mods/validation.jar'),fixture);
     if(name!=='server') {
         if(args['--options'])await fs.copyFile(resolve(root,args['--options']),join(dir,'options.txt'));
         else await fs.writeFile(join(dir,'options.txt'),'onboardAccessibility:false\nskipMultiplayerWarning:true\nguiScale:2\n');
@@ -46,33 +46,33 @@ try {
             server.send('op WA11Alice');server.send('gamemode spectator @a');
             server.send('forceload add 4096 4096 4112 4112');server.send('forceload add 5120 5120 5136 5136');
             server.send('setblock 4096 200 4096 stone');server.send('setblock 4097 200 4096 oak_stairs[facing=east]');server.send('setblock 4098 200 4096 chest');
-            server.send('wa_structure capture validation:fixture 4096 200 4096 4098 203 4098');
+            server.send('worldsunwritten structure capture validation:fixture 4096 200 4096 4098 203 4098');
             await server.wait('Captured');
-            server.send('wa_structure marker set validation:fixture spawn 0 1 0 north');
+            server.send('worldsunwritten structure marker set validation:fixture spawn 0 1 0 north');
             server.send('tp @a 5126 204 5126');
-            await act('Bob',['COMMAND wa_structure list'],stage);await wait(observed('Bob',stage),'Unknown or incomplete command');
-            await act('Alice',['COMMAND wa_structure stage validation:fixture 5120 200 5120'],stage);await wait(observed('Alice',stage),'SCREEN Structure placement');
+            await act('Bob',['COMMAND worldsunwritten structure list'],stage);await wait(observed('Bob',stage),'Unknown or incomplete command');
+            await act('Alice',['COMMAND worldsunwritten structure stage validation:fixture 5120 200 5120'],stage);await wait(observed('Alice',stage),'SCREEN Structure placement');
             await act('Alice',['PRESS Rotate'],stage);await act('Alice',['PRESS Mirror','SHOT'],stage);
-            server.send('wa_structure marker set validation:fixture spawn 0 1 0 east');
+            server.send('worldsunwritten structure marker set validation:fixture spawn 0 1 0 east');
             await server.wait('Saved validation:fixture revision 3.');
             await act('Alice',['PRESS Confirm'],stage);await wait(observed('Alice',stage),'template changed after preview');
-            await act('Alice',['COMMAND wa_structure stage validation:fixture 5120 200 5120'],stage);
+            await act('Alice',['COMMAND worldsunwritten structure stage validation:fixture 5120 200 5120'],stage);
             server.send('setblock 5120 200 5120 gold_block');
             await server.wait('Changed the block at 5120, 200, 5120');
             await act('Alice',['PRESS Confirm'],stage);await wait(observed('Alice',stage),'Placement collides');
             server.send('setblock 5120 200 5120 air');
             server.send('execute if block 5120 200 5120 air run say WA_DESTINATION_CLEAR');await server.wait('WA_DESTINATION_CLEAR');
-            await act('Alice',['COMMAND wa_structure stage validation:fixture 5120 200 5120'],stage);
+            await act('Alice',['COMMAND worldsunwritten structure stage validation:fixture 5120 200 5120'],stage);
             await act('Alice',['PRESS World ghost','SHOT'],stage);
-            await act('Alice',['COMMAND wa_structure stage validation:fixture 5120 200 5120'],stage);
+            await act('Alice',['COMMAND worldsunwritten structure stage validation:fixture 5120 200 5120'],stage);
             await act('Alice',['PRESS Confirm'],stage);await wait(observed('Alice',stage),'Placed 3 blocks');
             await act('Bob',['BLOCK 5120 200 5120'],stage);await wait(observed('Bob',stage),'BLOCK 5120, 200, 5120 minecraft:stone');
-            await act('Alice',['COMMAND wa_structure undo'],stage);await wait(observed('Alice',stage),'Undid 3 blocks');
+            await act('Alice',['COMMAND worldsunwritten structure undo'],stage);await wait(observed('Alice',stage),'Undid 3 blocks');
             await act('Bob',['BLOCK 5120 200 5120'],stage);await wait(observed('Bob',stage),'BLOCK 5120, 200, 5120 minecraft:air');
-            await act('Bob',['COMMAND wa_diagnose report'],stage);
+            await act('Bob',['COMMAND worldsunwritten diagnose report'],stage);
             results.tests.push({case:'staging-rotation-mirror-markers-stale-revision-collision-ghost-confirm-undo-client-sync',status:'passed'});
         } else {
-            await act('Alice',['COMMAND wa_structure undo'],stage);await wait(observed('Alice',stage),'No manual placement remains');
+            await act('Alice',['COMMAND worldsunwritten structure undo'],stage);await wait(observed('Alice',stage),'No manual placement remains');
             await act('Bob',['BLOCK 5120 200 5120'],stage);await wait(observed('Bob',stage),'BLOCK 5120, 200, 5120 minecraft:air');
             await wait(observed('Alice',stage),'AT minecraft:overworld 5126.50 204.00 5126.50');
             results.tests.push({case:'restart-session-history-cleared-and-player-position-retained',status:'passed'});
@@ -80,7 +80,7 @@ try {
         for(const name of ['Alice','Bob'])await fs.writeFile(join(output,'evidence',stage,name,'stop'),'');
         await alice.exit;await bob.exit;server.send('save-all flush');await server.wait('Saved the game');server.send('stop');if(await server.exit!==0)throw new Error('Server failed to stop');
         const data=join(output,'server/world/data'),current={};
-        for(const file of ['worldarchitect-generation-v1.dat','minecraft/world_gen_settings.dat'])current[file]=createHash('sha256').update(await fs.readFile(join(data,file))).digest('hex');
+        for(const file of ['worldsunwritten-generation-v1.dat','minecraft/world_gen_settings.dat'])current[file]=createHash('sha256').update(await fs.readFile(join(data,file))).digest('hex');
         if(pins&&JSON.stringify(pins)!==JSON.stringify(current))throw new Error('Generation pins changed after restart');pins=current;
     }
     results.status='passed';

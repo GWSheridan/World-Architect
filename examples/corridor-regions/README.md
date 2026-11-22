@@ -1,6 +1,6 @@
 # Corridor regions
 
-Install `bundles/corridor-regions-1.7.0.zip` through `config/worldarchitect/developer.json`:
+Install `bundles/corridor-regions-1.7.0.zip` through `config/worldsunwritten/developer.json`:
 
 ```json
 {"format":1,"bundle":"corridor-regions-1.7.0.zip"}

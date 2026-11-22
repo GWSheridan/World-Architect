@@ -1,0 +1,29 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "worldsunwritten:void",
+        "biome": "minecraft:plains",
+        "dimension": {"min_y": -64, "height": 384},
+        "allow_unsafe_spawn": true
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "worldsunwritten:void",
+        "biome": "minecraft:nether_wastes",
+        "dimension": {"min_y": 0, "height": 256}
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "worldsunwritten:void",
+        "biome": "minecraft:the_end",
+        "dimension": {"min_y": 0, "height": 256}
+      }
+    }
+  }
+}

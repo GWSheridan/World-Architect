@@ -2,13 +2,13 @@
 
 The workbench runs reviewed preset scenarios in new disposable dedicated-server instances. It is distributed as source tools and a separately built validation fixture. Test code is excluded from the gameplay JAR.
 
-With developer mode enabled, use `/wa_workbench export <Studio name> <release>` as a permission-level-4 administrator. It validates the saved revision and exports its bundle and a `.scenario.json` file to `config/worldarchitect/exports/`. Choose a release that has not already been exported. This does not alter the current world's generation. Scenarios contain bundle fingerprints and explicit test inputs; they are not uploaded.
+With developer mode enabled, use `/worldsunwritten workbench export <Studio name> <release>` as a permission-level-4 administrator. It validates the saved revision and exports its bundle and a `.scenario.json` file to `config/worldsunwritten/exports/`. Choose a release that has not already been exported. This does not alter the current world's generation. Scenarios contain bundle fingerprints and explicit test inputs; they are not uploaded.
 
 From an extracted source distribution, build the fixture with JDK 25, JDK 21 and Node 22 or newer installed:
 
 ```powershell
 .\gradlew.bat build acceptanceJar
-node tools/workbench/run.mjs --scenario path/to/preset.scenario.json --jar build/libs/worldarchitect-1.9.0.jar --fixture build/validation-tools/worldarchitect-1.9.0-validation.jar --output build/pack-test
+node tools/workbench/run.mjs --scenario path/to/preset.scenario.json --jar build/libs/Worlds-Unwritten-2.0.0.jar --fixture build/validation-tools/Worlds-Unwritten-2.0.0-validation.jar --output build/pack-test
 ```
 
 Use `bash ./gradlew` on Linux. Add `--network online` if Gradle dependencies/assets have not been cached; the runner otherwise uses offline mode. `JAVA21_HOME` selects the asset downloader's JDK. `--mods <directory>` copies explicitly selected provider JARs and records their hashes. Use matching provider versions. Review the EULA before running: each disposable instance writes `eula=true`.
@@ -27,7 +27,7 @@ The integration cases cover a clean install/restart, a deliberately incorrect bl
 
 ## Edit scenarios in game
 
-Open **Preset Studio → Workbench** after saving and validating the current preset version. On a dedicated server, a level-4 administrator with developer mode enabled can use `/wa_workbench studio <name> <release>`. Edit runs, exact seed strings, dimension lists, startup expectations, safe-spawn/restart policies, chunk areas, probes and budgets. Runs can be duplicated and reordered through history. Undo/Redo and explicit recovery work on the detached scenario draft.
+Open **Preset Studio → Workbench** after saving and validating the current preset version. On a dedicated server, a level-4 administrator with developer mode enabled can use `/worldsunwritten workbench studio <name> <release>`. Edit runs, exact seed strings, dimension lists, startup expectations, safe-spawn/restart policies, chunk areas, probes and budgets. Runs can be duplicated and reordered through history. Undo/Redo and explicit recovery work on the detached scenario draft.
 
 The selected saved preset and its SHA-256 remain fixed. Export revalidates the scenario and that source revision, then creates a new named scenario beside the identical bound bundle. Existing scenario files cannot be overwritten. The server checks the current actor, developer mode, session token and source fingerprint for each export; losing permission while the editor is open prevents further writes. Export status reports the server's acknowledgement. This screen only authors inputs; it never starts servers inside the game.
 

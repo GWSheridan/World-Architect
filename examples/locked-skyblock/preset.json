@@ -3,7 +3,7 @@
     "minecraft:overworld": {
       "type": "minecraft:overworld",
       "generator": {
-        "type": "worldarchitect:void",
+        "type": "worldsunwritten:void",
         "biome": "minecraft:plains",
         "dimension": {"min_y": -64, "height": 384},
         "island": {"origin_y": 86, "spacing": 96, "personal_slots": 2}
@@ -12,7 +12,7 @@
     "minecraft:the_nether": {
       "type": "minecraft:the_nether",
       "generator": {
-        "type": "worldarchitect:layered",
+        "type": "worldsunwritten:layered",
         "biome": "minecraft:nether_wastes",
         "dimension_profile": {"min_y": 0, "height": 256},
         "profile": {
@@ -27,7 +27,7 @@
     "minecraft:the_end": {
       "type": "minecraft:the_end",
       "generator": {
-        "type": "worldarchitect:void",
+        "type": "worldsunwritten:void",
         "biome": "minecraft:the_end",
         "dimension": {"min_y": 0, "height": 256}
       }

@@ -1,6 +1,6 @@
 # Batch comparisons
 
-Use `tools/workbench/batch.mjs` from the source distribution to compare reviewed scenarios across World Architect versions, provider sets and seeds. It runs jobs sequentially in new disposable directories. Build the separate fixture first; it is not part of the gameplay JAR. Read [Test Workbench](Test-Workbench.md) for installation, EULA, probe and scenario details.
+Use `tools/workbench/batch.mjs` from the source distribution to compare reviewed scenarios across Worlds Unwritten versions, provider sets and seeds. It runs jobs sequentially in new disposable directories. Build the separate fixture first; it is not part of the gameplay JAR. Read [Test Workbench](Test-Workbench.md) for installation, EULA, probe and scenario details.
 
 ```text
 node tools/workbench/batch.mjs --matrix path/to/matrix.json --output build/pack-matrix --network online
@@ -13,7 +13,7 @@ Matrix format 1 uses relative input paths, explicit SHA-256 fingerprints and a t
   "format": 1,
   "budgets": {"max_jobs": 8, "timeout_seconds": 1800},
   "versions": [{
-    "name": "candidate", "jar": "worldarchitect.jar", "sha256": "REPLACE_WITH_64_LOWERCASE_HEX_DIGITS",
+    "name": "candidate", "jar": "worldsunwritten.jar", "sha256": "REPLACE_WITH_64_LOWERCASE_HEX_DIGITS",
     "fixture": "validation.jar", "fixture_sha256": "REPLACE_WITH_64_LOWERCASE_HEX_DIGITS"
   }],
   "scenarios": [{"name": "pack", "file": "pack.scenario.json", "sha256": "REPLACE_WITH_64_LOWERCASE_HEX_DIGITS"}],

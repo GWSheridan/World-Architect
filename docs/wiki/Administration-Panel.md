@@ -1,6 +1,6 @@
 # Administration panel
 
-Use `/wa_admin` or `/wa_island panel` while connected to the server. Ordinary players see their own island information and a **Home** button. Operator level 3 opens the administration controls. Other players' assignments and server settings are excluded from ordinary-player views.
+Use `/wa_admin` or `/worldsunwritten island panel` while connected to the server. Ordinary players see their own island information and a **Home** button. Operator level 3 opens the administration controls. Other players' assignments and server settings are excluded from ordinary-player views.
 
 The panel uses the existing server commands and data files. Every change is staged first. Review the exact action and choose **Confirm change**. The server checks your current permissions, ownership, team membership and settings again before executing it. Confirmations expire after 60 seconds. If another administrator changes the relevant server state, refresh and stage again.
 

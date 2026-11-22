@@ -1,20 +1,20 @@
 # Cell world starters
 
-Six editable presets for World Architect 1.9.0, Minecraft 26.3 and NeoForge 26.3.0.103:
+Six editable presets for Worlds Unwritten 2.0.0, Minecraft 26.3 and NeoForge 26.3.0.103:
 
 | Bundle | Preset ID |
 | --- | --- |
-| Hex Continents | `worldarchitect_examples:hex_continents` |
-| Hex Skyblock | `worldarchitect_examples:hex_skyblock` |
-| Expanding One Chunk | `worldarchitect_examples:expanding_one_chunk` |
-| Resource Archipelago | `worldarchitect_examples:resource_archipelago` |
-| Biome Mosaic | `worldarchitect_examples:biome_mosaic` |
-| Underground Start | `worldarchitect_examples:underground_start` |
+| Hex Continents | `worldsunwritten_examples:hex_continents` |
+| Hex Skyblock | `worldsunwritten_examples:hex_skyblock` |
+| Expanding One Chunk | `worldsunwritten_examples:expanding_one_chunk` |
+| Resource Archipelago | `worldsunwritten_examples:resource_archipelago` |
+| Biome Mosaic | `worldsunwritten_examples:biome_mosaic` |
+| Underground Start | `worldsunwritten_examples:underground_start` |
 
-Copy one ZIP from `bundles/` to `config/worldarchitect/bundles/`. In `config/worldarchitect/developer.json`, select its filename:
+Copy one ZIP from `bundles/` to `config/worldsunwritten/bundles/`. In `config/worldsunwritten/developer.json`, select its filename:
 
 ```json
-{"format":1,"developer_mode":false,"bundle":"expanding-one-chunk-1.9.0.zip"}
+{"format":1,"developer_mode":false,"bundle":"expanding-one-chunk-2.0.0.zip"}
 ```
 
 Use matching files on clients and dedicated servers, then create a new world. These examples are unlocked so pack authors can customize them. Enable authoring in a separate instance, use Builder to edit cell types, islands and objectives, then choose locks before exporting a distribution for players.

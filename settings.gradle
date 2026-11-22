@@ -12,4 +12,4 @@ plugins {
 org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.gitignore')
 org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.gitattributes')
 
-rootProject.name = 'worldarchitect'
+rootProject.name = 'worldsunwritten'

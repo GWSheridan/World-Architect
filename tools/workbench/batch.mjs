@@ -47,7 +47,7 @@ try{
         const job=expanded.jobs[i],row=report.jobs[i],directory=join(output,job.name),instance=join(directory,'instance');await fs.mkdir(directory);
         const version=versions.get(job.version),scenarioFile=join(directory,'scenario.json');
         await fs.writeFile(scenarioFile,JSON.stringify(job.document)+'\n',{flag:'wx'});await fs.writeFile(join(directory,job.document.bundle.file),bundles.get(job.scenario),{flag:'wx'});
-        const jar=join(directory,'worldarchitect.jar'),fixture=join(directory,'validation.jar');await fs.writeFile(jar,version.jar,{flag:'wx'});await fs.writeFile(fixture,version.fixture,{flag:'wx'});
+        const jar=join(directory,'worldsunwritten.jar'),fixture=join(directory,'validation.jar');await fs.writeFile(jar,version.jar,{flag:'wx'});await fs.writeFile(fixture,version.fixture,{flag:'wx'});
         const params=['--scenario',scenarioFile,'--jar',jar,'--fixture',fixture,'--output',instance,'--network',args['--network']||'offline','--port',String(port)];
         if(providers.has(job.provider)){const mods=join(directory,'mods');await fs.mkdir(mods);for(const mod of providers.get(job.provider))await fs.writeFile(join(mods,mod.name),mod.bytes,{flag:'wx'});params.push('--mods',mods);}
         row.status='running';await record();const begin=performance.now(),outcome=await launch(params,join(directory,'runner.log'),Math.max(1,matrix.budgets.timeout_seconds*1000-(performance.now()-started)));row.elapsed_ms=Math.round(performance.now()-begin);

@@ -1,0 +1,2760 @@
+[
+  {
+    "name": "com.gwsheridan.worldarchitect.api.BlockCompatibility",
+    "members": [
+      {
+        "kind": "field",
+        "name": "TERRAIN_CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "terrain",
+        "descriptor": "(Lnet/minecraft/world/level/block/state/BlockState;)Lcom/mojang/serialization/DataResult;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "feature",
+        "descriptor": "(Lnet/minecraft/world/level/block/state/BlockState;)Lcom/mojang/serialization/DataResult;",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.CellLayout",
+    "members": [
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/api/CellLayout$Shape;III)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "validate",
+        "descriptor": "()Lcom/mojang/serialization/DataResult;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "at",
+        "descriptor": "(II)Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "atPoint",
+        "descriptor": "(DD)Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "centre",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;)Lcom/gwsheridan/worldarchitect/api/CellLayout$Point;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "edge",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;DD)D",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "contains",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;II)Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "rim",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;II)Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "bounds",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;)Lcom/gwsheridan/worldarchitect/api/CellLayout$Bounds;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "neighbours",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;)Ljava/util/List;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "distance",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;)I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "within",
+        "descriptor": "(I)Ljava/util/List;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "shape",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/api/CellLayout$Shape;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "size",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "gap",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "rim",
+        "descriptor": "()I",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.CellLayout$Bounds",
+    "members": [
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(IIII)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "chunks",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "minX",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "minZ",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "maxX",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "maxZ",
+        "descriptor": "()I",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.CellLayout$Cell",
+    "members": [
+      {
+        "kind": "field",
+        "name": "ORIGIN",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;",
+        "access": 25
+      },
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(II)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "key",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "parse",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "compareTo",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/api/CellLayout$Cell;)I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "q",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "r",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "compareTo",
+        "descriptor": "(Ljava/lang/Object;)I",
+        "access": 4161
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.CellLayout$Point",
+    "members": [
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(DD)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "x",
+        "descriptor": "()D",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "z",
+        "descriptor": "()D",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.CellLayout$Shape",
+    "members": [
+      {
+        "kind": "field",
+        "name": "SQUARE",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/CellLayout$Shape;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "POINTY_HEX",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/CellLayout$Shape;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "FLAT_HEX",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/CellLayout$Shape;",
+        "access": 16409
+      },
+      {
+        "kind": "method",
+        "name": "values",
+        "descriptor": "()[Lcom/gwsheridan/worldarchitect/api/CellLayout$Shape;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "valueOf",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/api/CellLayout$Shape;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "getSerializedName",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.CellProgressionApi",
+    "members": [
+      {
+        "kind": "field",
+        "name": "VERSION",
+        "descriptor": "I",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "signal",
+        "descriptor": "(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/resources/Identifier;)Ljava/util/List;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "signal",
+        "descriptor": "(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/resources/Identifier;)Ljava/util/List;",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.DimensionAdapter",
+    "members": [
+      {
+        "kind": "method",
+        "name": "version",
+        "descriptor": "()I",
+        "access": 1025
+      },
+      {
+        "kind": "method",
+        "name": "supportsPortalPolicies",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "supportsCellularTerrain",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "inspect",
+        "descriptor": "(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;)Lcom/gwsheridan/worldarchitect/api/DimensionAdapter$Support;",
+        "access": 1025
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.DimensionAdapter$Support",
+    "members": [
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Ljava/util/Set;Ljava/util/Optional;Lnet/minecraft/network/chat/Component;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "modes",
+        "descriptor": "()Ljava/util/Set;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "preferredBiome",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "detail",
+        "descriptor": "()Lnet/minecraft/network/chat/Component;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.DimensionAdapter$TerrainMode",
+    "members": [
+      {
+        "kind": "field",
+        "name": "SINGLE_BLOCK",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/DimensionAdapter$TerrainMode;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "LAYERED",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/DimensionAdapter$TerrainMode;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "VOID",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/DimensionAdapter$TerrainMode;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "SKYBLOCK",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/DimensionAdapter$TerrainMode;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "CELLULAR",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/DimensionAdapter$TerrainMode;",
+        "access": 16409
+      },
+      {
+        "kind": "method",
+        "name": "values",
+        "descriptor": "()[Lcom/gwsheridan/worldarchitect/api/DimensionAdapter$TerrainMode;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "valueOf",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/api/DimensionAdapter$TerrainMode;",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.DimensionAdapterRegistry",
+    "members": [
+      {
+        "kind": "field",
+        "name": "KEY",
+        "descriptor": "Lnet/minecraft/resources/ResourceKey;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "get",
+        "descriptor": "(Lnet/minecraft/resources/Identifier;)Ljava/util/Optional;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "registerRegistry",
+        "descriptor": "(Lnet/neoforged/neoforge/registries/NewRegistryEvent;)V",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.EnvironmentApi",
+    "members": [
+      {
+        "kind": "method",
+        "name": "profile",
+        "descriptor": "(Lnet/minecraft/server/level/ServerLevel;)Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "capabilities",
+        "descriptor": "(Lnet/minecraft/server/level/ServerLevel;)Lcom/gwsheridan/worldarchitect/environment/WorldEnvironment$Capabilities;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "canEnter",
+        "descriptor": "(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;)Z",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "set",
+        "descriptor": "(Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/resources/Identifier;Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile;)V",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.FeatureAdapter",
+    "members": [
+      {
+        "kind": "method",
+        "name": "version",
+        "descriptor": "()I",
+        "access": 1025
+      },
+      {
+        "kind": "method",
+        "name": "workLimit",
+        "descriptor": "(Lnet/minecraft/world/level/levelgen/feature/Feature;)I",
+        "access": 1025
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.FeatureAdapters",
+    "members": [
+      {
+        "kind": "field",
+        "name": "KEY",
+        "descriptor": "Lnet/minecraft/resources/ResourceKey;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "type",
+        "descriptor": "(Lnet/minecraft/world/level/levelgen/feature/Feature;)Lnet/minecraft/resources/Identifier;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "get",
+        "descriptor": "(Lnet/minecraft/world/level/levelgen/feature/Feature;)Ljava/util/Optional;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "registerRegistry",
+        "descriptor": "(Lnet/neoforged/neoforge/registries/NewRegistryEvent;)V",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.IslandLayout",
+    "members": [
+      {
+        "kind": "method",
+        "name": "originY",
+        "descriptor": "()I",
+        "access": 1025
+      },
+      {
+        "kind": "method",
+        "name": "spacing",
+        "descriptor": "()I",
+        "access": 1025
+      },
+      {
+        "kind": "method",
+        "name": "personalSlots",
+        "descriptor": "()I",
+        "access": 1025
+      },
+      {
+        "kind": "method",
+        "name": "slotAt",
+        "descriptor": "(II)I",
+        "access": 1025
+      },
+      {
+        "kind": "method",
+        "name": "origin",
+        "descriptor": "(I)Lnet/minecraft/core/BlockPos;",
+        "access": 1025
+      },
+      {
+        "kind": "method",
+        "name": "spawn",
+        "descriptor": "(I)Lnet/minecraft/core/BlockPos;",
+        "access": 1025
+      },
+      {
+        "kind": "method",
+        "name": "floors",
+        "descriptor": "(I)Ljava/util/List;",
+        "access": 1025
+      },
+      {
+        "kind": "method",
+        "name": "type",
+        "descriptor": "(I)Ljava/lang/String;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.NativeFeatureRule",
+    "members": [
+      {
+        "kind": "field",
+        "name": "MAX_RULES",
+        "descriptor": "I",
+        "access": 25
+      },
+      {
+        "kind": "field",
+        "name": "MAX_WORK",
+        "descriptor": "I",
+        "access": 25
+      },
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lnet/minecraft/core/Holder;IIIZLjava/util/List;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "feature",
+        "descriptor": "()Lnet/minecraft/core/Holder;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "attempts",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "minY",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "maxY",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "surface",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "biomes",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.PresetApi",
+    "members": [
+      {
+        "kind": "method",
+        "name": "validate",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;Lnet/minecraft/core/HolderLookup$Provider;)Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Checked;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "capture",
+        "descriptor": "(Lnet/minecraft/commands/CommandSourceStack;Ljava/lang/String;Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "save",
+        "descriptor": "(Lnet/minecraft/commands/CommandSourceStack;Ljava/lang/String;Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;)Ljava/nio/file/Path;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "load",
+        "descriptor": "(Lnet/minecraft/commands/CommandSourceStack;Ljava/lang/String;Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "export",
+        "descriptor": "(Lnet/minecraft/commands/CommandSourceStack;Ljava/lang/String;Ljava/lang/String;)Ljava/nio/file/Path;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "duplicate",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;Ljava/lang/String;Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "derive",
+        "descriptor": "(Lnet/minecraft/commands/CommandSourceStack;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "override",
+        "descriptor": "(Lnet/minecraft/commands/CommandSourceStack;Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;Ljava/lang/String;Lcom/google/gson/JsonElement;Z)Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "readImport",
+        "descriptor": "(Lnet/minecraft/commands/CommandSourceStack;Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.SpawnApi",
+    "members": [
+      {
+        "kind": "method",
+        "name": "resolve",
+        "descriptor": "(Lnet/minecraft/server/MinecraftServer;Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy;Ljava/util/UUID;Ljava/lang/String;)Ljava/util/Optional;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "policy",
+        "descriptor": "(Lnet/minecraft/server/MinecraftServer;Lcom/gwsheridan/worldarchitect/api/SpawnApi$Phase;Lnet/minecraft/resources/Identifier;)Ljava/util/Optional;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "set",
+        "descriptor": "(Lnet/minecraft/commands/CommandSourceStack;Lcom/gwsheridan/worldarchitect/api/SpawnApi$Phase;Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy;)V",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "clear",
+        "descriptor": "(Lnet/minecraft/commands/CommandSourceStack;Lcom/gwsheridan/worldarchitect/api/SpawnApi$Phase;Lnet/minecraft/resources/Identifier;)V",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.SpawnApi$Phase",
+    "members": [
+      {
+        "kind": "field",
+        "name": "INITIAL",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/SpawnApi$Phase;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "RESPAWN",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/SpawnApi$Phase;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "PORTAL",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/api/SpawnApi$Phase;",
+        "access": 16409
+      },
+      {
+        "kind": "method",
+        "name": "values",
+        "descriptor": "()[Lcom/gwsheridan/worldarchitect/api/SpawnApi$Phase;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "valueOf",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/api/SpawnApi$Phase;",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.StructureAdapter",
+    "members": [
+      {
+        "kind": "method",
+        "name": "version",
+        "descriptor": "()I",
+        "access": 1025
+      },
+      {
+        "kind": "method",
+        "name": "supports",
+        "descriptor": "(Lnet/minecraft/world/level/levelgen/structure/Structure;)Z",
+        "access": 1025
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.StructureAdapters",
+    "members": [
+      {
+        "kind": "field",
+        "name": "KEY",
+        "descriptor": "Lnet/minecraft/resources/ResourceKey;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "type",
+        "descriptor": "(Lnet/minecraft/world/level/levelgen/structure/Structure;)Lnet/minecraft/resources/Identifier;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "get",
+        "descriptor": "(Lnet/minecraft/world/level/levelgen/structure/Structure;)Ljava/util/Optional;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "registerRegistry",
+        "descriptor": "(Lnet/neoforged/neoforge/registries/NewRegistryEvent;)V",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.StructureTemplates",
+    "members": [
+      {
+        "kind": "method",
+        "name": "read",
+        "descriptor": "(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/core/HolderLookup$Provider;)Lcom/gwsheridan/worldarchitect/structure/NativeTemplate;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "modular",
+        "descriptor": "(Lcom/google/gson/JsonObject;Lnet/minecraft/core/HolderLookup$Provider;)Lcom/gwsheridan/worldarchitect/structure/ModularStructure;",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.api.WorldArchitectApi",
+    "members": [
+      {
+        "kind": "field",
+        "name": "VERSION",
+        "descriptor": "I",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "requireVersion",
+        "descriptor": "(I)V",
+        "access": 9
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.environment.EnvironmentProfile",
+    "members": [
+      {
+        "kind": "field",
+        "name": "DEFAULT",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile;",
+        "access": 25
+      },
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Time;Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Weather;ZZZLcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Portal;Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Visual;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "allowsSpawn",
+        "descriptor": "(Lnet/minecraft/world/entity/MobCategory;Lnet/minecraft/world/entity/EntitySpawnReason;)Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "time",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Time;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "weather",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Weather;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "monsters",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "creatures",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "spawners",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "portal",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Portal;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "visual",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Visual;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.environment.EnvironmentProfile$Clouds",
+    "members": [
+      {
+        "kind": "field",
+        "name": "VANILLA",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Clouds;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "HIDDEN",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Clouds;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "SHOWN",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Clouds;",
+        "access": 16409
+      },
+      {
+        "kind": "method",
+        "name": "values",
+        "descriptor": "()[Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Clouds;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "valueOf",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Clouds;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "getSerializedName",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.environment.EnvironmentProfile$Fog",
+    "members": [
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(FF)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "start",
+        "descriptor": "()F",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "end",
+        "descriptor": "()F",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.environment.EnvironmentProfile$Portal",
+    "members": [
+      {
+        "kind": "field",
+        "name": "ALL",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Portal;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "PLAYERS",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Portal;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "OPERATORS",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Portal;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "NONE",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Portal;",
+        "access": 16409
+      },
+      {
+        "kind": "method",
+        "name": "values",
+        "descriptor": "()[Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Portal;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "valueOf",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Portal;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "getSerializedName",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.environment.EnvironmentProfile$Time",
+    "members": [
+      {
+        "kind": "field",
+        "name": "DEFAULT",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Time;",
+        "access": 25
+      },
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$TimeMode;I)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "apply",
+        "descriptor": "(J)J",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "mode",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$TimeMode;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "ticks",
+        "descriptor": "()I",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.environment.EnvironmentProfile$TimeMode",
+    "members": [
+      {
+        "kind": "field",
+        "name": "VANILLA",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$TimeMode;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "FIXED",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$TimeMode;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "OFFSET",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$TimeMode;",
+        "access": 16409
+      },
+      {
+        "kind": "method",
+        "name": "values",
+        "descriptor": "()[Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$TimeMode;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "valueOf",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$TimeMode;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "getSerializedName",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.environment.EnvironmentProfile$Visual",
+    "members": [
+      {
+        "kind": "field",
+        "name": "DEFAULT",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Visual;",
+        "access": 25
+      },
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Optional;Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Clouds;Ljava/util/Optional;Ljava/util/Optional;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "fogColor",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "fog",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "skyColor",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "clouds",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Clouds;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "cloudColor",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "cloudHeight",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.environment.EnvironmentProfile$Weather",
+    "members": [
+      {
+        "kind": "field",
+        "name": "VANILLA",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Weather;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "CLEAR",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Weather;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "RAIN",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Weather;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "THUNDER",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Weather;",
+        "access": 16409
+      },
+      {
+        "kind": "method",
+        "name": "values",
+        "descriptor": "()[Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Weather;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "valueOf",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile$Weather;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "getSerializedName",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.environment.WorldEnvironment$Capabilities",
+    "members": [
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(ZZZZZ)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "description",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "time",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "weather",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "sky",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "clouds",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "portals",
+        "descriptor": "()Z",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.modpack.BundleManifest",
+    "members": [
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lnet/minecraft/resources/Identifier;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;Lnet/minecraft/world/level/levelgen/WorldOptions;Ljava/util/List;Ljava/util/Map;Ljava/util/List;Ljava/util/List;ZLjava/util/Optional;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lnet/minecraft/resources/Identifier;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;Lnet/minecraft/world/level/levelgen/WorldOptions;Ljava/util/List;Ljava/util/Map;Ljava/util/List;Ljava/util/List;Z)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lnet/minecraft/resources/Identifier;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;Lnet/minecraft/world/level/levelgen/WorldOptions;Ljava/util/List;Ljava/util/Map;Ljava/util/List;Ljava/util/List;ZLjava/util/Optional;Ljava/util/Optional;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "locked",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "format",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "withInheritance",
+        "descriptor": "(Ljava/util/Optional;)Lcom/gwsheridan/worldarchitect/modpack/BundleManifest;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "withPack",
+        "descriptor": "(Ljava/util/Optional;)Lcom/gwsheridan/worldarchitect/modpack/BundleManifest;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "canEditDimension",
+        "descriptor": "(Lnet/minecraft/resources/Identifier;)Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "canEditFeature",
+        "descriptor": "(Lnet/minecraft/resources/Identifier;Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Feature;)Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "canEditOption",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Option;)Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "preset",
+        "descriptor": "()Lnet/minecraft/resources/Identifier;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "title",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "description",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "author",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "release",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "lock",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "options",
+        "descriptor": "()Lnet/minecraft/world/level/levelgen/WorldOptions;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "editableDimensions",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "editableFeatures",
+        "descriptor": "()Ljava/util/Map;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "editableOptions",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "requiredMods",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "allowStructureLibrary",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "inheritance",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "pack",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.modpack.BundleManifest$Feature",
+    "members": [
+      {
+        "kind": "field",
+        "name": "BIOMES",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Feature;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "ORES",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Feature;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "DECORATIONS",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Feature;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "CAVES",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Feature;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "FLUIDS",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Feature;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "STRUCTURES",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Feature;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "NATIVE_FEATURES",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Feature;",
+        "access": 16409
+      },
+      {
+        "kind": "method",
+        "name": "values",
+        "descriptor": "()[Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Feature;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "valueOf",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Feature;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "getSerializedName",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.modpack.BundleManifest$Lock",
+    "members": [
+      {
+        "kind": "field",
+        "name": "UNLOCKED",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "PARTIAL",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "FULL",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;",
+        "access": 16409
+      },
+      {
+        "kind": "method",
+        "name": "values",
+        "descriptor": "()[Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "valueOf",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "getSerializedName",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.modpack.BundleManifest$Option",
+    "members": [
+      {
+        "kind": "field",
+        "name": "SEED",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Option;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "GENERATE_STRUCTURES",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Option;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "BONUS_CHEST",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Option;",
+        "access": 16409
+      },
+      {
+        "kind": "method",
+        "name": "values",
+        "descriptor": "()[Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Option;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "valueOf",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Option;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "getSerializedName",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.modpack.PackPolicy",
+    "members": [
+      {
+        "kind": "field",
+        "name": "GROUPS",
+        "descriptor": "Ljava/util/List;",
+        "access": 25
+      },
+      {
+        "kind": "field",
+        "name": "DEFAULT",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/modpack/PackPolicy;",
+        "access": 25
+      },
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/spawn/WorldAdministration$Settings;Ljava/util/List;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "validateDimensions",
+        "descriptor": "(Lnet/minecraft/world/level/levelgen/WorldDimensions;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "allows",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;Ljava/lang/String;)Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "compatibleChild",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;Ljava/util/Optional;)Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "defaults",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/spawn/WorldAdministration$Settings;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "editable",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.modpack.PresetInheritance",
+    "members": [
+      {
+        "kind": "field",
+        "name": "MAX_DEPTH",
+        "descriptor": "I",
+        "access": 25
+      },
+      {
+        "kind": "field",
+        "name": "MAX_BASELINE_BYTES",
+        "descriptor": "I",
+        "access": 25
+      },
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Ljava/util/List;Lcom/gwsheridan/worldarchitect/modpack/PresetInheritance$Policy;Lcom/google/gson/JsonObject;Ljava/util/Map;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "baseline",
+        "descriptor": "()Lcom/google/gson/JsonObject;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "manifestProblem",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/BundleManifest;)Ljava/util/Optional;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "enforce",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;Lnet/minecraft/world/level/levelgen/presets/WorldPreset;Lnet/minecraft/core/HolderLookup$Provider;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "capture",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/modpack/PresetInheritance;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "fingerprint",
+        "descriptor": "([B)Ljava/lang/String;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "report",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;)Ljava/util/List;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "override",
+        "descriptor": "(Lcom/google/gson/JsonObject;Ljava/lang/String;Lcom/google/gson/JsonElement;Z)Lcom/google/gson/JsonObject;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "parents",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "policy",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/modpack/PresetInheritance$Policy;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "resources",
+        "descriptor": "()Ljava/util/Map;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.modpack.PresetInheritance$Parent",
+    "members": [
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lnet/minecraft/resources/Identifier;Ljava/lang/String;Ljava/lang/String;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "preset",
+        "descriptor": "()Lnet/minecraft/resources/Identifier;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "release",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "sha256",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.modpack.PresetInheritance$Policy",
+    "members": [
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;Lnet/minecraft/world/level/levelgen/WorldOptions;Ljava/util/List;Ljava/util/Map;Ljava/util/List;Ljava/util/List;Z)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;Lnet/minecraft/world/level/levelgen/WorldOptions;Ljava/util/List;Ljava/util/Map;Ljava/util/List;Ljava/util/List;ZLjava/util/Optional;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "lock",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/modpack/BundleManifest$Lock;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "options",
+        "descriptor": "()Lnet/minecraft/world/level/levelgen/WorldOptions;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "dimensions",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "features",
+        "descriptor": "()Ljava/util/Map;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "editableOptions",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "mods",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "library",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "pack",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.modpack.PresetStudio$Checked",
+    "members": [
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;Lnet/minecraft/world/level/levelgen/presets/WorldPreset;Lnet/minecraft/core/HolderLookup$Provider;Ljava/util/List;Z)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "draft",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "preset",
+        "descriptor": "()Lnet/minecraft/world/level/levelgen/presets/WorldPreset;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "registries",
+        "descriptor": "()Lnet/minecraft/core/HolderLookup$Provider;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "report",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "canApply",
+        "descriptor": "()Z",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.modpack.PresetStudio$Draft",
+    "members": [
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/BundleManifest;Lcom/google/gson/JsonObject;Ljava/util/Map;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "preset",
+        "descriptor": "()Lcom/google/gson/JsonObject;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "templates",
+        "descriptor": "()Ljava/util/Map;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "withManifest",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/modpack/BundleManifest;)Lcom/gwsheridan/worldarchitect/modpack/PresetStudio$Draft;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "manifest",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/modpack/BundleManifest;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.spawn.SafeSpawns$Target",
+    "members": [
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;F)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "center",
+        "descriptor": "()Lnet/minecraft/world/phys/Vec3;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "transition",
+        "descriptor": "(Lnet/minecraft/world/level/portal/TeleportTransition$PostTeleportTransition;)Lnet/minecraft/world/level/portal/TeleportTransition;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "level",
+        "descriptor": "()Lnet/minecraft/server/level/ServerLevel;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "position",
+        "descriptor": "()Lnet/minecraft/core/BlockPos;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "yaw",
+        "descriptor": "()F",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.spawn.SpawnPolicy",
+    "members": [
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy$Kind;Lnet/minecraft/resources/Identifier;Lnet/minecraft/core/BlockPos;Ljava/util/Optional;Ljava/lang/String;Ljava/lang/String;Lnet/minecraft/world/level/block/Rotation;Lnet/minecraft/world/level/block/Mirror;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "simple",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy$Kind;Lnet/minecraft/resources/Identifier;Lnet/minecraft/core/BlockPos;)Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "kind",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy$Kind;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "dimension",
+        "descriptor": "()Lnet/minecraft/resources/Identifier;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "position",
+        "descriptor": "()Lnet/minecraft/core/BlockPos;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "template",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "module",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "marker",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "rotation",
+        "descriptor": "()Lnet/minecraft/world/level/block/Rotation;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "mirror",
+        "descriptor": "()Lnet/minecraft/world/level/block/Mirror;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.spawn.SpawnPolicy$Kind",
+    "members": [
+      {
+        "kind": "field",
+        "name": "FIXED",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy$Kind;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "ISLAND",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy$Kind;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "TEAM",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy$Kind;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "MARKER",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy$Kind;",
+        "access": 16409
+      },
+      {
+        "kind": "field",
+        "name": "GENERATED",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy$Kind;",
+        "access": 16409
+      },
+      {
+        "kind": "method",
+        "name": "values",
+        "descriptor": "()[Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy$Kind;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "valueOf",
+        "descriptor": "(Ljava/lang/String;)Lcom/gwsheridan/worldarchitect/spawn/SpawnPolicy$Kind;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "getSerializedName",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.spawn.WorldAdministration$Protection",
+    "members": [
+      {
+        "kind": "field",
+        "name": "OFF",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/spawn/WorldAdministration$Protection;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(ZZZZLjava/util/List;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "breaking",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "placement",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "containers",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "shared",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "containerBlocks",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.spawn.WorldAdministration$Settings",
+    "members": [
+      {
+        "kind": "field",
+        "name": "DEFAULT",
+        "descriptor": "Lcom/gwsheridan/worldarchitect/spawn/WorldAdministration$Settings;",
+        "access": 25
+      },
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/Codec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Ljava/util/Optional;Ljava/util/Optional;Ljava/util/Map;Lcom/gwsheridan/worldarchitect/spawn/WorldAdministration$Protection;Ljava/util/Map;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "withPolicy",
+        "descriptor": "(Ljava/lang/String;Ljava/util/Optional;Lnet/minecraft/resources/Identifier;)Lcom/gwsheridan/worldarchitect/spawn/WorldAdministration$Settings;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "withProtection",
+        "descriptor": "(Lcom/gwsheridan/worldarchitect/spawn/WorldAdministration$Protection;)Lcom/gwsheridan/worldarchitect/spawn/WorldAdministration$Settings;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "withEnvironment",
+        "descriptor": "(Lnet/minecraft/resources/Identifier;Lcom/gwsheridan/worldarchitect/environment/EnvironmentProfile;)Lcom/gwsheridan/worldarchitect/spawn/WorldAdministration$Settings;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "initial",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "respawn",
+        "descriptor": "()Ljava/util/Optional;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "portals",
+        "descriptor": "()Ljava/util/Map;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "protection",
+        "descriptor": "()Lcom/gwsheridan/worldarchitect/spawn/WorldAdministration$Protection;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "environments",
+        "descriptor": "()Ljava/util/Map;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.structure.ModularStructure",
+    "members": [
+      {
+        "kind": "field",
+        "name": "CODEC",
+        "descriptor": "Lcom/mojang/serialization/MapCodec;",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "validateTemplates",
+        "descriptor": "(Lnet/minecraft/core/HolderLookup$Provider;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "horizontalSpan",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "blockCount",
+        "descriptor": "()I",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "hasMarker",
+        "descriptor": "(Ljava/lang/String;Ljava/lang/String;)Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "generate",
+        "descriptor": "(Lnet/minecraft/core/Holder;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/world/level/biome/BiomeSource;Lnet/minecraft/world/level/biome/Climate$Sampler;Lnet/minecraft/world/level/levelgen/RandomState;Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplateManager;JLnet/minecraft/world/level/ChunkPos;ILnet/minecraft/world/level/LevelHeightAccessor;Ljava/util/function/Predicate;)Lnet/minecraft/world/level/levelgen/structure/StructureStart;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "findGenerationPoint",
+        "descriptor": "(Lnet/minecraft/world/level/levelgen/structure/Structure$GenerationContext;)Ljava/util/Optional;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "type",
+        "descriptor": "()Lnet/minecraft/world/level/levelgen/structure/StructureType;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.structure.NativeTemplate",
+    "members": [
+      {
+        "kind": "field",
+        "name": "MAX_SIDE",
+        "descriptor": "I",
+        "access": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lnet/minecraft/core/BlockPos;Ljava/util/List;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "sanitized",
+        "descriptor": "(Lnet/minecraft/core/HolderLookup$Provider;)Lcom/gwsheridan/worldarchitect/structure/NativeTemplate;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "read",
+        "descriptor": "(Lnet/minecraft/nbt/CompoundTag;)Lcom/gwsheridan/worldarchitect/structure/NativeTemplate;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "readIsland",
+        "descriptor": "(Lnet/minecraft/nbt/CompoundTag;)Lcom/gwsheridan/worldarchitect/structure/NativeTemplate;",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "toTag",
+        "descriptor": "()Lnet/minecraft/nbt/CompoundTag;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "checkSize",
+        "descriptor": "(Lnet/minecraft/core/BlockPos;)V",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "inside",
+        "descriptor": "(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;)Z",
+        "access": 9
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "size",
+        "descriptor": "()Lnet/minecraft/core/BlockPos;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "blocks",
+        "descriptor": "()Ljava/util/List;",
+        "access": 1
+      }
+    ]
+  },
+  {
+    "name": "com.gwsheridan.worldarchitect.structure.NativeTemplate$Cell",
+    "members": [
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/nbt/CompoundTag;)V",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "metadata",
+        "descriptor": "()Lnet/minecraft/nbt/CompoundTag;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "isSolidContent",
+        "descriptor": "()Z",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "toString",
+        "descriptor": "()Ljava/lang/String;",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "hashCode",
+        "descriptor": "()I",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "equals",
+        "descriptor": "(Ljava/lang/Object;)Z",
+        "access": 17
+      },
+      {
+        "kind": "method",
+        "name": "pos",
+        "descriptor": "()Lnet/minecraft/core/BlockPos;",
+        "access": 1
+      },
+      {
+        "kind": "method",
+        "name": "state",
+        "descriptor": "()Lnet/minecraft/world/level/block/state/BlockState;",
+        "access": 1
+      }
+    ]
+  }
+]

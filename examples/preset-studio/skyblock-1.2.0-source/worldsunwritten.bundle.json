@@ -1,0 +1,19 @@
+{
+  "format": 1,
+  "preset": "wa_studio:skyblock",
+  "title": "Studio Skyblock",
+  "description": "Created with Worlds Unwritten Preset Studio",
+  "author": "GWSHERIDAN",
+  "release": "1.2.0",
+  "lock": "full",
+  "options": {
+    "seed": 18,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "minecraft",
+    "worldsunwritten"
+  ],
+  "allow_structure_library": false
+}

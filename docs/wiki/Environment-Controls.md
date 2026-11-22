@@ -2,21 +2,21 @@
 
 Environment settings are stored separately for each world. Each dimension can use its own supported clock, weather, spawn restrictions and portal-entry policy. The server sends fog, sky and cloud settings to each player's active dimension.
 
-Use `/wa_environment <dimension>` to inspect settings, current time and weather, and capability diagnostics. Administrators at permission level 3 can open `/wa_environment <dimension> edit`. The designer has pages for time and weather, mob spawning, fog, sky and clouds, and portal entry. Choose an action to save that setting. The server checks permissions, preset locks, capability support and input bounds for every edit.
+Use `/worldsunwritten environment <dimension>` to inspect settings, current time and weather, and capability diagnostics. Administrators at permission level 3 can open `/worldsunwritten environment <dimension> edit`. The designer has pages for time and weather, mob spawning, fog, sky and clouds, and portal entry. Choose an action to save that setting. The server checks permissions, preset locks, capability support and input bounds for every edit.
 
 ## Time and weather
 
 ```text
-/wa_environment minecraft:overworld set time fixed 6000
-/wa_environment wa_example:workshop set time fixed 18000
-/wa_environment wa_example:workshop set weather thunder
-/wa_environment minecraft:overworld set weather clear
-/wa_environment minecraft:overworld set time offset 6000
-/wa_environment minecraft:overworld set time vanilla
-/wa_environment wa_example:workshop set weather vanilla
+/worldsunwritten environment minecraft:overworld set time fixed 6000
+/worldsunwritten environment wa_example:workshop set time fixed 18000
+/worldsunwritten environment wa_example:workshop set weather thunder
+/worldsunwritten environment minecraft:overworld set weather clear
+/worldsunwritten environment minecraft:overworld set time offset 6000
+/worldsunwritten environment minecraft:overworld set time vanilla
+/worldsunwritten environment wa_example:workshop set weather vanilla
 ```
 
-The workshop example dimension is supplied by the [cross-dimension structures datapack](https://github.com/GWSheridan/World-Architect/tree/v1.7.0/examples/cross-dimension-structures). Replace its ID with an installed compatible dimension.
+The workshop example dimension is supplied by the [cross-dimension structures datapack](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/cross-dimension-structures). Replace its ID with an installed compatible dimension.
 
 Fixed time holds the dimension's default clock at the selected tick. Offset time adds 0–23999 ticks to the underlying clock and follows its normal rate and pause state. These are read-only views: shared clocks, game time, scheduled ticks and saved generation data remain untouched. Native timeline attributes use the same clock view, including sun position and skylight. Normal `/time` commands still change Minecraft's underlying clocks.
 
@@ -27,10 +27,10 @@ Dimensions without a changing default clock report time overrides as unsupported
 ## Mob spawning and portals
 
 ```text
-/wa_environment minecraft:overworld set mobs monsters false
-/wa_environment minecraft:overworld set mobs creatures false
-/wa_environment minecraft:overworld set mobs spawners false
-/wa_environment minecraft:the_nether set portal operators
+/worldsunwritten environment minecraft:overworld set mobs monsters false
+/worldsunwritten environment minecraft:overworld set mobs creatures false
+/worldsunwritten environment minecraft:overworld set mobs spawners false
+/worldsunwritten environment minecraft:the_nether set portal operators
 ```
 
 Monster and creature flags restrict native natural, chunk-generation, structure, patrol, event, reinforcement and jockey spawn checks. The spawner flag independently controls ordinary and trial spawners. An enabled flag permits the normal checks; it does not force a spawn. Existing mobs, breeding, player-created mobs, spawn eggs, commands and dimension travel retain their normal behaviour. Mods that bypass the native spawn hooks need their own integration.
@@ -40,13 +40,13 @@ Portal entry accepts `all`, `players`, `operators` or `none`. Operators need per
 ## Fog, sky and clouds
 
 ```text
-/wa_environment minecraft:overworld set fog_color 223344
-/wa_environment minecraft:overworld set fog 4 96
-/wa_environment minecraft:overworld set sky_color 33aaff
-/wa_environment minecraft:overworld set clouds hidden
-/wa_environment wa_example:workshop set clouds shown
-/wa_environment wa_example:workshop set cloud_color 00ff00
-/wa_environment wa_example:workshop set cloud_height 110
+/worldsunwritten environment minecraft:overworld set fog_color 223344
+/worldsunwritten environment minecraft:overworld set fog 4 96
+/worldsunwritten environment minecraft:overworld set sky_color 33aaff
+/worldsunwritten environment minecraft:overworld set clouds hidden
+/worldsunwritten environment wa_example:workshop set clouds shown
+/worldsunwritten environment wa_example:workshop set cloud_color 00ff00
+/worldsunwritten environment wa_example:workshop set cloud_height 110
 ```
 
 Colours are six hexadecimal RGB digits without `#`. Use `vanilla` in place of a colour or cloud height to remove that override. Cloud modes are `vanilla`, `hidden` and `shown`. Use `set fog vanilla` to restore normal fog distances. Fog start must be below fog end; both distances are bounded to 4096 blocks.
@@ -57,7 +57,7 @@ The server synchronizes settings after edits, joining, respawning and changing d
 
 ## Persistence and locks
 
-`/wa_environment <dimension> reset` removes that dimension's overrides. Unconfigured dimensions retain vanilla behaviour. Settings are stored under `environments` in the existing world-local `data/worldarchitect-administration-v1.dat` file. Include it in backups with island allocations and generation snapshots. Missing required administration data stops loading before Minecraft rewrites the level metadata.
+`/worldsunwritten environment <dimension> reset` removes that dimension's overrides. Unconfigured dimensions retain vanilla behaviour. Settings are stored under `environments` in the existing world-local `data/worldsunwritten-administration-v1.dat` file. Include it in backups with island allocations and generation snapshots. Missing required administration data stops loading before Minecraft rewrites the level metadata.
 
 The server reads earlier administration files without changing them until an administrator saves an edit. Environment edits preserve spawn policies and island protection settings. Generation snapshots, embedded templates and allocation files remain separate. Existing bundle dimension locks also govern environment changes; a full lock rejects them.
 

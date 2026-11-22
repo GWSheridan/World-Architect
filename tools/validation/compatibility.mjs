@@ -20,7 +20,7 @@ if(baselineVersion==='1.6.0')bytes=await fs.readFile(join(root,'build/validation
 else if(baselineVersion==='1.5.0')bytes=await fs.readFile(join(root,'build/validation-inputs/worldarchitect-1.5.0.jar'));
 else if(baselineVersion==='1.4.0')bytes=await fs.readFile(join(root,'build/validation-inputs/worldarchitect-1.4.0.jar'));
 else if(baselineVersion==='1.3.0')bytes=await baselineBytes(root,network);
-else {const response=await fetch(`https://github.com/GWSheridan/World-Architect/releases/download/v${baselineVersion}/worldarchitect-${baselineVersion}.jar`);if(!response.ok)throw new Error('Cannot fetch the published baseline');bytes=Buffer.from(await response.arrayBuffer());}
+else {const response=await fetch(`https://github.com/GWSheridan/Worlds-Unwritten/releases/download/v${baselineVersion}/worldarchitect-${baselineVersion}.jar`);if(!response.ok)throw new Error('Cannot fetch the published baseline');bytes=Buffer.from(await response.arrayBuffer());}
 if(createHash('sha256').update(bytes).digest('hex')!==checksums[baselineVersion])throw new Error('Published baseline checksum mismatch');
 await fs.writeFile(baseline,bytes,{flag:'wx'});
 const matrix={format:1,platform:process.platform,candidate:version,baseline:baselineVersion,cases:[],status:'passed'};
@@ -39,8 +39,8 @@ for(const [pack,projects] of Object.entries({terralith:['8oi3bsk5','XaDC71GB'],b
         const results={};
         for(const kind of ['baseline','candidate']) {
             const output=relative(root,join(directory,`cases/${pack}-${kind}-${profile}`));await fs.mkdir(join(directory,'cases'),{recursive:true});
-            const fixture=kind==='baseline'&&args['--baseline-fixture']?args['--baseline-fixture']:(args['--fixture']||`build/validation-tools/worldarchitect-${version}-validation.jar`);
-            const commandArgs=['tools/validation/run.mjs','--jar',kind==='baseline'?baseline:(args['--jar']||`build/libs/worldarchitect-${version}.jar`),'--fixture',fixture,'--output',output,'--profile',profile,'--mods',mods,'--suite','compatibility','--network',network];
+            const fixture=kind==='baseline'&&args['--baseline-fixture']?args['--baseline-fixture']:(args['--fixture']||`build/validation-tools/Worlds-Unwritten-${version}-validation.jar`);
+            const commandArgs=['tools/validation/run.mjs','--jar',kind==='baseline'?baseline:(args['--jar']||`build/libs/Worlds-Unwritten-${version}.jar`),'--fixture',fixture,'--output',output,'--profile',profile,'--mods',mods,'--suite','compatibility','--network',network];
             const code=await new Promise((accept,reject)=>{const child=spawn(process.execPath,commandArgs,{cwd:root,stdio:'inherit'});child.on('error',reject);child.on('close',accept);});
             const result=JSON.parse(await fs.readFile(join(root,output,'results.json'),'utf8'));
             if(code!==0&&result.status==='passed')throw new Error('Inconsistent compatibility result');

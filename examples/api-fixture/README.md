@@ -1,17 +1,17 @@
 # External API 1 fixture
 
-This independent NeoForge project consumes World Architect's JAR through `compileOnly`; it does not compile against the parent source set. Minecraft 26.3, NeoForge 26.3.0.103, Java 25.
+This independent NeoForge project consumes Worlds Unwritten's JAR through `compileOnly`; it does not compile against the parent source set. Minecraft 26.3, NeoForge 26.3.0.103, Java 25.
 
-From the World Architect repository root:
+From the Worlds Unwritten repository root:
 
 ```powershell
 .\gradlew.bat build
 .\gradlew.bat -p examples/api-fixture build
 ```
 
-For another artifact, pass `-PworldArchitectJar=<absolute-JAR-path>`. Install **both** JARs in a clean instance's `mods` directory. Keep this diagnostic mod out of a production modpack. It has no block items or client assets; the fixture block exists for registry and generation audits.
+For another artifact, pass `-PworldsUnwrittenJar=<absolute-JAR-path>`. Install **both** JARs in a clean instance's `mods` directory. Keep this diagnostic mod out of a production modpack. It has no block items or client assets; the fixture block exists for registry and generation audits.
 
-The current fixture builds against World Architect 1.9.0. To test the optional cell generator in its lab dimension, add `-Dwa.fixture.cells=true` to the server JVM. Without that property, the adapter deliberately keeps its default `supportsCellularTerrain()` value of `false`, even though its older mode declaration uses `EnumSet.allOf`. Existing API 1 providers therefore cannot opt into new terrain accidentally.
+The current fixture builds against Worlds Unwritten 2.0.0. To test the optional cell generator in its lab dimension, add `-Dwa.fixture.cells=true` to the server JVM. Without that property, the adapter deliberately keeps its default `supportsCellularTerrain()` value of `false`, even though its older mode declaration uses `EnumSet.allOf`. Existing API 1 providers therefore cannot opt into new terrain accidentally.
 
 Use `level-type=wa_api_fixture\:laboratory` for a fresh dedicated server. The preset has managed vanilla dimensions, an adapter-bound lab with solid custom slate terrain, four native markers per chunk at Y45, an explicitly adapted pyramid type, and an untouched original flat dimension. Seed 194723 is used for acceptance. The slate surface is Y40. Chunk positions can coincide across feature attempts.
 

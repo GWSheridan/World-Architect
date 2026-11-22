@@ -1,0 +1,74 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "biome": "minecraft:plains",
+        "profile": {
+          "material": "minecraft:stone",
+          "generator_version": 3,
+          "elevation": 64,
+          "relief": 0,
+          "terrain": {
+            "landform": "plateaus"
+          },
+          "terrain_regions": [
+            {
+              "name": "dry_coast",
+              "mask": "circle",
+              "min_x": -128,
+              "min_z": -128,
+              "max_x": 128,
+              "max_z": 128,
+              "transition": 16,
+              "elevation": 96,
+              "relief": 0,
+              "terrain": {
+                "landform": "plateaus"
+              }
+            }
+          ]
+        },
+        "dimension_profile": {
+          "min_y": -64,
+          "height": 384,
+          "content": {
+            "sea": {
+              "fluid": "water",
+              "level": 80
+            },
+            "structures": [
+              {
+                "structure": "worldsunwritten_examples:coastal_ruin",
+                "spacing": 16,
+                "separation": 6
+              }
+            ]
+          }
+        },
+        "type": "worldsunwritten:single_block"
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "biome_source": {
+          "preset": "minecraft:nether",
+          "type": "minecraft:multi_noise"
+        },
+        "settings": "minecraft:nether",
+        "type": "minecraft:noise"
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "biome_source": {
+          "type": "minecraft:the_end"
+        },
+        "settings": "minecraft:end",
+        "type": "minecraft:noise"
+      }
+    }
+  }
+}

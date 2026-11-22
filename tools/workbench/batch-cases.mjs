@@ -8,19 +8,18 @@ import {fileURLToPath} from 'node:url';
 import {baselineBytes} from '../validation/baseline.mjs';
 import {gradle} from '../validation/process.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..'),args={};
-for(let i=2;i<process.argv.length;i+=2){const k=process.argv[i],v=process.argv[i+1];if(!['--output','--network','--port','--baseline-fixture'].includes(k)||!v||k in args)throw Error('Invalid batch case option');args[k]=v;}
+for(let i=2;i<process.argv.length;i+=2){const k=process.argv[i],v=process.argv[i+1];if(!['--output','--network','--port','--baseline-fixture','--legacy-provider'].includes(k)||!v||k in args)throw Error('Invalid batch case option');args[k]=v;}
 const output=resolve(root,args['--output']||'build/ci-batch'),network=args['--network']||'offline',port=Number(args['--port']||25974);
 if(!['online','offline'].includes(network)||!relative(root,output).startsWith('build'+(process.platform==='win32'?'\\':'/')))throw Error('Use a new build/ directory and online/offline network mode');
 await fs.mkdir(output,{recursive:false});const inputs=join(output,'inputs');await fs.mkdir(inputs);
 const sha=b=>createHash('sha256').update(b).digest('hex'),json=(p,v)=>fs.writeFile(p,JSON.stringify(v,null,2)+'\n',{flag:'wx'});
 const version=(await fs.readFile(join(root,'gradle.properties'),'utf8')).match(/^mod_version=(.+)$/m)[1].trim();
-const candidate=await fs.readFile(join(root,`build/libs/worldarchitect-${version}.jar`)),fixture=await fs.readFile(join(root,`build/validation-tools/worldarchitect-${version}-validation.jar`)),baseline=await baselineBytes(root,network);
+const candidate=await fs.readFile(join(root,`build/libs/Worlds-Unwritten-${version}.jar`)),fixture=await fs.readFile(join(root,`build/validation-tools/Worlds-Unwritten-${version}-validation.jar`)),baseline=await baselineBytes(root,network);
 const baselineFixture=await fs.readFile(resolve(root,args['--baseline-fixture']||'build/validation-tools/worldarchitect-1.3.0-validation.jar'));
 for(const [name,bytes]of [['candidate.jar',candidate],['baseline.jar',baseline],['validation.jar',fixture],['baseline-validation.jar',baselineFixture]])await fs.writeFile(join(inputs,name),bytes,{flag:'wx'});
-const prep=['-p','examples/api-fixture','jar','--no-daemon','--console=plain',`-PworldArchitectJar=${join(inputs,'baseline.jar')}`];if(network==='offline')prep.push('--offline');if(process.env.JAVA21_HOME)prep.push(`-Porg.gradle.java.installations.paths=${process.env.JAVA21_HOME}`);
-const compiled=gradle(root,prep,join(output,'api-build.log'));if(await compiled.exit!==0)throw Error('Cannot compile the independent API consumer against 1.3');
+// The same unrecompiled API 1 consumer exercises both generations of the mod.
 await fs.mkdir(join(inputs,'plain'));await fs.mkdir(join(inputs,'api'));
-const provider=await fs.readFile(join(root,'examples/api-fixture/build/libs/worldarchitect-api-fixture-1.0.0.jar'));await fs.writeFile(join(inputs,'api/provider.jar'),provider,{flag:'wx'});
+const provider=await fs.readFile(resolve(root,args['--legacy-provider']||'build/validation-inputs/legacy-api-fixture.jar'));await fs.writeFile(join(inputs,'api/provider.jar'),provider,{flag:'wx'});
 function scenario(bundle,hash,seed){return {format:1,bundle:{file:bundle,sha256:hash},budgets:{timeout_seconds:120,heap_mib:1400},runs:[{name:'clean',seed,expect_startup:'accept',safe_spawn:true,restart:true,dimensions:['minecraft:overworld'],regions:[{dimension:'minecraft:overworld',chunk_x:-32,chunk_z:32,width:2,depth:2}],probes:[]}]};}
 const legacyBytes=await fs.readFile(join(root,'examples/creator-starters/bundles/single-block-1.3.0.zip')),modernBytes=await fs.readFile(join(root,'examples/shared-regions/bundles/shared-regions-1.7.0.zip'));
 await fs.writeFile(join(inputs,'legacy.zip'),legacyBytes,{flag:'wx'});await fs.writeFile(join(inputs,'modern.zip'),modernBytes,{flag:'wx'});

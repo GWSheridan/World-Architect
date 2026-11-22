@@ -2,7 +2,7 @@
 
 ## Missing world type
 
-Check the Minecraft, NeoForge and Java versions and this instance's `mods/` folder. Restart after adding a JAR. Preset bundles belong in `config/worldarchitect/bundles/`.
+Check the Minecraft, NeoForge and Java versions and this instance's `mods/` folder. Restart after adding a JAR. Preset bundles belong in `config/worldsunwritten/bundles/`.
 
 ## A dimension cannot be replaced
 

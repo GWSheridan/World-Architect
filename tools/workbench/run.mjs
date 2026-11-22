@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {gradle} from '../validation/process.mjs';
 import {readScenarioInput} from './scenario.mjs';
+import {identityFromJar} from '../validation/identity.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..'),args={};
 let active,interrupted=false;const interrupt=async()=>{if(interrupted)return;interrupted=true;if(active)await active.stop();};
 process.once('SIGINT',interrupt);process.once('SIGTERM',interrupt);process.on('message',message=>{if(message?.type==='workbench_abort')interrupt().catch(()=>{});});
@@ -15,8 +16,8 @@ const port=Number(args['--port']||25974);if(!Number.isInteger(port)||port<1024||
 const sha=b=>createHash('sha256').update(b).digest('hex'),scenarioPath=resolve(root,args['--scenario']),scenarioInput=await readScenarioInput(scenarioPath),scenario=scenarioInput.scenario;
 async function input(path,max=33554432){const st=await fs.lstat(path);if(!st.isFile()||st.isSymbolicLink()||st.size>max)throw Error('Input must be a bounded regular file');return fs.readFile(path);}
 const bundle=await input(join(dirname(scenarioPath),scenario.bundle.file));if(sha(bundle)!==scenario.bundle.sha256)throw Error('Bundle SHA-256 does not match scenario');
-const jar=await input(resolve(root,args['--jar'])),fixture=await input(resolve(root,args['--fixture'])),mods=[];
-if(args['--mods'])for(const name of (await fs.readdir(resolve(root,args['--mods']))).filter(n=>n.endsWith('.jar')).sort()){if(!/^[a-zA-Z0-9+_.-]{1,160}\.jar$/.test(name)||['worldarchitect.jar','validation.jar'].includes(name))throw Error('Invalid or reserved mod name');mods.push({name,bytes:await input(join(resolve(root,args['--mods']),name),134217728)});}
+const jar=await input(resolve(root,args['--jar'])),fixture=await input(resolve(root,args['--fixture'])),mods=[],identity=identityFromJar(jar);
+if(args['--mods'])for(const name of (await fs.readdir(resolve(root,args['--mods']))).filter(n=>n.endsWith('.jar')).sort()){if(!/^[a-zA-Z0-9+_.-]{1,160}\.jar$/.test(name)||['Worlds-Unwritten.jar','worldsunwritten.jar','worldarchitect.jar','validation.jar'].includes(name))throw Error('Invalid or reserved mod name');mods.push({name,bytes:await input(join(resolve(root,args['--mods']),name),134217728)});}
 const build=await fs.realpath(join(root,'build')),output=resolve(root,args['--output']),rel=relative(build,output);
 if(!rel||isAbsolute(rel)||rel==='..'||rel.startsWith('..'+sep))throw Error('Output must be a new directory under build/');
 // Resolve the existing parent too: a symlink must not redirect job writes outside build/.
@@ -24,13 +25,13 @@ const parent=await fs.realpath(dirname(output)),parentRel=relative(build,parent)
 await fs.mkdir(output,{recursive:false});await fs.writeFile(join(output,'workbench-instance.json'),JSON.stringify({format:1,scenario_sha256:sha(scenarioInput.bytes)})+'\n',{flag:'wx'});
 const results={format:1,jar_sha256:sha(jar),bundle_sha256:sha(bundle),mods:mods.map(m=>({file:m.name,sha256:sha(m.bytes)})),runs:[],status:'running'};
 const record=()=>fs.writeFile(join(output,'results.json'),JSON.stringify(results,null,2)+'\n');
-async function pins(server){const dir=join(server,'world/data'),p={};for(const name of ['worldarchitect-generation-v1.dat','minecraft/world_gen_settings.dat'])p[name]=sha(await fs.readFile(join(dir,name)));const archive=join(dir,'worldarchitect/generation');try{for(const n of (await fs.readdir(archive)).filter(n=>n.endsWith('.zip')).sort())p[n]=sha(await fs.readFile(join(archive,n)));}catch(e){if(e.code!=='ENOENT')throw e;}return p;}
+async function pins(server){const dir=join(server,'world/data'),p={};for(const name of [identity.id+'-generation-v1.dat','minecraft/world_gen_settings.dat'])p[name]=sha(await fs.readFile(join(dir,name)));const archive=join(dir,identity.id,'generation');try{for(const n of (await fs.readdir(archive)).filter(n=>n.endsWith('.zip')).sort())p[n]=sha(await fs.readFile(join(archive,n)));}catch(e){if(e.code!=='ENOENT')throw e;}return p;}
 async function bounded(promise,seconds){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Object.assign(Error('Job exceeded its time budget'),{code:'WA_VALIDATION_TIMEOUT'})),seconds*1000);})]);}finally{clearTimeout(timer);}}
 try{
  for(const job of scenario.runs){
     if(interrupted)throw Error('Workbench interrupted');
-    const dir=join(output,job.name),server=join(dir,'server'),config=join(server,'config/worldarchitect');await fs.mkdir(join(server,'mods'),{recursive:true});await fs.mkdir(join(config,'bundles'),{recursive:true});
-    for(const [name,bytes]of [['worldarchitect.jar',jar],['validation.jar',fixture],...mods.map(m=>[m.name,m.bytes])])await fs.writeFile(join(server,'mods',name),bytes,{flag:'wx'});
+    const dir=join(output,job.name),server=join(dir,'server'),config=join(server,'config',identity.id);await fs.mkdir(join(server,'mods'),{recursive:true});await fs.mkdir(join(config,'bundles'),{recursive:true});
+    for(const [name,bytes]of [[identity.runtimeFile,jar],['validation.jar',fixture],...mods.map(m=>[m.name,m.bytes])])await fs.writeFile(join(server,'mods',name),bytes,{flag:'wx'});
     await fs.writeFile(join(config,'bundles/preset.zip'),bundle,{flag:'wx'});await fs.writeFile(join(config,'developer.json'),JSON.stringify({format:1,bundle:'preset.zip',developer_mode:false})+'\n',{flag:'wx'});await fs.writeFile(join(config,'workbench-job.json'),JSON.stringify(job)+'\n',{flag:'wx'});
     await fs.writeFile(join(server,'eula.txt'),'eula=true\n',{flag:'wx'});await fs.writeFile(join(server,'server.properties'),`server-ip=127.0.0.1\nserver-port=${port}\nonline-mode=false\nwhite-list=true\nenforce-whitelist=true\nmax-players=1\nview-distance=2\nsimulation-distance=2\nlog-ips=false\nmanagement-server-enabled=false\nenable-rcon=false\npause-when-empty-seconds=-1\nlevel-seed=${job.seed}\n`,{flag:'wx'});
     let original;const result={name:job.name,status:'running',stages:[]};results.runs.push(result);await record();

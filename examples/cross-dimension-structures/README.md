@@ -19,9 +19,9 @@ execute in wa_example:workshop run forceload add -16 -16 32 32
 execute in wa_example:fortress run forceload add -16 -16 32 32
 locate structure minecraft:end_city
 execute in wa_example:workshop run locate structure wa_example:village
-execute in wa_example:workshop run wa_structure generated_markers wa_example:village 1 81 1
+execute in wa_example:workshop run worldsunwritten structure generated_markers wa_example:village 1 81 1
 ```
 
-Each assembly embeds its templates and placement rules. Its three named modules each retain an `entry` spawn marker. Use the marker inspection command to find their seeded, rotated coordinates. An operator player can travel with `wa_structure generated_spawn wa_example:village 1 81 1 main entry` in the workshop dimension.
+Each assembly embeds its templates and placement rules. Its three named modules each retain an `entry` spawn marker. Use the marker inspection command to find their seeded, rotated coordinates. An operator player can travel with `worldsunwritten structure generated_spawn wa_example:village 1 81 1 main entry` in the workshop dimension.
 
 After stopping the server, verify the saved chunks with `gradlew.bat auditCrossDimensionWorld -PterrainWorld=<world-folder>`. The audit checks native End City pieces, template blocks, block states, decorative metadata, and marker clearance. [Generation and authoring guide](../../docs/FEATURES.md#modular-template-generation)

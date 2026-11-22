@@ -1,14 +1,14 @@
 # End progression test tools
 
-This separate diagnostic mod exercises World Architect 1.0.0 on a disposable Minecraft 26.3 / NeoForge 26.3.0.103 instance. It is not needed for normal play. The commands deliberately change the fight, rewards and selected test regions; use a fresh test world.
+This separate diagnostic mod exercises Worlds Unwritten 1.0.0 on a disposable Minecraft 26.3 / NeoForge 26.3.0.103 instance. It is not needed for normal play. The commands deliberately change the fight, rewards and selected test regions; use a fresh test world.
 
-Build World Architect first, then run this from the repository root with Java 25:
+Build Worlds Unwritten first, then run this from the repository root with Java 25:
 
 ```powershell
 .\gradlew.bat -p examples/end-progression-test build
 ```
 
-Put the resulting test JAR and `worldarchitect-1.1.0.jar` in a fresh server's `mods/` folder. Install the [End progression example](../end-progression) before creating its world. Use ordinary clients with the production mod and an operator console for commands:
+Put the resulting test JAR and `Worlds-Unwritten-2.0.0.jar` in a fresh server's `mods/` folder. Install the [End progression example](../end-progression) before creating its world. Use ordinary clients with the production mod and an operator console for commands:
 
 | Command | Check |
 | --- | --- |

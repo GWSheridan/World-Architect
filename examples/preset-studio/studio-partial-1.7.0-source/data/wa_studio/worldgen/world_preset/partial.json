@@ -78,7 +78,7 @@
             ]
           }
         },
-        "type": "worldarchitect:single_block"
+        "type": "worldsunwritten:single_block"
       }
     },
     "minecraft:the_nether": {
@@ -89,7 +89,7 @@
           "min_y": 0,
           "height": 256
         },
-        "type": "worldarchitect:void"
+        "type": "worldsunwritten:void"
       }
     },
     "minecraft:the_end": {
@@ -100,7 +100,7 @@
           "min_y": 0,
           "height": 256
         },
-        "type": "worldarchitect:void"
+        "type": "worldsunwritten:void"
       }
     }
   }

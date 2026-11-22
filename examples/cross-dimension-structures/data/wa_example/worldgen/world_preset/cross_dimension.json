@@ -3,7 +3,7 @@
     "minecraft:overworld": {
       "type": "minecraft:overworld",
       "generator": {
-        "type": "worldarchitect:single_block",
+        "type": "worldsunwritten:single_block",
         "biome": "minecraft:end_highlands",
         "profile": {
           "generator_version": 1,
@@ -29,7 +29,7 @@
     "minecraft:the_nether": {
       "type": "minecraft:the_nether",
       "generator": {
-        "type": "worldarchitect:void",
+        "type": "worldsunwritten:void",
         "biome": "minecraft:nether_wastes",
         "dimension": {
           "min_y": 0,
@@ -40,7 +40,7 @@
     "minecraft:the_end": {
       "type": "minecraft:the_end",
       "generator": {
-        "type": "worldarchitect:void",
+        "type": "worldsunwritten:void",
         "biome": "minecraft:the_end",
         "dimension": {
           "min_y": 0,
@@ -51,7 +51,7 @@
     "wa_example:workshop": {
       "type": "minecraft:overworld",
       "generator": {
-        "type": "worldarchitect:single_block",
+        "type": "worldsunwritten:single_block",
         "biome": "minecraft:plains",
         "profile": {
           "generator_version": 1,
@@ -77,7 +77,7 @@
     "wa_example:fortress": {
       "type": "minecraft:overworld",
       "generator": {
-        "type": "worldarchitect:single_block",
+        "type": "worldsunwritten:single_block",
         "biome": "minecraft:plains",
         "profile": {
           "generator_version": 1,

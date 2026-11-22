@@ -11,7 +11,7 @@
         0
       ],
       "template": {
-        "worldarchitect": {
+        "worldsunwritten": {
           "author": "GWSHERIDAN",
           "format": 1,
           "rules": {
@@ -2122,5 +2122,5 @@
   ],
   "max_slope": 0,
   "random_rotation": false,
-  "type": "worldarchitect:modular"
+  "type": "worldsunwritten:modular"
 }

@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "preset": "worldsunwritten_examples:resource_archipelago",
+  "title": "Resource Archipelago",
+  "description": "Coal, iron and copper islands in a seeded hex layout.",
+  "author": "GWSHERIDAN",
+  "release": "2.0.0",
+  "lock": "unlocked",
+  "options": {
+    "seed": 6371206102314167159,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "minecraft",
+    "worldsunwritten"
+  ]
+}

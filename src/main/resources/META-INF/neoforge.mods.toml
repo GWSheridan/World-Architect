@@ -3,26 +3,33 @@ loaderVersion = "[4,)"
 license = "All Rights Reserved"
 
 [[mods]]
-modId = "worldarchitect"
+modId = "worldsunwritten"
 version = "${mod_version}"
-displayName = "World Architect"
+displayName = "Worlds Unwritten"
 authors = "GWSHERIDAN"
 credits = "Original Creator and Developer: GWSHERIDAN"
 description = "Design custom Minecraft worlds before creating them."
 
-[[mixins]]
-config = "worldarchitect.mixins.json"
+[[mods]]
+modId = "worldarchitect"
+version = "1.9.0"
+displayName = "Worlds Unwritten Legacy Support"
+authors = "GWSHERIDAN"
+description = "Compatibility contract for existing worlds, presets and API 1 add-ons. Included with Worlds Unwritten."
 
 [[mixins]]
-config = "worldarchitect.client.mixins.json"
+config = "worldsunwritten.mixins.json"
 
-[[dependencies.worldarchitect]]
+[[mixins]]
+config = "worldsunwritten.client.mixins.json"
+
+[[dependencies.worldsunwritten]]
 modId = "neoforge"
 type = "required"
 versionRange = "[26.3.0.103,)"
 side = "BOTH"
 
-[[dependencies.worldarchitect]]
+[[dependencies.worldsunwritten]]
 modId = "minecraft"
 type = "required"
 versionRange = "[26.3]"

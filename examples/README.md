@@ -33,3 +33,5 @@ The 1.7 release contains 23 current bundles, adding [corridor paths](corridor-re
 The [Modpack Builder examples](modpack-builder/README.md) add shared, choice, team and mixed-dimension packs in 1.8. Unchanged examples keep their existing versions; they remain compatible without duplicate release files.
 
 The [cell-world examples](cell-worlds/README.md) add six editable 1.9 starters: Hex Continents, Hex Skyblock, Expanding One Chunk, Resource Archipelago, Biome Mosaic and Underground Start. Their bundles embed the terrain, templates and objective definitions needed by a clean server.
+
+Versioned bundle ZIPs published before 2.0 retain their original `worldarchitect` resource IDs and archive bytes. The editable source trees use `worldsunwritten` IDs. When installing an older ZIP, use its manifest rather than copying an ID from the editable source. Both formats are supported; keep the original ZIP with any world created from it.

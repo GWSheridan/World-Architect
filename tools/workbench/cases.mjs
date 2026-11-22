@@ -12,7 +12,7 @@ const params=['prepareWorkbenchInputs','--console=plain',`-PworkbenchInputs=${jo
 const prep=gradle(root,params,join(output,'prepare.log'));if(await prep.exit!==0)throw Error('Cannot prepare workbench cases');
 const results={format:1,cases:[],status:'passed'};
 for(const name of ['valid','bad-probe','locked-seed','missing-provider','unsafe-spawn']){
- const dir=join(output,name),argv=['tools/workbench/run.mjs','--scenario',join(output,'inputs',name+'.scenario.json'),'--jar',`build/libs/worldarchitect-${version}.jar`,'--fixture',`build/validation-tools/worldarchitect-${version}-validation.jar`,'--output',dir,'--network',args['--network']||'offline'];
+ const dir=join(output,name),argv=['tools/workbench/run.mjs','--scenario',join(output,'inputs',name+'.scenario.json'),'--jar',`build/libs/Worlds-Unwritten-${version}.jar`,'--fixture',`build/validation-tools/Worlds-Unwritten-${version}-validation.jar`,'--output',dir,'--network',args['--network']||'offline'];
  const exit=await new Promise((done,reject)=>{const child=spawn(process.execPath,argv,{cwd:root,stdio:'inherit'});child.on('error',reject);child.on('close',done);});
  const result=JSON.parse(await fs.readFile(join(dir,'results.json'),'utf8'));
  const probeFailure=['bad-probe','unsafe-spawn'].includes(name),log=probeFailure?await fs.readFile(join(dir,'clean-install/fresh.log'),'utf8'):'';

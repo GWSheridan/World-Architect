@@ -2,7 +2,7 @@
   "format": 1,
   "preset": "wa_studio:skyblock",
   "title": "Studio Skyblock",
-  "description": "Created with World Architect Preset Studio",
+  "description": "Created with Worlds Unwritten Preset Studio",
   "author": "GWSHERIDAN",
   "release": "1.0.0",
   "lock": "full",
@@ -13,7 +13,7 @@
   },
   "required_mods": [
     "minecraft",
-    "worldarchitect"
+    "worldsunwritten"
   ],
   "allow_structure_library": false
 }

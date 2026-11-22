@@ -1,0 +1,17 @@
+{
+  "format": 1,
+  "preset": "worldsunwritten_examples:themed_platform",
+  "title": "Themed platform",
+  "description": "A supported starting platform with deterministic masonry and stair palettes, captured variants, supplies and a safe marker.",
+  "author": "GWSHERIDAN",
+  "release": "1.6.0",
+  "lock": "unlocked",
+  "options": {
+    "seed": 18,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "worldsunwritten"
+  ]
+}

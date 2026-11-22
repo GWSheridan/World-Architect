@@ -5,7 +5,7 @@ The site inspector runs an assembly's production placement planner against the b
 On an authoring server with developer mode enabled, a level-3 administrator can run:
 
 ```text
-/wa_site studio my-preset 1.0.0
+/worldsunwritten site studio my-preset 1.0.0
 ```
 
 The server must already have that immutable Preset Studio version. The active pack must permit the structure library. From Preset Studio, choose **Help / sites → Structure site inspector** while connected to an authoring world. That route also checks that the server has the identical saved bundle. Save a changed draft as a new version first. Offline new-world editing cannot start a server preview.
@@ -15,6 +15,8 @@ Choose a managed solid-terrain dimension and an assembly selected in that dimens
 The view shows the assembled geometry, gold spawn markers, cyan connection endpoints and a base-terrain cross-section through the centre Z. The report records the resolved origins, water intersections, source fingerprint and the native candidate chunk for that placement region.
 
 ![A vertical assembly, its markers and the terrain section](images/structure-site-inspector.png)
+
+This example uses an archived preset, so its original resource ID remains visible. New presets use the `worldsunwritten` namespace.
 
 An **eligible** result means the production planner accepted the base-terrain geometry. It does not promise an automatic start: native candidate selection, earlier template rules, End reservations, other structures, features and later ticking remain authoritative. A **rejected** result explains the first failed check. An **incomplete** result has no placement decision; retry or simplify the sample. Use the [test workbench](Test-Workbench.md) to check actual generated chunks.
 
@@ -28,6 +30,6 @@ In 1.6, choose **Tools → Search nearby sites** after selecting a dimension and
 
 **Tools → Search results** opens a coordinate list. Select one to inspect its geometry, foundation supports, clearance, transformed markers and terrain section. An eligible search result agrees with the production base-terrain planner; later generation and ticking can still affect the live site. No search step loads chunks or changes generation files.
 
-**Tools → Export search report** writes a new JSON file to the server's `config/worldarchitect/site-reports/` directory. Reports include exact seed, dimension, structure, bounds, limits, source release and SHA-256 fingerprint. Use a simple filename; existing reports cannot be overwritten. Export requires the current permission, pack policy, token, serial and unchanged saved source. It never uploads a report.
+**Tools → Export search report** writes a new JSON file to the server's `config/worldsunwritten/site-reports/` directory. Reports include exact seed, dimension, structure, bounds, limits, source release and SHA-256 fingerprint. Use a simple filename; existing reports cannot be overwritten. Export requires the current permission, pack policy, token, serial and unchanged saved source. It never uploads a report.
 
 **Tools → Cancel search**, a replacement request, closing or losing permission invalidates pending work. A changed source fingerprint also refuses late results and export. Sessions and memory limits are shared with single-site previews.

@@ -2,7 +2,7 @@
   "format": 1,
   "preset": "wa_studio:partial",
   "title": "Studio Partial",
-  "description": "Created with World Architect Preset Studio",
+  "description": "Created with Worlds Unwritten Preset Studio",
   "author": "GWSHERIDAN",
   "release": "1.0.0",
   "lock": "partial",
@@ -24,6 +24,6 @@
   ],
   "required_mods": [
     "minecraft",
-    "worldarchitect"
+    "worldsunwritten"
   ]
 }

@@ -5,6 +5,8 @@ import {resolve,relative,join,dirname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {gradle} from './process.mjs';
+import {identityFromJar} from './identity.mjs';
+import {profileProperties,copyProfilePacks} from './profiles.mjs';
 import {analyzeBenchmarks,analyzeControls} from './benchmark-analysis.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..'),args=process.argv.slice(2);
@@ -38,10 +40,11 @@ try{
    if(interrupted)throw Error('Benchmark interrupted');
    if(sha(await fs.readFile(join(root,'tools/validation/benchmark.init.gradle')))!==input.init_sha256)throw Error('Benchmark runtime configuration changed');
    const server=join(directory,'bench-'+role,profile);await fs.mkdir(join(server,'mods'),{recursive:true});
-   const jar=kind==='control'?bytes.baseline:bytes[role];await fs.writeFile(join(server,'mods/worldarchitect.jar'),jar,{flag:'wx'});await fs.writeFile(join(server,'mods/benchmark-probe.jar'),bytes.probe,{flag:'wx'});
+   const jar=kind==='control'?bytes.baseline:bytes[role],identity=identityFromJar(jar);await fs.writeFile(join(server,'mods',identity.runtimeFile),jar,{flag:'wx'});await fs.writeFile(join(server,'mods/benchmark-probe.jar'),bytes.probe,{flag:'wx'});
    let properties=await fs.readFile(join(root,'examples/performance/profiles',profile,'server.properties'),'utf8');properties=properties.split(/\r?\n/).filter(line=>!/^(server-port|max-tick-time|management-server|rcon\.|log-ips)=/.test(line)).join('\n');
+   properties=profileProperties(properties,identity);
    await fs.writeFile(join(server,'server.properties'),properties+`\nserver-port=${port}\nmax-tick-time=-1\nmanagement-server-enabled=false\nlog-ips=false\n`);await fs.writeFile(join(server,'eula.txt'),'eula=true\n');
-   try{await fs.cp(join(root,'examples/performance/profiles',profile,'datapacks'),join(server,'world/datapacks'),{recursive:true});}catch(error){if(error.code!=='ENOENT')throw error;}
+   try{await copyProfilePacks(join(root,'examples/performance/profiles',profile,'datapacks'),join(server,'world/datapacks'),identity);}catch(error){if(error.code!=='ENOENT')throw error;}
    const run={kind,pair,role,profile,status:'running',jar_sha256:sha(jar),probe_sha256:input.probe_sha256,samples:[]};results.runs.push(run);await persist();
    const launch=['-I','tools/validation/benchmark.init.gradle','runServer','--no-daemon','-x','compileJava','-x','processResources','--console=plain',`-PtestWorldDirectory=${server}`,...toolchain()];if(network==='offline')launch.push('--offline');
    current=gradle(root,launch,join(server,'console.log'));

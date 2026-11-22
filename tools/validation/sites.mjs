@@ -17,7 +17,7 @@ const report={format:1,version,cases:[],status:'passed'};
 for(const [,kind,dimension,id,path] of [...exports,...extensions,...current]){
     const bundle=resolve(path.trim());if(!relative(source,bundle).startsWith('server'+sep))throw Error('Export escaped the authoring fixture');
     const name=kind+'_'+dimension.replace(':','_');
-    const command=['tools/validation/run.mjs','--jar',args['--jar']||`build/libs/worldarchitect-${version}.jar`,'--fixture',args['--fixture']||`build/validation-tools/worldarchitect-${version}-validation.jar`,'--output',relative(root,join(output,name)),'--suite','compatibility','--bundle',bundle,'--site',kind,'--site-structure',id,'--dimension',dimension,'--network',args['--network']||'online'];
+    const command=['tools/validation/run.mjs','--jar',args['--jar']||`build/libs/Worlds-Unwritten-${version}.jar`,'--fixture',args['--fixture']||`build/validation-tools/Worlds-Unwritten-${version}-validation.jar`,'--output',relative(root,join(output,name)),'--suite','compatibility','--bundle',bundle,'--site',kind,'--site-structure',id,'--dimension',dimension,'--network',args['--network']||'online'];
     if(args['--mods'])command.push('--mods',args['--mods']);
     const code=await new Promise((accept,reject)=>{const child=spawn(process.execPath,command,{cwd:root,stdio:'inherit'});child.on('error',reject);child.on('close',accept);});
     const result=JSON.parse(await fs.readFile(join(output,name,'results.json'),'utf8'));report.cases.push({kind,dimension,...result});if(code!==0||result.status!=='passed')report.status='failed';

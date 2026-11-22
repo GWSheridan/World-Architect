@@ -1,6 +1,6 @@
 # Structure districts
 
-Install `bundles/structure-districts-1.7.0.zip` on clients and servers using the bundle selection in `config/worldarchitect/developer.json`.
+Install `bundles/structure-districts-1.7.0.zip` on clients and servers using the bundle selection in `config/worldsunwritten/developer.json`.
 
 The Overworld selects three modular houses. Dark masonry and calcite houses share the `village` grid with weights 3 and 1; a plain andesite `outpost` uses its own grid. Both groups share the `settlements` exclusion family, an eight-chunk minimum origin distance and the `district_land` rectangle. Their native grids use spacing 8 and separation 6. Footings, stair states, supply chest metadata and safe entry markers are captured with each house.
 

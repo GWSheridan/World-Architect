@@ -35,7 +35,7 @@ jobs:
           if ($IsWindows) { & ./gradlew.bat -I tools/validation/server.init.gradle build acceptanceJar benchmarkProbeJar packageTestKit prepareValidationServerRun --console=plain $toolchain }
           else { & sh ./gradlew -I tools/validation/server.init.gradle build acceptanceJar benchmarkProbeJar packageTestKit prepareValidationServerRun --console=plain $toolchain }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node --test tools/workbench/scenario.test.mjs tools/workbench/batch.test.mjs tools/validation/benchmark-analysis.test.mjs
+          node --test tools/workbench/scenario.test.mjs tools/workbench/batch.test.mjs tools/validation/benchmark-analysis.test.mjs tools/validation/identity.test.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Standalone modpack kit
         shell: pwsh
@@ -50,12 +50,12 @@ jobs:
           if ($expected -notmatch (Get-FileHash $installer).Hash.ToLowerInvariant()) { throw 'Installer checksum differs' }
           & java -jar $installer --installServer build/ci-kit-runtime
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          Expand-Archive "build/release/worldarchitect-$version-test-kit.zip" build/ci-kit
+          Expand-Archive "build/release/Worlds-Unwritten-$version-test-kit.zip" build/ci-kit
           New-Item -ItemType Directory build/ci-kit-project,build/ci-kit-providers | Out-Null
           Copy-Item "examples/cell-worlds/bundles/expanding-one-chunk-$version.zip" build/ci-kit-project/preset.zip
           $hash = (Get-FileHash build/ci-kit-project/preset.zip).Hash.ToLowerInvariant()
-          "format=1`nbundle=preset.zip`nsha256=$hash`nworldarchitect=$version`nneoforge=$neo`n" | Set-Content build/ci-kit-project/testkit.properties
-          & java -jar build/ci-kit/worldarchitect-test-kit.jar --server build/ci-kit-runtime --export build/ci-kit-project --providers build/ci-kit-providers --output build/ci-kit-results --eula true
+          "format=2`nbundle=preset.zip`nsha256=$hash`nworldsunwritten=$version`nneoforge=$neo`n" | Set-Content build/ci-kit-project/testkit.properties
+          & java -jar build/ci-kit/Worlds-Unwritten-test-kit.jar --server build/ci-kit-runtime --export build/ci-kit-project --providers build/ci-kit-providers --output build/ci-kit-results --eula true
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -134,12 +134,46 @@ jobs:
             Copy-Item -LiteralPath $jar -Destination (Join-Path $target 'worldarchitect-1.6.0.jar')
             Copy-Item -LiteralPath 'build/validation-tools/worldarchitect-1.6.0-validation.jar' -Destination (Join-Path $target 'worldarchitect-1.6.0-validation.jar')
           } finally { Pop-Location }
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: 559804d93a1124b55331cd14d8f4cee779a40606 # v1.9.0 API 1 contract
+          path: build/frozen-1.9-source
+          persist-credentials: false
+      - name: Build the unchanged legacy API consumer
+        shell: pwsh
+        run: |
+          $target = Join-Path $PWD 'build/validation-inputs'
+          Push-Location build/frozen-1.9-source
+          try {
+            $toolchain = "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64"
+            if ($IsWindows) { & ./gradlew.bat jar --console=plain $toolchain }
+            else { & sh ./gradlew jar --console=plain $toolchain }
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $legacyJar = Join-Path $PWD 'build/libs/worldarchitect-1.9.0.jar'
+            if ($IsWindows) { & ./gradlew.bat -p examples/api-fixture jar --console=plain $toolchain "-PworldArchitectJar=$legacyJar" }
+            else { & sh ./gradlew -p examples/api-fixture jar --console=plain $toolchain "-PworldArchitectJar=$legacyJar" }
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            Copy-Item 'examples/api-fixture/build/libs/worldarchitect-api-fixture-1.0.0.jar' (Join-Path $target 'legacy-api-fixture.jar')
+          } finally { Pop-Location }
+      - name: Build and verify the current API consumer
+        shell: pwsh
+        run: |
+          $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
+          $toolchain = "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64"
+          if ($IsWindows) { & ./gradlew.bat -p examples/api-fixture jar --console=plain $toolchain }
+          else { & sh ./gradlew -p examples/api-fixture jar --console=plain $toolchain }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory build/ci-api-mods | Out-Null
+          Copy-Item 'examples/api-fixture/build/libs/Worlds-Unwritten-api-fixture-1.0.0.jar' build/ci-api-mods/provider.jar
+          $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
+          node tools/validation/run.mjs --jar "build/libs/Worlds-Unwritten-$version.jar" --fixture "build/validation-tools/Worlds-Unwritten-$version-validation.jar" --output build/ci-api --mods build/ci-api-mods --preset wa_api_fixture:laboratory --suite compatibility --api true --network online
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Direct benchmark and memory sampler smoke
         shell: pwsh
         run: |
           $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
           $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
-          node tools/validation/benchmark-pairs.mjs --baseline build/validation-inputs/worldarchitect-1.6.0.jar --candidate "build/libs/worldarchitect-$version.jar" --probe "build/validation-tools/worldarchitect-$version-benchmark-probe.jar" --output build/ci-benchmark-smoke --pairs 1 --control-pairs 1 --warmup-size 8 --measured-size 6 --samples 2 --profiles void --port 25986 --purpose smoke --network online
+          node tools/validation/benchmark-pairs.mjs --baseline build/validation-inputs/worldarchitect-1.6.0.jar --candidate "build/libs/Worlds-Unwritten-$version.jar" --probe "build/validation-tools/Worlds-Unwritten-$version-benchmark-probe.jar" --output build/ci-benchmark-smoke --pairs 1 --control-pairs 1 --warmup-size 8 --measured-size 6 --samples 2 --profiles void --port 25986 --purpose smoke --network online
           $benchmarkExit = $LASTEXITCODE
           $proof = Get-Content build/ci-benchmark-smoke/results.json -Raw | ConvertFrom-Json
           if ($proof.status -eq 'inconclusive' -and $proof.runs.Count -eq 2 -and @($proof.runs | Where-Object status -ne 'passed').Count -eq 0 -and @($proof.runs.samples | Where-Object { $null -eq $_.sampled_resident_peak_bytes -or $_.sampled_resident_peak_bytes -le 0 }).Count -eq 0) {
@@ -151,14 +185,14 @@ jobs:
         run: |
           $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
           $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
-          node tools/validation/run.mjs --jar "build/libs/worldarchitect-$version.jar" --fixture "build/validation-tools/worldarchitect-$version-validation.jar" --output build/ci-validation --network online
+          node tools/validation/run.mjs --jar "build/libs/Worlds-Unwritten-$version.jar" --fixture "build/validation-tools/Worlds-Unwritten-$version-validation.jar" --output build/ci-validation --network online
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Cell worlds and interrupted activation
         shell: pwsh
         run: |
           $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
           $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
-          node tools/validation/cells.mjs --jar "build/libs/worldarchitect-$version.jar" --fixture "build/validation-tools/worldarchitect-$version-validation.jar" --output build/ci-cell-worlds --network online --crash true
+          node tools/validation/cells.mjs --jar "build/libs/Worlds-Unwritten-$version.jar" --fixture "build/validation-tools/Worlds-Unwritten-$version-validation.jar" --output build/ci-cell-worlds --network online --crash true
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Exported assembly generation and restart
         shell: pwsh
@@ -208,6 +242,8 @@ jobs:
             build/ci-sites/*/results.json
             build/ci-sites/*/*.log
             build/ci-validation/results.json
+            build/ci-api/results.json
+            build/ci-api/*.log
             build/ci-kit-results/results.json
             build/ci-kit-results/stage-*.log
             build/ci-validation/*.log
@@ -217,7 +253,7 @@ jobs:
             build/ci-bundles.json
             build/ci-bundle-*/results.json
             build/ci-bundle-*/*.log
-            build/ci-validation/server/config/worldarchitect/diagnostics/*.json
+            build/ci-validation/server/config/worldsunwritten/diagnostics/*.json
             build/test-results/test/*.xml
             build/ci-benchmark-smoke/results.json
             build/ci-benchmark-smoke/inputs.json

@@ -1,0 +1,87 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "biome": "minecraft:plains",
+        "profile": {
+          "base_material": "minecraft:stone",
+          "layers": [
+            {
+              "material": "minecraft:andesite",
+              "depth": 1
+            },
+            {
+              "material": "minecraft:dirt",
+              "depth": 3
+            }
+          ],
+          "generator_version": 3,
+          "elevation": 64,
+          "relief": 0,
+          "terrain": {
+            "landform": "plateaus"
+          },
+          "terrain_regions": [
+            {
+              "name": "forest_plateau",
+              "mask": "rectangle",
+              "min_x": -512,
+              "min_z": -512,
+              "max_x": 512,
+              "max_z": 512,
+              "transition": 64,
+              "elevation": 120,
+              "relief": 0,
+              "terrain": {
+                "landform": "plateaus"
+              },
+              "biome": "minecraft:forest"
+            },
+            {
+              "name": "desert_circle",
+              "mask": "circle",
+              "min_x": -128,
+              "min_z": -128,
+              "max_x": 128,
+              "max_z": 128,
+              "priority": 10,
+              "elevation": 180,
+              "relief": 0,
+              "terrain": {
+                "landform": "plateaus"
+              },
+              "biome": "minecraft:desert"
+            }
+          ]
+        },
+        "dimension_profile": {
+          "min_y": -64,
+          "height": 384
+        },
+        "type": "worldsunwritten:layered"
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "biome_source": {
+          "preset": "minecraft:nether",
+          "type": "minecraft:multi_noise"
+        },
+        "settings": "minecraft:nether",
+        "type": "minecraft:noise"
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "biome_source": {
+          "type": "minecraft:the_end"
+        },
+        "settings": "minecraft:end",
+        "type": "minecraft:noise"
+      }
+    }
+  }
+}
