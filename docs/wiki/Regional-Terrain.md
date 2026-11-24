@@ -8,7 +8,7 @@ Higher priorities win. Equal priorities retain list order, with the earlier regi
 
 Version 3 requires a solid base landform. Floating Islands cannot be a regional base or regional target. Each profile supports up to 32 uniquely named regions. Names use 1–32 lowercase letters, digits, underscores or hyphens; priority is −1024 to 1024. Bounds stay within ±29,999,984, with a span of at least two blocks. A transition is 0–4096 blocks and cannot exceed half the smaller span.
 
-The JSON `profile` keeps its elevation, relief and `terrain` fields, sets `generator_version` to `3`, and adds a `terrain_regions` list. Each region contains `name`, `mask` (`rectangle` or `circle`), `min_x`, `min_z`, `max_x`, `max_z`, `elevation`, `relief` and `terrain`. Optional fields are `priority`, `transition` and `biome`. See the [regional example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/regional-terrain) for a complete preset.
+The JSON `profile` keeps its elevation, relief and `terrain` fields, sets `generator_version` to `3`, and adds a `terrain_regions` list. Each region contains `name`, `mask` (`rectangle` or `circle`), `min_x`, `min_z`, `max_x`, `max_z`, `elevation`, `relief` and `terrain`. Optional fields are `priority`, `transition` and `biome`. See the [regional example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/regional-terrain) for a complete preset.
 
 Region heights are sampled independently from coordinates and the world seed. They do not read neighbouring chunks. The preview shows base terrain and stored biome choices before features, structures and ticking changes. [World Generation Rules](World-Generation-Rules.md) can further change the generated result.
 
@@ -22,7 +22,7 @@ Polygons may be convex or concave. Use 3–64 unique vertices in perimeter order
 
 Polygon profiles opt into **generator version 4**. Rectangle/circle-only profiles retain version 3 and their original encoding. The base and regional landforms must remain solid. Polygon edges and vertices are inclusive; transition height weights feather inward using the nearest edge. Priority winners use geometric containment independently of feathering. Biomes retain the four-block grid and transition threshold described above. Named rules and Inspector overlays use the same evaluator.
 
-See the [polygon example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/polygon-regions) and [site inspector](Structure-Site-Inspector.md).
+See the [polygon example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/polygon-regions) and [site inspector](Structure-Site-Inspector.md).
 
 ## Composite regions
 
@@ -32,7 +32,7 @@ A composite opts that dimension into **generator version 5**. Its geometry is sh
 
 Use 2–8 distinct operands per composite, at most 32 regions per dimension and at most eight reference levels including primitive regions. Unknown names, cycles and intersections with bounding spans smaller than two blocks are refused. The editor derives composite bounds from its operands; it updates dependent composites when operands move or are renamed. A composite cannot be dragged independently. Remove its incoming references before deleting an operand. Rule references still need updating when a referenced name changes.
 
-JSON adds `"mask": "composite"` and `"composition": {"operation": "subtract", "regions": ["mainland", "lake"]}` to a normal region entry. The min/max fields describe the derived bounds; they do not clip the referenced geometry. The [composite example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/composite-regions) demonstrates a concave outline with an excluded hole.
+JSON adds `"mask": "composite"` and `"composition": {"operation": "subtract", "regions": ["mainland", "lake"]}` to a normal region entry. The min/max fields describe the derived bounds; they do not clip the referenced geometry. The [composite example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/composite-regions) demonstrates a concave outline with an excluded hole.
 
 ## Corridor paths in 1.7
 
@@ -42,4 +42,4 @@ A corridor is the union of round-ended line segments. It accepts 2–64 points a
 
 Corridors opt the dimension into **generator version 6**. They can be composite operands and share their evaluator with height blending, biome choices, named-region rules and previews. Existing versions 1–5 retain their algorithms and encoding. Biomes still use the four-block grid and half-transition threshold.
 
-JSON adds `"mask": "corridor"` and `"corridor": {"points": [{"x": -64, "z": 0}, {"x": 64, "z": 0}], "radius": 16}`. Its bounds must be `min_x: -80`, `min_z: -16`, `max_x: 80`, `max_z: 16`. Use the [corridor example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/corridor-regions) for a complete preset.
+JSON adds `"mask": "corridor"` and `"corridor": {"points": [{"x": -64, "z": 0}, {"x": 64, "z": 0}], "radius": 16}`. Its bounds must be `min_x: -80`, `min_z: -16`, `max_x: 80`, `max_z: 16`. Use the [corridor example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/corridor-regions) for a complete preset.

@@ -24,7 +24,7 @@ Pack authors should also back up the instance’s `config/worldsunwritten/` dire
 
 ## Upgrading to Worlds Unwritten 2.0
 
-Stop the server, make a complete backup, remove the previous mod JAR and install `Worlds-Unwritten-2.0.0.jar`. Install the same version on every client. Do not install the old and new JAR together.
+Stop the server, make a complete backup, remove the previous mod JAR and install `Worlds-Unwritten-2.1.0.jar`. Install the same version on every client. Do not install the old and new JAR together.
 
 The primary mod ID, commands and new-world data namespace are `worldsunwritten`. The included legacy support module retains `worldarchitect` and its 1.9 API dependency contract for existing saves and API 1 add-ons. It is part of the same JAR.
 
@@ -33,3 +33,5 @@ Existing worlds keep their original `data/worldarchitect-generation-v1.dat`, `da
 When `config/worldsunwritten/` is absent, the mod imports `config/worldarchitect/` once, verifies the copied bytes and retains the original directory. An existing current configuration takes precedence and is never overwritten. Back up both directories during the upgrade. Older preset archives remain readable without extracting or renaming their manifest. Re-exporting an edited project creates a new archive; it does not replace the archive pinned to an existing world.
 
 Commands now start with `/worldsunwritten`, for example `/worldsunwritten island`. Existing `/wa_*` commands remain aliases with the same permissions and lock checks.
+
+Version 2.1 adds opt-in cell campaigns. Existing version-one cell profiles and journals keep their original format, terrain, inventories and objectives. Do not add a `campaign` field to a saved world or replace its journal with one from another world. New version-two journals also hold delivery receipts, connection states and permanent End reservations; back up the complete world and player data together.

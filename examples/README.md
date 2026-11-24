@@ -35,3 +35,5 @@ The [Modpack Builder examples](modpack-builder/README.md) add shared, choice, te
 The [cell-world examples](cell-worlds/README.md) add six editable 1.9 starters: Hex Continents, Hex Skyblock, Expanding One Chunk, Resource Archipelago, Biome Mosaic and Underground Start. Their bundles embed the terrain, templates and objective definitions needed by a clean server.
 
 Versioned bundle ZIPs published before 2.0 retain their original `worldarchitect` resource IDs and archive bytes. The editable source trees use `worldsunwritten` IDs. When installing an older ZIP, use its manifest rather than copying an ID from the editable source. Both formats are supported; keep the original ZIP with any world created from it.
+
+The [campaign examples](campaigns/README.md) add Hex Frontier and One Chunk to the End in 2.1. They include visual-layout groups, item turn-ins, cell costs, shared native End progression and full or partial server locks.

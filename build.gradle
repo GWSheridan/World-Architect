@@ -438,3 +438,13 @@ tasks.register('prepareCycle19Examples', JavaExec) {
     argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
         file(providers.gradleProperty('cellExportsDirectory').get()).absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
 }
+
+tasks.register('prepareCampaignExamples', JavaExec) {
+    group = 'distribution'
+    description = 'Prepare the campaign examples from dedicated-server validated Studio exports.'
+    classpath = sourceSets.test.runtimeClasspath
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    mainClass = 'com.gwsheridan.worldsunwritten.release.ReleaseCampaignExamples'
+    argumentProviders.add({ [layout.projectDirectory.asFile.absolutePath,
+        file(providers.gradleProperty('campaignExportsDirectory').get()).absolutePath, project.version.toString()] } as CommandLineArgumentProvider)
+}

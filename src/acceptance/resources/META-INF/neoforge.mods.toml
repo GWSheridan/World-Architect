@@ -1,7 +1,7 @@
 modLoader="javafml"
 loaderVersion="[4,)"
-license="All Rights Reserved"
+license="MIT"
 [[mods]]
 modId="wa_validation"
-version="2.0.0-test"
+version="2.1.0-test"
 displayName="Worlds Unwritten Validation Fixture"

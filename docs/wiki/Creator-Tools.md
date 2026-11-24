@@ -4,7 +4,7 @@
 
 Builder and Island Studio were introduced in Worlds Unwritten 1.8.0. Use matching mod versions on clients and dedicated servers. Existing saved worlds keep their generation settings.
 
-Worlds Unwritten 1.9 adds [Cell World Studio](Cell-Worlds.md): original hex and square layouts, per-cell terrain and islands, and advancement or quest objectives that open reserved void cells. The six Builder recipes include Hex Continents, Hex Skyblock, Expanding One Chunk, Resource Archipelago, Biome Mosaic and Underground Start.
+[Cell World Studio](Cell-Worlds.md) provides square and hex layouts, per-cell terrain and islands, and advancement or quest objectives. In 2.1, use **World Layout Designer** to paint cell assignments and save groups; use **Progression Designer** for dependency links, costs and item turn-ins. **Connections and adventure sites** adds reserved routes and bounded modular ruins. The eight cell starters include Hex Frontier and One Chunk to the End.
 
 ## Start a world
 

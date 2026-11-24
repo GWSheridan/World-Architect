@@ -4,7 +4,7 @@ Cell World Studio builds a dimension from square or hexagonal cells. Each cell h
 
 ## Choose a starter
 
-Open **Builder → Project → Choose starter**. The six cell recipes are:
+Open **Builder → Project → Choose starter**. The cell recipes are:
 
 | Recipe | Starting point |
 | --- | --- |
@@ -14,6 +14,8 @@ Open **Builder → Project → Choose starter**. The six cell recipes are:
 | Resource Archipelago | Islands with different ore deposits |
 | Biome Mosaic | A square grid of different biomes and terrain types |
 | Underground Start | A supplied starting chamber, with advancement-based expansion |
+| Hex Frontier | Resource islands, reserved paths, a procedural ruin and shared End progression |
+| One Chunk to the End | One chunk, a timber turn-in, an End portal room and shared End progression |
 
 The starting cell includes wood, saplings, dirt, water, lava, bone meal and torches. Edit these contents in Island Studio before exporting your pack. Other islands use their own saved templates and resource choices.
 
@@ -53,7 +55,10 @@ For an external quest mod, call `CellProgressionApi.signal(territoryLevel, playe
 | `/worldsunwritten cells` | Show territory progress |
 | `/worldsunwritten cells panel` | Open objectives and frontier selection |
 | `/worldsunwritten cells home` | Return to a safe starting marker |
-| `/worldsunwritten cells choose <q> <r>` | Spend one earned credit in choice mode |
+| `/worldsunwritten cells submit <objective>` | Submit the objective’s required items from your main inventory |
+| `/worldsunwritten cells choose <q> <r>` | Spend the saved cell cost in choice mode |
+| `/worldsunwritten cells admin connections <territory>` | Permission level 3; show placement states and conflicts |
+| `/worldsunwritten cells admin retry_connection <territory> <id>` | Permission level 3; recheck a repaired connection |
 | `/worldsunwritten cells admin unlock <territory> <q> <r>` | Permission level 3 |
 | `/worldsunwritten cells admin retry <territory> <q> <r>` | Permission level 3; retry a preserved conflict after inspecting it |
 | `/worldsunwritten cells admin signal <player> <signal>` | Permission level 3; target the command's dimension |
@@ -69,4 +74,42 @@ Locked cells are actual void, even after their chunks have been loaded and saved
 
 Back up the entire world, including `data/worldsunwritten-cells/`. This directory holds assignments, objectives, credits and activation states. The immutable generation snapshot separately preserves the cell definitions and embedded templates. A missing or mismatched journal stops loading rather than recreating progression.
 
-Use matching mod versions on clients and servers. Keep the native End arena enabled for static cell terrain around the dragon fight. Progressive cells with that arena are rejected; put progression worlds in the Overworld or a separate custom dimension.
+Use matching 2.1 clients and servers. Version-one worlds retain their original static/progressive End restrictions. For a new progressive native End, choose **Shared End progression** or one of the two campaign starters; this explicitly creates a version-two campaign.
+
+## Visual layouts
+
+Open **World Layout Designer** from Cell World Studio. Choose a brush, switch between Select and Paint, then click or drag over the map. **Go to** selects a coordinate and centres the view; the last clicked or entered coordinate is the clipboard cursor. **Tools** supports rectangular selections, copy/paste, named groups and up to 32 undo steps. Square rotations turn 90 degrees and hex rotations turn 60 degrees. These operations move cell assignments; edit individual template orientations in Island Studio.
+
+Copy resolves the selected cells using the draft's seed, so pasting preserves the types shown in the preview. Selections and fixed assignments are limited to 1,024 cells. A named group contains explicit coordinates and can supply a progression reward. Apply the layout to its parent project, then save or export the project. All previews are detached from the live world.
+
+## Progression graphs, costs and turn-ins
+
+**Progression Designer** shows objectives in dependency layers. Links join prerequisite nodes to their dependants; page through larger layers or open an objective to inspect every prerequisite. Set advancement or server-signal triggers, require all or any prerequisites, choose fixed cells or an `@group`, and award credits. Simulation checks a set of observed objective IDs without changing a world. Keep objective IDs stable between draft revisions.
+
+Set cell-type costs from 1–64 credits. Fixed cell rewards remain direct grants; manual and automatic frontier choices spend the saved cost. Automatic expansion chooses the first affordable cell in its stable order. If none is affordable, credits remain available. The player panel shows costs and requires confirmation; the server checks the current dimension, territory and cost again.
+
+An item turn-in belongs to a signal objective. Players use **Item turn-ins** in the expansion panel or `cells submit`. Only an explicit submission consumes the saved item ID and count from the player's main inventory. Equipment and offhand slots are excluded. Supply a count that fits a normal main inventory. Prerequisites, ownership, inventory contents and previous completion are checked on the server. Concurrent teammates cannot pay the same territory objective twice.
+
+The server persists a player inventory receipt before awarding the objective. After an interruption it either aborts an unconsumed intent or completes the recorded consumption once. Missing or inconsistent evidence stops recovery. Keep player data and cell journals from the same backup. Item-delivery signals and the native dragon-kill signal cannot be completed through quest APIs or administrator signal commands.
+
+## Connections and procedural sites
+
+In **Connections and adventure sites**, define a connection between neighbouring cells. Select a path, bridge or tunnel, an odd width of 1, 3 or 5, a safe solid material and either a floor height or saved template ports. Tunnels require width 3 or 5. Port names refer to standing positions above safe floors. Inspect the placement report before exporting.
+
+The full corridor is reserved before activation. Both endpoints must be ready; the server then checks entrances, entities and every proposed position before writing. It preserves unexpected blocks as a conflict. Matching junction blocks can be shared; disagreeing materials or headroom are rejected. Each territory is limited to 65,536 reserved positions, with at most 64 connections and a 256-block route length. A saved fingerprint binds recovery to the same plan.
+
+The administration report lists waiting, queued, applying, ready and conflicting routes. Inspect conflicts and restore or repair the affected saved blocks before retrying. A retry rechecks the footprint and preserves any remaining obstruction. It never authorizes excavation. The player panel's **Generation status** also shows queued cells and route states.
+
+Procedural sites embed an Assembly Studio modular definition for a cell type. Load its exported datapack, select the registered assembly and set the chance. The production pool planner chooses its modules; the complete result must fit one cell, the dimension height, 64 blocks per axis and 65,536 occupied positions. Rejected layouts leave the type's ordinary template or terrain. The review samples eight seeds and explains rejected layouts.
+
+Cell sites use their cell's elevation, biome and collision contract. Use free module templates with default placement rules, no global placement anchor or foundation, and a zero global height offset. Module rotations and optional assembly rotation preserve block states and markers. Decorative metadata is retained; procedural containers start empty. Marker names use the selected module name as a prefix, such as `root_west` or `module_1_entry`. These definitions and their algorithm version are saved with the world.
+
+Version-two campaign jobs share a 16,384-position server limit per tick and each dimension's lower saved limit. Connections and cell activation share that allowance. Planning, chunk loading and durable save flushes also take time; lower the saved per-tick limit for busy packs and validate on the intended server hardware.
+
+## Shared progressive End
+
+The native square arena remains permanently open, including its dragon, fountain, crystals and inner gateways. Arena cells never cost credits. Twenty predeclared End-stone landing islands and reserved arrival volumes keep native outer gateways usable without spending a cell reward. They are travel reservations, not extra unlocked territories.
+
+For an End objective, use the signal source `worldsunwritten:dragon_defeated`; the two campaign starters configure it already. Use advancement `minecraft:story/enter_the_end` for arrival rewards. The verified native dragon kill can complete its saved End objective once. Repeated kills continue normal gateway progression without repeating that objective. A blocked new arrival preserves the build and falls back to a safe position in the native arena; a matching partial gateway frame can recover. Shared progression is required for this native End mode.
+
+The [campaign examples](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/campaigns) contain complete survival routes. Hex Frontier is fully locked; One Chunk to the End allows a new-world seed and runtime protection changes. Both retain the normal Nether and an unfilled End portal room, so players still need Eyes of Ender.

@@ -1,0 +1,32 @@
+{
+  "format": 3,
+  "preset": "worldsunwritten_examples:hex_frontier",
+  "title": "Hex Frontier",
+  "description": "Resource islands, reserved paths and procedural ruins, with a shared native End campaign.",
+  "author": "GWSHERIDAN",
+  "release": "2.1.0",
+  "lock": "full",
+  "options": {
+    "seed": 194723,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "minecraft",
+    "worldsunwritten"
+  ],
+  "allow_structure_library": false,
+  "pack": {
+    "version": 1,
+    "defaults": {
+      "version": 1,
+      "protection": {
+        "breaking": true,
+        "placement": true,
+        "containers": true,
+        "shared": true
+      }
+    },
+    "editable": []
+  }
+}

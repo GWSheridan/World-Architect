@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.1.0
+
+- Added a square and hex layout canvas with painting, coordinate selection, copied layouts, rotations, mirrors, named groups and undo/redo.
+- Added a progression graph with prerequisite links, simulation, grouped cell rewards and per-type expansion costs.
+- Added explicit item turn-ins with server-side inventory checks and durable receipts that reconcile interrupted submissions without paying twice.
+- Added reserved paths, bridges and tunnels between neighbouring cells, with saved placement states, conflict reports and restart recovery.
+- Added bounded cell-local modular sites with retained block states, decorative metadata and spawn markers.
+- Added shared progressive End worlds that retain the native arena, dragon fight, crystal respawn and paired gateways. Dragon rewards require a verified native kill.
+- Added Hex Frontier and One Chunk to the End, extended the standalone pack test kit, and kept existing cell worlds on their saved generator version.
+- Distributed the mod and its build tools under the MIT License.
+- Updated the source wrapper to Gradle 9.9.1 with a pinned distribution checksum.
+
 ## 2.0.0
 
 - Renamed the mod to Worlds Unwritten, including the JAR, interface, commands, authoring tools and documentation.

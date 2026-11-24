@@ -10,8 +10,18 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 /** Server-owned authoring views contain geometry and labels, never template block-entity data. */
 public record StudioViewPayload(CompoundTag view) implements CustomPacketPayload {
-    public static final Type<StudioViewPayload> TYPE = new Type<>(Identifier.parse("worldsunwritten:studio_view"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, StudioViewPayload> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.COMPOUND_TAG, StudioViewPayload::view, StudioViewPayload::new);
-    @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
-    public static void register(RegisterPayloadHandlersEvent event) { event.registrar("1.9").playToClient(TYPE, STREAM_CODEC); }
+    public static final Type<StudioViewPayload> TYPE =
+            new Type<>(Identifier.parse("worldsunwritten:studio_view"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, StudioViewPayload> STREAM_CODEC =
+            StreamCodec.composite(
+                    ByteBufCodecs.COMPOUND_TAG, StudioViewPayload::view, StudioViewPayload::new);
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+
+    public static void register(RegisterPayloadHandlersEvent event) {
+        event.registrar("2.1").playToClient(TYPE, STREAM_CODEC);
+    }
 }

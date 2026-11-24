@@ -63,7 +63,7 @@ Administrators can use these local-file workflows:
 
 `capture` snapshots the authoring world's generation settings into a new library version. `validate` prints its dependency report. Authoring operations do not alter the running world's generation. Existing JSON drafts and `/worldsunwritten modpack export` remain supported and now share Studio validation and modular-template packaging.
 
-The [ready-to-install examples](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/preset-studio) include a partial preset with a bundled modular build and a fully locked multiplayer Skyblock preset.
+The [ready-to-install examples](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/preset-studio) include a partial preset with a bundled modular build and a fully locked multiplayer Skyblock preset.
 
 ## Draft history and workbench export
 
@@ -86,4 +86,4 @@ Dedicated authoring commands use the same validation:
 /worldsunwritten preset override <child> <release> <new_release> "<json_pointer>" <json_value>
 ```
 
-Both require administrator permission and developer mode. `override` saves a new immutable child version. See the [reusable Skyblock examples](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/reusable-presets) for a base, a partially locked child and a fully locked child with bundled island templates and native End progression.
+Both require administrator permission and developer mode. `override` saves a new immutable child version. See the [reusable Skyblock examples](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/reusable-presets) for a base, a partially locked child and a fully locked child with bundled island templates and native End progression.

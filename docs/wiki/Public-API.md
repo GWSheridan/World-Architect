@@ -1,6 +1,6 @@
 # Public extension API 1
 
-Worlds Unwritten 2.0.0 supports Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Compile against the distributed JAR; declare a required NeoForge dependency on Worlds Unwritten. Call `WorldsUnwrittenApi.requireVersion(1)` in your mod constructor. A different API contract fails during mod construction, before a world opens.
+Worlds Unwritten 2.1.0 supports Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Compile against the distributed JAR; declare a required NeoForge dependency on Worlds Unwritten. Call `WorldsUnwrittenApi.requireVersion(1)` in your mod constructor. A different API contract fails during mod construction, before a world opens.
 
 The supported surface is `com.gwsheridan.worldsunwritten.api` plus the data types listed below. Other implementation packages, mixins, generator implementation classes, client screens and low-level file writers are internal even when Java visibility is public. API 1 additions retain existing method signatures and codec defaults. Breaking changes require a new API version. Minecraft/NeoForge upgrades may require recompilation; API 1 is not a promise of binary compatibility across game versions.
 
@@ -36,7 +36,7 @@ A `StructureAdapter` declares a positive `version()` and pure `supports(Structur
 
 `StructureTemplates.modular(JsonObject, HolderLookup.Provider)` decodes a detached `worldsunwritten:modular` definition, checks size/overlap/rules/markers and validates metadata. It never inserts entries into a live registry. `StructureTemplates.read(CompoundTag, registries)` reads and sanitizes a detached native template: decorative supported metadata survives; inventories, commands and unsupported data are removed or rejected. Neither method places blocks.
 
-Supported template data: `NativeTemplate`/`Cell`, `TemplateRules`, `TemplatePlacement`; `ModularStructure` supports `CODEC`, `validateTemplates`, `horizontalSpan`, `blockCount` and `hasMarker`. Constructors/native override methods on the generator implementation are not extension points. Register a decoded modular definition via a datapack before selecting its holder. See [template rules and markers](Structure-Library.md) and [cross-dimension examples](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/cross-dimension-structures).
+Supported template data: `NativeTemplate`/`Cell`, `TemplateRules`, `TemplatePlacement`; `ModularStructure` supports `CODEC`, `validateTemplates`, `horizontalSpan`, `blockCount` and `hasMarker`. Constructors/native override methods on the generator implementation are not extension points. Register a decoded modular definition via a datapack before selecting its holder. See [template rules and markers](Structure-Library.md) and [cross-dimension examples](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/cross-dimension-structures).
 
 ## Features and blocks
 
@@ -80,7 +80,7 @@ New native extension worlds pin selected adapter IDs/versions/work costs, featur
 
 ## External consumer and verification
 
-[The separate fixture project](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/api-fixture) compiles against the shipped JAR and supplies a dimension adapter, custom block, native feature and structure codec. It exercises template/marker decoding, preset validation, environment/spawn persistence, permissions and thread guards. No fixture classes or resources are included in the production JAR. Use matching providers and retain their declared adapter versions. See [Installation](Installation.md#compatibility) for compatibility requirements.
+[The separate fixture project](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/api-fixture) compiles against the shipped JAR and supplies a dimension adapter, custom block, native feature and structure codec. It exercises template/marker decoding, preset validation, environment/spawn persistence, permissions and thread guards. No fixture classes or resources are included in the production JAR. Use matching providers and retain their declared adapter versions. See [Installation](Installation.md#compatibility) for compatibility requirements.
 
 ## Dimension adapters
 
@@ -171,4 +171,15 @@ These additions require Worlds Unwritten 2.0.0 or newer. Declare that minimum mo
 
 New consumers use `com.gwsheridan.worldsunwritten.api` and declare a required NeoForge dependency on `worldsunwritten` version 2.0.0 or newer. Compile against `Worlds-Unwritten-2.0.0.jar`; the supported API contract remains version 1.
 
-Already compiled API 1 consumers using `com.gwsheridan.worldarchitect.api` can keep their existing dependency and provider IDs. The included `worldarchitect` compatibility module exposes the frozen 1.9 contract and forwards supported calls to the current implementation. Its version describes the legacy contract; the main mod reports 2.0.0. Do not change saved adapter IDs or bump adapter versions for a branding-only rebuild. Migrate a provider's imports and dependency together, and register an adapter through one API family: duplicate IDs across the old and new registries are rejected.
+Already compiled API 1 consumers using `com.gwsheridan.worldarchitect.api` can keep their existing dependency and provider IDs. The included `worldarchitect` compatibility module exposes the frozen 1.9 contract and forwards supported calls to the current implementation. Its version describes the legacy contract; the main mod reports its current release. Do not change saved adapter IDs or bump adapter versions for a branding-only rebuild. Migrate a provider's imports and dependency together, and register an adapter through one API family: duplicate IDs across the old and new registries are rejected.
+
+## 2.1 progression additions
+
+The supported API contract remains version 1. Require Worlds Unwritten 2.1.0 or newer when using these additions:
+
+- `CellProgressionApi.progress(territoryLevel, player)` returns a detached immutable view: current territory, assignment state, credits, objective explanations and frontier costs. Querying does not allocate a territory.
+- `CellProgressionApi.submit(territoryLevel, player, objectiveId)` performs an explicit item turn-in against the saved definition. The server validates prerequisites and inventory, persists consumption and awards it once. Do not call it merely because a player opens a menu.
+
+Both require the logical server thread and a player from that server. The existing signal overloads are unchanged. Reserved delivery and verified dragon-kill sources reject external signal calls. No external quest mod is required.
+
+An optional `campaign` field selects cell generator/journal version 2. Its absence retains version 1. The eight-argument `CellWorldProfile` constructor remains available. New campaign groups, costs, deliveries, connections and embedded modular sites belong to the immutable generation definition; do not modify saved ledgers or generator worker state through an add-on.

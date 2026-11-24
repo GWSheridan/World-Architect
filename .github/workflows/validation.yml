@@ -59,7 +59,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Expand-Archive "build/release/Worlds-Unwritten-$version-test-kit.zip" build/ci-kit
           New-Item -ItemType Directory build/ci-kit-project,build/ci-kit-providers | Out-Null
-          Copy-Item "examples/cell-worlds/bundles/expanding-one-chunk-$version.zip" build/ci-kit-project/preset.zip
+          Copy-Item "examples/campaigns/bundles/one-chunk-to-the-end-$version.zip" build/ci-kit-project/preset.zip
           $hash = (Get-FileHash build/ci-kit-project/preset.zip).Hash.ToLowerInvariant()
           "format=2`nbundle=preset.zip`nsha256=$hash`nworldsunwritten=$version`nneoforge=$neo`n" | Set-Content build/ci-kit-project/testkit.properties
           & java -jar build/ci-kit/Worlds-Unwritten-test-kit.jar --server build/ci-kit-runtime --export build/ci-kit-project --providers build/ci-kit-providers --output build/ci-kit-results --eula true

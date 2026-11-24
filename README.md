@@ -9,12 +9,12 @@ Licensed under the [MIT License](LICENSE).
 
 See the [creator tools guide](docs/wiki/Creator-Tools.md) for the current authoring workflow.
 
-Create hex and square cell worlds, advancement-based chunk expansion, saved player and team territories, and six modpack starters. Build and export them through [Cell World Studio](docs/wiki/Cell-Worlds.md). Find downloads on the [releases page](https://github.com/GWSheridan/Worlds-Unwritten/releases) or read the [changelog](CHANGELOG.md).
+Create hex and square cell worlds, advancement-based chunk expansion, saved player and team territories, and eight cell-world starters. Build and export them through [Cell World Studio](docs/wiki/Cell-Worlds.md). Find downloads on the [releases page](https://github.com/GWSheridan/Worlds-Unwritten/releases) or read the [changelog](CHANGELOG.md).
 
 
 ## Get started
 
-Install `Worlds-Unwritten-2.0.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
+Install `Worlds-Unwritten-2.1.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
 
 In **Create New World → World**, choose **Worlds Unwritten · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
 
@@ -30,8 +30,9 @@ For modpacks, open **Builder** to choose a starter, edit island types, set serve
 - **Single Block and Layered terrain:** block states, surface layers, landforms and biome-aware strata.
 - **Features and structures:** biomes, ores, decoration, caves, fluids, native structures and modular assemblies.
 - **Void and Skyblock:** empty terrain or template islands with persistent multiplayer assignments.
-- **Cell worlds:** original hex and square layouts, custom islands, resource cells and advancement or quest-driven expansion.
-- **End progression:** a native central arena and dragon fight surrounded by custom terrain.
+- **Cell worlds:** visual square and hex layouts, custom islands, resource cells and saved expansion.
+- **Campaign authoring:** dependency graphs, item turn-ins, cell costs, reserved connections and cell-local procedural ruins.
+- **End progression:** a native central arena and dragon fight, with optional shared outer-cell expansion and safe gateway landings.
 - **Assembly Studio:** visual modules, transformed markers, saved drafts and datapack or preset exports.
 - **Rule Inspector:** condition maps, coordinate explanations and rule order without generating chunks.
 - **Preset Studio:** versioned presets, embedded templates, validation and server-enforced locks.

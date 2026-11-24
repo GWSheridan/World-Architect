@@ -7,7 +7,8 @@ gradle.beforeProject { project ->
             programArguments.addAll('--username', 'ValidationCreator', '--width', '1000', '--height', '760')
             jvmArgument '-Xmx1500m'
             jvmArgument '-XX:ActiveProcessorCount=4'
-            jvmArgument '-Dwa.creator.acceptance=true'
+            jvmArgument '-Dwa.creator.acceptance=' + (project.providers.gradleProperty('validationClientCampaign').orElse('false').get() != 'true')
+            jvmArgument '-Dwa.creator.campaign=' + project.providers.gradleProperty('validationClientCampaign').orElse('false').get()
             jvmArgument '-Dwa.creator.cells=' + project.providers.gradleProperty('validationClientCells').orElse('false').get()
             jvmArgument '-Dwa.creator.studio=' + project.providers.gradleProperty('validationClientStudio').orElse('false').get()
             jvmArgument '-Dwa.creator.locked=' + project.providers.gradleProperty('validationClientLock').orElse('').get()

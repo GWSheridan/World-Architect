@@ -4,14 +4,14 @@ Worlds Unwritten bundles package a world preset, developer policy, and native st
 
 ## Preset Studio
 
-Use [Preset Studio](Preset-Studio.md) to save immutable releases, duplicate, import/export and validate presets, edit locks, inspect dependencies and read help in game. Ready-to-install partial and full examples are included in [the Studio examples](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/preset-studio). The original JSON authoring workflow remains available below.
+Use [Preset Studio](Preset-Studio.md) to save immutable releases, duplicate, import/export and validate presets, edit locks, inspect dependencies and read help in game. Ready-to-install partial and full examples are included in [the Studio examples](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/preset-studio). The original JSON authoring workflow remains available below.
 
 Bundles can also embed selected `worldsunwritten:modular` definitions under `data/<namespace>/worldgen/structure/`. Studio captures those definitions and native starting islands automatically. The dedicated authoring export shares Studio validation.
 
 ## Author and export
 
 1. In an authoring instance, create `config/worldsunwritten/developer.json` with `{"format":1,"developer_mode":true}`. Restart the instance. The server console and administrators can now use `/worldsunwritten modpack export`.
-2. Copy [the locked Skyblock draft](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/locked-skyblock) into `config/worldsunwritten/drafts/locked-skyblock`. Edit its three JSON files and place any additional native templates under `data/<namespace>/structure/<path>.nbt` in the draft.
+2. Copy [the locked Skyblock draft](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/locked-skyblock) into `config/worldsunwritten/drafts/locked-skyblock`. Edit its three JSON files and place any additional native templates under `data/<namespace>/structure/<path>.nbt` in the draft.
 3. Run `/worldsunwritten modpack export locked-skyblock`. The bundle appears in `config/worldsunwritten/exports/locked-skyblock.zip`. Choose a new draft name for each export.
 
 | Draft file | Purpose |

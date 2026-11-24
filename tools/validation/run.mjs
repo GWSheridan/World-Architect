@@ -10,7 +10,7 @@ import {profileProperties,copyProfilePacks} from './profiles.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const options = Object.fromEntries(Array.from({length: (process.argv.length - 2) / 2}, (_, i) => process.argv.slice(2 + i * 2, 4 + i * 2)));
-for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset','--check-end','--pool','--regional','--baseline','--named-regions','--baseline14','--baseline15','--site','--site-structure','--islands','--api'].includes(key)) throw new Error(`Unknown option ${key}`);
+for (const key of Object.keys(options)) if (!['--jar','--fixture','--output','--world','--profile','--port','--mods','--suite','--bundle','--network','--assembly','--dimension','--preset','--check-end','--pool','--regional','--baseline','--named-regions','--baseline14','--baseline15','--site','--site-structure','--islands','--api','--campaign'].includes(key)) throw new Error(`Unknown option ${key}`);
 if (!['online','offline'].includes(options['--network'] || 'offline')) throw new Error('Network must be online or offline');
 if (!options['--jar'] || !options['--fixture'] || !options['--output']) throw new Error('Use --jar JAR --fixture VALIDATION_JAR --output NEW_DIRECTORY [--world COPIED_SAVE] [--profile single-block] [--port 25945]');
 if(options['--dimension']&&!/^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(options['--dimension']))throw Error('Invalid dimension ID');
@@ -73,7 +73,7 @@ if (options['--bundle']) {
     await fs.writeFile(join(config,'developer.json'),JSON.stringify({format:1,bundle:'preset.zip'}));
     properties=properties.split(/\r?\n/).filter(line=>!/^(level-type|level-seed|generator-settings|generate-structures|initial-enabled-packs)=/.test(line)).join('\n');
 }
-if(suite === 'authoring'||options['--api']==='true') {
+if(suite === 'authoring'||options['--api']==='true'||options['--campaign']==='export') {
     const config=join(server,'config',identity.id);await fs.mkdir(config,{recursive:true});
     const file=join(config,'developer.json');let developer={format:1};try{developer=JSON.parse(await fs.readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
     developer.developer_mode=true;await fs.writeFile(file,JSON.stringify(developer));
@@ -109,6 +109,7 @@ function launch(stage) {
             if (ended || Date.now()>until) throw new Error(`Missing ${marker}; inspect ${stage}.log`);
             if (text.includes('WA_VALIDATION_STRUCTURES_FAILED')) throw new Error('Dedicated structure assertions failed');
             if (text.includes('WA_SITE_GENERATION_FAILED')) throw new Error('Dedicated site generation assertions failed');
+            if (text.includes('WU21_CAMPAIGN_FAILED')) throw new Error('Dedicated campaign assertions failed');
             if(text.includes('WA18_ISLAND_CATALOG_FAILED')||text.includes('WA18_ISLAND_ASSETS_FAILED'))throw new Error('Dedicated island assertions failed');
             await new Promise(done=>setTimeout(done,200));
         }
@@ -130,8 +131,11 @@ async function generationPins() {
     return pins;
 }
 try {
+    if(options['--campaign']&&!['export','audit'].includes(options['--campaign']))throw Error('Unknown campaign check');
     for (const stage of ['fresh','restart']) {
         running = launch(stage); await running.wait('Done (');
+        if(options['--campaign']==='export'&&stage==='fresh'){running.send('wa_campaign_test export');await running.wait('WU21_CAMPAIGN_EXPORT_PASS');}
+        if(options['--campaign']==='audit'){running.send('wa_campaign_test audit');await running.wait('WU21_CAMPAIGN_AUDIT_PASS');}
         let beforeAuthoring;
         if(stage==='fresh'&&suite==='authoring'){running.send('save-all flush');await running.wait('Saved the game');beforeAuthoring=await generationPins();}
         if(options['--api']==='true') {

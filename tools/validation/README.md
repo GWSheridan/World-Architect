@@ -95,3 +95,13 @@ The 1.7 authoring fixture exports connected corridors and weighted districts, co
 `node tools/validation/bundles.mjs --output build/bundles-new --network offline` installs all 23 current examples in clean instances. The output option keeps local repeats separate from CI. Real creator fixtures also exercise corridor point history, shared district settings and child derivation/override/report controls at both GUI scales.
 
 Build `benchmarkProbeJar` separately and follow the [direct-generation instructions](../../examples/performance/README.md). Windows and Linux CI run a small probe/RSS smoke matrix against the fingerprinted published 1.6 JAR; full same-host performance remains a separate quiet-host release check. Run the seven analysis checks with `node --test tools/validation/benchmark-analysis.test.mjs` alongside the existing workbench tests. Validation fixtures, measurement mods, raw logs and worlds are excluded from the gameplay JAR.
+
+## Campaigns in 2.1
+
+The two [campaign examples](../../examples/campaigns/README.md) are complete presets. Add `--campaign audit` to `run.mjs` when checking either bundle. It verifies version-two journals, permanent native arena cells and all twenty gateway landing floors on a fresh server and after restart. The authoring fixture also supports `--campaign export` to create disposable campaign and recovery inputs through the production preset codecs.
+
+`campaign-multiplayer.mjs` uses four real local clients and the ordinary player panel. It checks concurrent item submissions, duplicate and forged requests, saved route placement, decorative site metadata, native dragon kills, gateway travel, crystal respawn and simultaneous chunk generation after restart. Supply `--jar`, `--fixture`, `--bundle`, a new `--output` under `build/`, an `--options` file and a loopback `--port`; use `--cells true`. Defaults are three generation rounds of five seconds.
+
+`campaign-recovery.mjs` requires the dedicated fixture's `campaign_recovery` export, a gameplay JAR and a validation fixture. It halts disposable server JVMs at prepared, consumed, rewarded, paid and cleared delivery boundaries; queued, partial, flushed and conflicting connections; and partial or blocked gateway frames. It then restarts each world and checks recovery and immutable generation pins. Its `--case` option selects one named case. Fault commands exist only in the separate validation mod, never in the gameplay JAR.
+
+The standalone Java test kit additionally checks actual campaign site markers, ready connection footprints, delivery capacity, dependency graphs and native End reservations. It keeps the original checks for ordinary cell, void and island presets.

@@ -24,4 +24,8 @@ Add this to the End generator's dimension profile (`dimension_profile` for solid
 
 Omitting the field retains the previous disabled policy. Version 1 requires `minecraft:the_end`, a native fight and a build range of Y 0–255. Its algorithm and native dependencies are saved with the world.
 
-The option is chosen before world creation. Updating the mod does not add an arena, enable a fight or change unexplored chunks in an existing custom End save. Use **Original Generation** for an entirely native End. Try the [End example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.0.0/examples/end-progression) in a new world.
+The option is chosen before world creation. Updating the mod does not add an arena, enable a fight or change unexplored chunks in an existing custom End save. Use **Original Generation** for an entirely native End. Try the [End example](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/end-progression) in a new world.
+
+## Progressive cell campaigns in 2.1
+
+New shared cell campaigns can combine locked outer terrain with the native fight. In Cell World Studio choose **Shared End progression** before creating the world. The native arena stays open, and permanent outer gateway landings do not spend expansion credits. Dragon objectives require a verified native kill and pay once; later kills and crystal respawns retain vanilla progression. A new gateway preserves blocked destinations and uses a safe arena fallback. See [Cell Worlds](Cell-Worlds.md#shared-progressive-end) for limits and [the campaign examples](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/campaigns) for complete configurations. Existing worlds keep their previous End policy.

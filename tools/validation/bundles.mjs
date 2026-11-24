@@ -31,6 +31,7 @@ for(const entry of cases) {
     const args=['tools/validation/run.mjs','--jar',options['--jar']||`build/libs/Worlds-Unwritten-${version}.jar`,'--fixture',options['--fixture']||`build/validation-tools/Worlds-Unwritten-${version}-validation.jar`,'--output',output,'--bundle',entry.bundle,'--suite','compatibility','--network',options['--network']||'online'];
     if(entry.name==='assembly-demo')args.push('--assembly',exampleNamespace+':assembly_demo','--dimension','minecraft:overworld');
     if(entry.islands)args.push('--islands','true');
+    if(entry.campaign)args.push('--campaign','audit');
     if(entry.name==='regional-demo')args.push('--regional','true');
     if(entry.name==='pool-demo')args.push('--pool',exampleNamespace+':pool_demo','--dimension','minecraft:overworld');
     if(entry.name==='shared-regions')args.push('--named-regions','true');
