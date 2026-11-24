@@ -2,12 +2,15 @@ package com.gwsheridan.worldsunwritten.client;
 
 import com.gwsheridan.worldsunwritten.api.CellLayout.Cell;
 import com.gwsheridan.worldsunwritten.cells.*;
+import com.mojang.blaze3d.platform.NativeImage;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -23,6 +26,13 @@ final class CellCanvasScreen extends Screen {
     private Cell anchor = Cell.ORIGIN, cursor = Cell.ORIGIN;
     private int radius = 4, mapY = 55, mapH;
     private boolean painting;
+    private final Identifier previewId =
+            Identifier.fromNamespaceAndPath("worldsunwritten", "cell_canvas/" + UUID.randomUUID());
+    private DynamicTexture preview;
+    private CellWorldProfile cachedProfile;
+    private Set<Cell> cachedSelection;
+    private Cell cachedAnchor;
+    private int cachedRadius, cachedWidth, cachedHeight;
 
     CellCanvasScreen(
             Screen parent, CellWorldProfile profile, long seed, Consumer<CellWorldProfile> save) {
@@ -313,19 +323,51 @@ final class CellCanvasScreen extends Screen {
     public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float tick) {
         super.extractRenderState(g, mx, my, tick);
         g.centeredText(font, title, width / 2, 9, UnwrittenTheme.TEXT);
-        g.fill(12, mapY, width - 12, mapY + mapH, 0xFF121A23);
-        var colors = new HashMap<Cell, Integer>();
+        updatePreview();
+        g.blit(previewId, 12, mapY, width - 12, mapY + mapH, 0, 1, 0, 1);
+        g.text(
+                font,
+                font.plainSubstrByWidth(status, width - 24),
+                12,
+                height - 61,
+                UnwrittenTheme.MUTED);
+        g.text(
+                font,
+                font.plainSubstrByWidth(
+                        "Transforms move cells; templates keep their facing.", width - 24),
+                12,
+                height - 48,
+                UnwrittenTheme.MUTED);
+    }
+
+    private void updatePreview() {
         var profile = draft.profile();
+        var selection = draft.selection();
+        if (preview != null
+                && profile == cachedProfile
+                && selection == cachedSelection
+                && anchor.equals(cachedAnchor)
+                && radius == cachedRadius
+                && width == cachedWidth
+                && mapH == cachedHeight) return;
+        releasePreview();
+        // One cached texture avoids a GUI layering search for every two-pixel sample.
+        var image = new NativeImage(Math.max(1, (width - 23) / 2), (mapH + 1) / 2, false);
+        var colors = new HashMap<Cell, Integer>();
         var layout = profile.layout();
         var center = layout.centre(anchor);
         double scale = scale();
-        for (int y = mapY; y < mapY + mapH; y += 2)
-            for (int x = 12; x < width - 12; x += 2) {
+        for (int py = 0; py < image.getHeight(); py++)
+            for (int px = 0; px < image.getWidth(); px++) {
+                int x = 12 + px * 2, y = mapY + py * 2;
                 int wx = (int) Math.floor(center.x() + (x - width / 2.0) / scale),
                         wz = (int) Math.floor(center.z() + (y - mapY - mapH / 2.0) / scale);
                 var cell = layout.at(wx, wz);
                 if (profile.progressive() && layout.distance(cell) > profile.growth().radius()
-                        || !layout.contains(cell, wx, wz)) continue;
+                        || !layout.contains(cell, wx, wz)) {
+                    image.setPixel(px, py, 0xFF121A23);
+                    continue;
+                }
                 int color =
                         colors.computeIfAbsent(
                                 cell,
@@ -340,23 +382,31 @@ final class CellCanvasScreen extends Screen {
                                                                 .42f,
                                                                 .7f)
                                                         & 0xFFFFFF);
-                if (draft.selection().contains(cell)
+                if (selection.contains(cell)
                         && layout.edge(cell, wx + .5, wz + .5) < Math.max(1, 2 / scale))
                     color = UnwrittenTheme.TEXT;
-                g.fill(x, y, Math.min(x + 2, width - 12), Math.min(y + 2, mapY + mapH), color);
+                image.setPixel(px, py, color);
             }
-        g.text(
-                font,
-                font.plainSubstrByWidth(status, width - 24),
-                12,
-                height - 61,
-                UnwrittenTheme.MUTED);
-        g.text(
-                font,
-                font.plainSubstrByWidth(
-                        "Transforms move cells; templates keep their facing.", width - 24),
-                12,
-                height - 48,
-                UnwrittenTheme.MUTED);
+        preview = new DynamicTexture(() -> "World Layout Designer", image);
+        minecraft.getTextureManager().register(previewId, preview);
+        cachedProfile = profile;
+        cachedSelection = selection;
+        cachedAnchor = anchor;
+        cachedRadius = radius;
+        cachedWidth = width;
+        cachedHeight = mapH;
+    }
+
+    private void releasePreview() {
+        if (preview != null) {
+            minecraft.getTextureManager().release(previewId);
+            preview = null;
+        }
+    }
+
+    @Override
+    public void removed() {
+        releasePreview();
+        super.removed();
     }
 }

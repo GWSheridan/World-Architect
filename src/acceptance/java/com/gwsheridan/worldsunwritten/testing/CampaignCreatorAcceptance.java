@@ -92,8 +92,8 @@ public final class CampaignCreatorAcceptance {
                     bounds();
                     press("World Layout Designer");
                     bounds();
-                    Screenshot.grab(mc, false);
                 });
+        STEPS.add(() -> Screenshot.grab(mc, false));
         STEPS.add(
                 () -> {
                     press("Go to");
@@ -119,8 +119,8 @@ public final class CampaignCreatorAcceptance {
                     choose("Select named group");
                     choose("frontier_group");
                     bounds();
-                    Screenshot.grab(mc, false);
                 });
+        STEPS.add(() -> Screenshot.grab(mc, false));
         STEPS.add(
                 () -> {
                     press("Apply layout");
@@ -134,8 +134,8 @@ public final class CampaignCreatorAcceptance {
                     bounds();
                     press("Layer >");
                     bounds();
-                    Screenshot.grab(mc, false);
                 });
+        STEPS.add(() -> Screenshot.grab(mc, false));
         STEPS.add(
                 () -> {
                     press("Simulate");
