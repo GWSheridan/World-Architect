@@ -21,7 +21,7 @@ final class ProgressionGraphScreen extends Screen {
     private final Consumer<CellWorldProfile> save;
     private CellWorldProfile profile;
     private int layer, page;
-    private String status = "Select an objective to edit its trigger, prerequisites or rewards.";
+    private String status = "Select an objective to edit requirements and rewards.";
 
     ProgressionGraphScreen(
             Screen parent, CellWorldProfile profile, Consumer<CellWorldProfile> save) {
@@ -69,7 +69,7 @@ final class ProgressionGraphScreen extends Screen {
         var layers = ProgressionGraph.layers(profile.growth());
         layer = Math.clamp(layer, 0, Math.max(0, layers.size() - 1));
         var goals = layers.isEmpty() ? List.<GrowthRules.Goal>of() : layers.get(layer);
-        int rows = Math.max(1, (height - 145) / 28), count = rows;
+        int rows = Math.max(1, (height - 155) / 28), count = rows;
         page = Math.clamp(page, 0, Math.max(0, (goals.size() - 1) / count));
         nodes.clear();
         int nodeWidth = (w - 32) / 2;
@@ -113,7 +113,7 @@ final class ProgressionGraphScreen extends Screen {
                     "Showing "
                             + rows
                             + " prerequisite nodes; open an objective to inspect all links.";
-        int nav = height - 63;
+        int nav = height - 73;
         button(
                 "< Layer",
                 12,
@@ -523,7 +523,7 @@ final class ProgressionGraphScreen extends Screen {
                 font,
                 font.plainSubstrByWidth(status, width - 24),
                 12,
-                height - 38,
+                height - 48,
                 UnwrittenTheme.MUTED);
     }
 }
