@@ -31,6 +31,7 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -48,6 +49,7 @@ public final class FabricEntrypoint implements ModInitializer {
         DimensionAdapterRegistry.initialize();
         FeatureAdapters.initialize();
         StructureAdapters.initialize();
+        FabricLoader.getInstance().invokeEntrypoints("worldsunwritten:adapters", Runnable.class, Runnable::run);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, context, selection) -> {
             var registration = new CommandRegistration(dispatcher, context);

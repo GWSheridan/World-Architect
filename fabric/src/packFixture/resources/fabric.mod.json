@@ -6,6 +6,9 @@
   "authors": ["GWSHERIDAN"],
   "license": "MIT",
   "environment": "server",
-  "entrypoints": {"server": ["com.gwsheridan.worldsunwritten.packtest.FabricPackTest"]},
-  "depends": {"worldsunwritten": ">=2.1.0"}
+  "entrypoints": {
+    "server": ["com.gwsheridan.worldsunwritten.packtest.FabricPackTest"],
+    "worldsunwritten:adapters": ["com.gwsheridan.worldsunwritten.packtest.FabricPackTest::registerAdapters"]
+  },
+  "depends": {"worldsunwritten": ">=2.2.0"}
 }

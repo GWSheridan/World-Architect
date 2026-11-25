@@ -2,7 +2,7 @@
 
 Compile against the Worlds Unwritten JAR for your loader and declare a required dependency on the mod. Call `WorldsUnwrittenApi.requireVersion(1)` during initialization. An unsupported API version fails before a world opens. See [Installation](Installation.md) for the supported Minecraft and loader versions.
 
-The supported surface is `com.gwsheridan.worldsunwritten.api` plus the data types listed below. Other implementation packages, mixins, generator implementation classes, client screens and low-level file writers are internal even when Java visibility is public. API 1 additions retain existing method signatures and codec defaults. Breaking changes require a new API version. Minecraft/NeoForge upgrades may require recompilation; API 1 is not a promise of binary compatibility across game versions.
+The supported surface is `com.gwsheridan.worldsunwritten.api` plus the data types listed below. Other implementation packages, mixins, generator implementation classes, client screens and low-level file writers are internal even when Java visibility is public. API 1 additions retain existing method signatures and codec defaults. Breaking changes require a new API version. Minecraft and loader upgrades may require recompilation. API 1 does not guarantee binary compatibility across game versions.
 
 ## Registration and dimensions
 
@@ -10,7 +10,7 @@ Register providers on both physical sides before the registries freeze. The adap
 
 - On NeoForge, attach a `DeferredRegister` to your mod event bus. Worlds Unwritten creates its registries during `NewRegistryEvent`. See the [NeoForge registry guide](https://docs.neoforged.net/docs/concepts/registries/).
 - On Forge, use `DeferredRegister` or `RegisterEvent` with the same registry keys. See the [Forge registry guide](https://docs.minecraftforge.net/en/latest/concepts/registries/).
-- On Fabric, declare Worlds Unwritten as a dependency and register with `Registry.register` during mod initialization. Look up the adapter registry in `BuiltInRegistries.REGISTRY` by its identifier.
+- On Fabric, declare Worlds Unwritten as a dependency and add a `worldsunwritten:adapters` entrypoint to `fabric.mod.json`. It accepts a `Runnable` class or a reference such as `example.ModAdapters::register`. Worlds Unwritten invokes it once when its registries are ready. Use `Registry.register` with the adapter registry from `BuiltInRegistries.REGISTRY`. The callback may run before your own `main` entrypoint, so leave lookups of other registered content to the adapter methods.
 
 | Extension | Registry key | Entry ID |
 | --- | --- | --- |
