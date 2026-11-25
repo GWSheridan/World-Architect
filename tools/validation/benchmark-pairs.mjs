@@ -28,7 +28,23 @@ await fs.writeFile(join(output,'inputs.json'),JSON.stringify(input,null,2)+'\n',
 const results={format:2,status:'running',input,runs:[],compatibility:[]};let current,memory,interrupted=false;
 const stop=()=>{interrupted=true;};process.once('SIGINT',stop);process.once('SIGTERM',stop);
 const persist=()=>fs.writeFile(join(output,'results.json'),JSON.stringify(results,null,2)+'\n');
-async function waiting(promise){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setInterval(()=>{if(interrupted||Date.now()>deadline)reject(Error(interrupted?'Benchmark interrupted':'Benchmark total deadline exceeded'));else fs.stat(join(output,'stop')).then(()=>reject(Error('Benchmark interrupted')),()=>{});},200);})]);}finally{clearInterval(timer);}}
+async function waiting(promise,shutdownSeconds) {
+    const shutdown = shutdownSeconds === undefined ? Infinity : Date.now() + shutdownSeconds * 1000;
+    let timer;
+    try {
+        return await Promise.race([promise, new Promise((_,reject) => {
+            timer = setInterval(() => {
+                const now = Date.now();
+                if (interrupted) reject(Error('Benchmark interrupted'));
+                else if (now > deadline) reject(Error('Benchmark total deadline exceeded'));
+                else if (now > shutdown) reject(Error('Benchmark server did not stop in time'));
+                else fs.stat(join(output,'stop')).then(() => reject(Error('Benchmark interrupted')), () => {});
+            }, 200);
+        })]);
+    } finally {
+        clearInterval(timer);
+    }
+}
 async function json(path,seconds=30){const deadline=Date.now()+seconds*1000;while(Date.now()<deadline){if(interrupted||await fs.stat(join(output,'stop')).then(()=>true,()=>false))throw Error('Benchmark interrupted');try{return JSON.parse(await fs.readFile(path,'utf8'));}catch(error){if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;}if(current?.child.exitCode!==null)throw Error('Server exited before its benchmark record');await new Promise(done=>setTimeout(done,100));}throw Error('Benchmark record timed out');}
 async function stopMemory(directory){if(!memory)return;if(memory.exitCode!==null){memory=undefined;return;}await fs.writeFile(join(directory,'memory-stop'),'stop\n');await Promise.race([new Promise(done=>memory.once('close',done)),new Promise(done=>setTimeout(done,3000))]);if(memory.exitCode===null)memory.kill();memory=undefined;}
 function toolchain(){return process.env.JAVA21_HOME?[`-Porg.gradle.java.installations.paths=${process.env.JAVA21_HOME}`]:[];}
@@ -46,7 +62,7 @@ try{
    await fs.writeFile(join(server,'server.properties'),properties+`\nserver-port=${port}\nmax-tick-time=-1\nmanagement-server-enabled=false\nlog-ips=false\n`);await fs.writeFile(join(server,'eula.txt'),'eula=true\n');
    try{await copyProfilePacks(join(root,'examples/performance/profiles',profile,'datapacks'),join(server,'world/datapacks'),identity);}catch(error){if(error.code!=='ENOENT')throw error;}
    const run={kind,pair,role,profile,status:'running',jar_sha256:sha(jar),probe_sha256:input.probe_sha256,samples:[]};results.runs.push(run);await persist();
-   const launch=['-I','tools/validation/benchmark.init.gradle','runServer','--no-daemon','-x','compileJava','-x','processResources','--console=plain',`-PtestWorldDirectory=${server}`,...toolchain()];if(network==='offline')launch.push('--offline');
+   const launch=['-I','tools/validation/benchmark.init.gradle',':runServer','--configure-on-demand','--no-daemon','-x',':compileJava','-x',':processResources','--console=plain',`-PtestWorldDirectory=${server}`,...toolchain()];if(network==='offline')launch.push('--offline');
    current=gradle(root,launch,join(server,'console.log'));
    try{
     await waiting(current.wait('Done (',180));run.header=await json(join(server,'benchmark-process.json'));
@@ -61,7 +77,7 @@ try{
      else run.warmup=sample;
      await new Promise(done=>setTimeout(done,500));
     }
-    current.send('stop');if(await current.exit!==0)throw Error('Benchmark server did not stop cleanly');run.status='passed';
+    current.send('stop');if(await waiting(current.exit,120)!==0)throw Error('Benchmark server did not stop cleanly');run.status='passed';
    }finally{await stopMemory(server);await current.stop();current=undefined;await persist();}
    console.log(`WA_BENCHMARK_RUN ${kind} ${pair} ${role} ${profile}`);
   }

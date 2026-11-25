@@ -180,7 +180,7 @@ jobs:
         run: |
           $env:JAVA21_HOME = $env:JAVA_HOME_21_X64
           $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
-          node tools/validation/benchmark-pairs.mjs --baseline build/validation-inputs/worldarchitect-1.6.0.jar --candidate "build/libs/Worlds-Unwritten-$version.jar" --probe "build/validation-tools/Worlds-Unwritten-$version-benchmark-probe.jar" --output build/ci-benchmark-smoke --pairs 1 --control-pairs 1 --warmup-size 8 --measured-size 6 --samples 2 --profiles void --port 25986 --purpose smoke --network online
+          node tools/validation/benchmark-pairs.mjs --baseline build/validation-inputs/worldarchitect-1.6.0.jar --candidate "build/libs/Worlds-Unwritten-$version.jar" --probe "build/validation-tools/Worlds-Unwritten-$version-benchmark-probe.jar" --output build/ci-benchmark-smoke --pairs 1 --control-pairs 1 --warmup-size 8 --measured-size 6 --samples 2 --profiles void --port 25986 --purpose smoke --network online --deadline-seconds 600
           $benchmarkExit = $LASTEXITCODE
           $proof = Get-Content build/ci-benchmark-smoke/results.json -Raw | ConvertFrom-Json
           if ($proof.status -eq 'inconclusive' -and $proof.runs.Count -eq 2 -and @($proof.runs | Where-Object status -ne 'passed').Count -eq 0 -and @($proof.runs.samples | Where-Object { $null -eq $_.sampled_resident_peak_bytes -or $_.sampled_resident_peak_bytes -le 0 }).Count -eq 0) {
