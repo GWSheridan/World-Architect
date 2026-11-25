@@ -32,8 +32,8 @@ jobs:
         shell: pwsh
         run: |
           $toolchain = "-Porg.gradle.java.installations.paths=$env:JAVA_HOME_21_X64"
-          if ($IsWindows) { & ./gradlew.bat -I tools/validation/server.init.gradle build acceptanceJar benchmarkProbeJar packageTestKit prepareValidationServerRun --console=plain $toolchain }
-          else { & sh ./gradlew -I tools/validation/server.init.gradle build acceptanceJar benchmarkProbeJar packageTestKit prepareValidationServerRun --console=plain $toolchain }
+          if ($IsWindows) { & ./gradlew.bat -I tools/validation/server.init.gradle :build acceptanceJar benchmarkProbeJar packageTestKit prepareValidationServerRun --configure-on-demand --console=plain $toolchain }
+          else { & sh ./gradlew -I tools/validation/server.init.gradle :build acceptanceJar benchmarkProbeJar packageTestKit prepareValidationServerRun --configure-on-demand --console=plain $toolchain }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --test tools/workbench/scenario.test.mjs tools/workbench/batch.test.mjs tools/validation/benchmark-analysis.test.mjs tools/validation/identity.test.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -48,7 +48,7 @@ jobs:
         shell: pwsh
         run: |
           $version = ((Get-Content gradle.properties | Where-Object { $_ -like 'mod_version=*' }) -split '=',2)[1]
-          $neo = '26.3.0.103'
+          $neo = ((Get-Content gradle.properties | Where-Object { $_ -like 'neo_version=*' }) -split '=',2)[1]
           $installer = Join-Path $PWD 'build/neoforge-installer.jar'
           $url = "https://maven.neoforged.net/releases/net/neoforged/neoforge/$neo/neoforge-$neo-installer.jar"
           Invoke-WebRequest $url -OutFile $installer
@@ -59,7 +59,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Expand-Archive "build/release/Worlds-Unwritten-$version-test-kit.zip" build/ci-kit
           New-Item -ItemType Directory build/ci-kit-project,build/ci-kit-providers | Out-Null
-          Copy-Item "examples/campaigns/bundles/one-chunk-to-the-end-$version.zip" build/ci-kit-project/preset.zip
+          Copy-Item 'examples/campaigns/bundles/one-chunk-to-the-end-2.1.0.zip' build/ci-kit-project/preset.zip
           $hash = (Get-FileHash build/ci-kit-project/preset.zip).Hash.ToLowerInvariant()
           "format=2`nbundle=preset.zip`nsha256=$hash`nworldsunwritten=$version`nneoforge=$neo`n" | Set-Content build/ci-kit-project/testkit.properties
           & java -jar build/ci-kit/Worlds-Unwritten-test-kit.jar --server build/ci-kit-runtime --export build/ci-kit-project --providers build/ci-kit-providers --output build/ci-kit-results --eula true
@@ -278,3 +278,63 @@ jobs:
             build/ci-batch/matrix/*/instance/results.json
           if-no-files-found: error
           retention-days: 30
+  loader-ports:
+    name: ${{ matrix.loader }} installed server
+    strategy:
+      fail-fast: false
+      matrix:
+        loader: [forge, fabric]
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      LOADER: ${{ matrix.loader }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Build the loader distribution
+        run: sh ./gradlew ":${LOADER}:build" --configure-on-demand --console=plain
+      - name: Install and restart a locked preset
+        shell: pwsh
+        run: |
+          $props = ConvertFrom-StringData (Get-Content gradle.properties -Raw)
+          $mc = $props.minecraft_version
+          $runtime = 'build/ci-runtime'
+          New-Item -ItemType Directory -Path $runtime -Force | Out-Null
+          $api = ''
+          if ($env:LOADER -eq 'forge') {
+            $version = $props.forge_version
+            $id = "$mc-$version"
+            $url = "https://maven.minecraftforge.net/net/minecraftforge/forge/$id/forge-$id-installer.jar"
+            $installer = 'build/forge-installer.jar'
+            Invoke-WebRequest $url -OutFile $installer
+            $sum = (Invoke-WebRequest "$url.sha1").Content
+            if ($sum -is [byte[]]) { $sum = [Text.Encoding]::UTF8.GetString($sum) }
+            if ($sum.Trim().ToLowerInvariant() -ne (Get-FileHash $installer -Algorithm SHA1).Hash.ToLowerInvariant()) { throw 'Forge installer checksum differs' }
+            & java -jar $installer --installServer $runtime
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } else {
+            $version = $props.fabric_loader_version
+            $runtime = 'build/fabric-server.jar'
+            $api = 'build/fabric-api.jar'
+            $apiVersion = $props.fabric_api_version
+            Invoke-WebRequest "https://meta.fabricmc.net/v2/versions/loader/$mc/$version/1.1.2/server/jar" -OutFile $runtime
+            Invoke-WebRequest "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$apiVersion/fabric-api-$apiVersion.jar" -OutFile $api
+          }
+          $jar = Get-Item "$env:LOADER/build/libs/Worlds-Unwritten-$($props.mod_version)-mc$mc-$env:LOADER.jar"
+          & node tools/validation/loader-server.mjs $env:LOADER $version $jar.FullName $runtime 'examples/campaigns/bundles/hex-frontier-2.1.0.zip' build/ci-loader $api
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: ${{ matrix.loader }}-distribution
+          path: ${{ matrix.loader }}/build/libs/Worlds-Unwritten-*.jar
+          if-no-files-found: error
+          retention-days: 7

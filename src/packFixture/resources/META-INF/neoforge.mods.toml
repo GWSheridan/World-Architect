@@ -8,6 +8,6 @@ displayName="Worlds Unwritten Pack Test"
 [[dependencies.wa_pack_test]]
 modId="worldsunwritten"
 type="required"
-versionRange="[2.1.0]"
+versionRange="[2.1.0,3)"
 ordering="AFTER"
 side="SERVER"

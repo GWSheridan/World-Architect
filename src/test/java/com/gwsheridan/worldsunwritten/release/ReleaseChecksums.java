@@ -17,7 +17,12 @@ public final class ReleaseChecksums {
             throw new IllegalArgumentException("Invalid release version");
         Files.createDirectories(directory);
         var assets = new ArrayList<Path>();
-        for (int i = 1; i <= 3; i++) assets.add(stage(Path.of(args[i]), directory));
+        try (var binaries = Files.list(Path.of(args[1]))) {
+            var jars = binaries.filter(path -> path.getFileName().toString().endsWith(".jar")).toList();
+            if (jars.size() != 3) throw new IllegalStateException("Expected three loader JARs");
+            for (Path jar : jars) assets.add(stage(jar, directory));
+        }
+        for (int i = 2; i <= 3; i++) assets.add(stage(Path.of(args[i]), directory));
         var kit = directory.resolve("Worlds-Unwritten-" + version + "-test-kit.zip");
         if (Files.isRegularFile(kit)) assets.add(kit);
         var bundleDirectories = new ArrayList<Path>();

@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '7.0.40'
+}
+
+apply from: rootProject.file('gradle/platform.gradle')
+
+def mixinConfigs = ['worldsunwritten.mixins.json', 'worldsunwritten.portable.mixins.json',
+                    'worldsunwritten.client.mixins.json', 'worldsunwritten.forge.mixins.json']
+
+minecraft {
+    runs {
+        configureEach { args mixinConfigs.collect { "--mixin.config=${it}" } }
+        register('client') {
+            workingDir = layout.projectDirectory.dir(providers.gradleProperty('testClientDirectory').orElse('run/client').get())
+        }
+        register('server') {
+            workingDir = layout.projectDirectory.dir(providers.gradleProperty('testWorldDirectory').orElse('run/server').get())
+            args '--nogui'
+        }
+    }
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.6'
+}
+
+tasks.named('processResources', ProcessResources) {
+    def metadata = [mod_version: mod_version, forge_version: forge_version, minecraft_version: minecraft_version]
+    inputs.properties metadata
+    filesMatching('META-INF/mods.toml') { expand metadata }
+    filesMatching('worldsunwritten*.mixins.json') {
+        filter { String line -> line.replace('"JAVA_25"', '"JAVA_21"') }
+    }
+}
+
+tasks.named('jar', Jar) {
+    manifest.attributes 'MixinConfigs': mixinConfigs.join(',')
+}

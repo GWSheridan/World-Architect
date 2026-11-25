@@ -7,6 +7,8 @@ group = 'com.gwsheridan.worldsunwritten'
 version = mod_version
 base { archivesName = 'Worlds-Unwritten' }
 sourceSets.main.java.srcDir 'src/legacy/java'
+sourceSets.main.java.srcDirs 'common/src/main/java', 'neoforge/src/main/java'
+sourceSets.main.resources.srcDirs 'common/src/main/resources', 'neoforge/src/main/resources'
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
@@ -141,6 +143,18 @@ tasks.named('processResources', ProcessResources).configure {
 }
 
 def releaseDirectory = layout.buildDirectory.dir('release')
+def loaderJarName = { loader -> "Worlds-Unwritten-${mod_version}-mc${minecraft_version}-${loader}.jar" }
+def alternateJars = ['forge', 'fabric'].collect { loader ->
+    project(":${loader}").layout.buildDirectory.file("libs/${loaderJarName(loader)}")
+}
+def multiLoaderJars = tasks.register('multiLoaderJars', Sync) {
+    group = 'distribution'
+    description = 'Build and collect the three playable loader JARs.'
+    dependsOn tasks.named('jar'), ':forge:jar', ':fabric:jar'
+    from(tasks.named('jar')) { rename { loaderJarName('neoforge') } }
+    from(alternateJars)
+    into layout.buildDirectory.dir('distribution')
+}
 tasks.register('auditExtensionWorld', JavaExec) {
     group = 'verification'
     classpath = sourceSets.test.runtimeClasspath
@@ -184,7 +198,7 @@ def releaseSources = tasks.register('releaseSources', Zip) {
     destinationDirectory = releaseDirectory
     from(layout.projectDirectory) {
         exclude '**/build/**', '**/.gradle/**', '**/.gradle-local/**', '**/run/**'
-        include 'src/**', 'gradle/**', 'docs/**', 'examples/**', '.github/**',
+        include 'src/**', 'common/**', 'neoforge/**', 'forge/**', 'fabric/**', 'gradle/**', 'docs/**', 'examples/**', '.github/**',
                 'gradlew', 'gradlew.bat', 'build.gradle', 'settings.gradle', 'gradle.properties', 'README.md', 'CHANGELOG.md', 'tools/**'
     }
     from('.gitignore', '.gitattributes', 'LICENSE')
@@ -193,10 +207,15 @@ def releaseSources = tasks.register('releaseSources', Zip) {
 tasks.register('packageRelease', Zip) {
     group = 'distribution'
     description = 'Package the mod, buildable sources, documentation, and example presets.'
-    dependsOn tasks.named('check')
+    dependsOn tasks.named('check'), multiLoaderJars
     archiveClassifier = 'release'
     destinationDirectory = releaseDirectory
-    from(tasks.named('jar')) { into 'mods' }
+    ['neoforge', 'forge', 'fabric'].each { loader ->
+        from(multiLoaderJars.map { it.destinationDir }) {
+            include loaderJarName(loader)
+            into "mods/${loader}"
+        }
+    }
     from(releaseSources) { into 'source' }
     from('README.md', 'CHANGELOG.md', 'LICENSE')
     from('docs') { into 'docs' }
@@ -215,7 +234,7 @@ tasks.register('releaseChecksums', JavaExec) {
     javaLauncher = javaToolchains.launcherFor(java.toolchain)
     mainClass = 'com.gwsheridan.worldsunwritten.release.ReleaseChecksums'
     argumentProviders.add({ [releaseDirectory.get().asFile.absolutePath,
-        tasks.named('jar').get().archiveFile.get().asFile.absolutePath,
+        multiLoaderJars.get().destinationDir.absolutePath,
         releaseSources.get().archiveFile.get().asFile.absolutePath,
         tasks.named('packageRelease').get().archiveFile.get().asFile.absolutePath,
         file('examples/preset-studio/bundles').absolutePath, project.version.toString(),
@@ -329,6 +348,7 @@ sourceSets {
         runtimeClasspath += output + compileClasspath
     }
     packFixture {
+        java.srcDir 'neoforge/src/packFixture/java'
         compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
         runtimeClasspath += output + compileClasspath
     }
@@ -348,14 +368,23 @@ tasks.register('testKitJar', Jar) {
     destinationDirectory = layout.buildDirectory.dir('validation-tools')
     manifest { attributes 'Main-Class': 'com.gwsheridan.worldsunwritten.testkit.PackTestKit' }
 }
+tasks.named('processTestKitResources', ProcessResources) {
+    def versions = [mod_version: mod_version, minecraft_version: minecraft_version, neo_version: neo_version,
+                    forge_version: forge_version, fabric_loader_version: fabric_loader_version]
+    inputs.properties versions
+    filesMatching('testkit-runtime.properties') { expand versions }
+}
 tasks.register('packageTestKit', Zip) {
     group = 'distribution'
-    dependsOn tasks.named('jar'), tasks.named('packFixtureJar'), tasks.named('testKitJar')
+    dependsOn multiLoaderJars, tasks.named('packFixtureJar'), tasks.named('testKitJar'), ':forge:packFixtureJar', ':fabric:packFixtureJar'
     archiveClassifier = 'test-kit'
     destinationDirectory = releaseDirectory
     from(tasks.named('testKitJar')) { rename { 'Worlds-Unwritten-test-kit.jar' } }
-    from(tasks.named('jar')) { into 'lib'; rename { 'Worlds-Unwritten.jar' } }
-    from(tasks.named('packFixtureJar')) { into 'lib'; rename { 'Worlds-Unwritten-pack-test.jar' } }
+    from(multiLoaderJars.map { it.destinationDir }) { into 'lib' }
+    from(tasks.named('packFixtureJar')) { into 'lib'; rename { 'pack-test-neoforge.jar' } }
+    ['forge', 'fabric'].each { loader ->
+        from(project(":${loader}").layout.buildDirectory.file("validation-tools/pack-test-${loader}.jar")) { into 'lib' }
+    }
     from('tools/pack-test')
     from('LICENSE')
 }

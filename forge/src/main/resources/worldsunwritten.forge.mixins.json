@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.gwsheridan.worldsunwritten.forge.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["ForgeThemeMixin"],
+  "injectors": {"defaultRequire": 1}
+}

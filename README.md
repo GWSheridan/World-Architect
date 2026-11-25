@@ -2,7 +2,7 @@
 
 Design each Minecraft dimension before creating a world. Choose terrain and layers, control resources and structures, build Skyblock islands, or package the setup as a locked modpack preset.
 
-**Minecraft Java 26.3 · NeoForge 26.3.0.103 · Java 25**
+**Minecraft Java 26.3 · NeoForge, Forge and Fabric · Java 25**
 Created and maintained by **GWSHERIDAN**.
 
 Licensed under the [MIT License](LICENSE).
@@ -14,7 +14,7 @@ Create hex and square cell worlds, advancement-based chunk expansion, saved play
 
 ## Get started
 
-Install `Worlds-Unwritten-2.1.0.jar` in your NeoForge instance's `mods/` folder. Use matching versions on clients and servers.
+Put the Worlds Unwritten JAR for your loader in `mods/`. Use the same Minecraft, loader, mod and provider versions on clients and servers. Fabric also requires Fabric API. See [Installation](docs/wiki/Installation.md) for compatible versions and filenames.
 
 In **Create New World → World**, choose **Worlds Unwritten · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
 
@@ -62,11 +62,11 @@ Back up the complete world folder before updating. Keep its snapshot, archived b
 Use a 64-bit JDK 25:
 
 ```powershell
-.\gradlew.bat build
-.\gradlew.bat runClient
+.\gradlew.bat :build :forge:build :fabric:build --configure-on-demand
+.\gradlew.bat multiLoaderJars
 .\gradlew.bat assembleRelease
 ```
 
-On Linux or macOS, use `bash ./gradlew` instead. The build uses the pinned Gradle wrapper and NeoForge dependency. The asset downloader also needs JDK 21; select an installed runtime with `-Porg.gradle.java.installations.paths=<JDK21 path>` when needed.
+On Linux or macOS, use `sh ./gradlew` instead. `common` holds the gameplay, world data and resources. Each loader has its own entry points, registration and networking. Run `:runClient` or `:runServer` for NeoForge, and prefix the task with `:forge:` or `:fabric:` for the other two loaders. The NeoForge asset downloader also uses JDK 21. Set `-Porg.gradle.java.installations.paths=<JDK21 path>` when needed.
 
-`assembleRelease` writes the mod, source and complete ZIPs, example bundles and checksums to `build/release/`. See [validation runners](tools/validation/README.md) and [Public API](docs/wiki/Public-API.md) for development instructions.
+`assembleRelease` writes the three playable JARs, the source and complete ZIPs, the optional pack test kit and checksums to `build/release/`. See the [validation runners](tools/validation/README.md) and [Public API](docs/wiki/Public-API.md) for development instructions.

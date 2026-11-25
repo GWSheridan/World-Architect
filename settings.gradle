@@ -1,6 +1,14 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
+        maven {
+            url = 'https://maven.fabricmc.net/'
+            content { includeGroupByRegex 'net\\.fabricmc(\\..*)?' }
+        }
+        maven {
+            url = 'https://maven.minecraftforge.net/'
+            content { includeGroupByRegex 'net\\.minecraftforge(\\..*)?' }
+        }
     }
 }
 
@@ -13,3 +21,4 @@ org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.gitignore')
 org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.gitattributes')
 
 rootProject.name = 'worldsunwritten'
+include 'forge', 'fabric'

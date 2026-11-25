@@ -1,6 +1,6 @@
 # Backups and upgrades
 
-Stop the server and copy the **complete world directory** before changing mods. Replace the Worlds Unwritten JAR while keeping compatible Minecraft, NeoForge, provider mods and datapacks. Reopen the copied world first. Existing saves retain their original generation profiles; editing a starting preset changes future worlds.
+Stop the server and copy the **complete world directory** before changing mods. Keep the existing loader and use compatible versions of Minecraft, provider mods and datapacks. Reopen the copied world first. Existing saves retain their original generation profiles. Editing a starting preset changes future worlds.
 
 Keep these files with the world:
 
@@ -24,7 +24,7 @@ Pack authors should also back up the instance’s `config/worldsunwritten/` dire
 
 ## Upgrading to Worlds Unwritten 2.0
 
-Stop the server, make a complete backup, remove the previous mod JAR and install `Worlds-Unwritten-2.1.0.jar`. Install the same version on every client. Do not install the old and new JAR together.
+Stop the server, make a complete backup, and replace the previous mod JAR with the new JAR for the same loader. Install the same version on every client. See [Installation](Installation.md) for the JAR names.
 
 The primary mod ID, commands and new-world data namespace are `worldsunwritten`. The included legacy support module retains `worldarchitect` and its 1.9 API dependency contract for existing saves and API 1 add-ons. It is part of the same JAR.
 

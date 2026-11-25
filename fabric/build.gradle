@@ -1,0 +1,34 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.19.4'
+}
+
+apply from: rootProject.file('gradle/platform.gradle')
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+}
+
+tasks.named('processResources', ProcessResources) {
+    def metadata = [mod_version: mod_version, minecraft_version: minecraft_version,
+                    fabric_loader_version: fabric_loader_version, fabric_api_version: fabric_api_version]
+    inputs.properties metadata
+    filesMatching('fabric.mod.json') { expand metadata }
+}
+
+loom {
+    runs {
+        server {
+            programArg '--nogui'
+            runDir providers.gradleProperty('testWorldDirectory').orElse('run/server').get()
+        }
+        client {
+            runDir providers.gradleProperty('testClientDirectory').orElse('run/client').get()
+        }
+    }
+}

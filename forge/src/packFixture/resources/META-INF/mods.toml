@@ -1,0 +1,16 @@
+modLoader = "javafml"
+loaderVersion = "[66,)"
+license = "MIT"
+
+[[mods]]
+modId = "wa_pack_test"
+version = "1.0.0"
+displayName = "Worlds Unwritten Pack Test"
+authors = "GWSHERIDAN"
+
+[[dependencies.wa_pack_test]]
+modId = "worldsunwritten"
+mandatory = true
+versionRange = "[2.1.0,)"
+ordering = "AFTER"
+side = "SERVER"

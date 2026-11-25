@@ -39,6 +39,9 @@ public final class DocumentationAudit {
             var versioned=Pattern.compile(Pattern.quote(repository)+"(?:blob|tree)/v[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][^/]+)?/(.+)").matcher(target);
             if (versioned.matches()) {
                 resolved = root.resolve(versioned.group(1));
+                if (!Files.exists(resolved) && versioned.group(1).startsWith("src/main/")) {
+                    resolved = root.resolve("common").resolve(versioned.group(1));
+                }
             } else if (target.matches("^[a-zA-Z]+:.*")) {
                 continue;
             } else {

@@ -13,7 +13,7 @@
 
 ## Test an exported project
 
-The optional `Worlds-Unwritten-2.0.0-test-kit.zip` runs with Java 25, an installed NeoForge 26.3.0.103 server, the exported project and any required provider JARs. Extract the complete ZIP and run `run.cmd --help` or `sh run.sh --help`. It needs no source checkout, Gradle, Node or development SDK.
+The optional test kit runs with Java 25, a matching NeoForge, Forge or Fabric server, the exported project and any required provider JARs. For Fabric, point the kit at the dedicated launcher JAR and include Fabric API with the providers. Extract the complete ZIP and run `run.cmd --help` or `sh run.sh --help`.
 
 Choose a new output folder and accept the Minecraft EULA using the documented flag. The kit copies the selected runtime libraries into that folder and checks a disposable server's startup, islands, markers, starter contents, configured runtime locks and restart snapshots. Cell worlds also check reserved-cell activation and void gaps. Logs and `results.json` stay there. Follow with real multiplayer, progression and external-mod gameplay checks before distributing the pack.
 

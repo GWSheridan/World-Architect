@@ -1,0 +1,35 @@
+group = 'com.gwsheridan.worldsunwritten'
+version = mod_version
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+sourceSets.main {
+    java.srcDir rootProject.file('common/src/main/java')
+    resources.srcDir rootProject.file('common/src/main/resources')
+}
+
+sourceSets {
+    packFixture {
+        java.srcDir rootProject.file('src/packFixture/java')
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+    }
+}
+
+tasks.register('packFixtureJar', Jar) {
+    from sourceSets.packFixture.output
+    archiveFileName = "pack-test-${project.name}.jar"
+    destinationDirectory = layout.buildDirectory.dir('validation-tools')
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+tasks.named('jar', Jar) {
+    archiveFileName = "Worlds-Unwritten-${mod_version}-mc${minecraft_version}-${project.name}.jar"
+    from rootProject.file('LICENSE')
+}

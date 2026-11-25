@@ -3,24 +3,24 @@ package com.gwsheridan.worldsunwritten.packtest;
 import com.gwsheridan.worldsunwritten.modpack.*;
 import com.gwsheridan.worldsunwritten.skyblock.*;
 import com.gwsheridan.worldsunwritten.worldgen.*;
+import com.mojang.brigadier.CommandDispatcher;
 import java.nio.file.*;
 import java.util.*;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 /** Optional disposable-world fixture; never included in the gameplay JAR. */
-@Mod("wa_pack_test")
 public final class PackTestMod {
-    public PackTestMod(){NeoForge.EVENT_BUS.addListener(PackTestMod::register);NeoForge.EVENT_BUS.addListener(CellPackChecks::tick);}
-    private static void register(RegisterCommandsEvent event){event.getDispatcher().register(Commands.literal("wa_pack_test").requires(source->source.getEntity()==null&&Commands.hasPermission(Commands.LEVEL_OWNERS).test(source)).then(Commands.argument("stage",com.mojang.brigadier.arguments.IntegerArgumentType.integer(1,2)).executes(c->{try{var server=c.getSource().getServer();int stage=com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c,"stage");CellPackChecks.request(server,stage,()->check(server,stage));return 1;}catch(Throwable error){error.printStackTrace();System.err.println("WA_PACK_TEST_FAILED "+error.getMessage());return 0;}})));}
+    private PackTestMod() {}
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher){dispatcher.register(Commands.literal("wa_pack_test").requires(source->source.getEntity()==null&&Commands.hasPermission(Commands.LEVEL_OWNERS).test(source)).then(Commands.argument("stage",com.mojang.brigadier.arguments.IntegerArgumentType.integer(1,2)).executes(c->{try{var server=c.getSource().getServer();int stage=com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(c,"stage");CellPackChecks.request(server,stage,()->check(server,stage));return 1;}catch(Throwable error){error.printStackTrace();System.err.println("WA_PACK_TEST_FAILED "+error.getMessage());return 0;}})));}
+
+    public static void tick(MinecraftServer server) { CellPackChecks.tick(server); }
     private static void check(MinecraftServer server,int stage)throws Exception{
         require(!ModpackRuntime.developerMode(),"Export enabled developer mode");var bundle=WorldBundles.active(server).orElseThrow(()->new IllegalStateException("No pack was installed"));
         String bundleHash=PresetInheritance.fingerprint(BundleManifest.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE,bundle.manifest()).getOrThrow().toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));var data=server.getWorldPath(LevelResource.DATA);var proof=data.resolve("Worlds-Unwritten-pack-test.dat");var before=stage==2?NbtIo.readCompressed(proof,NbtAccounter.create(2*1024*1024)):new CompoundTag();var after=new CompoundTag();after.putString("bundle",bundleHash);int markers=0,cells=0,containers=0;

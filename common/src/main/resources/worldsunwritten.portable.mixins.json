@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.gwsheridan.worldsunwritten.compatibility.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": ["PortablePlayerMixin"],
+  "injectors": {"defaultRequire": 1}
+}

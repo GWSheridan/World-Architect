@@ -1,0 +1,31 @@
+modLoader = "javafml"
+loaderVersion = "[66,)"
+license = "MIT"
+
+[[mods]]
+modId = "worldsunwritten"
+version = "${mod_version}"
+displayName = "Worlds Unwritten"
+authors = "GWSHERIDAN"
+description = "Design custom Minecraft worlds before creating them."
+
+[[mods]]
+modId = "worldarchitect"
+version = "1.9.0"
+displayName = "Worlds Unwritten Legacy Support"
+authors = "GWSHERIDAN"
+description = "Compatibility for existing world generation identifiers and presets."
+
+[[dependencies.worldsunwritten]]
+modId = "forge"
+mandatory = true
+versionRange = "[${forge_version},)"
+side = "BOTH"
+ordering = "NONE"
+
+[[dependencies.worldsunwritten]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${minecraft_version}]"
+side = "BOTH"
+ordering = "NONE"

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.0
+
+- Added Forge and Fabric builds for Minecraft 26.3 alongside NeoForge.
+- Shared terrain, campaigns, authoring tools, save formats and assets across the three loaders.
+- Added a loader selection to the standalone modpack test kit. Existing NeoForge project exports still load.
+
 ## 2.1.0
 
 - Added a square and hex layout canvas with painting, coordinate selection, copied layouts, rotations, mirrors, named groups and undo/redo.

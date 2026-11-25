@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "worldsunwritten",
+  "version": "${mod_version}",
+  "name": "Worlds Unwritten",
+  "description": "Design custom Minecraft worlds before creating them.",
+  "authors": ["GWSHERIDAN"],
+  "license": "MIT",
+  "contact": {"sources": "https://github.com/GWSheridan/Worlds-Unwritten"},
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.gwsheridan.worldsunwritten.fabric.FabricEntrypoint"],
+    "client": ["com.gwsheridan.worldsunwritten.fabric.FabricClient"]
+  },
+  "mixins": ["worldsunwritten.mixins.json", "worldsunwritten.portable.mixins.json", "worldsunwritten.fabric.mixins.json", {"config": "worldsunwritten.client.mixins.json", "environment": "client"}],
+  "depends": {
+    "minecraft": "${minecraft_version}",
+    "java": ">=25",
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": ">=${fabric_api_version}"
+  }
+}

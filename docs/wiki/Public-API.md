@@ -1,14 +1,18 @@
 # Public extension API 1
 
-Worlds Unwritten 2.1.0 supports Minecraft 26.3, NeoForge 26.3.0.103 and Java 25. Compile against the distributed JAR; declare a required NeoForge dependency on Worlds Unwritten. Call `WorldsUnwrittenApi.requireVersion(1)` in your mod constructor. A different API contract fails during mod construction, before a world opens.
+Compile against the Worlds Unwritten JAR for your loader and declare a required dependency on the mod. Call `WorldsUnwrittenApi.requireVersion(1)` during initialization. An unsupported API version fails before a world opens. See [Installation](Installation.md) for the supported Minecraft and loader versions.
 
 The supported surface is `com.gwsheridan.worldsunwritten.api` plus the data types listed below. Other implementation packages, mixins, generator implementation classes, client screens and low-level file writers are internal even when Java visibility is public. API 1 additions retain existing method signatures and codec defaults. Breaking changes require a new API version. Minecraft/NeoForge upgrades may require recompilation; API 1 is not a promise of binary compatibility across game versions.
 
 ## Registration and dimensions
 
-Register on **both physical sides**, during the mod constructor, with NeoForge `DeferredRegister`. Attach the deferred register to the **mod event bus**. Worlds Unwritten creates its three adapter registries during `NewRegistryEvent`; consumers must not register values manually after registry freeze. See the official [registry lifecycle](https://docs.neoforged.net/docs/concepts/registries/) and [event buses](https://docs.neoforged.net/docs/concepts/events/).
+Register providers on both physical sides before the registries freeze. The adapter types and registry IDs are shared across loaders.
 
-| Extension | DeferredRegister key | Entry ID |
+- On NeoForge, attach a `DeferredRegister` to your mod event bus. Worlds Unwritten creates its registries during `NewRegistryEvent`. See the [NeoForge registry guide](https://docs.neoforged.net/docs/concepts/registries/).
+- On Forge, use `DeferredRegister` or `RegisterEvent` with the same registry keys. See the [Forge registry guide](https://docs.minecraftforge.net/en/latest/concepts/registries/).
+- On Fabric, declare Worlds Unwritten as a dependency and register with `Registry.register` during mod initialization. Look up the adapter registry in `BuiltInRegistries.REGISTRY` by its identifier.
+
+| Extension | Registry key | Entry ID |
 | --- | --- | --- |
 | Dimension | `DimensionAdapterRegistry.KEY` | Exact dimension ID |
 | Structure | `StructureAdapters.KEY` | Exact native `STRUCTURE_TYPE` ID |

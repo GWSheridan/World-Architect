@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "wa_pack_test",
+  "version": "1.0.0",
+  "name": "Worlds Unwritten Pack Test",
+  "authors": ["GWSHERIDAN"],
+  "license": "MIT",
+  "environment": "server",
+  "entrypoints": {"server": ["com.gwsheridan.worldsunwritten.packtest.FabricPackTest"]},
+  "depends": {"worldsunwritten": ">=2.1.0"}
+}

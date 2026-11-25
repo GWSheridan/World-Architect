@@ -1,6 +1,6 @@
 # Dedicated server setup
 
-Install the matching NeoForge server and put `Worlds-Unwritten-2.0.0.jar` and required provider mods in `mods/`. Use Java 25 and matching versions on clients. Keep the server's usual authentication and access settings for public play.
+Install the NeoForge, Forge or Fabric server for Minecraft 26.3. Put the matching Worlds Unwritten JAR and provider mods in `mods/`. Fabric also needs Fabric API. Use Java 25 and match the loader and mod versions on clients. Keep the server’s usual authentication and access settings for public play. [Installation](Installation.md) lists loader versions and filenames.
 
 For a new built-in world, set these before first launch:
 

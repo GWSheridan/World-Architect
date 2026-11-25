@@ -9,7 +9,6 @@ import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.*;
 
@@ -103,8 +102,7 @@ final class CellPackChecks {
         else PENDING.put(server, check);
     }
 
-    static void tick(ServerTickEvent.Post event) {
-        var server = event.getServer();
+    static void tick(MinecraftServer server) {
         var check = PENDING.get(server);
         if (check == null) return;
         try {

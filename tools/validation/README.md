@@ -12,7 +12,9 @@
 
 `island-multiplayer.mjs` starts four real clients. Supply `--jar`, `--fixture`, `--bundle`, a new `--output` and an existing client `--options` file. Use `--teams true` for the team example and `--end true` for native entry, kills, gateway travel and a ritual interrupted by restart. Release validation uses the default twenty three-minute exploration rounds; shorter runs are smoke tests. All evidence stays in the disposable output folder.
 
-`packageTestKit` builds the optional Java-only user kit. Test it against a separately installed NeoForge runtime and a GUI-exported project. Its fixture remains separate from the gameplay JAR.
+`packageTestKit` builds the optional Java-only user kit with a separate fixture for each loader. Test the kit against the installed runtime and a project exported from Modpack Builder.
+
+`loader-server.mjs` boots a packaged JAR on an installed NeoForge, Forge or Fabric dedicated server. It checks the mod and bundle datapacks, the starting cell and the generation snapshot and archive after restart. Run it with no arguments for the command syntax.
 
 The direct benchmark runner validates all identical-JAR controls before starting candidate comparisons. Noisy or missing-resident-memory controls produce an `inconclusive` report with zero candidate comparisons. A sampler smoke can verify completed controls without claiming a performance comparison passed.
 

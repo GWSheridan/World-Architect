@@ -9,19 +9,20 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-/** Java-only launcher for exported projects and a user-selected installed NeoForge runtime. */
+/** Java-only launcher for exported projects and an installed server runtime. */
 public final class PackTestKit {
-    private static final String NEO = "26.3.0.103";
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0 || Arrays.asList(args).contains("--help")) {
             System.out.println(
                     "Worlds Unwritten pack test kit (Java 25)\n"
                             + "java -jar Worlds-Unwritten-test-kit.jar --server"
-                            + " INSTALLED_NEOFORGE_SERVER --export EXPORTED_PROJECT --providers"
+                            + " INSTALLED_SERVER --export EXPORTED_PROJECT --providers"
                             + " PROVIDER_JAR_FOLDER --output NEW_FOLDER --eula true\n"
+                            + "Set --loader and --loader-version to test another supported runtime."
+                            + " For Fabric use its dedicated server launcher JAR and put Fabric API in the provider folder.\n"
                             + "Uses only a new disposable world. Supply legally installed"
-                            + " Minecraft/NeoForge and required provider mods. No Gradle, source"
+                            + " Minecraft, a mod loader and required provider mods. No Gradle, source"
                             + " checkout or Node is required.");
             return;
         }
@@ -29,7 +30,7 @@ public final class PackTestKit {
         if (args.length % 2 != 0)
             throw new IllegalArgumentException("Use option/value pairs; see --help");
         for (int i = 0; i < args.length; i += 2)
-            if (!Set.of("--server", "--export", "--providers", "--output", "--eula")
+            if (!Set.of("--server", "--export", "--providers", "--output", "--eula", "--loader", "--loader-version")
                             .contains(args[i])
                     || options.put(args[i], args[i + 1]) != null)
                 throw new IllegalArgumentException("Unknown or repeated option " + args[i]);
@@ -54,11 +55,18 @@ public final class PackTestKit {
         try (var in = Files.newInputStream(project.resolve("testkit.properties"))) {
             properties.load(in);
         }
-        if (!properties.getProperty("format", "").equals("2")
-                || !properties.getProperty("worldsunwritten", "").equals("2.1.0")
-                || !properties.getProperty("neoforge", "").equals(NEO))
-            throw new IOException(
-                    "This test kit requires a matching 2.1.0 project and NeoForge " + NEO);
+        String format = properties.getProperty("format", "");
+        if (!Set.of("2", "3").contains(format)) throw new IOException("Unsupported test project format");
+        var kit = new Properties();
+        try (var input = PackTestKit.class.getResourceAsStream("/testkit-runtime.properties")) {
+            if (input == null) throw new IOException("Missing test kit runtime metadata");
+            kit.load(input);
+        }
+        String loader = options.getOrDefault("--loader", properties.getProperty("loader", "neoforge"));
+        if (!Set.of("neoforge", "forge", "fabric").contains(loader)) throw new IOException("Unknown loader " + loader);
+        String version = options.getOrDefault("--loader-version", options.containsKey("--loader") ? kit.getProperty(loader)
+                : properties.getProperty("loader_version", properties.getProperty("neoforge", kit.getProperty(loader))));
+        if (!version.matches("[0-9]+(?:\\.[0-9]+)+")) throw new IOException("Invalid loader version");
         var bundle = project.resolve(properties.getProperty("bundle", "")).normalize();
         if (!bundle.startsWith(project)
                 || !Files.isRegularFile(bundle, LinkOption.NOFOLLOW_LINKS)
@@ -68,10 +76,16 @@ public final class PackTestKit {
                 System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win")
                         ? "win_args.txt"
                         : "unix_args.txt";
-        Path relativeArgs = Path.of("libraries/net/neoforged/neoforge/" + NEO + "/" + platform);
-        if (!Files.isRegularFile(runtime.resolve(relativeArgs)))
-            throw new IOException(
-                    "Select an installed NeoForge " + NEO + " server containing " + relativeArgs);
+        String minecraft = kit.getProperty("minecraft");
+        String forgeId = minecraft + "-" + version;
+        Path relativeArgs = switch (loader) {
+            case "neoforge" -> Path.of("libraries/net/neoforged/neoforge", version, platform);
+            case "forge" -> Path.of("libraries/net/minecraftforge/forge", forgeId, platform);
+            default -> null;
+        };
+        if (relativeArgs == null ? !Files.isRegularFile(runtime) : !Files.isRegularFile(runtime.resolve(relativeArgs))) {
+            throw new IOException("Select an installed " + loader + " " + version + " server runtime");
+        }
         var home =
                 Path.of(
                                 PackTestKit.class
@@ -80,20 +94,33 @@ public final class PackTestKit {
                                         .getLocation()
                                         .toURI())
                         .getParent();
-        for (String file : List.of("Worlds-Unwritten.jar", "Worlds-Unwritten-pack-test.jar"))
+        var kitFiles = Map.of("Worlds-Unwritten.jar", "Worlds-Unwritten-" + kit.getProperty("mod") + "-mc" + minecraft + "-" + loader + ".jar",
+                "Worlds-Unwritten-pack-test.jar", "pack-test-" + loader + ".jar");
+        for (String file : kitFiles.values())
             if (!Files.isRegularFile(home.resolve("lib").resolve(file)))
                 throw new IOException(
                         "Keep the complete test-kit ZIP together; missing lib/" + file);
         Files.createDirectory(output);
         var server = output.resolve("server");
         Files.createDirectory(server);
-        copyTree(runtime.resolve("libraries"), server.resolve("libraries"));
+        List<String> launch;
+        if (relativeArgs == null) {
+            Files.copy(runtime, server.resolve("fabric-server.jar"));
+            launch = List.of("-jar", "fabric-server.jar");
+        } else {
+            copyTree(runtime.resolve("libraries"), server.resolve("libraries"));
+            if (loader.equals("forge")) {
+                String shim = "forge-" + forgeId + "-shim.jar";
+                Files.copy(runtime.resolve(shim), server.resolve(shim));
+            }
+            launch = List.of("@" + relativeArgs);
+        }
         Files.createDirectory(server.resolve("mods"));
         var inventory = new TreeMap<String, String>();
-        for (String file : List.of("Worlds-Unwritten.jar", "Worlds-Unwritten-pack-test.jar")) {
-            var source = home.resolve("lib").resolve(file);
-            Files.copy(source, server.resolve("mods").resolve(file));
-            inventory.put(file, sha(source));
+        for (var file : kitFiles.entrySet()) {
+            var source = home.resolve("lib").resolve(file.getValue());
+            Files.copy(source, server.resolve("mods").resolve(file.getKey()));
+            inventory.put(file.getKey(), sha(source));
         }
         try (var files = Files.list(providers)) {
             for (var source : files.sorted().toList())
@@ -137,7 +164,7 @@ public final class PackTestKit {
         String status = "failed", problem = "";
         try {
             for (int stage = 1; stage <= 2; stage++)
-                run(server, relativeArgs, output.resolve("stage-" + stage + ".log"), stage);
+                run(server, launch, output.resolve("stage-" + stage + ".log"), stage);
             status = "passed";
         } catch (Exception error) {
             problem = Objects.toString(error.getMessage(), error.getClass().getSimpleName());
@@ -165,15 +192,12 @@ public final class PackTestKit {
         if (!status.equals("passed")) throw new IllegalStateException(problem);
     }
 
-    private static void run(Path server, Path args, Path log, int stage) throws Exception {
+    private static void run(Path server, List<String> args, Path log, int stage) throws Exception {
         String java = ProcessHandle.current().info().command().orElseThrow();
-        var process =
-                new ProcessBuilder(
-                                java,
-                                "-Xmx1600m",
-                                "-XX:ActiveProcessorCount=4",
-                                "@" + args.toString(),
-                                "--nogui")
+        var command = new ArrayList<>(List.of(java, "-Xmx1600m", "-XX:ActiveProcessorCount=4"));
+        command.addAll(args);
+        command.add("--nogui");
+        var process = new ProcessBuilder(command)
                         .directory(server.toFile())
                         .redirectErrorStream(true)
                         .start();
