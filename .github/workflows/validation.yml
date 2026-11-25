@@ -301,7 +301,21 @@ jobs:
           node-version: '24'
           package-manager-cache: false
       - name: Build the loader distribution
-        run: sh ./gradlew ":${LOADER}:build" ":${LOADER}:packFixtureJar" --configure-on-demand --console=plain
+        shell: bash
+        run: |
+          build_loader() {
+            sh ./gradlew ":${LOADER}:build" ":${LOADER}:packFixtureJar" --configure-on-demand --console=plain
+          }
+          log="$RUNNER_TEMP/loader-build.log"
+          if build_loader 2>&1 | tee "$log"; then
+            exit 0
+          fi
+          # ForgeGradle downloads libraries in a separate Java process on a cold build.
+          if [[ "$LOADER" == forge ]] && grep -Fq 'java.net.http.HttpTimeoutException' "$log"; then
+            build_loader
+          else
+            exit 1
+          fi
       - name: Install and restart a locked preset
         shell: pwsh
         run: |

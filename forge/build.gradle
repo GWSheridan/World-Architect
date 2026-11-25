@@ -45,3 +45,7 @@ tasks.named('processResources', ProcessResources) {
 tasks.named('jar', Jar) {
     manifest.attributes 'MixinConfigs': mixinConfigs.join(',')
 }
+
+tasks.named('packFixtureJar', Jar) {
+    from 'src/main/resources/pack.mcmeta'
+}
