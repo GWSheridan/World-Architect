@@ -3,10 +3,10 @@ import { createHash } from 'node:crypto';
 import { createWriteStream, promises as fs } from 'node:fs';
 import { basename, isAbsolute, join, relative, resolve } from 'node:path';
 
-const [loader, version, jarFile, runtime, bundleFile, output, fabricApi] = process.argv.slice(2);
+const [loader, version, jarFile, runtime, bundleFile, output, fabricApi, fixture] = process.argv.slice(2);
 if (!['neoforge', 'forge', 'fabric'].includes(loader) || !/^\d+(?:\.\d+)+$/.test(version ?? '')
         || !jarFile || !runtime || !bundleFile || !output || loader === 'fabric' && !fabricApi) {
-    throw Error('Usage: node loader-server.mjs <loader> <loader-version> <mod.jar> <installed-runtime> <preset.zip> <output> [fabric-api.jar]');
+    throw Error('Usage: node loader-server.mjs <loader> <loader-version> <mod.jar> <installed-runtime> <preset.zip> <output> [fabric-api.jar] [fixture.jar]');
 }
 
 const build = resolve('build');
@@ -21,6 +21,7 @@ const hash = async path => createHash('sha256').update(await fs.readFile(path)).
 await fs.mkdir(directory);
 await fs.mkdir(mods);
 await fs.copyFile(jarFile, join(mods, 'Worlds-Unwritten.jar'));
+if (fixture) await fs.copyFile(fixture, join(mods, 'pack-test.jar'));
 await fs.mkdir(join(config, 'bundles'), { recursive: true });
 await fs.copyFile(bundleFile, join(config, 'bundles', bundle));
 await fs.writeFile(join(config, 'developer.json'), JSON.stringify({ format: 1, bundle, developer_mode: false }));
@@ -82,7 +83,11 @@ async function boot(index) {
         const modPack = { neoforge: 'mod_data', forge: 'mod:worldsunwritten', fabric: 'worldsunwritten (Fabric mod)' }[loader];
         if (!packs.includes(modPack) || !packs.includes('worldsunwritten_bundle/')) throw Error(`Missing mod or bundle datapack. See ${file}`);
         send('worldsunwritten cells');
-        await wait('1 open cells', 30);
+        await wait(index === 2 && fixture ? '3 open cells' : '1 open cells', 30);
+        if (fixture) {
+            send(`wa_pack_test ${index}`);
+            await wait(`WA_PACK_TEST_PASS stage=${index}`, 180);
+        }
         send('save-all flush');
         await wait('Saved the game', 45);
     } finally {

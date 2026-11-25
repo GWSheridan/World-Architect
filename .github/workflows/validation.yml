@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 75
+    timeout-minutes: 95
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -301,7 +301,7 @@ jobs:
           node-version: '24'
           package-manager-cache: false
       - name: Build the loader distribution
-        run: sh ./gradlew ":${LOADER}:build" --configure-on-demand --console=plain
+        run: sh ./gradlew ":${LOADER}:build" ":${LOADER}:packFixtureJar" --configure-on-demand --console=plain
       - name: Install and restart a locked preset
         shell: pwsh
         run: |
@@ -309,7 +309,7 @@ jobs:
           $mc = $props.minecraft_version
           $runtime = 'build/ci-runtime'
           New-Item -ItemType Directory -Path $runtime -Force | Out-Null
-          $api = ''
+          $api = '-'
           if ($env:LOADER -eq 'forge') {
             $version = $props.forge_version
             $id = "$mc-$version"
@@ -330,7 +330,8 @@ jobs:
             Invoke-WebRequest "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$apiVersion/fabric-api-$apiVersion.jar" -OutFile $api
           }
           $jar = Get-Item "$env:LOADER/build/libs/Worlds-Unwritten-$($props.mod_version)-mc$mc-$env:LOADER.jar"
-          & node tools/validation/loader-server.mjs $env:LOADER $version $jar.FullName $runtime 'examples/campaigns/bundles/hex-frontier-2.1.0.zip' build/ci-loader $api
+          $fixture = "$env:LOADER/build/validation-tools/pack-test-$env:LOADER.jar"
+          & node tools/validation/loader-server.mjs $env:LOADER $version $jar.FullName $runtime 'examples/campaigns/bundles/hex-frontier-2.1.0.zip' build/ci-loader $api $fixture
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:

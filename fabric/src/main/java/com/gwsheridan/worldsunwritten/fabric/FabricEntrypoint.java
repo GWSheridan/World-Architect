@@ -33,6 +33,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -59,7 +60,15 @@ public final class FabricEntrypoint implements ModInitializer {
             CellWorlds.tick(server);
             server.getPlayerList().getPlayers().forEach(IslandSelections::tick);
         });
-        ServerPlayerEvents.JOIN.register(ServerEvents::joined);
+        ServerPlayerEvents.JOIN.register(player -> {
+            if (!ServerPlayNetworking.canSend(player, EnvironmentPayload.TYPE)
+                    || !ServerPlayNetworking.canSend(player, StudioViewPayload.TYPE)
+                    || !ServerPlayNetworking.canSend(player, PlacementPreviewPayload.TYPE)) {
+                player.connection.disconnect(Component.literal("Install the matching Worlds Unwritten Fabric build on your client."));
+                return;
+            }
+            ServerEvents.joined(player);
+        });
         ServerPlayerEvents.LEAVE.register(ServerEvents::left);
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, player, alive) -> WorldEnvironment.respawned(player));
         ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, from, to) -> WorldEnvironment.dimensionChanged(player));
