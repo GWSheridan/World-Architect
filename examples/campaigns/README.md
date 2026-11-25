@@ -1,6 +1,6 @@
 # Campaign examples
 
-These presets require Worlds Unwritten **2.1.0**, Minecraft **26.3**, NeoForge **26.3.0.103** and Java **25**. Install matching mod versions on clients and servers.
+These presets work with Worlds Unwritten **2.1.0** on NeoForge and **2.2.0** on all three supported loaders. Use Minecraft **26.3**, Java **25** and the same mod and loader versions on clients and servers. See [Installation](../../docs/wiki/Installation.md) for loader versions and dependencies.
 
 | Preset | World | Locks |
 | --- | --- | --- |
