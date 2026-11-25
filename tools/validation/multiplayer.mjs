@@ -29,7 +29,15 @@ await fs.writeFile(join(output,'server/whitelist.json'),JSON.stringify(whitelist
 const results={format:1,jar_sha256:createHash('sha256').update(jar).digest('hex'),tests:[],status:'running'};
 const running=[];let server;
 async function read(file){try{return await fs.readFile(file,'utf8');}catch(error){if(error.code==='ENOENT')return '';throw error;}}
-async function wait(file,marker,seconds=180){const end=Date.now()+seconds*1000;while(!(await read(file)).includes(marker)){if(Date.now()>end)throw new Error('Missing '+marker);await new Promise(done=>setTimeout(done,200));}}
+async function wait(file,marker,seconds=180) {
+    const end=Date.now()+seconds*1000;
+    do {
+        const text=await read(file);
+        if (marker instanceof RegExp ? marker.test(text) : text.includes(marker)) return;
+        await new Promise(done=>setTimeout(done,200));
+    } while (Date.now()<end);
+    throw new Error('Missing '+marker);
+}
 function start(task,key,stage){const params=['-I','tools/validation/multiplayer.init.gradle',':'+task,'--configure-on-demand','--offline','--console=plain',`-PvalidationRoot=${output}`,`-PvalidationStage=${stage}`,`-PtestWorldDirectory=${join(output,'server')}`];if(process.env.JAVA21_HOME)params.push(`-Porg.gradle.java.installations.paths=${process.env.JAVA21_HOME}`);const run=gradle(root,params,join(output,`${stage}-${key}.log`));running.push(run);return run;}
 let counters={};
 async function act(player,commands,stage){const index=counters[player]++,dir=join(output,'evidence',stage,player);const pending=join(dir,`pending-${index}.tmp`);await fs.writeFile(pending,commands.join('\n')+'\n');await fs.rename(pending,join(dir,`action-${index}.txt`));await wait(join(dir,'observed.log'),`DONE ${index} SCREEN`);}
@@ -50,7 +58,8 @@ try {
             await server.wait('Captured');
             server.send('worldsunwritten structure marker set validation:fixture spawn 0 1 0 north');
             server.send('tp @a 5126 204 5126');
-            await act('Bob',['COMMAND worldsunwritten structure list'],stage);await wait(observed('Bob',stage),'Unknown or incomplete command');
+            await act('Bob',['COMMAND worldsunwritten structure list'],stage);
+            await wait(observed('Bob',stage),/^SERVER (Unknown or incomplete command|Incorrect argument for command)$/m);
             await act('Alice',['COMMAND worldsunwritten structure stage validation:fixture 5120 200 5120'],stage);await wait(observed('Alice',stage),'SCREEN Structure placement');
             await act('Alice',['PRESS Rotate'],stage);await act('Alice',['PRESS Mirror','SHOT'],stage);
             server.send('worldsunwritten structure marker set validation:fixture spawn 0 1 0 east');

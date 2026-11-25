@@ -310,8 +310,9 @@ jobs:
           if build_loader 2>&1 | tee "$log"; then
             exit 0
           fi
-          # ForgeGradle downloads libraries in a separate Java process on a cold build.
-          if [[ "$LOADER" == forge ]] && grep -Fq 'java.net.http.HttpTimeoutException' "$log"; then
+          # Cold loader builds can hit a transient dependency download failure.
+          if grep -Eq 'java\.net\.http\.HttpTimeoutException|Received status code (429|502|503|504) from server' "$log"; then
+            sleep 10
             build_loader
           else
             exit 1
