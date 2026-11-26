@@ -28,7 +28,12 @@ final class AuthoringPreview {
         state.setAllowCommands(true);
         try {
             var context = state.getSettings();
-            state.setSettings(context.withSettings(options, dimensions.apply(context)));
+            var selected = dimensions.apply(context);
+            state.setWorldType(new WorldCreationUiState.WorldTypeEntry(null));
+            state.setSeed(Long.toString(options.seed()));
+            state.setGenerateStructures(options.generateStructures());
+            state.setBonusChest(options.generateBonusChest());
+            state.setSettings(context.withSettings(options, selected));
         } catch (RuntimeException error) {
             minecraft.gui.setScreen(parent);
             throw error;
