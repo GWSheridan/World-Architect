@@ -7,7 +7,13 @@ version = '1.0.0'
 base { archivesName = 'Worlds-Unwritten-api-fixture' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 neoForge { version = '26.3.0.103' }
+def sourceVersion = providers.fileContents(layout.projectDirectory.file('../../gradle.properties')).asText.map { text ->
+    def properties = new Properties()
+    properties.load(new StringReader(text))
+    properties.getProperty('mod_version')
+}
+def currentJar = sourceVersion.map { version -> "../../build/libs/Worlds-Unwritten-${version}.jar" }
 dependencies {
-    compileOnly files(providers.gradleProperty('worldsUnwrittenJar').orElse('../../build/libs/Worlds-Unwritten-2.2.0.jar').get())
+    compileOnly files(providers.gradleProperty('worldsUnwrittenJar').orElse(currentJar))
 }
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
