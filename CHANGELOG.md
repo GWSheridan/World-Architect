@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.0
+
+- Builder projects can target NeoForge, Forge, Fabric, or any combination. Each installation export has its own loader version, dependencies and test kit settings.
+- Added Island Workshop for comparing starter islands, checking spawn and container access, and trying an island in a fresh world.
+- Added campaign rehearsal with checkpoint playtests and route reports. Campaigns can award objectives for visiting a dimension or finding a named site marker.
+- Added two editable examples, Skyblock Workshop and One Chunk Expedition.
+
 ## 2.2.0
 
 - Added Forge and Fabric builds for Minecraft 26.3 alongside NeoForge.

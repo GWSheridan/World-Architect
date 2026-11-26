@@ -238,12 +238,12 @@ final class ProgressionGraphScreen extends Screen {
                         case "Title and trigger" ->
                                 form(
                                         "Objective trigger",
-                                        "Keep a stable objective ID. Item turn-ins own their"
-                                                + " reserved signal.",
+                                        "Use advancement, signal, dimension_visit or site_discovery."
+                                                + " A visit uses a dimension ID; discovery uses worldsunwritten:<marker>.",
                                         List.of(
                                                 f("Title", goal.title()),
                                                 f(
-                                                        "Trigger: advancement / signal",
+                                                        "Trigger",
                                                         goal.trigger().getSerializedName()),
                                                 f("Source ID", goal.source())),
                                         v ->

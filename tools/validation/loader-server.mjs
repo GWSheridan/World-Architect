@@ -3,10 +3,11 @@ import { createHash } from 'node:crypto';
 import { createWriteStream, promises as fs } from 'node:fs';
 import { basename, isAbsolute, join, relative, resolve } from 'node:path';
 
-const [loader, version, jarFile, runtime, bundleFile, output, fabricApi, fixture] = process.argv.slice(2);
+const [loader, version, jarFile, runtime, bundleFile, output, fabricApi, fixtureArg, upgradeWorld] = process.argv.slice(2);
+const fixture = fixtureArg === '-' ? undefined : fixtureArg;
 if (!['neoforge', 'forge', 'fabric'].includes(loader) || !/^\d+(?:\.\d+)+$/.test(version ?? '')
         || !jarFile || !runtime || !bundleFile || !output || loader === 'fabric' && !fabricApi) {
-    throw Error('Usage: node loader-server.mjs <loader> <loader-version> <mod.jar> <installed-runtime> <preset.zip> <output> [fabric-api.jar] [fixture.jar]');
+    throw Error('Usage: node loader-server.mjs <loader> <loader-version> <mod.jar> <installed-runtime> <preset.zip> <output> [fabric-api.jar or -] [fixture.jar or -] [world-to-copy]');
 }
 
 const build = resolve('build');
@@ -19,12 +20,18 @@ const mods = join(directory, 'mods');
 const bundle = basename(bundleFile);
 const hash = async path => createHash('sha256').update(await fs.readFile(path)).digest('hex');
 await fs.mkdir(directory);
+if (upgradeWorld) await fs.cp(resolve(upgradeWorld), join(directory, 'world'), { recursive: true });
 await fs.mkdir(mods);
 await fs.copyFile(jarFile, join(mods, 'Worlds-Unwritten.jar'));
 if (fixture) await fs.copyFile(fixture, join(mods, 'pack-test.jar'));
 await fs.mkdir(join(config, 'bundles'), { recursive: true });
 await fs.copyFile(bundleFile, join(config, 'bundles', bundle));
 await fs.writeFile(join(config, 'developer.json'), JSON.stringify({ format: 1, bundle, developer_mode: false }));
+if (fixture) {
+    const required = ['minecraft', 'worldsunwritten', ...(loader === 'fabric' ? ['fabric-api'] : [])];
+    await fs.writeFile(join(config, 'test-target.properties'),
+        `loader=${loader}\nversion=${version}\nrequired_mods=${required.join(',')}\n`);
+}
 await fs.writeFile(join(directory, 'eula.txt'), 'eula=true\n');
 await fs.writeFile(join(directory, 'server.properties'), [
     'server-ip=127.0.0.1', 'server-port=0', 'online-mode=false', 'pause-when-empty-seconds=0',
@@ -70,6 +77,8 @@ async function boot(index) {
     async function wait(marker, seconds) {
         const deadline = Date.now() + seconds * 1000;
         while (!output.includes(marker)) {
+            const failure = output.match(/WA_PACK_TEST_FAILED ([^\r\n]+)/);
+            if (failure) throw Error(`${loader} fixture failed: ${failure[1]}. See ${file}`);
             if (ended || Date.now() > deadline) throw Error(`${loader} did not reach ${marker}. See ${file}`);
             await new Promise(done => setTimeout(done, 250));
         }
@@ -82,8 +91,6 @@ async function boot(index) {
         const packs = output.split(/\r?\n/).find(line => line.includes('data pack(s) enabled'));
         const modPack = { neoforge: 'mod_data', forge: 'mod:worldsunwritten', fabric: 'worldsunwritten (Fabric mod)' }[loader];
         if (!packs.includes(modPack) || !packs.includes('worldsunwritten_bundle/')) throw Error(`Missing mod or bundle datapack. See ${file}`);
-        send('worldsunwritten cells');
-        await wait(index === 2 && fixture ? '3 open cells' : '1 open cells', 30);
         if (fixture) {
             send(`wa_pack_test ${index}`);
             await wait(`WA_PACK_TEST_PASS stage=${index}`, 180);
@@ -97,19 +104,27 @@ async function boot(index) {
         finally { clearTimeout(timer); }
     }
 
-    const data = join(directory, 'world/data');
+    return snapshotOf(join(directory, 'world'));
+}
+
+async function snapshotOf(world) {
+    const data = join(world, 'data');
     const snapshot = join(data, 'worldsunwritten-generation-v1.dat');
     const archives = join(data, 'worldsunwritten/generation');
     const saved = (await fs.readdir(archives)).filter(name => name.endsWith('.zip')).sort();
     if (saved.length !== 1) throw Error(`Expected one archived preset at ${archives}`);
-    return { snapshot: await hash(snapshot), bundle: await hash(join(archives, saved[0])) };
+    return { snapshot: await hash(snapshot), bundle: await hash(join(archives, saved[0])),
+        settings: await hash(join(data, 'minecraft/world_gen_settings.dat')) };
 }
 
+const previous = upgradeWorld ? await snapshotOf(resolve(upgradeWorld)) : undefined;
 const fresh = await boot(1);
 const restart = await boot(2);
 if (JSON.stringify(fresh) !== JSON.stringify(restart) || fresh.bundle !== await hash(bundleFile)) {
     throw Error('The pinned generation snapshot or original preset changed');
 }
-const result = { loader, version, jar: await hash(jarFile), fresh, restart };
+if (previous && JSON.stringify(previous) !== JSON.stringify(fresh))
+    throw Error('Upgrading the copied world changed its saved generation or archived preset');
+const result = { loader, version, preset: bundle, jar: await hash(jarFile), previous, fresh, restart };
 await fs.writeFile(join(directory, 'results.json'), JSON.stringify(result, null, 2) + '\n');
 console.log(`Passed fresh installation and restart on ${loader} ${version}`);

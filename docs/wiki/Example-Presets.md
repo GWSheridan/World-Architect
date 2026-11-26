@@ -1,6 +1,9 @@
 # Example presets
 
-Examples ship in the complete ZIP and the [source repository](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples). Read each example's README for its preset ID, dependencies and server properties. Use a separate new world; existing worlds do not adopt revised examples automatically.
+Examples ship in the complete ZIP and the [source repository](https://github.com/GWSheridan/Worlds-Unwritten/tree/main/examples). Read each example's README for its preset ID, dependencies and server properties. Use a separate new world; existing worlds do not adopt revised examples automatically.
+
+- [Skyblock Workshop](https://github.com/GWSheridan/Worlds-Unwritten/tree/main/examples/modpack-builder) has two custom islands and lets players choose their own start.
+- [One Chunk Expedition](https://github.com/GWSheridan/Worlds-Unwritten/tree/main/examples/campaigns) branches through crafting, timber delivery and exploration to a native End.
 
 - [pure-sand](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/pure-sand)
 - [universal-dimensions](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/universal-dimensions)

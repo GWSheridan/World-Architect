@@ -19,7 +19,8 @@ public final class PackTestKit {
                             + "java -jar Worlds-Unwritten-test-kit.jar --server"
                             + " INSTALLED_SERVER --export EXPORTED_PROJECT --providers"
                             + " PROVIDER_JAR_FOLDER --output NEW_FOLDER --eula true\n"
-                            + "Set --loader and --loader-version to test another supported runtime."
+                            + "Select an export for the loader and runtime you want to test."
+                            + " Legacy exports allow --loader and --loader-version overrides."
                             + " For Fabric use its dedicated server launcher JAR and put Fabric API in the provider folder.\n"
                             + "Uses only a new disposable world. Supply legally installed"
                             + " Minecraft, a mod loader and required provider mods. No Gradle, source"
@@ -56,7 +57,7 @@ public final class PackTestKit {
             properties.load(in);
         }
         String format = properties.getProperty("format", "");
-        if (!Set.of("2", "3").contains(format)) throw new IOException("Unsupported test project format");
+        if (!Set.of("2", "3", "4").contains(format)) throw new IOException("Unsupported test project format");
         var kit = new Properties();
         try (var input = PackTestKit.class.getResourceAsStream("/testkit-runtime.properties")) {
             if (input == null) throw new IOException("Missing test kit runtime metadata");
@@ -64,9 +65,20 @@ public final class PackTestKit {
         }
         String loader = options.getOrDefault("--loader", properties.getProperty("loader", "neoforge"));
         if (!Set.of("neoforge", "forge", "fabric").contains(loader)) throw new IOException("Unknown loader " + loader);
-        String version = options.getOrDefault("--loader-version", options.containsKey("--loader") ? kit.getProperty(loader)
-                : properties.getProperty("loader_version", properties.getProperty("neoforge", kit.getProperty(loader))));
-        if (!version.matches("[0-9]+(?:\\.[0-9]+)+")) throw new IOException("Invalid loader version");
+        String version;
+        if (format.equals("4")) {
+            String targetLoader = properties.getProperty("loader");
+            version = properties.getProperty("loader_version");
+            if (version == null || !loader.equals(targetLoader)
+                    || !version.equals(options.getOrDefault("--loader-version", version)))
+                throw new IOException("Select the export for the requested loader and version.");
+            if (!kit.getProperty("mod").equals(properties.getProperty("worldsunwritten")))
+                throw new IOException("Use the Worlds Unwritten test kit for " + properties.getProperty("worldsunwritten"));
+        } else {
+            var savedVersion = properties.getProperty("loader_version", properties.getProperty("neoforge", kit.getProperty(loader)));
+            version = options.getOrDefault("--loader-version", options.containsKey("--loader") ? kit.getProperty(loader) : savedVersion);
+        }
+        if (version == null || !version.matches("[0-9]+(?:\\.[0-9]+)+")) throw new IOException("Invalid loader version");
         var bundle = project.resolve(properties.getProperty("bundle", "")).normalize();
         if (!bundle.startsWith(project)
                 || !Files.isRegularFile(bundle, LinkOption.NOFOLLOW_LINKS)
@@ -134,6 +146,15 @@ public final class PackTestKit {
         var config = server.resolve("config/worldsunwritten");
         Files.createDirectories(config.resolve("bundles"));
         Files.copy(bundle, config.resolve("bundles/preset.zip"));
+        if (format.equals("4")) {
+            var target = new Properties();
+            target.setProperty("loader", loader);
+            target.setProperty("version", version);
+            target.setProperty("required_mods", properties.getProperty("required_mods", ""));
+            try (var writer = Files.newBufferedWriter(config.resolve("test-target.properties"))) {
+                target.store(writer, "Disposable fixture runtime");
+            }
+        }
         Files.writeString(
                 config.resolve("developer.json"),
                 "{\"format\":1,\"bundle\":\"preset.zip\",\"developer_mode\":false}\n");
@@ -162,16 +183,23 @@ public final class PackTestKit {
         Files.writeString(server.resolve("whitelist.json"), "[]\n");
         Instant start = Instant.now();
         String status = "failed", problem = "";
+        int passedStages = 0;
         try {
-            for (int stage = 1; stage <= 2; stage++)
+            for (int stage = 1; stage <= 2; stage++) {
                 run(server, launch, output.resolve("stage-" + stage + ".log"), stage);
+                passedStages++;
+            }
             status = "passed";
         } catch (Exception error) {
             problem = Objects.toString(error.getMessage(), error.getClass().getSimpleName());
         } finally {
             var report =
-                    new StringBuilder("{\"format\":1,\"status\":")
+                    new StringBuilder("{\"format\":2,\"status\":")
                             .append(json(status))
+                            .append(",\"preset\":").append(json(bundle.getFileName().toString()))
+                            .append(",\"loader\":").append(json(loader))
+                            .append(",\"loader_version\":").append(json(version))
+                            .append(",\"stages_passed\":").append(passedStages)
                             .append(",\"elapsed_seconds\":")
                             .append(Duration.between(start, Instant.now()).toSeconds())
                             .append(",\"bundle_sha256\":")
@@ -256,8 +284,11 @@ public final class PackTestKit {
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds);
         while (System.nanoTime() < deadline) {
             synchronized (text) {
-                if (text.indexOf("WA_PACK_TEST_FAILED") >= 0)
-                    throw new IOException("Pack fixture failed; inspect stage logs");
+                int failureAt = text.indexOf("WA_PACK_TEST_FAILED ");
+                if (failureAt >= 0) {
+                    int end = text.indexOf("\n", failureAt);
+                    if (end >= 0) throw new IOException(text.substring(failureAt + "WA_PACK_TEST_FAILED ".length(), end).strip());
+                }
                 if (text.indexOf(marker) >= 0) return;
             }
             if (failure.get() != null)

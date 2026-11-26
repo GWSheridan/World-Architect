@@ -18,7 +18,7 @@ Put the Worlds Unwritten JAR for your loader in `mods/`. Use the same Minecraft,
 
 In **Create New World → World**, choose **Worlds Unwritten · Dimensions** and open **Customize**. Select a dimension, choose its terrain, review the preview, and press **Done**. Each dimension can have different settings.
 
-For modpacks, open **Builder** to choose a starter, edit island types, set server policies and export an installation. [Island Studio](docs/wiki/Void-and-Skyblock.md) supports captured or imported builds, native model previews, markers and starter containers.
+For modpacks, open **Builder** to choose a starter, edit island types, set server policies and export an installation for each loader you target. [Island Studio and Island Workshop](docs/wiki/Void-and-Skyblock.md) support imported builds, side-by-side previews, custom spawn markers, starter supplies and playable previews.
 
 - **World Inspector:** saved profiles, dependency pins and new-world preset comparisons.
 - **Regional terrain:** rectangles, circles, polygon outlines and named compositions, with priority, biome choices and feathered heights.
@@ -31,7 +31,7 @@ For modpacks, open **Builder** to choose a starter, edit island types, set serve
 - **Features and structures:** biomes, ores, decoration, caves, fluids, native structures and modular assemblies.
 - **Void and Skyblock:** empty terrain or template islands with persistent multiplayer assignments.
 - **Cell worlds:** visual square and hex layouts, custom islands, resource cells and saved expansion.
-- **Campaign authoring:** dependency graphs, item turn-ins, cell costs, reserved connections and cell-local procedural ruins.
+- **Campaign authoring:** dependency graphs, checkpoint rehearsals, visit and discovery objectives, item turn-ins, cell costs and procedural ruins.
 - **End progression:** a native central arena and dragon fight, with optional shared outer-cell expansion and safe gateway landings.
 - **Assembly Studio:** visual modules, transformed markers, saved drafts and datapack or preset exports.
 - **Rule Inspector:** condition maps, coordinate explanations and rule order without generating chunks.

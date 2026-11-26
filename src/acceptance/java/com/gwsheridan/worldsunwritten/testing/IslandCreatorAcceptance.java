@@ -35,7 +35,7 @@ public final class IslandCreatorAcceptance {
         var mc=Minecraft.getInstance();
         STEPS.add(()->{mc.options.guiScale().set(scale);mc.resizeGui();var ui=parent.getUiState();ui.updateDimensions((registries,old)->ui.getSettings().worldgenLoadContext().lookupOrThrow(net.minecraft.core.registries.Registries.WORLD_PRESET).getOrThrow(WorldsUnwritten.DIMENSIONS_PRESET).value().createWorldDimensions());mc.gui.setScreen(ui.getPresetEditor().createEditScreen(parent,ui.getSettings()));press("Builder");bounds();});
         STEPS.add(()->Screenshot.grab(mc,false));
-        STEPS.add(()->{press("Choose starter");choose("Personal islands");press("Project");press("Project details");form(List.of("island-studio-"+scale,"worldsunwritten_examples:island-studio-"+scale,"Island Studio validation","Validation fixture","1.8.0","A clean exported Skyblock project"));press("Islands");press("Edit island catalog");choose("classic · Classic island");choose("Details and weight");var fields=mc.gui.screen().children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast).toList();fields.get(3).setValue("missing:icon");press("Apply");require(mc.gui.screen().getTitle().getString().equals("Island type details"),"A rejected icon discarded the form");require(fields.get(3).getValue().equals("missing:icon"),"Rejected form lost entered values");fields.get(3).setValue("minecraft:grass_block");press("Apply");press("Edit island catalog");choose("classic · Classic island");choose("Open Island Studio");bounds();});
+        STEPS.add(()->{press("Choose starter");choose("Personal islands");press("Project");press("Project details");form(List.of("island-studio-"+scale,"worldsunwritten_examples:island-studio-"+scale,"Island Studio validation","Validation fixture","1.8.0","A clean exported Skyblock project"));press("Islands");workshop();press("Edit island catalog");choose("classic · Classic island");choose("Details and weight");var fields=mc.gui.screen().children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast).toList();fields.get(3).setValue("missing:icon");press("Apply");require(mc.gui.screen().getTitle().getString().equals("Island type details"),"A rejected icon discarded the form");require(fields.get(3).getValue().equals("missing:icon"),"Rejected form lost entered values");fields.get(3).setValue("minecraft:grass_block");press("Apply");press("Edit island catalog");choose("classic · Classic island");choose("Open Island Studio");bounds();});
         STEPS.add(()->Screenshot.grab(mc,false));
         STEPS.add(()->{press("Slice view");bounds();});
         STEPS.add(()->Screenshot.grab(mc,false));
@@ -46,6 +46,23 @@ public final class IslandCreatorAcceptance {
         STEPS.add(()->{press("Back");press("Dimensions");press("Select dimension: minecraft:overworld");choose("minecraft:the_end");press("Terrain / generator");choose("Skyblock");bounds();press("Review / export");press("Save version");require(value(mc.gui.screen(),"status").toString().startsWith("Saved "),"Save failed: "+value(mc.gui.screen(),"status"));press("Export client / server installation");require(value(mc.gui.screen(),"status").toString().startsWith("Exported "),"Export failed: "+value(mc.gui.screen(),"status"));press("Use project");press("Done");});
         STEPS.add(IslandCreatorAcceptance::checkStudioPolicy);
     }
+    private static void workshop() {
+        var mc = Minecraft.getInstance();
+        press("Island Workshop");
+        bounds();
+        press("Supplies and spawn");
+        require(mc.gui.screen().getTitle().getString().equals("Classic island"), "Missing island supplies report");
+        press("Back");
+        press("Play preview");
+        require(mc.gui.screen() instanceof CreateWorldScreen screen
+                        && screen.getUiState().getSettings().selectedDimensions().dimensions()
+                                .get(net.minecraft.world.level.dimension.LevelStem.OVERWORLD).generator()
+                                instanceof com.gwsheridan.worldsunwritten.worldgen.SkyblockGenerator,
+                "Preview did not create a detached Skyblock world draft");
+        mc.gui.screen().onClose();
+        press("Back");
+    }
+
     private static void checkStudioPolicy(){
         var mc=Minecraft.getInstance();var ui=parent.getUiState();mc.gui.setScreen(ui.getPresetEditor().createEditScreen(parent,ui.getSettings()));press("Preset Studio");press("Browse saved presets");var search=mc.gui.screen().children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast).findFirst().orElseThrow();search.setValue("island-studio-"+mc.options.guiScale().get()+" /");mc.gui.screen().keyPressed(new KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_TAB,'\t',0));press("Load selected");
         var before=((PresetStudio.Draft)value(mc.gui.screen(),"draft")).manifest();require(before.pack().isPresent(),"Loaded project omitted its runtime policy");press("Metadata");press("Apply");require(((PresetStudio.Draft)value(mc.gui.screen(),"draft")).manifest().pack().equals(before.pack()),"Editing metadata discarded runtime defaults or locks");press("World defaults");press("Apply");require(((PresetStudio.Draft)value(mc.gui.screen(),"draft")).manifest().pack().equals(before.pack()),"Editing world defaults discarded runtime policy");press("Cancel");press("Cancel");if(mc.gui.screen().getTitle().getString().equals("Discard world draft?"))press("Discard changes");

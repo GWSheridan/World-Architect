@@ -23,12 +23,22 @@ public record GrowthRules(Scope scope,int radius,int territories,int blocksPerTi
         if(radius<1||radius>15||territories<1||territories>255||blocksPerTick<256||blocksPerTick>16384||goals.size()>128)return DataResult.error(()->"Invalid growth limits.");
         if(scope==Scope.STATIC&&!goals.isEmpty())return DataResult.error(()->"Static worlds cannot award expansion objectives.");
         var names=new HashMap<String,Goal>();for(var goal:goals){if(!goal.id.matches("[a-z][a-z0-9_-]{0,39}")||goal.title.isBlank()||goal.title.length()>100||goal.source.toString().length()>200||goal.credits<0||goal.credits>64||goal.targets.size()>64||new HashSet<>(goal.targets).size()!=goal.targets.size()||goal.targets.contains(Cell.ORIGIN)||goal.requires.size()>16||new HashSet<>(goal.requires).size()!=goal.requires.size()||goal.credits==0&&goal.targets.isEmpty()||names.put(goal.id,goal)!=null)return DataResult.error(()->"Use unique objective IDs, prerequisites and non-origin cell rewards within the saved limits.");}
+        for (var goal : goals) {
+            if (goal.trigger == Trigger.SITE_DISCOVERY && (!goal.source.getNamespace().equals("worldsunwritten")
+                    || !goal.source.getPath().matches("[a-z][a-z0-9_-]{0,31}"))) {
+                return DataResult.error(() -> "Use a worldsunwritten:<marker> ID for site discovery: " + goal.id);
+            }
+        }
         try{for(var goal:goals)visit(goal.id,names,new HashSet<>(),new HashSet<>());}catch(IllegalArgumentException e){return DataResult.error(e::getMessage);}
         return DataResult.success(this);
     }
     private static void visit(String name,Map<String,Goal> goals,Set<String> path,Set<String> done){if(done.contains(name))return;var goal=goals.get(name);if(goal==null)throw new IllegalArgumentException("Unknown prerequisite "+name);if(!path.add(name))throw new IllegalArgumentException("Progression objectives contain a dependency cycle.");for(var required:goal.requires)visit(required,goals,path,done);path.remove(name);done.add(name);}
     public enum Scope implements StringRepresentable {STATIC,SHARED,PLAYER,TEAM;public String getSerializedName(){return name().toLowerCase(Locale.ROOT);}}
-    public enum Trigger implements StringRepresentable {ADVANCEMENT,SIGNAL;public String getSerializedName(){return name().toLowerCase(Locale.ROOT);}}
+    public enum Trigger implements StringRepresentable {
+        ADVANCEMENT, SIGNAL, DIMENSION_VISIT, SITE_DISCOVERY;
+
+        public String getSerializedName() { return name().toLowerCase(Locale.ROOT); }
+    }
     public record Goal(String id,String title,Trigger trigger,Identifier source,List<String> requires,boolean any,List<Cell> targets,int credits){
         public Goal {requires=List.copyOf(requires);targets=List.copyOf(targets);}
         public static final Codec<Goal> CODEC=RecordCodecBuilder.create(b->b.group(

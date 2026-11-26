@@ -617,18 +617,17 @@ final class CellStudioScreen extends Screen implements AuthoringContext {
                                     case "Details and trigger" ->
                                             form(
                                                     "Objective details",
-                                                    "Advancement IDs are checked against the server"
-                                                        + " registry. Quest mods may call the"
-                                                        + " server API or admin signal command.",
+                                                    "Triggers: advancement, signal, dimension_visit, site_discovery."
+                                                        + " For a site use worldsunwritten:<marker>.",
                                                     List.of(
                                                             field("Objective ID", goal.id()),
                                                             field("Title", goal.title()),
                                                             field(
-                                                                    "Trigger: advancement / signal",
+                                                                    "Trigger",
                                                                     goal.trigger()
                                                                             .getSerializedName()),
                                                             field(
-                                                                    "Advancement or signal ID",
+                                                                    "Trigger source ID",
                                                                     goal.source())),
                                                     v ->
                                                             goal(

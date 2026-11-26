@@ -1,6 +1,7 @@
 package com.gwsheridan.worldsunwritten.packtest;
 
 import com.gwsheridan.worldsunwritten.modpack.*;
+import com.gwsheridan.worldsunwritten.platform.Platform;
 import com.gwsheridan.worldsunwritten.skyblock.*;
 import com.gwsheridan.worldsunwritten.worldgen.*;
 import com.mojang.brigadier.CommandDispatcher;
@@ -22,6 +23,7 @@ public final class PackTestMod {
 
     public static void tick(MinecraftServer server) { CellPackChecks.tick(server); }
     private static void check(MinecraftServer server,int stage)throws Exception{
+        checkTarget();
         require(!ModpackRuntime.developerMode(),"Export enabled developer mode");var bundle=WorldBundles.active(server).orElseThrow(()->new IllegalStateException("No pack was installed"));
         String bundleHash=PresetInheritance.fingerprint(BundleManifest.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE,bundle.manifest()).getOrThrow().toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));var data=server.getWorldPath(LevelResource.DATA);var proof=data.resolve("Worlds-Unwritten-pack-test.dat");var before=stage==2?NbtIo.readCompressed(proof,NbtAccounter.create(2*1024*1024)):new CompoundTag();var after=new CompoundTag();after.putString("bundle",bundleHash);int markers=0,cells=0,containers=0;
         require(stage==1||before.getStringOr("bundle","").equals(bundleHash),"Preset changed after restart");
@@ -46,6 +48,25 @@ public final class PackTestMod {
         }
         after.put("consumed",consumed);NbtIo.writeCompressed(after,proof);
         System.out.println("WA_PACK_TEST_PASS stage="+stage+" markers="+markers+" cells="+cells+" containers="+containers+" lock="+bundle.manifest().lock().getSerializedName());
+    }
+    private static void checkTarget() throws java.io.IOException {
+        var path = ModpackRuntime.directory().resolve("test-target.properties");
+        if (!Files.exists(path)) return;
+        var target = new Properties();
+        try (var input = Files.newBufferedReader(path)) {
+            target.load(input);
+        }
+        var platform = Platform.get();
+        var loaded = platform.loadedMods();
+        String loader = platform.loaderId();
+        String version = loaded.get(loader.equals("fabric") ? "fabricloader" : loader);
+        require(loader.equals(target.getProperty("loader")) && Objects.equals(version, target.getProperty("version")),
+                "Expected target " + target.getProperty("loader") + " " + target.getProperty("version")
+                        + ", running " + loader + " " + version);
+        var missing = new TreeSet<>(Arrays.asList(target.getProperty("required_mods", "").split(",")));
+        missing.remove("");
+        missing.removeAll(loaded.keySet());
+        require(missing.isEmpty(), "Missing required mods for " + loader + ": " + String.join(", ", missing));
     }
     private static void require(boolean value,String message){if(!value)throw new IllegalStateException(message);}
 }

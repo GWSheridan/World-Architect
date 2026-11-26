@@ -1,5 +1,7 @@
 # Campaign examples
 
+**One Chunk Expedition (2.3.0)** branches into stoneworking, timber delivery and discovery. Start in one chunk, then cross to the marked trailhead, visit the Nether and open the portal route to the native End. Editable source lives in `one-chunk-expedition-2.3.0-source/`.
+
 These presets work with Worlds Unwritten **2.1.0** on NeoForge and **2.2.0** on all three supported loaders. Use Minecraft **26.3**, Java **25** and the same mod and loader versions on clients and servers. See [Installation](../../docs/wiki/Installation.md) for loader versions and dependencies.
 
 | Preset | World | Locks |

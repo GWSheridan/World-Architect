@@ -40,4 +40,12 @@ class CellProgressionTest {
         var rules=rules(List.of(),false);var path=directory.resolve("progress.json");var ledger=new CellLedger(path,layout,rules,"pin",true);var first=new Key(0,new Cell(2,0));var second=new Key(0,new Cell(-1,0));ledger.queue(first);ledger.queue(second);var bytes=Files.readAllBytes(path);assertEquals(List.of(first,second),ledger.pending());assertTrue(ledger.completed(7).isEmpty());assertEquals(0,ledger.credits(7));assertArrayEquals(bytes,Files.readAllBytes(path));assertThrows(UnsupportedOperationException.class,()->ledger.cells().clear());
         var reopened=new CellLedger(path,layout,rules,"pin",false);assertEquals(List.of(first,second),reopened.pending());assertEquals(3,reopened.territoryCells(0).size());reopened.transition(first,CellLedger.Status.QUEUED,CellLedger.Status.APPLYING);reopened.transition(first,CellLedger.Status.APPLYING,CellLedger.Status.READY);assertEquals(List.of(second),reopened.pending());assertTrue(reopened.ready().contains(first));
     }
+
+    @Test void rehearsalCheckpointsRecognizeVisitObjectivesAndRejectUnknownIds() {
+        var visit = new GrowthRules.Goal("nether", "Visit the Nether", GrowthRules.Trigger.DIMENSION_VISIT,
+                Identifier.parse("minecraft:the_nether"), List.of("start"), false, List.of(new Cell(1, 0)), 2);
+        var progression = rules(List.of(goal("start", "start", List.of(), false, 1), visit), true);
+        assertEquals(List.of("nether", "start"), CampaignRehearsal.checkpoint(progression, " start nether start "));
+        assertThrows(IllegalArgumentException.class, () -> CampaignRehearsal.checkpoint(progression, "nether missing"));
+    }
 }

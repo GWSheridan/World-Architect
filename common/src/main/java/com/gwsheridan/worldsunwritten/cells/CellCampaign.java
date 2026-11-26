@@ -17,7 +17,8 @@ public record CellCampaign(
         Map<String, Integer> costs,
         List<Delivery> deliveries,
         List<Connection> connections,
-        List<Site> sites) {
+        List<Site> sites,
+        List<String> checkpoint) {
     public static final CellCampaign EMPTY = new CellCampaign(List.of(), Map.of(), List.of());
 
     public CellCampaign {
@@ -26,10 +27,16 @@ public record CellCampaign(
         deliveries = List.copyOf(deliveries);
         connections = List.copyOf(connections);
         sites = List.copyOf(sites);
+        checkpoint = checkpoint.stream().distinct().sorted().toList();
     }
 
     public CellCampaign(List<Group> groups, Map<String, Integer> costs, List<Delivery> deliveries) {
         this(groups, costs, deliveries, List.of(), List.of());
+    }
+
+    public CellCampaign(List<Group> groups, Map<String, Integer> costs, List<Delivery> deliveries,
+            List<Connection> connections, List<Site> sites) {
+        this(groups, costs, deliveries, connections, sites, List.of());
     }
 
     public static final Codec<CellCampaign> CODEC =
@@ -54,7 +61,10 @@ public record CellCampaign(
                                             Site.CODEC
                                                     .listOf(0, 16)
                                                     .optionalFieldOf("sites", List.of())
-                                                    .forGetter(CellCampaign::sites))
+                                                    .forGetter(CellCampaign::sites),
+                                            Codec.STRING.listOf(0, 128)
+                                                    .optionalFieldOf("rehearsal_checkpoint", List.of())
+                                                    .forGetter(CellCampaign::checkpoint))
                                     .apply(b, CellCampaign::new));
 
     public record Group(String id, List<Cell> cells) {
@@ -155,6 +165,9 @@ public record CellCampaign(
     public Optional<String> problem(CellWorldProfile profile) {
         if (groups.size() > 32 || costs.size() > 16 || deliveries.size() > 128)
             return Optional.of("Campaign definitions exceed the saved limits.");
+        if (!checkpoint.isEmpty() && (!profile.progressive() || checkpoint.size() > 128
+                || !profile.growth().goals().stream().map(GrowthRules.Goal::id).toList().containsAll(checkpoint)))
+            return Optional.of("A rehearsal checkpoint must use existing progressive objectives.");
         var names = new HashSet<String>();
         for (var group : groups) {
             if (!group.id().matches("[a-z][a-z0-9_-]{0,39}")
@@ -246,23 +259,27 @@ public record CellCampaign(
     }
 
     public CellCampaign withGroups(List<Group> value) {
-        return new CellCampaign(value, costs, deliveries, connections, sites);
+        return new CellCampaign(value, costs, deliveries, connections, sites, checkpoint);
     }
 
     public CellCampaign withCosts(Map<String, Integer> value) {
-        return new CellCampaign(groups, value, deliveries, connections, sites);
+        return new CellCampaign(groups, value, deliveries, connections, sites, checkpoint);
     }
 
     public CellCampaign withDeliveries(List<Delivery> value) {
-        return new CellCampaign(groups, costs, value, connections, sites);
+        return new CellCampaign(groups, costs, value, connections, sites, checkpoint);
     }
 
     public CellCampaign withConnections(List<Connection> value) {
-        return new CellCampaign(groups, costs, deliveries, value, sites);
+        return new CellCampaign(groups, costs, deliveries, value, sites, checkpoint);
     }
 
     public CellCampaign withSites(List<Site> value) {
-        return new CellCampaign(groups, costs, deliveries, connections, value);
+        return new CellCampaign(groups, costs, deliveries, connections, value, checkpoint);
+    }
+
+    public CellCampaign withCheckpoint(List<String> objectives) {
+        return new CellCampaign(groups, costs, deliveries, connections, sites, objectives);
     }
 
     public static String canonical(com.google.gson.JsonElement value) {

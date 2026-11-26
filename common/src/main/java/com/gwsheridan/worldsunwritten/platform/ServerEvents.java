@@ -25,6 +25,12 @@ public final class ServerEvents {
     public static void joined(ServerPlayer player) {
         WorldEnvironment.login(player);
         IslandSelections.login(player);
+        CellWorlds.visited(player);
+    }
+
+    public static void dimensionChanged(net.minecraft.world.entity.player.Player actor) {
+        WorldEnvironment.dimensionChanged(actor);
+        if (actor instanceof ServerPlayer player) CellWorlds.visited(player);
     }
 
     public static void left(ServerPlayer player) {

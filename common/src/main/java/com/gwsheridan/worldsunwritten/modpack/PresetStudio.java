@@ -167,7 +167,15 @@ public final class PresetStudio {
             if(manifest.pack().isPresent())manifest.pack().orElseThrow().validateDimensions(dimensions);
             ModpackRuntime.validateManifestDimensions(manifest, dimensions);
             for(var entry:dimensions.dimensions().entrySet()){
-                if(entry.getValue().generator() instanceof com.gwsheridan.worldsunwritten.worldgen.CellGenerator cells)cells.validateAssets(registries);
+                if(entry.getValue().generator() instanceof com.gwsheridan.worldsunwritten.worldgen.CellGenerator cells) {
+                    if (cells.cells().campaign().filter(campaign -> !campaign.checkpoint().isEmpty()).isPresent())
+                        throw new IOException("Rehearsal checkpoints belong to disposable worlds. Save the original campaign project.");
+                    for (var goal : cells.cells().growth().goals())
+                        if (goal.trigger() == com.gwsheridan.worldsunwritten.cells.GrowthRules.Trigger.DIMENSION_VISIT
+                                && dimensions.dimensions().keySet().stream().noneMatch(key -> key.identifier().equals(goal.source())))
+                            throw new IOException("Objective " + goal.id() + " visits a missing dimension " + goal.source());
+                    cells.validateAssets(registries);
+                }
                 if(entry.getValue().generator() instanceof com.gwsheridan.worldsunwritten.worldgen.SkyblockGenerator rich){
                     if(manifest.pack().isEmpty())throw new IOException("Rich Skyblock presets require a format-3 pack policy.");
                     rich.validateAssets(registries);

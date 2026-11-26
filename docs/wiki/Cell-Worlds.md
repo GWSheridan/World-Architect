@@ -42,7 +42,7 @@ Choose a progression scope before creating the world:
 
 Territory capacity and radius are fixed in the preset. Progressive cells support sizes up to 64 and dimension heights up to 512 blocks. Separate territories are spaced 262,144 blocks apart, so players never see different terrain at the same coordinates.
 
-Objectives use an advancement registry ID or a named server signal. Configure prerequisite IDs and choose **all** or **any**. The editor rejects unknown prerequisites and dependency cycles. Rewards may target fixed cells, award expansion credits, or do both. Automatic mode spends credits on a deterministic frontier; choice mode lets players select a neighbouring cell in `/worldsunwritten cells panel`.
+Objectives can listen to an advancement, named server signal, dimension visit, or site discovery. For a visit, use a dimension ID such as `minecraft:the_nether`. For discovery, use `worldsunwritten:<marker>` and put that marker in a cell template or procedural site. A player discovers the marker by coming within three blocks of it in a ready cell belonging to their territory. Configure prerequisite IDs and choose **all** or **any**. The editor rejects unknown prerequisites and dependency cycles. Rewards may target fixed cells, award expansion credits, or do both. Automatic mode spends credits on a deterministic frontier. Choice mode lets players select a neighbouring cell in `/worldsunwritten cells panel`.
 
 Signals received before prerequisites are remembered. A completed objective pays once per territory, including when two teammates complete it together. Revoking an advancement never removes terrain or refunds an objective. Advancements earned while visiting another dimension still count.
 
@@ -91,6 +91,10 @@ Set cell-type costs from 1–64 credits. Fixed cell rewards remain direct grants
 An item turn-in belongs to a signal objective. Players use **Item turn-ins** in the expansion panel or `cells submit`. Only an explicit submission consumes the saved item ID and count from the player's main inventory. Equipment and offhand slots are excluded. Supply a count that fits a normal main inventory. Prerequisites, ownership, inventory contents and previous completion are checked on the server. Concurrent teammates cannot pay the same territory objective twice.
 
 The server persists a player inventory receipt before awarding the objective. After an interruption it either aborts an unconsumed intent or completes the recorded consumption once. Missing or inconsistent evidence stops recovery. Keep player data and cell journals from the same backup. Item-delivery signals and the native dragon-kill signal cannot be completed through quest APIs or administrator signal commands.
+
+## Rehearse a campaign
+
+In Builder, select a progressive cell dimension and choose **Rehearse campaign**. Enter the objective IDs whose events should already have happened, separated by spaces. Leave the field empty to start from the beginning. **Inspect route** shows completed and waiting objectives, cell costs and gaps between awarded cells. **Create rehearsal world** opens a new save with those observations applied through the progression journal. Checkpoints stay in the rehearsal save. Exports use the original draft.
 
 ## Connections and procedural sites
 

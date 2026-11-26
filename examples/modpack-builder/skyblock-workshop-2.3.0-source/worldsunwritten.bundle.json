@@ -1,0 +1,32 @@
+{
+  "format": 3,
+  "preset": "worldsunwritten_examples:skyblock_workshop",
+  "title": "Skyblock Workshop",
+  "description": "Choose a compact meadow island or a wooded orchard with different starter supplies.",
+  "author": "GWSHERIDAN",
+  "release": "2.3.0",
+  "lock": "full",
+  "options": {
+    "seed": 18,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "minecraft",
+    "worldsunwritten"
+  ],
+  "allow_structure_library": false,
+  "pack": {
+    "version": 1,
+    "defaults": {
+      "version": 1,
+      "protection": {
+        "breaking": true,
+        "placement": true,
+        "containers": true,
+        "shared": true
+      }
+    },
+    "editable": []
+  }
+}

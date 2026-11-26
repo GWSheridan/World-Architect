@@ -56,6 +56,7 @@ public final class CellWorlds {
         private CellActivation activation;
         private boolean recoveredDeliveries;
         final CellConnections connections;
+        final boolean siteDiscovery;
         private final Set<UUID> joined = new HashSet<>();
         private final Set<UUID> waiting = new HashSet<>();
 
@@ -63,6 +64,8 @@ public final class CellWorlds {
             this.generator = generator;
             this.ledger = ledger;
             this.connections = new CellConnections(generator, ledger, seed);
+            this.siteDiscovery = generator.cells().growth().goals().stream()
+                    .anyMatch(goal -> goal.trigger() == GrowthRules.Trigger.SITE_DISCOVERY);
         }
     }
 
@@ -320,6 +323,44 @@ public final class CellWorlds {
         }
     }
 
+    public static void visited(ServerPlayer player) {
+        if (player.isSpectator()) return;
+        var dimension = player.level().dimension().identifier();
+        for (var state : SERVERS.getOrDefault(player.level().getServer(), Map.of()).values()) {
+            try {
+                observe(state, player, GrowthRules.Trigger.DIMENSION_VISIT, dimension);
+            } catch (IllegalStateException error) {
+                player.sendSystemMessage(Component.literal(error.getMessage()));
+            }
+        }
+    }
+
+    private static void discoverSites(State state, ServerPlayer player) throws IOException {
+        var generator = state.generator;
+        var goals = generator.cells().growth().goals();
+        if (player.isSpectator()) return;
+        var pos = player.blockPosition();
+        var address = generator.cells().address(pos.getX(), pos.getZ());
+        if (address == null || address.territory() != territory(state, player, false)
+                || (address.territory() == 0 && generator.cells().growth().scope() != GrowthRules.Scope.SHARED))
+            return;
+        var key = new Key(address.territory(), address.cell());
+        if (state.ledger.status(key) != CellLedger.Status.READY) return;
+        long seed = player.level().getSeed();
+        var tile = generator.cells().tile(seed, key.territory(), key.cell());
+        var build = generator.build(tile, key, seed);
+        if (build.isEmpty()) return;
+        var origin = generator.origin(tile, key, seed);
+        for (var goal : goals) {
+            if (goal.trigger() != GrowthRules.Trigger.SITE_DISCOVERY) continue;
+            var marker = build.orElseThrow().markers().get(goal.source().getPath());
+            if (marker != null && player.position().distanceToSqr(
+                    net.minecraft.world.phys.Vec3.atBottomCenterOf(origin.offset(marker))) <= 9) {
+                observe(state, player, goal.trigger(), goal.source());
+            }
+        }
+    }
+
     public static List<String> signal(
             ServerPlayer player, GrowthRules.Trigger trigger, Identifier source) {
         return signal(player.level(), player, trigger, source);
@@ -343,7 +384,7 @@ public final class CellWorlds {
             State state, ServerPlayer player, GrowthRules.Trigger trigger, Identifier source) {
         if (!player.level().getServer().isSameThread())
             throw new IllegalStateException("Cell progression must run on the server thread.");
-        if (state.generator.cells().campaign().isPresent()
+        if (trigger == GrowthRules.Trigger.SIGNAL && state.generator.cells().campaign().isPresent()
                 && (source.equals(DRAGON_DEFEATED)
                         || state.generator.cells().campaign().orElseThrow().deliveries().stream()
                                 .anyMatch(d -> d.signal().equals(source))))
@@ -462,6 +503,7 @@ public final class CellWorlds {
                                             goal.source());
                             }
                     }
+                    if (state.siteDiscovery && server.getTickCount() % 20 == 0) discoverSites(state, player);
                     var address =
                             state.generator
                                     .cells()

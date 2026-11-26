@@ -40,6 +40,7 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
     private final BiConsumer<String, PresetStudio.Draft> use;
     private final ClientDraftJournal journal;
     private PresetStudio.Draft draft;
+    private PackTargets targets;
     private String name, status = "Start with a recipe or customize your current world settings.";
     private ResourceKey<LevelStem> selected = LevelStem.OVERWORLD;
     private int step, left, span, contentX, contentWidth, navWidth;
@@ -58,6 +59,8 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
         this.name = name;
         this.draft = draft;
         this.use = use;
+        targets = PackTargets.current();
+        act(() -> targets = PackTargets.load(ModpackRuntime.directory(), name, draft.manifest().release()));
         initial = snapshot();
         journal = new ClientDraftJournal("modpack-builder:" + draft.manifest().preset(), initial);
     }
@@ -68,7 +71,9 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
     }
 
     private JsonElement snapshot() {
-        return PackedDraft.pack(PresetDraftDocument.encode(name, draft));
+        var document = PresetDraftDocument.encode(name, draft);
+        document.add("loader_targets", PackTargets.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, targets).getOrThrow());
+        return PackedDraft.pack(document);
     }
 
     private void restore(JsonElement json) {
@@ -77,7 +82,9 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
             var next =
                     PresetStudio.validate(PresetDraftDocument.decode(decoded), registries).draft();
             String restored = PresetDraftDocument.name(decoded);
-            PackedDraft.pack(PresetDraftDocument.encode(restored, next));
+            var savedTargets = decoded.getAsJsonObject().get("loader_targets");
+            targets = savedTargets == null ? PackTargets.current()
+                    : PackTargets.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, savedTargets).getOrThrow(IOException::new);
             name = restored;
             draft = next;
         } catch (IOException error) {
@@ -95,10 +102,9 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
 
     private void update(String nextName, PresetStudio.Draft next) throws IOException {
         var validated = PresetStudio.validate(next, registries).draft();
-        var document = PackedDraft.pack(PresetDraftDocument.encode(nextName, validated));
         draft = validated;
         name = nextName;
-        journal.observe(document);
+        journal.observe(snapshot());
         status = "Project updated. Export creates a new immutable revision.";
     }
 
@@ -187,17 +193,80 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
     }
 
     private Button action(String label, int row, Runnable run) {
-        return button(label, contentX, 61 + row * 25, contentWidth, run);
+        return button(label, contentX, actionY(row), contentWidth, run);
+    }
+
+    private int actionY(int row) {
+        return height < 264 ? 55 + row * 23 : 61 + row * 25;
     }
 
     private void project() {
         int art = contentWidth >= 340 && height >= 310 ? Math.min(180, contentWidth / 2) : 0;
         int controls = contentWidth - (art > 0 ? art + 12 : 0);
-        button("Choose starter", contentX, 61, controls, this::starter);
-        button("Project details", contentX, 86, controls, this::metadata);
-        button("World defaults", contentX, 111, controls, this::worldDefaults);
-        button("Saved presets / parents", contentX, 136, controls, this::library);
-        button("History / recovery", contentX, 161, controls, this::history);
+        button("Choose starter", contentX, actionY(0), controls, this::starter);
+        button("Project details", contentX, actionY(1), controls, this::metadata);
+        button("World defaults", contentX, actionY(2), controls, this::worldDefaults);
+        button("Saved presets / parents", contentX, actionY(3), controls, this::library);
+        button("History / recovery", contentX, actionY(4), controls, this::history);
+        button("Loader targets", contentX, actionY(5), controls, this::loaderTargets);
+    }
+
+    private void loaderTargets() {
+        var labels = PackTargets.LOADERS.stream().map(loader ->
+                loader + (targets.targets().containsKey(loader) ? " · selected" : " · available")).toList();
+        minecraft.gui.setScreen(new StudioChoiceScreen(this, "Loader targets", labels, label -> {
+            String loader = label.substring(0, label.indexOf(' '));
+            var target = targets.targets().get(loader);
+            if (target == null) {
+                editTarget(loader, PackTargets.defaultTarget(loader));
+            } else {
+                minecraft.gui.setScreen(new StudioChoiceScreen(this, loader, List.of("Edit target", "Remove target"), choice -> {
+                    if (choice.equals("Edit target")) editTarget(loader, target);
+                    else act(() -> {
+                        targets = targets.with(loader, null);
+                        journal.observe(snapshot());
+                        loaderTargets();
+                    });
+                }));
+            }
+        }));
+    }
+
+    private void editTarget(String loader, PackTargets.Target target) {
+        minecraft.gui.setScreen(new StudioFormScreen(this, "Export target · " + loader,
+                "Choose a runtime version and comma-separated mod IDs for this target.",
+                List.of(new StudioFormScreen.Field("Loader version", target.version()),
+                        new StudioFormScreen.Field("Required mods", String.join(", ", target.required())),
+                        new StudioFormScreen.Field("Optional mods", String.join(", ", target.optional()))),
+                values -> {
+                    new PackTargets.Target(values.get(0).strip(), modIds(values.get(1)), modIds(values.get(2)));
+                    return "";
+                }, values -> act(() -> {
+                    targets = targets.with(loader, new PackTargets.Target(values.get(0).strip(),
+                            modIds(values.get(1)), modIds(values.get(2))));
+                    journal.observe(snapshot());
+                    loaderTargets();
+                })));
+    }
+
+    private static List<String> modIds(String text) {
+        return Arrays.stream(text.split(",")).map(String::strip).filter(id -> !id.isEmpty()).toList();
+    }
+
+    private void exportTarget(String loader) {
+        act(() -> {
+            var directory = ModpackRuntime.directory();
+            var exported = ModpackInstallations.export(directory, name, draft, loader, targets.targets().get(loader), registries);
+            targets.save(directory, name, draft.manifest().release());
+            status = "Exported " + exported.getFileName();
+            if (minecraft.gui.screen() != this) minecraft.gui.setScreen(this);
+        });
+    }
+
+    private List<String> targetReview() throws IOException {
+        var report = new ArrayList<>(targets.report(draft.manifest()));
+        report.addAll(checked().report());
+        return report;
     }
 
     private void starter() {
@@ -406,6 +475,8 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
                                                                                                                                                                     .release()),
                                                                                                                                             registries)
                                                                                                                                     .draft();
+                                                                                                            targets = PackTargets.load(
+                                                                                                                    ModpackRuntime.directory(), revision.name(), revision.release());
                                                                                                             update(
                                                                                                                     revision
                                                                                                                             .name(),
@@ -562,6 +633,7 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
                                                                                             edited)))));
                                 }));
         action("Native End progression", 3, this::endProgression);
+        action("Rehearse campaign", 5, this::campaignRehearsal);
         action(
                 "Preview terrain",
                 4,
@@ -590,6 +662,57 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
                                                     draft.manifest().options().seed(),
                                                     preview));
                                 }));
+    }
+
+    private void campaignRehearsal() {
+        act(() -> {
+            var key = selected;
+            var project = draft;
+            var stem = checked().preset().createWorldDimensions().dimensions().get(key);
+            if (stem == null || !(stem.generator() instanceof CellGenerator generator)
+                    || !generator.cells().progressive())
+                throw new IOException("Select a progressive square or hex cell dimension first.");
+            var profile = generator.cells();
+            var seed = project.manifest().options().seed();
+            var objectives = profile.growth().goals().stream().map(com.gwsheridan.worldsunwritten.cells.GrowthRules.Goal::id).toList();
+            minecraft.gui.setScreen(new StudioFormScreen(this, "Campaign rehearsal",
+                    "Choose completed events for a new playtest world. Available IDs: " + String.join(", ", objectives),
+                    List.of(new StudioFormScreen.Field("Observed objective IDs", "")),
+                    values -> {
+                        com.gwsheridan.worldsunwritten.cells.CampaignRehearsal.checkpoint(profile.growth(), values.getFirst());
+                        return "";
+                    }, values -> {
+                        var checkpoint = com.gwsheridan.worldsunwritten.cells.CampaignRehearsal.checkpoint(profile.growth(), values.getFirst());
+                        minecraft.gui.setScreen(new StudioChoiceScreen(this, "Campaign checkpoint",
+                                List.of("Inspect route", "Create rehearsal world"), choice -> act(() -> {
+                                    if (choice.equals("Inspect route")) {
+                                        minecraft.gui.setScreen(new StudioReportScreen(this, "Checkpoint route",
+                                                com.gwsheridan.worldsunwritten.cells.CampaignRehearsal.report(
+                                                        profile, seed, profile.growth().scope()
+                                                                == com.gwsheridan.worldsunwritten.cells.GrowthRules.Scope.SHARED ? 0 : 1,
+                                                        generator.alwaysOpenCells(), checkpoint)));
+                                        return;
+                                    }
+                                    AuthoringPreview.open(this, "Campaign rehearsal", project.manifest().options(), context -> {
+                                        try {
+                                            var preview = PresetStudio.validate(project, context.worldgenLoadContext());
+                                            var dimensions = new LinkedHashMap<>(preview.preset().createWorldDimensions().dimensions());
+                                            var previewStem = dimensions.get(key);
+                                            var cell = (CellGenerator) previewStem.generator();
+                                            var original = cell.cells();
+                                            var copied = checkpoint.isEmpty() ? original : original.withCampaign(
+                                                    original.campaign().orElse(com.gwsheridan.worldsunwritten.cells.CellCampaign.EMPTY)
+                                                            .withCheckpoint(checkpoint));
+                                            dimensions.put(key, new LevelStem(previewStem.type(), new CellGenerator(
+                                                    cell.dimensionProfile().orElseThrow(), copied)));
+                                            return new WorldDimensions(dimensions);
+                                        } catch (IOException error) {
+                                            throw new IllegalArgumentException(error.getMessage(), error);
+                                        }
+                                    });
+                                })));
+                    }));
+        });
     }
 
     private void cells() {
@@ -1005,6 +1128,8 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
         action("Select dimension: " + selected.identifier(), 0, this::selectDimension);
         action("Edit island catalog", 1, this::catalog).active = canDimension(selected);
         action("Allocation and spacing", 2, this::allocation).active = canDimension(selected);
+        action("Compare and playtest islands", 4, () -> act(() -> minecraft.gui.setScreen(
+                new IslandWorkshopScreen(this, registries, rich().catalog(), draft.manifest().options().seed()))));
         action(
                 "Starting island overview",
                 3,
@@ -1056,12 +1181,38 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
                                 old.biome(), old.dimensionProfile().orElseThrow(), next)));
     }
 
+    private void importIslandType() {
+        LocalAssetBrowser.open(this, ModpackRuntime.directory().resolve("imports"), file ->
+                minecraft.gui.setScreen(new StudioFormScreen(this, "Import island type",
+                        "Choose how the build appears in the starter-island picker.",
+                        List.of(new StudioFormScreen.Field("Island ID", "custom"),
+                                new StudioFormScreen.Field("Island title", "Custom island"),
+                                new StudioFormScreen.Field("Keep starter inventories · true/false", "false")),
+                        values -> values.get(0).matches("[a-z][a-z0-9_-]{0,31}")
+                                && !values.get(1).isBlank() && values.get(1).length() <= 80 && bool(values.get(2))
+                                ? "" : "Enter a valid island ID, title and inventory choice.",
+                        values -> act(() -> {
+                            var catalog = rich().catalog();
+                            if (catalog.entries().stream().anyMatch(entry -> entry.id().equals(values.getFirst())))
+                                throw new IOException("Choose a new island ID.");
+                            var build = com.gwsheridan.worldsunwritten.structure.IslandAssets.read(
+                                    file, Boolean.parseBoolean(values.get(2)), registries);
+                            var entries = new ArrayList<>(catalog.entries());
+                            entries.add(new IslandCatalog.Entry(values.get(0), values.get(1), "",
+                                    "minecraft:grass_block", 1, build));
+                            changeCatalog(new IslandCatalog(entries, catalog.lobby(), catalog.mode(), catalog.teams(),
+                                    catalog.originY(), catalog.spacing(), catalog.personalSlots()));
+                            minecraft.gui.setScreen(this);
+                        }))));
+    }
+
     private void catalog() {
         act(
                 () -> {
                     var rich = rich();
                     var labels = new ArrayList<String>();
                     labels.add("Add island type");
+                    labels.add("Import as island type");
                     rich.catalog().entries().forEach(e -> labels.add(e.id() + " · " + e.title()));
                     minecraft.gui.setScreen(
                             new StudioChoiceScreen(
@@ -1070,6 +1221,7 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
                                     labels,
                                     choice -> {
                                         if (choice.startsWith("Add")) typeDetails(null);
+                                        else if (choice.startsWith("Import")) importIslandType();
                                         else {
                                             String id = choice.substring(0, choice.indexOf(" · "));
                                             minecraft.gui.setScreen(
@@ -1694,7 +1846,7 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
                                                 new StudioReportScreen(
                                                         this,
                                                         "Project validation",
-                                                        checked().report()))));
+                                                        targetReview()))));
         action(
                                 "Save version",
                                 1,
@@ -1710,25 +1862,19 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
                                                                                     draft,
                                                                                     registries)
                                                                             .getFileName();
+                                                    targets.save(ModpackRuntime.directory(), name, draft.manifest().release());
                                                 }))
                         .active =
                 ModpackRuntime.developerMode();
         action(
                                 "Export client / server installation",
                                 2,
-                                () ->
-                                        act(
-                                                () -> {
-                                                    status =
-                                                            "Exported "
-                                                                    + ModpackInstallations.export(
-                                                                                    ModpackRuntime
-                                                                                            .directory(),
-                                                                                    name,
-                                                                                    draft,
-                                                                                    registries)
-                                                                            .getFileName();
-                                                }))
+                                () -> {
+                                    var loaders = targets.targets().keySet().stream().toList();
+                                    if (loaders.size() == 1) exportTarget(loaders.getFirst());
+                                    else minecraft.gui.setScreen(new StudioChoiceScreen(
+                                            this, "Choose a loader export", loaders, this::exportTarget));
+                                })
                         .active =
                 ModpackRuntime.developerMode();
         action(

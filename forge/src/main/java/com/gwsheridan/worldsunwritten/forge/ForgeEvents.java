@@ -37,7 +37,7 @@ final class ForgeEvents {
         PlayerEvent.PlayerLoggedOutEvent.BUS.addListener(event -> {
             if (event.getEntity() instanceof ServerPlayer player) ServerEvents.left(player);
         });
-        PlayerEvent.PlayerChangedDimensionEvent.BUS.addListener(event -> WorldEnvironment.dimensionChanged(event.getEntity()));
+        PlayerEvent.PlayerChangedDimensionEvent.BUS.addListener(event -> ServerEvents.dimensionChanged(event.getEntity()));
         PlayerEvent.PlayerRespawnEvent.BUS.addListener(event -> WorldEnvironment.respawned(event.getEntity()));
         AdvancementEvent.AdvancementEarnEvent.BUS.addListener(event -> {
             if (event.getEntity() instanceof ServerPlayer player) CellWorlds.earned(player, event.getAdvancement().id());

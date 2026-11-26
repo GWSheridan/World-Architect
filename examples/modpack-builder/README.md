@@ -1,5 +1,7 @@
 # Modpack Builder examples
 
+**Skyblock Workshop (2.3.0)** provides a meadow homestead and a birch orchard with different supplies. Players choose their island on a locked server. Import the bundle in an authoring instance to compare the builds or make your own revision. Editable templates and the manifest live in `skyblock-workshop-2.3.0-source/`.
+
 These four self-contained presets use the rich island generator and format-3 new-world policy. Install matching Worlds Unwritten 1.8.0 and NeoForge 26.3.0.103 on clients and servers. Each preset requires `minecraft` and `worldsunwritten`.
 
 | Archive | New-world layout | Lock |

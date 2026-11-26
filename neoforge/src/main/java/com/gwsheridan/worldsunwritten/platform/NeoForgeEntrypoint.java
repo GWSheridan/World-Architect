@@ -48,7 +48,7 @@ public final class NeoForgeEntrypoint {
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.server.ServerAboutToStartEvent event) -> WorldEnvironment.validateSaved(event.getServer()));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) -> com.gwsheridan.worldsunwritten.structure.SiteStudio.logout(event.getEntity()));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) -> WorldEnvironment.login(event.getEntity()));
-        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent event) -> WorldEnvironment.dimensionChanged(event.getEntity()));
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent event) -> ServerEvents.dimensionChanged(event.getEntity()));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent event) -> WorldEnvironment.respawned(event.getEntity()));
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.PlayerRespawnPositionEvent event) -> {
             if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player) {

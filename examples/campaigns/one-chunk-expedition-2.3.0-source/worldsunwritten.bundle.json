@@ -1,0 +1,39 @@
+{
+  "format": 3,
+  "preset": "worldsunwritten_examples:one_chunk_expedition",
+  "title": "One Chunk Expedition",
+  "description": "Branch into stoneworking, timber delivery and exploration before opening a route to the native End.",
+  "author": "GWSHERIDAN",
+  "release": "2.3.0",
+  "lock": "partial",
+  "options": {
+    "seed": 194723,
+    "generate_structures": true,
+    "bonus_chest": false
+  },
+  "required_mods": [
+    "minecraft",
+    "worldsunwritten"
+  ],
+  "allow_structure_library": false,
+  "editable_dimensions": [],
+  "editable_features": {},
+  "editable_options": [
+    "seed"
+  ],
+  "pack": {
+    "version": 1,
+    "defaults": {
+      "version": 1,
+      "protection": {
+        "breaking": true,
+        "placement": true,
+        "containers": true,
+        "shared": true
+      }
+    },
+    "editable": [
+      "protection"
+    ]
+  }
+}

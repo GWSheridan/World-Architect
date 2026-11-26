@@ -73,7 +73,7 @@ public final class FabricEntrypoint implements ModInitializer {
         });
         ServerPlayerEvents.LEAVE.register(ServerEvents::left);
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, player, alive) -> WorldEnvironment.respawned(player));
-        ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, from, to) -> WorldEnvironment.dimensionChanged(player));
+        ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, from, to) -> ServerEvents.dimensionChanged(player));
         PlayerBlockBreakEvents.BEFORE.register((level, actor, pos, state, entity) -> !(actor instanceof ServerPlayer player)
                 || !CellWorlds.denied(player, pos) && !IslandProtection.breakDenied(player, pos, state));
         UseBlockCallback.EVENT.register((actor, level, hand, hit) -> {

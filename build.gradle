@@ -135,6 +135,8 @@ tasks.register('auditVoidWorld', JavaExec) {
     } as CommandLineArgumentProvider)
 }
 
+apply from: 'gradle/runtime-metadata.gradle'
+
 tasks.named('processResources', ProcessResources).configure {
     inputs.property 'mod_version', mod_version
     filesMatching('META-INF/neoforge.mods.toml') {

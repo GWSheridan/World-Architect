@@ -1,7 +1,5 @@
 package com.gwsheridan.worldsunwritten.modpack;
 
-import com.gwsheridan.worldsunwritten.WorldsUnwritten;
-import com.gwsheridan.worldsunwritten.platform.Platform;
 import net.minecraft.core.HolderLookup;
 
 import java.io.IOException;
@@ -12,10 +10,18 @@ import java.util.*;
 public final class ModpackInstallations {
     private ModpackInstallations() {}
 
+    public static Path export(Path directory, String name, PresetStudio.Draft source,
+            HolderLookup.Provider registries) throws IOException {
+        var target = PackTargets.current().targets().entrySet().iterator().next();
+        return export(directory, name, source, target.getKey(), target.getValue(), registries);
+    }
+
     public static Path export(
             Path directory,
             String name,
             PresetStudio.Draft source,
+            String loader,
+            PackTargets.Target target,
             HolderLookup.Provider registries)
             throws IOException {
         if (!ModpackRuntime.developerMode())
@@ -26,6 +32,11 @@ public final class ModpackInstallations {
         String release = draft.manifest().release();
         if (!name.matches("[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}"))
             throw new IOException("Choose a simple project name.");
+        if (!PackTargets.LOADERS.contains(loader)) throw new IOException("Unknown target loader.");
+        String base = name + "-" + release;
+        Path folder = directory.resolve("exports").resolve(base + "-" + loader + "-pack");
+        if (Files.exists(folder))
+            throw new IOException("An installation for that loader and revision already exists.");
         Path saved = directory.resolve("studio").resolve(name).resolve(release + ".zip");
         if (Files.exists(saved)) {
             var old = PresetStudio.load(directory, name, release);
@@ -38,13 +49,9 @@ public final class ModpackInstallations {
                                 + " release.");
         } else PresetStudio.save(directory, name, draft, registries);
         byte[] bytes = Files.readAllBytes(saved);
-        String filename = name + "-" + release + ".zip",
+        String filename = base + ".zip",
                 hash = PresetInheritance.fingerprint(bytes);
-        Path folder = directory.resolve("exports").resolve(name + "-" + release + "-pack");
         Files.createDirectories(folder.getParent());
-        if (Files.exists(folder))
-            throw new IOException(
-                    "The installation export already exists. Choose a new release to preserve it.");
         Path temporary = Files.createTempDirectory(folder.getParent(), ".pack-");
         // Retain a failed staging directory for diagnosis; an incomplete export is never presented
         // as final.
@@ -76,23 +83,25 @@ public final class ModpackInstallations {
                         + filename
                         + "\n",
                 StandardOpenOption.CREATE_NEW);
-        var host = Platform.get();
-        String loader = host.loaderId();
-        Map<String, String> versions = host.loadedMods();
+        var required = target.requiredMods(loader, draft.manifest());
+        var optional = target.optionalMods(loader, draft.manifest());
         Files.writeString(
                 temporary.resolve("testkit.properties"),
-                "format=3\nbundle=client/config/worldsunwritten/bundles/"
+                "format=4\nbundle=client/config/worldsunwritten/bundles/"
                         + filename
                         + "\nsha256="
                         + hash
-                        + "\nworldsunwritten=" + versions.get(WorldsUnwritten.ID)
+                        + "\nworldsunwritten=" + PackTargets.runtime().getProperty("mod")
                         + "\nloader=" + loader
-                        + "\nloader_version=" + versions.get(loader.equals("fabric") ? "fabricloader" : loader) + "\n",
+                        + "\nloader_version=" + target.version()
+                        + "\nrequired_mods=" + String.join(",", required)
+                        + "\noptional_mods=" + String.join(",", optional) + "\n",
                 StandardOpenOption.CREATE_NEW);
         var instructions =
                 new ArrayList<String>(
                         List.of(
                                 draft.manifest().title() + " · " + release,
+                                "Target: " + loader + " " + target.version(),
                                 "",
                                 "Install matching Worlds Unwritten and required mods first. Copy"
                                     + " the client or server config folder into a clean instance,"
@@ -111,13 +120,14 @@ public final class ModpackInstallations {
                                     + " disposable output directory.",
                                 "",
                                 "Required mods: "
-                                        + String.join(", ", draft.manifest().requiredMods()),
+                                        + String.join(", ", required),
+                                "Optional mods: " + String.join(", ", optional),
                                 "Preset SHA-256: " + hash,
                                 "",
-                                "Validation:"));
+                                "Validation in the authoring instance:"));
         instructions.addAll(checked.report());
         Files.write(temporary.resolve("README.txt"), instructions, StandardOpenOption.CREATE_NEW);
-        Files.move(temporary, folder, StandardCopyOption.ATOMIC_MOVE);
+        Files.move(temporary, folder);
         return folder;
     }
 }

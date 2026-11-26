@@ -283,9 +283,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        loader: [forge, fabric]
+        loader: [neoforge, forge, fabric]
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 50
     env:
       LOADER: ${{ matrix.loader }}
     steps:
@@ -304,7 +304,9 @@ jobs:
         shell: bash
         run: |
           build_loader() {
-            sh ./gradlew ":${LOADER}:build" ":${LOADER}:packFixtureJar" --configure-on-demand --console=plain
+            local project=":${LOADER}"
+            if [[ "$LOADER" == neoforge ]]; then project=''; fi
+            sh ./gradlew "${project}:build" "${project}:packFixtureJar" --configure-on-demand --console=plain
           }
           log="$RUNNER_TEMP/loader-build.log"
           if build_loader 2>&1 | tee "$log"; then
@@ -317,7 +319,7 @@ jobs:
           else
             exit 1
           fi
-      - name: Install and restart a locked preset
+      - name: Install and restart the shared preset fixtures
         shell: pwsh
         run: |
           $props = ConvertFrom-StringData (Get-Content gradle.properties -Raw)
@@ -325,7 +327,17 @@ jobs:
           $runtime = 'build/ci-runtime'
           New-Item -ItemType Directory -Path $runtime -Force | Out-Null
           $api = '-'
-          if ($env:LOADER -eq 'forge') {
+          if ($env:LOADER -eq 'neoforge') {
+            $version = $props.neo_version
+            $url = "https://maven.neoforged.net/releases/net/neoforged/neoforge/$version/neoforge-$version-installer.jar"
+            $installer = 'build/neoforge-installer.jar'
+            Invoke-WebRequest $url -OutFile $installer
+            $sum = (Invoke-WebRequest "$url.sha256").Content
+            if ($sum -is [byte[]]) { $sum = [Text.Encoding]::UTF8.GetString($sum) }
+            if ($sum.Trim().ToLowerInvariant() -ne (Get-FileHash $installer).Hash.ToLowerInvariant()) { throw 'NeoForge installer checksum differs' }
+            & java -jar $installer --installServer $runtime
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } elseif ($env:LOADER -eq 'forge') {
             $version = $props.forge_version
             $id = "$mc-$version"
             $url = "https://maven.minecraftforge.net/net/minecraftforge/forge/$id/forge-$id-installer.jar"
@@ -344,13 +356,45 @@ jobs:
             Invoke-WebRequest "https://meta.fabricmc.net/v2/versions/loader/$mc/$version/1.1.2/server/jar" -OutFile $runtime
             Invoke-WebRequest "https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$apiVersion/fabric-api-$apiVersion.jar" -OutFile $api
           }
-          $jar = Get-Item "$env:LOADER/build/libs/Worlds-Unwritten-$($props.mod_version)-mc$mc-$env:LOADER.jar"
-          $fixture = "$env:LOADER/build/validation-tools/pack-test-$env:LOADER.jar"
-          & node tools/validation/loader-server.mjs $env:LOADER $version $jar.FullName $runtime 'examples/campaigns/bundles/hex-frontier-2.1.0.zip' build/ci-loader $api $fixture
+          if ($env:LOADER -eq 'neoforge') {
+            $jar = Get-Item "build/libs/Worlds-Unwritten-$($props.mod_version).jar"
+            $fixture = "build/validation-tools/Worlds-Unwritten-$($props.mod_version)-pack-test.jar"
+          } else {
+            $jar = Get-Item "$env:LOADER/build/libs/Worlds-Unwritten-$($props.mod_version)-mc$mc-$env:LOADER.jar"
+            $fixture = "$env:LOADER/build/validation-tools/pack-test-$env:LOADER.jar"
+          }
+          $presets = @{
+            'hex' = 'examples/campaigns/bundles/hex-frontier-2.1.0.zip'
+            'workshop' = 'examples/modpack-builder/bundles/skyblock-workshop-2.3.0.zip'
+            'expedition' = 'examples/campaigns/bundles/one-chunk-expedition-2.3.0.zip'
+          }
+          foreach ($entry in $presets.GetEnumerator()) {
+            & node tools/validation/loader-server.mjs $env:LOADER $version $jar.FullName $runtime $entry.Value "build/ci-loader-$($entry.Key)" $api $fixture
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          $baselineHashes = @{
+            neoforge = '03f3d4cbd8d4d6162a830cf06e0fb9cb90cdb9de07307ccae8b7897ed6cdacf3'
+            forge = 'e7983151003da7fe14092cba898001e69aea539a159263d2b0359266e41d1242'
+            fabric = '01922b2423e9d88c1e329d0c97dcece531a049ea3f29f17e332593a767af0271'
+          }
+          $baseline = "Worlds-Unwritten-2.2.0-mc$mc-$env:LOADER.jar"
+          Invoke-WebRequest "https://github.com/GWSheridan/Worlds-Unwritten/releases/download/v2.2.0/$baseline" -OutFile "build/$baseline"
+          if ((Get-FileHash "build/$baseline").Hash.ToLowerInvariant() -ne $baselineHashes[$env:LOADER]) { throw 'Baseline JAR checksum differs' }
+          & node tools/validation/loader-server.mjs $env:LOADER $version "build/$baseline" $runtime $presets.hex build/ci-loader-baseline $api -
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & node tools/validation/loader-server.mjs $env:LOADER $version $jar.FullName $runtime $presets.hex build/ci-loader-upgrade $api - build/ci-loader-baseline/world
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: ${{ matrix.loader }}-server-results
+          path: |
+            build/ci-loader-*/results.json
+            build/ci-loader-*/boot-*.log
+          retention-days: 7
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: ${{ matrix.loader }}-distribution
-          path: ${{ matrix.loader }}/build/libs/Worlds-Unwritten-*.jar
+          path: ${{ matrix.loader == 'neoforge' && 'build' || format('{0}/build', matrix.loader) }}/libs/Worlds-Unwritten-*.jar
           if-no-files-found: error
           retention-days: 7

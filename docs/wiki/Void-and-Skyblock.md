@@ -89,6 +89,12 @@ Chests, trapped chests, and barrels are the default protected container types. C
 
 Administration settings live in `data/worldsunwritten-administration-v1.dat`. Include that file and the island ledger in backups. The normal save records whether administration settings are required and rejects a missing file on reopening. Team reservations use allocation format 2 in the existing `worldsunwritten-islands-v1.dat` file. Versions without team-allocation support cannot open worlds using teams. The server continues to read earlier allocation files.
 
+## Island Workshop
+
+In Builder, go to **Islands → Island Workshop**. Use the name above each preview to choose an island from the catalog. **Supplies and spawn** lists the saved marker and container contents. It also flags containers that have a blocked lid or lack a simple walking route from spawn. **Play preview** opens world creation with the selected island in a fresh void save. Delete the preview through the Singleplayer world list when you finish.
+
+To add a custom build, import a template or schematic through Island Studio. Choose a spawn marker with solid footing and room above it. Use **Import as island type** on the catalog to add the saved build. Review any imported inventories before including them in the pack.
+
 ## Dedicated server presets
 
 Copy [the Skyblock example datapack](https://github.com/GWSheridan/Worlds-Unwritten/tree/v2.1.0/examples/skyblock) into the new world's `datapacks` directory. Enable `file/skyblock` with `initial-enabled-packs=vanilla,file/skyblock`. Set `level-type=worldsunwritten\:skyblock_demo` for a custom Overworld island with two personal slots, a shared Nether island, and an empty End. Set `level-type=worldsunwritten\:void_demo` for pure void in all three dimensions with unsafe Overworld spawn explicitly accepted.

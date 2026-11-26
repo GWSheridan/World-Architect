@@ -2,13 +2,15 @@
 
 Build a world around the way you want to play. Give each dimension its own terrain, biomes, resources and structures, build Skyblock islands, or distribute the whole setup as a modpack preset.
 
-**Worlds Unwritten 2.2.0** runs on Minecraft Java **26.3** and Java **25** with NeoForge, Forge or Fabric. Created and maintained by **GWSHERIDAN**.
+**Worlds Unwritten 2.3.0** runs on Minecraft Java **26.3** and Java **25** with NeoForge, Forge or Fabric. Created and maintained by **GWSHERIDAN**.
 
 Start with [Installation](Installation.md) and [Getting Started](Getting-Started.md). [Creator Tools](Creator-Tools.md) covers the starter gallery, terrain preview and staged structure placement. Use [Assembly Studio](Assembly-Studio.md) for modular structures and [Rule Inspector](Rule-Inspector.md) for condition maps and explanations. Server owners should read [Server Setup](Server-Setup.md) and [Administration Panel](Administration-Panel.md); pack authors can follow [Modpack Quick Start](Modpack-Quick-Start.md).
 
 [Download the release](https://github.com/GWSheridan/Worlds-Unwritten/releases/latest), or browse [Example Presets](Example-Presets.md).
 
 Existing worlds keep the generation settings they were created with. Changes to a preset affect future worlds. Read [Backups and Upgrades](Backups-and-Upgrades.md) before updating a server.
+
+In 2.3, Builder can export for a single loader. Compare island builds in [Island Workshop](Void-and-Skyblock.md#island-workshop) and start [campaign playtests](Cell-Worlds.md#rehearse-a-campaign) at a chosen checkpoint.
 
 New in 1.6: combine named [terrain regions](Regional-Terrain.md), add [foundations and weighted themes](Assembly-Studio.md) to generated structures, and [search native structure sites](Structure-Site-Inspector.md). Earlier releases remain available on the releases page.
 

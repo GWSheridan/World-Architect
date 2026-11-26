@@ -29,6 +29,7 @@ public final class CellLedger {
     private final GrowthRules growth;
     private final int format;
     private final Set<Cell> reserved;
+    private final List<String> checkpoint;
     private final java.util.function.ToIntBiFunction<Integer, Cell> cost;
     private JsonObject data;
     private Map<Key, Status> indexed = Map.of();
@@ -63,7 +64,8 @@ public final class CellLedger {
                 profile.version(),
                 (slot, cell) ->
                         profile.campaign().map(c -> c.cost(profile, seed, slot, cell)).orElse(1),
-                reserved);
+                reserved,
+                profile.campaign().map(CellCampaign::checkpoint).orElse(List.of()));
         if (format == 2)
             for (var entry : data.getAsJsonObject("deliveries").entrySet()) {
                 var claim = delivery(entry.getValue().getAsJsonObject());
@@ -104,7 +106,7 @@ public final class CellLedger {
             int format,
             java.util.function.ToIntBiFunction<Integer, Cell> cost)
             throws IOException {
-        this(file, layout, growth, pin, fresh, format, cost, Set.of());
+        this(file, layout, growth, pin, fresh, format, cost, Set.of(), List.of());
     }
 
     private CellLedger(
@@ -115,7 +117,8 @@ public final class CellLedger {
             boolean fresh,
             int format,
             java.util.function.ToIntBiFunction<Integer, Cell> cost,
-            Set<Cell> reserved)
+            Set<Cell> reserved,
+            List<String> checkpoint)
             throws IOException {
         this.file = file;
         this.layout = layout;
@@ -123,6 +126,7 @@ public final class CellLedger {
         this.format = format;
         this.cost = cost;
         this.reserved = Set.copyOf(reserved);
+        this.checkpoint = List.copyOf(checkpoint);
         if (Files.notExists(file)) {
             if (!fresh)
                 throw new IOException(
@@ -144,6 +148,7 @@ public final class CellLedger {
             }
             root.getAsJsonObject("cells")
                     .addProperty(new Key(0, Cell.ORIGIN).id(), Status.READY.name());
+            if (growth.scope() == GrowthRules.Scope.SHARED) initializeCheckpoint(root, 0);
             commit(root);
         } else {
             if (Files.size(file) > 32 * 1024 * 1024)
@@ -305,6 +310,7 @@ public final class CellLedger {
         var draft = data.deepCopy();
         draft.getAsJsonObject("owners").addProperty(owner, slot);
         queue(draft, new Key(slot, Cell.ORIGIN));
+        initializeCheckpoint(draft, slot);
         commit(draft);
         return slot;
     }
@@ -317,7 +323,9 @@ public final class CellLedger {
                 throw new IllegalArgumentException("That territory already has an owner.");
         var draft = data.deepCopy();
         draft.getAsJsonObject("owners").addProperty(owner, slot);
+        boolean newTerritory = !draft.getAsJsonObject("cells").has(new Key(slot, Cell.ORIGIN).id());
         queue(draft, new Key(slot, Cell.ORIGIN));
+        if (newTerritory) initializeCheckpoint(draft, slot);
         commit(draft);
     }
 
@@ -561,10 +569,23 @@ public final class CellLedger {
             return List.of();
         checkKey(new Key(slot, Cell.ORIGIN));
         var draft = data.deepCopy();
+        var awarded = applyObservations(draft, slot, List.of(observation));
+        if (!draft.equals(data)) commit(draft);
+        return awarded;
+    }
+
+    private void initializeCheckpoint(JsonObject draft, int slot) {
+        if (!checkpoint.isEmpty()) {
+            var observations = growth.goals().stream().filter(goal -> checkpoint.contains(goal.id()))
+                    .map(goal -> goal.trigger().name() + ":" + goal.source()).toList();
+            applyObservations(draft, slot, observations);
+        }
+    }
+
+    private List<String> applyObservations(JsonObject draft, int slot, Collection<String> observations) {
         var region = region(draft, slot);
         var observed = strings(region.getAsJsonArray("observed"));
-        if (source.length() > 200) throw new IllegalArgumentException("Signal identifier too long");
-        observed.add(trigger.name() + ":" + source);
+        observed.addAll(observations);
         if (observed.size() > 512) throw new IllegalArgumentException("Too many objective signals");
         var completed = strings(region.getAsJsonArray("completed"));
         var awarded = new ArrayList<String>();
@@ -587,7 +608,6 @@ public final class CellLedger {
         region.add("completed", array(completed));
         region.addProperty("credits", credits);
         if (!growth.chooseFrontier()) spendAutomatically(draft, slot);
-        if (!draft.equals(data)) commit(draft);
         return List.copyOf(awarded);
     }
 
