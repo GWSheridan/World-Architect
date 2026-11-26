@@ -1128,7 +1128,7 @@ final class ModpackBuilderScreen extends Screen implements AuthoringContext, Arc
         action("Select dimension: " + selected.identifier(), 0, this::selectDimension);
         action("Edit island catalog", 1, this::catalog).active = canDimension(selected);
         action("Allocation and spacing", 2, this::allocation).active = canDimension(selected);
-        action("Compare and playtest islands", 4, () -> act(() -> minecraft.gui.setScreen(
+        action("Island Workshop", 4, () -> act(() -> minecraft.gui.setScreen(
                 new IslandWorkshopScreen(this, registries, rich().catalog(), draft.manifest().options().seed()))));
         action(
                 "Starting island overview",
